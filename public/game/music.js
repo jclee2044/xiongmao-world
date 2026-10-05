@@ -19,8 +19,17 @@ const melody = [
 const bass = [38, 45, 42, 40];
 const frequency = (note) => 440 * 2 ** ((note - 69) / 12);
 
-// A small original pentatonic score. All sound is made locally; no audio files
-// or network requests are needed, including during offline exploration.
+export const backgroundTrack = {
+  url: "/assets/audio/asia-fsm-team.mp3",
+  title: "Asia",
+  artist: "FSM Team",
+  source: "https://www.free-stock-music.com/fsm-team-asia.html",
+  license: "https://creativecommons.org/licenses/by/4.0/",
+  credit: "Music by https://www.free-stock-music.com",
+};
+
+// The licensed recording is bundled locally. The original pentatonic score
+// remains available when the recording cannot load or decode.
 export class Music {
   constructor(settings = {}) {
     this.volume = 0.15;
@@ -29,6 +38,7 @@ export class Music {
     this.ducked = false;
     this.notes = new Set();
     this.step = 0;
+    this.version = 0;
     this.onVisibility = () => this.sync();
     document.addEventListener("visibilitychange", this.onVisibility);
     this.applySettings(settings);
@@ -78,24 +88,68 @@ export class Music {
     const gain = this.master.gain;
     gain.cancelScheduledValues(now);
     gain.setTargetAtTime(
-      this.volume * (this.ducked ? 0.1 : 1),
+      this.audible() ? this.volume * (this.ducked ? 0.1 : 1) : 0,
       now,
       this.ducked ? 0.035 : 0.3,
     );
   }
 
+  audible() {
+    return (
+      this.enabled &&
+      this.wanted &&
+      this.volume > 0 &&
+      !document.hidden &&
+      !this.disposed
+    );
+  }
+
+  createTrack() {
+    if (this.audio || this.trackFailed) return;
+    try {
+      this.audio = new Audio(backgroundTrack.url);
+      this.audio.loop = true;
+      this.audio.preload = "auto";
+      this.audio.onplay = () => {
+        // A pending play must not outlive a mute, pause, or hidden page.
+        if (!this.audible()) this.audio.pause();
+      };
+      this.audio.onerror = () => this.failTrack();
+      this.source = this.context.createMediaElementSource(this.audio);
+      this.source.connect(this.master);
+    } catch {
+      this.failTrack();
+    }
+  }
+
+  failTrack() {
+    if (this.trackFailed || this.disposed) return;
+    this.trackFailed = true;
+    this.audio?.pause();
+    this.source?.disconnect();
+    this.sync();
+  }
+
+  stopNotes() {
+    clearTimeout(this.timer);
+    this.timer = null;
+    for (const note of this.notes) {
+      try {
+        note.stop();
+      } catch {}
+    }
+    this.notes.clear();
+  }
+
   async sync() {
     if (!this.context || !this.enabled) return;
-    const audible = this.wanted && this.volume > 0 && !document.hidden;
-    if (!audible) {
-      clearTimeout(this.timer);
-      this.timer = null;
-      for (const note of this.notes) {
-        try {
-          note.stop();
-        } catch {}
-      }
-      this.notes.clear();
+    const version = ++this.version;
+    if (!this.audible()) {
+      this.audio?.pause();
+      this.stopNotes();
+      // Silence immediately, including while a state response is pending.
+      this.master.gain.cancelScheduledValues(this.context.currentTime);
+      this.master.gain.value = 0;
       try {
         await this.context.suspend();
       } catch {}
@@ -107,14 +161,24 @@ export class Music {
     } catch {
       return;
     }
-    if (
-      this.context.state === "running" &&
-      this.wanted &&
-      this.volume > 0 &&
-      !document.hidden &&
-      !this.timer
-    )
-      this.tick();
+    if (version !== this.version || !this.audible()) return;
+    if (this.context.state !== "running") return;
+    this.createTrack();
+    if (this.trackFailed) {
+      if (!this.timer) this.tick();
+      return;
+    }
+    this.stopNotes();
+    try {
+      await this.audio.play();
+      if (!this.audible()) this.audio.pause();
+    } catch (error) {
+      if (version !== this.version || !this.audible()) return;
+      // Browser gesture restrictions and an interrupted play are not broken
+      // recordings; retain the track so the next user gesture can retry it.
+      if (error.name !== "NotAllowedError" && error.name !== "AbortError")
+        this.failTrack();
+    }
   }
 
   note(note, when, duration, level, type = "sine") {
@@ -138,7 +202,7 @@ export class Music {
   }
 
   tick() {
-    if (this.context.state !== "running") return;
+    if (this.context.state !== "running" || !this.audible()) return;
     const when = this.context.currentTime + 0.05;
     const note = melody[this.step % melody.length];
     if (note !== null) {
@@ -150,13 +214,21 @@ export class Music {
     this.step++;
     this.timer = setTimeout(() => {
       this.timer = null;
-      if (this.wanted && this.volume > 0 && !document.hidden) this.tick();
+      if (this.audible()) this.tick();
     }, 2200);
   }
 
   async dispose() {
     document.removeEventListener("visibilitychange", this.onVisibility);
+    this.disposed = true;
     await this.pause();
+    if (this.audio) {
+      this.audio.onplay = null;
+      this.audio.onerror = null;
+      this.audio.removeAttribute("src");
+      this.audio.load();
+    }
+    this.source?.disconnect();
     await this.context?.close();
   }
 }

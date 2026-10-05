@@ -1,6 +1,7 @@
 import bounds from "../data/art-bounds.js";
 import { actorSizes, appearanceRow, walkFrame } from "./appearance.js";
 import { paintGround, blendedPlate } from "./terrain.js";
+import { lifeActors, paintLeaves } from "./life.js";
 const images = new Map();
 function asset(path) {
   if (!images.has(path)) {
@@ -25,29 +26,38 @@ const paths = {
   neighbors: "/assets/characters/neighbors.webp",
   walk: "/assets/characters/player-walk.webp",
   props: "/assets/world/props.webp",
+  storefronts: "/assets/world/storefronts.webp",
+  landmarks: "/assets/world/landmarks.webp",
+  animals: "/assets/characters/animals.webp",
 };
 export const pandaImage = asset(paths.panda);
 export async function prepareArt(scene) {
-  const names =
-    scene.id === "home"
-      ? ["home", "player", "walk", "panda", "momo"]
-      : [
-          "lane",
-          "paving",
-          "house",
-          "tree",
-          "player",
-          "panda",
-          "mei",
-          "lin",
-          "yun",
-          "momo",
-          "walk",
-          "neighbors",
-          "props",
-          "home",
-        ];
+  if (scene.backgroundPath) await asset(scene.backgroundPath).decode();
+  const names = [
+    "lane",
+    "paving",
+    "house",
+    "tree",
+    "player",
+    "panda",
+    "mei",
+    "lin",
+    "yun",
+    "momo",
+    "walk",
+    "neighbors",
+    "props",
+    "home",
+    "storefronts",
+    "landmarks",
+    "animals",
+  ];
   await Promise.all(names.map((name) => asset(paths[name]).decode()));
+  await Promise.all(
+    ["bakery", "teahouse", "bookshop"].map((name) =>
+      asset(`/assets/world/${name}-interior.webp`).decode(),
+    ),
+  );
 }
 function ready(img) {
   return img.complete && img.naturalWidth > 0;
@@ -141,7 +151,7 @@ export function draw(
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
   const scale =
-    scene.id === "home"
+    scene.id === "home" || scene.interior
       ? Math.max(w / 1200, h / 800)
       : Math.min(1.15, Math.max(0.68, w / 1254, h / 1254));
   const viewW = w / scale,
@@ -156,8 +166,8 @@ export function draw(
   ctx.save();
   ctx.scale(scale, scale);
   ctx.translate(ox - camX, oy - camY);
-  if (scene.id === "home") {
-    const img = asset(paths.home);
+  if (scene.id === "home" || scene.interior) {
+    const img = asset(scene.backgroundPath || paths.home);
     if (ready(img)) ctx.drawImage(img, 0, 0, scene.width, scene.height);
   } else {
     const paving = asset(paths.paving);
@@ -169,7 +179,7 @@ export function draw(
       ctx.fillStyle = groundPattern;
       paintGround(ctx, scene, view, groundPattern, { time, animate });
     }
-    if (plateVisible(scene.landmark, view)) {
+    if (scene.landmark && plateVisible(scene.landmark, view)) {
       const img = asset(paths.lane);
       if (ready(img))
         ctx.drawImage(
@@ -181,6 +191,7 @@ export function draw(
         );
     }
   }
+  const ambient = lifeActors(scene, time, player, settings.motion !== false);
   const entities = [
     ...scene.scenery.filter((o) => visible(o, view)),
     ...scene.interactables.filter(
@@ -191,6 +202,12 @@ export function draw(
     ),
     { ...player, type: "player" },
     { ...companion, type: "panda" },
+    ...ambient,
+    ...(scene.roomForeground || []).map((polygon) => ({
+      polygon,
+      y: Math.max(...polygon.map(([, y]) => y)),
+      type: "room-foreground",
+    })),
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
   for (const o of entities) {
@@ -225,6 +242,54 @@ export function draw(
         ctx.fillStyle = "#453420";
         ctx.fillText(o.label, o.x - 5, o.y - o.h * 0.27);
       }
+    } else if (["storefront", "landmark", "nature"].includes(o.type)) {
+      const group = o.type === "storefront" ? "storefronts" : "landmarks";
+      const key = o.storefront || o.landmark || o.nature,
+        crop = bounds[group]?.[key];
+      if (!crop) continue;
+      ctx.save();
+      const obscures =
+        player.y < o.y &&
+        player.y > o.y - o.h &&
+        Math.abs(player.x - o.x) < o.w * 0.35;
+      const target = obscures ? 0.4 : 1,
+        previous = opacity.get(o) ?? 1;
+      const alpha = animate ? previous + (target - previous) * 0.3 : target;
+      opacity.set(o, alpha);
+      ctx.globalAlpha = alpha;
+      if (o.type === "nature" && animate)
+        ctx.translate(Math.sin(time * 0.65 + o.x) * 1.5, 0);
+      sprite(ctx, group, o.x, o.y, o.h, { crop });
+      ctx.restore();
+      if (o.label) {
+        ctx.font = '20px "Noto Serif CJK SC",serif';
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#4c3727";
+        ctx.fillText(o.label, o.x, o.y - o.h * 0.4);
+      }
+    } else if (o.type === "animal") {
+      const frames = bounds.animals?.[o.animal];
+      if (!frames) continue;
+      const height = { cat: 64, duck: 54, rabbit: 58, bird: 30 }[o.animal];
+      if (!o.flying) shadow(ctx, o.x, o.y, height * 0.32);
+      const active = settings.motion !== false && (o.moving || o.flying);
+      sprite(ctx, "animals", o.x, o.y, height, {
+        crop: frames[active ? walkFrame(o.distance) : 1],
+        uniformHeight: Math.max(...frames.map((f) => f.h)),
+        flip: o.facing < 0,
+        bob:
+          o.animal === "rabbit" && active
+            ? -Math.abs(Math.sin(o.distance / 10)) * 5
+            : 0,
+      });
+    } else if (o.type === "passerby") {
+      shadow(ctx, o.x, o.y, 25);
+      sprite(ctx, "neighbors", o.x, o.y, 225, {
+        crop: bounds.neighbors[o.appearance],
+        flip: o.facing < 0,
+        bob: o.moving ? Math.sin(o.distance / 10) * 2 : 0,
+        sway: o.moving ? Math.sin(o.distance / 17) * 0.018 : 0,
+      });
     } else if (bounds.props?.[o.type]) {
       shadow(ctx, o.x, o.y, o.w * 0.3);
       const img = asset(paths.props),
@@ -292,7 +357,23 @@ export function draw(
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
       sprite(ctx, "momo", o.x, o.y, actorSizes.momo);
-    } else if (o.type === "foreground" && plateVisible(scene.landmark, view)) {
+    } else if (o.type === "room-foreground" && scene.backgroundPath) {
+      const img = asset(scene.backgroundPath);
+      if (!ready(img)) continue;
+      ctx.save();
+      ctx.beginPath();
+      o.polygon.forEach(([x, y], i) =>
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y),
+      );
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, 0, 0, scene.width, scene.height);
+      ctx.restore();
+    } else if (
+      o.type === "foreground" &&
+      scene.landmark &&
+      plateVisible(scene.landmark, view)
+    ) {
       const img = asset(paths.lane);
       if (!ready(img)) continue;
       ctx.save();
@@ -314,6 +395,7 @@ export function draw(
       ctx.restore();
     }
   }
+  const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);
   if (route.length) {
     const end = route.at(-1);
     ctx.strokeStyle = "#fff5ddaa";
@@ -331,7 +413,13 @@ export function draw(
   ctx.restore();
   canvas.dataset.artReady = String(
     ready(asset(paths.player)) &&
-      ready(asset(paths[scene.id === "home" ? "home" : "lane"])),
+      ready(
+        asset(
+          scene.backgroundPath || paths[scene.id === "home" ? "home" : "lane"],
+        ),
+      ),
   );
+  canvas.dataset.ambientCount = String(ambient.length);
+  canvas.dataset.fallingLeaves = String(leaves);
   return { camX, camY, scale, ox, oy };
 }

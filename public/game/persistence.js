@@ -161,8 +161,12 @@ export class Persistence {
       ];
       const localPractice = validatePractice(this.state.practice),
         remotePractice = validatePractice(remote.state.practice);
+      const rounds = { ...remotePractice.rounds, ...localPractice.rounds };
+      for (const [id, count] of Object.entries(remotePractice.rounds))
+        rounds[id] = Math.max(rounds[id] || 0, count);
       this.state.practice = {
         ...localPractice,
+        rounds,
         completed: [
           ...new Set([...localPractice.completed, ...remotePractice.completed]),
         ],

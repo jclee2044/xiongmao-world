@@ -18,10 +18,13 @@ try {
       "neighbors",
       "player-walk",
       "props",
+      "storefronts",
+      "landmarks",
+      "animals",
     ];
     for (const name of files) {
       const img = new Image();
-      img.src = `/assets/${name === "props" ? "world" : "characters"}/${name}.webp`;
+      img.src = `/assets/${["props", "storefronts", "landmarks"].includes(name) ? "world" : "characters"}/${name}.webp`;
       await img.decode();
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -95,6 +98,32 @@ try {
           ["market", "bench", "planter", "sign", "well", "tea-table"].map(
             (id, i) => [id, grid(3, 2).flat()[i]],
           ),
+        );
+      else if (name === "storefronts")
+        output.storefronts = Object.fromEntries(
+          [
+            "bakery",
+            "dumpling",
+            "bookshop",
+            "tea-house",
+            "flower-stall",
+            "pavilion",
+          ].map((id, i) => [id, grid(3, 2).flat()[i]]),
+        );
+      else if (name === "landmarks")
+        output.landmarks = Object.fromEntries(
+          [
+            "pagoda",
+            "moon-gate",
+            "rockery",
+            "museum",
+            "bamboo",
+            "lotus-bank",
+          ].map((id, i) => [id, grid(3, 2).flat()[i]]),
+        );
+      else if (name === "animals")
+        output.animals = Object.fromEntries(
+          ["cat", "duck", "rabbit", "bird"].map((id, i) => [id, grid(3, 4)[i]]),
         );
       else output[name] = bounds(0, 0, img.width, img.height);
     }

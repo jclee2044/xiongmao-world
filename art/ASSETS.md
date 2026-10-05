@@ -1,4 +1,4 @@
-# Painted assets — versions 0.2.0 and 0.3.0
+# Painted assets — versions 0.2.0–0.4.0
 
 Created with the **built-in image-generation tool**, using the supplied third Suzhou illustration as the composition target for Canal Lane and as a style/identity reference for the other assets. The selected environment retains the reference's framing and detail; separately generated characters and the outer streets are adaptations, not pixel-identical copies of the whole reference.
 
@@ -43,4 +43,21 @@ The three version 0.3.0 additions total 2,860,980 bytes in lossless WebP. All th
 
 `public/game/terrain.js` draws narrow lanes, soft courtyard borders, gardens and ponds. A cached alpha mask and matching paving aprons blend the original environment plate into connecting paths. Foliage fades when it hides the player; reduced motion stops swaying and animated poses. Home changes use a short Canvas crossfade. These runtime Canvas treatments preserve the shipped source art.
 
-The service worker caches these assets for offline exploration. All generated WebP art totals about 16.0 MB, plus the supplied Panda/icons and client source. Actual phone frame rate and private HTTPS download performance remain unmeasured. Screenshots from isolated Chromium are in ignored `test-results/art-*.png`.
+The service worker caches these assets for offline exploration. The 0.2.0–0.3.0 WebPs total 16,014,508 bytes. Actual phone frame rate and private HTTPS download performance remain unmeasured. Screenshots from isolated Chromium are in ignored `test-results/art-*.png`.
+
+## Version 0.4.0
+
+Six initial built-in generations and six built-in corrections add three atlases and three interior plates. The complete exact prompts, input paths, transparency flags and selected output paths are in [prompts/generation-calls-v0.4.0.json](prompts/generation-calls-v0.4.0.json). The existing house cutout provided the style reference for shops, landmarks and rooms. Corrections added safe atlas gutters or a warm parchment backdrop around the rooms; they did not use an external image API.
+
+| Shipped asset                                | Built-in original filename                      | Purpose                                                                    |
+| -------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------- |
+| `public/assets/world/storefronts.webp`       | `exec-cb936ec1-0b07-49ac-ae6a-fa539f988cd0.png` | Bakery, dumpling restaurant, bookshop, teahouse, flower stall and pavilion |
+| `public/assets/world/landmarks.webp`         | `exec-e331b3c7-9b80-46ca-ad2b-fb8e15343212.png` | Pagoda, moon gate, rockery, museum, bamboo and lotus bank interpretations  |
+| `public/assets/characters/animals.webp`      | `exec-2e4d7c0f-4486-4126-b9ac-99edd7f07c78.png` | Three poses each for cat, duck, rabbit and sparrow                         |
+| `public/assets/world/bakery-interior.webp`   | `exec-9cc703ad-965d-476b-9fff-af91ed7471e6.png` | Explorable bakery and recipe worktable                                     |
+| `public/assets/world/teahouse-interior.webp` | `exec-4cf6a838-a1da-4e25-881c-f98604e884fe.png` | Explorable teahouse and listening-order counter                            |
+| `public/assets/world/bookshop-interior.webp` | `exec-2fcffe90-3e3d-453a-aff5-fb95fa797112.png` | Explorable bookshop and language desk                                      |
+
+The six additions total **8,885,810 bytes**. All six PNG/WebP pixel comparisons reported absolute error zero; alpha is preserved in the atlases. All shipped generated WebPs now total **24,900,318 bytes**. Local reproduction PNGs remain in ignored `art/source/`; shipped assets and alpha-bound metadata are versioned.
+
+Room plates render in a 1200 × 800 world with traced floor and furniture polygons. Foreground wall clips put nearby actors behind the doorway/walls. The outdoor lake is drawn directly with Canvas gradients, irregular banks, clipped ripples and lily pads; its collision uses the same polygon. No raster art edit creates the water. Animals use three simple poses; visitors reuse existing human art. Pause/reduced motion freeze ambient time and movement. All outdoor and room plates preload before play, including a saved-home first exit. Settled room, lake and mobile screenshots were inspected after automated checks.

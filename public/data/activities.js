@@ -67,33 +67,107 @@ export const activities = [
     hint: line("茶馆卖茶，花店卖花，书店有书。听到哪个词，就找哪个地方。", "Cháguǎn mài chá, huādiàn mài huā, shūdiàn yǒu shū. Tīngdào nǎ ge cí, jiù zhǎo nǎ ge dìfang.", "茶馆 has tea, 花店 has flowers, and 书店 has books. Match the word you hear to the place."),
     response: line("茶、花和书，都找到了！谢谢你帮我。你最喜欢哪个地方？", "Chá, huā hé shū, dōu zhǎodào le! Xièxie nǐ bāng wǒ. Nǐ zuì xǐhuan nǎ ge dìfang?", "Tea, flowers, and books—you found them all! Thank you. Which place did you like most?"),
   },
+  {
+    id: "bakery-recipe", npc: "yun", place: "bakery", culture: "osmanthus", type: "sequence", title: "点心小厨房", english: "Pastry kitchen", topic: "food",
+    hint: line("先准备材料，再做点心，最后请大家吃。点一下材料卡，就能把它放进顺序里。", "Xiān zhǔnbèi cáiliào, zài zuò diǎnxin, zuìhòu qǐng dàjiā chī. Diǎn yíxià cáiliào kǎ, jiù néng bǎ tā fàng jìn shùnxù lǐ.", "Prepare the ingredients first, make the pastry next, and share it last. Tap the cards to arrange the steps."),
+    response: line("点心做好了！你想请谁一起吃？", "Diǎnxin zuò hǎo le! Nǐ xiǎng qǐng shéi yìqǐ chī?", "The pastries are ready! Who would you like to share them with?"),
+    variants: [
+      { prompt: line("把桂花糕的步骤排好。先……，然后……，最后……。", "Bǎ guìhuā gāo de bùzhòu pái hǎo. Xiān…, ránhòu…, zuìhòu…", "Arrange the steps for osmanthus rice cake: first…, then…, finally…."), pieces: [line("准备米粉和糖", "zhǔnbèi mǐfěn hé táng", "prepare rice flour and sugar"), line("加一点水，拌匀", "jiā yìdiǎn shuǐ, bàn yún", "add a little water and mix"), line("把米糕蒸熟", "bǎ mǐgāo zhēng shú", "steam the rice cake"), line("撒上桂花，分给朋友", "sǎ shàng guìhuā, fēn gěi péngyou", "add osmanthus and share with friends")] },
+      { prompt: line("把甜汤圆的步骤排好。先……，然后……，最后……。", "Bǎ tián tāngyuán de bùzhòu pái hǎo. Xiān…, ránhòu…, zuìhòu…", "Arrange the steps for sweet rice balls: first…, then…, finally…."), pieces: [line("把面团搓成小球", "bǎ miàntuán cuō chéng xiǎo qiú", "roll the dough into small balls"), line("把汤圆放进热水里", "bǎ tāngyuán fàng jìn rè shuǐ lǐ", "put the rice balls into hot water"), line("等汤圆浮起来", "děng tāngyuán fú qǐlái", "wait until they float"), line("盛进碗里，分给朋友", "chéng jìn wǎn lǐ, fēn gěi péngyou", "serve in bowls and share with friends")] },
+    ],
+  },
+  {
+    id: "tea-listen-order", npc: "qiao", place: "tea", type: "order", title: "茶馆接单", english: "Take a tea-house order", topic: "food", listenFirst: true,
+    items: [line("绿茶", "lǜchá", "green tea"), line("红茶", "hóngchá", "black tea"), line("温水", "wēn shuǐ", "warm water")],
+    hint: line("听清楚饮料和杯数。没有点的饮料选零杯。可以慢慢听，再查看文字。", "Tīng qīngchu yǐnliào hé bēi shù. Méiyǒu diǎn de yǐnliào xuǎn líng bēi. Kěyǐ mànmàn tīng, zài chákàn wénzì.", "Listen for the drink and cup count. Choose zero for drinks that were not ordered. Replay slowly or reveal the words."),
+    response: line("饮料准备好了。给朋友倒茶时，可以说：请喝茶。", "Yǐnliào zhǔnbèi hǎo le. Gěi péngyou dào chá shí, kěyǐ shuō: qǐng hē chá.", "The drinks are ready. When offering a friend tea, you can say 请喝茶, 'please have some tea.'"),
+    variants: [
+      { prompt: line("请给我们两杯绿茶和一杯温水，谢谢。", "Qǐng gěi wǒmen liǎng bēi lǜchá hé yì bēi wēn shuǐ, xièxie.", "Two cups of green tea and one cup of warm water, please."), quantities: [2, 0, 1] },
+      { prompt: line("我要一杯红茶。我的朋友要两杯温水。", "Wǒ yào yì bēi hóngchá. Wǒ de péngyou yào liǎng bēi wēn shuǐ.", "I would like one cup of black tea. My friends would like two cups of warm water."), quantities: [0, 1, 2] },
+      { prompt: line("我们想要三杯绿茶和两杯红茶。不要温水。", "Wǒmen xiǎng yào sān bēi lǜchá hé liǎng bēi hóngchá. Bú yào wēn shuǐ.", "We would like three cups of green tea and two cups of black tea. No warm water."), quantities: [3, 2, 0] },
+    ],
+  },
+  {
+    id: "book-memory", npc: "bo", place: "books", type: "matching", title: "词语寻宝卡", english: "Match Chinese and object cards", topic: "school",
+    prompt: line("先选一个中文词，再选对应的图片。配好以后，试着说一遍。", "Xiān xuǎn yí ge Zhōngwén cí, zài xuǎn duìyìng de túpiàn. Pèi hǎo yǐhòu, shìzhe shuō yí biàn.", "Choose a Chinese word, then its picture. After matching it, try saying the word aloud."),
+    hint: line("词语卡和图片卡可以来回看。点一下中文词，还可以听读音。", "Cíyǔ kǎ hé túpiàn kǎ kěyǐ láihuí kàn. Diǎn yíxià Zhōngwén cí, hái kěyǐ tīng dúyīn.", "You can look back and forth between the word and picture cards. Tap a word to hear it."),
+    response: line("都配好了！选一个词，说说你在哪里见过它。", "Dōu pèi hǎo le! Xuǎn yí ge cí, shuōshuo nǐ zài nǎlǐ jiàn guo tā.", "All matched! Pick a word and describe where you saw it."),
+    variants: [
+      { pairs: [ { ...line("书", "shū", "book"), icon: "📖" }, { ...line("花", "huā", "flower"), icon: "🌸" }, { ...line("茶", "chá", "tea"), icon: "🍵" }, { ...line("猫", "māo", "cat"), icon: "🐱" } ] },
+      { pairs: [ { ...line("苹果", "píngguǒ", "apple"), icon: "🍎" }, { ...line("鸭子", "yāzi", "duck"), icon: "🦆" }, { ...line("兔子", "tùzi", "rabbit"), icon: "🐰" }, { ...line("树", "shù", "tree"), icon: "🌳" } ] },
+      { pairs: [ { ...line("桥", "qiáo", "bridge"), icon: "🌉" }, { ...line("面", "miàn", "noodles"), icon: "🍜" }, { ...line("熊猫", "xióngmāo", "panda"), icon: "🐼" }, { ...line("灯笼", "dēnglong", "lantern"), icon: "🏮" } ] },
+      { pairs: [ { ...line("水", "shuǐ", "water"), icon: "💧" }, { ...line("石头", "shítou", "rock"), icon: "🪨" }, { ...line("植物", "zhíwù", "plant"), icon: "🌿" }, { ...line("窗", "chuāng", "window"), icon: "🪟" } ] },
+    ],
+  },
+  {
+    id: "lake-animals", npc: "an", type: "visit", title: "湖边找动物", english: "Animal clues around the lake", topic: "travel",
+    hint: line("猫和鸭子在湖边，兔子在花园。打开地图，找对应的动物。", "Māo hé yāzi zài hú biān, tùzi zài huāyuán. Dǎkāi dìtú, zhǎo duìyìng de dòngwù.", "The cat and duck are by the lake, and the rabbit is in the garden. Open the map to find the animal you heard."),
+    response: line("三只动物都找到了！你最喜欢哪一只？可以告诉安。", "Sān zhī dòngwù dōu zhǎodào le! Nǐ zuì xǐhuan nǎ yì zhī? Kěyǐ gàosu Ān.", "You found all three animals! Which is your favorite? You can tell An."),
+    variants: [
+      { steps: [{ target: "lake-cat", clue: line("先到湖边找一只猫，和它打个招呼。", "Xiān dào hú biān zhǎo yì zhī māo, hé tā dǎ ge zhāohu.", "First, find a cat by the lake and say hello.") }, { target: "lake-duck", clue: line("再到水边找一只鸭子。它喜欢游泳。", "Zài dào shuǐ biān zhǎo yì zhī yāzi. Tā xǐhuan yóuyǒng.", "Next, find a duck by the water. It likes swimming.") }, { target: "garden-rabbit", clue: line("最后去花园找一只兔子。它有长耳朵。", "Zuìhòu qù huāyuán zhǎo yì zhī tùzi. Tā yǒu cháng ěrduo.", "Finally, find a rabbit in the garden. It has long ears.") }] },
+      { steps: [{ target: "lake-duck", clue: line("先去水边找喜欢游泳的鸭子。", "Xiān qù shuǐ biān zhǎo xǐhuan yóuyǒng de yāzi.", "First, find the duck that likes swimming by the water.") }, { target: "garden-rabbit", clue: line("再去花园找长耳朵的兔子。", "Zài qù huāyuán zhǎo cháng ěrduo de tùzi.", "Next, find the rabbit with long ears in the garden.") }, { target: "lake-cat", clue: line("最后去湖边找猫。", "Zuìhòu qù hú biān zhǎo māo.", "Finally, find the cat by the lake.") }] },
+    ],
+  },
+  {
+    id: "shop-sentences", npc: "qiao", type: "tiles", title: "拼一句，再说一句", english: "Build a sentence, then make it your own", topic: "activities",
+    hint: line("先说谁，再说想做什么。也可以在下面写自己的句子。", "Xiān shuō shéi, zài shuō xiǎng zuò shénme. Yě kěyǐ zài xiàmian xiě zìjǐ de jùzi.", "Start with who, then what they want to do. You can also write your own sentence below."),
+    response: line("谢谢你分享！你还想说什么？可以继续和邻居聊聊。", "Xièxie nǐ fēnxiǎng! Nǐ hái xiǎng shuō shénme? Kěyǐ jìxù hé línjū liáoliao.", "Thanks for sharing! What else would you like to say? You can keep chatting with your neighbor."),
+    variants: [
+      { prompt: line("用这些词说：我想买两块桂花糕。", "Yòng zhèxiē cí shuō: wǒ xiǎng mǎi liǎng kuài guìhuā gāo.", "Use the tiles to say: I'd like to buy two pieces of osmanthus rice cake."), pieces: [line("我", "wǒ", "I"), line("想", "xiǎng", "would like to"), line("买", "mǎi", "buy"), line("两块", "liǎng kuài", "two pieces"), line("桂花糕", "guìhuā gāo", "osmanthus rice cake")] },
+      { prompt: line("用这些词说：请给我一杯热茶。", "Yòng zhèxiē cí shuō: qǐng gěi wǒ yì bēi rè chá.", "Use the tiles to say: Please give me a cup of hot tea."), pieces: [line("请", "qǐng", "please"), line("给我", "gěi wǒ", "give me"), line("一杯", "yì bēi", "one cup"), line("热茶", "rè chá", "hot tea")] },
+      { prompt: line("用这些词问：请问，书店在哪儿？", "Yòng zhèxiē cí wèn: qǐngwèn, shūdiàn zài nǎr?", "Use the tiles to ask: Excuse me, where is the bookshop?"), pieces: [line("请问", "qǐngwèn", "excuse me"), line("书店", "shūdiàn", "bookshop"), line("在哪儿", "zài nǎr", "where is") ] },
+    ],
+  },
 ];
 export const activityById = Object.fromEntries(activities.map((a) => [a.id, a]));
-export const newPractice = () => ({ completed: [], active: null });
-
+export const newPractice = () => ({ completed: [], active: null, rounds: {} });
+export function activityRound(id, round = 0) {
+  const activity = activityById[id];
+  if (!activity) throw new Error("Unknown practice.");
+  return { ...activity, ...(activity.variants?.[round % activity.variants.length] || {}) };
+}
+export function pieceOrder(length, round = 0) {
+  const offset = (round % Math.max(1, length - 1)) + 1;
+  return Array.from({ length }, (_, i) => (i + offset) % length).reverse();
+}
+export function orderedPieces(activity, selected) {
+  return selected.length === activity.pieces.length && selected.every((n, i) => n === i);
+}
 export function validatePractice(value) {
   if (value === undefined) return newPractice();
-  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some((key) => !["completed", "active"].includes(key))) throw new Error("Invalid practice progress.");
+  if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some((key) => !["completed", "active", "rounds"].includes(key))) throw new Error("Invalid practice progress.");
   if (!Array.isArray(value.completed) || value.completed.length > activities.length || value.completed.some((id) => !Object.hasOwn(activityById, id)) || new Set(value.completed).size !== value.completed.length) throw new Error("Invalid completed practice.");
+  const rounds = value.rounds ?? {};
+  if (!rounds || typeof rounds !== "object" || Array.isArray(rounds) || Object.keys(rounds).length > activities.length || Object.entries(rounds).some(([id, count]) => !Object.hasOwn(activityById, id) || !Number.isSafeInteger(count) || count < 0 || count > 1000000)) throw new Error("Invalid practice rounds.");
   const active = value.active;
-  if (active !== null && (!active || typeof active !== "object" || Array.isArray(active) || Object.keys(active).some((key) => !["id", "step"].includes(key)) || !Object.hasOwn(activityById, active.id) || !Number.isSafeInteger(active.step) || active.step < 0 || active.step >= (activityById[active.id].steps?.length || 1))) throw new Error("Invalid active practice.");
-  return { completed: [...value.completed], active: active ? { ...active } : null };
+  if (active !== null && (!active || typeof active !== "object" || Array.isArray(active) || Object.keys(active).some((key) => !["id", "step", "round", "tiles", "matches", "order"].includes(key)) || !Object.hasOwn(activityById, active.id) || !Number.isSafeInteger(active.step) || active.step < 0 || !Number.isSafeInteger(active.round ?? 0) || (active.round ?? 0) < 0 || (active.round ?? 0) > 1000000)) throw new Error("Invalid active practice.");
+  if (active) {
+    const a = activityRound(active.id, active.round ?? 0);
+    if (active.step >= (a.steps?.length || 1)) throw new Error("Invalid active practice step.");
+    for (const [key, length] of [["tiles", a.pieces?.length], ["matches", a.pairs?.length]]) {
+      if (active[key] !== undefined && (!length || !Array.isArray(active[key]) || active[key].length > length || new Set(active[key]).size !== active[key].length || active[key].some((n) => !Number.isSafeInteger(n) || n < 0 || n >= length))) throw new Error("Invalid practice cards.");
+    }
+    if (active.order !== undefined && (a.type !== "order" || !Array.isArray(active.order) || active.order.length !== a.items.length || active.order.some((n) => !Number.isSafeInteger(n) || n < 0 || n > 5))) throw new Error("Invalid practice order.");
+  }
+  return { completed: [...value.completed], active: active ? { ...active, round: active.round ?? 0 } : null, rounds: { ...rounds } };
 }
 export function beginPractice(practice, id) {
   const clean = validatePractice(practice);
   if (!Object.hasOwn(activityById, id)) throw new Error("Unknown practice.");
-  return { ...clean, active: clean.active?.id === id ? clean.active : { id, step: 0 } };
+  return { ...clean, active: clean.active?.id === id ? clean.active : { id, step: 0, round: clean.rounds[id] || 0 } };
 }
 export function completePractice(practice, id) {
   const clean = validatePractice(practice);
   if (!Object.hasOwn(activityById, id)) throw new Error("Unknown practice.");
-  return { completed: [...new Set([...clean.completed, id])], active: null };
+  const rounds = { ...clean.rounds };
+  if (clean.active?.id === id) rounds[id] = Math.min(1000000, Math.max(rounds[id] || 0, clean.active.round + 1));
+  return { completed: [...new Set([...clean.completed, id])], active: null, rounds };
 }
 export function visitPractice(practice, stop) {
   const clean = validatePractice(practice), active = clean.active;
   if (!active) return { practice: clean, advanced: false, completed: false };
-  const activity = activityById[active.id], step = activity.steps?.[active.step];
+  const activity = activityRound(active.id, active.round), step = activity.steps?.[active.step];
   if (!step || step.target !== stop) return { practice: clean, advanced: false, completed: false };
   const completed = active.step + 1 === activity.steps.length;
-  return { practice: completed ? completePractice(clean, active.id) : { ...clean, active: { id: active.id, step: active.step + 1 } }, advanced: true, completed, id: active.id };
+  return { practice: completed ? completePractice(clean, active.id) : { ...clean, active: { ...active, step: active.step + 1 } }, advanced: true, completed, id: active.id };
 }

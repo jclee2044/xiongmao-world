@@ -191,12 +191,26 @@ try {
   }
   await page.screenshot({ path: "test-results/art-lantern-street.png" });
   await walkToStop(page, "books");
-  assert.ok(Number(await page.locator("#world").getAttribute("data-y")) < 1000);
+  const bookDoor = scenes.shanghai.interactables.find((o) => o.id === "books");
+  assert.ok(
+    Math.abs(
+      Number(await page.locator("#world").getAttribute("data-y")) - bookDoor.y,
+    ) < 50,
+  );
   await page.screenshot({ path: "test-results/art-book-street.png" });
+  await page.locator("#interact").click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector("#world").dataset.scene === "bookshop" &&
+      document.querySelector("#world").dataset.artReady === "true",
+  );
+  await page.waitForTimeout(260);
+  await page.screenshot({ path: "test-results/art-bookshop-interior.png" });
+  await walkToStop(page, "bookshop-shelves");
   await page.locator("#interact").click();
   assert.match(
     await page.locator("#panel-content").textContent(),
-    /你喜欢看什么书/,
+    /你喜欢看故事书/,
   );
   assert.deepEqual(errors, []);
   await writeFile(
@@ -206,6 +220,11 @@ try {
         bounds,
         referenceScene: true,
         home: true,
+        bookshopInterior: true,
+        districtDimensions: {
+          width: scenes.shanghai.width,
+          height: scenes.shanghai.height,
+        },
         longDistrictRoute: true,
         seamAlpha,
         cameraJump,

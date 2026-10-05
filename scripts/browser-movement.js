@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { enterWorld, walkToStop } from "./browser-helpers.js";
-import { scenes, interactionPoint } from "../public/game/world.js";
+import { scenes, interactionPoint, move } from "../public/game/world.js";
 await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
@@ -69,15 +69,20 @@ try {
     });
   }
   const start = await pos();
+  const bankStop = move(scenes.shanghai, start, -500, 0);
   await page.keyboard.down("ArrowLeft");
   await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.x) < 520,
+    (x) => Number(document.querySelector("canvas").dataset.x) < x - 25,
+    start.x,
   );
   await page.waitForTimeout(700);
   await page.keyboard.up("ArrowLeft");
   const end = await pos();
   assert.ok(end.x < start.x - 50);
-  assert.ok(end.x > 440 && end.x < 510, "Stops at canal bank");
+  assert.ok(
+    Math.abs(end.x - bankStop.x) < 8 && Math.abs(end.y - bankStop.y) < 1,
+    "Stops at the compact district's canal bank",
+  );
   await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
   const before = await pos();
@@ -170,8 +175,11 @@ try {
   await page.waitForTimeout(800);
   await page.keyboard.up("ArrowUp");
   const npcStop = await pos();
+  const body = scenes.shanghai.solidCircles.find(
+    (o) => o.x === qiao.x && o.y === qiao.y,
+  );
   assert.ok(
-    Math.hypot(npcStop.x - qiao.x, npcStop.y - qiao.y) >= 34,
+    Math.hypot(npcStop.x - qiao.x, npcStop.y - qiao.y) >= body.r + 15 - 0.1,
     "The player cannot stand through Qiao's body",
   );
   assert.ok(

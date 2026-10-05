@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   activities,
+  activityRound,
+  pieceOrder,
+  orderedPieces,
   newPractice,
   validatePractice,
   beginPractice,
@@ -14,11 +17,21 @@ import { reply, ollamaReply } from "../server/dialogue.js";
 import { Persistence } from "../public/game/persistence.js";
 
 test("Chinese errands have distinct places, meaningful clues, and replayable responses", () => {
-  assert.equal(activities.length, 9);
-  assert.equal(new Set(activities.map((a) => a.id)).size, 9);
+  assert.equal(activities.length, 14);
+  assert.equal(new Set(activities.map((a) => a.id)).size, 14);
   assert.deepEqual(
     new Set(activities.map((a) => a.type)),
-    new Set(["choice", "basket", "expression", "listening", "visit"]),
+    new Set([
+      "choice",
+      "basket",
+      "expression",
+      "listening",
+      "visit",
+      "sequence",
+      "order",
+      "matching",
+      "tiles",
+    ]),
   );
   for (const a of activities) {
     assert.ok(Object.hasOwn(npcs, a.npc));
@@ -124,6 +137,11 @@ test("keeping local progress merges completed errands from the other device", as
   };
   const remote = newState();
   remote.practice.completed = ["bo-books"];
+  remote.practice.rounds = { "tea-listen-order": 4 };
+  persistence.state.practice.rounds = {
+    "tea-listen-order": 2,
+    "bakery-recipe": 3,
+  };
   let snapshot;
   global.localStorage = { setItem() {} };
   global.fetch = async (url, options) => {
@@ -144,9 +162,14 @@ test("keeping local progress merges completed errands from the other device", as
       "mei-order",
       "bo-books",
     ]);
+    assert.deepEqual(snapshot.state.practice.rounds, {
+      "tea-listen-order": 4,
+      "bakery-recipe": 3,
+    });
     assert.deepEqual(snapshot.state.practice.active, {
       id: "yun-find",
       step: 1,
+      round: 0,
     });
   } finally {
     global.fetch = previousFetch;
@@ -190,4 +213,83 @@ test("each new neighbor supports honest fallback and has a distinct local AI ide
       );
   }
   await assert.rejects(() => reply("constructor", "你好", [], state));
+});
+
+test("pinyin starts off for new learners, while an existing opt-in remains intact", () => {
+  assert.equal(newState().settings.pinyin, false);
+  const existing = newState();
+  existing.settings.pinyin = true;
+  assert.equal(validateState(existing).settings.pinyin, true);
+});
+test("mini-game rounds vary their material and layouts, and do not advance on replay alone", () => {
+  for (const id of [
+    "bakery-recipe",
+    "tea-listen-order",
+    "book-memory",
+    "lake-animals",
+    "shop-sentences",
+  ]) {
+    const first = activityRound(id, 0),
+      next = activityRound(id, 1);
+    assert.notDeepEqual(first, next);
+    let progress = beginPractice(undefined, id);
+    assert.equal(progress.active.round, 0);
+    assert.deepEqual(beginPractice(progress, id), progress);
+    progress = completePractice(progress, id);
+    assert.equal(progress.rounds[id], 1);
+    assert.equal(completePractice(progress, id).rounds[id], 1);
+    progress = beginPractice(progress, id);
+    assert.equal(progress.active.round, 1);
+    assert.deepEqual(progress.completed, [id]);
+  }
+  assert.notDeepEqual(pieceOrder(4, 0), pieceOrder(4, 1));
+  assert.deepEqual([...pieceOrder(5, 2)].sort(), [0, 1, 2, 3, 4]);
+  const recipe = activityRound("bakery-recipe", 0);
+  assert.equal(orderedPieces(recipe, [0, 1, 2, 3]), true);
+  assert.equal(orderedPieces(recipe, [1, 0, 2, 3]), false);
+  assert.equal(orderedPieces(recipe, [0, 1, 2]), false);
+});
+test("partial mini-game cards and orders survive a save, with bounded validation", () => {
+  const store = new Store(":memory:");
+  try {
+    const learner = store.create(),
+      saved = store.read(learner.id);
+    let progress = beginPractice(saved.state.practice, "bakery-recipe");
+    progress.active.tiles = [0, 1];
+    saved.state.practice = progress;
+    assert.equal(
+      store.save(learner.id, saved.revision, saved.state).revision,
+      1,
+    );
+    assert.deepEqual(
+      store.read(learner.id).state.practice.active.tiles,
+      [0, 1],
+    );
+    const old = {
+      completed: ["mei-order"],
+      active: { id: "yun-find", step: 1 },
+    };
+    assert.deepEqual(validatePractice(old), {
+      ...old,
+      active: { ...old.active, round: 0 },
+      rounds: {},
+    });
+    for (const progress of [
+      { completed: [], rounds: { unknown: 1 }, active: null },
+      { completed: [], rounds: { "book-memory": 1000001 }, active: null },
+      {
+        completed: [],
+        active: { id: "bakery-recipe", step: 0, tiles: [0, 0] },
+      },
+      { completed: [], active: { id: "book-memory", step: 0, matches: [4] } },
+      {
+        completed: [],
+        active: { id: "tea-listen-order", step: 0, order: [1, 6, 0] },
+      },
+      { completed: [], active: { id: "mei-order", step: 0, tiles: [0] } },
+    ])
+      assert.throws(() => validatePractice(progress));
+  } finally {
+    store.close();
+  }
 });

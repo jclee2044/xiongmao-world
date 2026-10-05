@@ -1,4 +1,4 @@
-const CACHE = "panda-shell-0.3.0-2";
+const CACHE = "panda-shell-0.4.0-2";
 const SHELL = [
   "/",
   "/index.html",
@@ -20,6 +20,18 @@ const SHELL = [
   "/game/terrain.js",
   "/game/music.js",
   "/game/practice.js",
+  "/game/life.js",
+  "/data/culture.js",
+  "/data/interiors.js",
+  "/assets/world/storefronts.webp",
+  "/assets/world/landmarks.webp",
+  "/assets/characters/animals.webp",
+  "/assets/world/bakery-interior.webp",
+  "/assets/world/teahouse-interior.webp",
+  "/assets/world/bookshop-interior.webp",
+  "/assets/audio/asia-fsm-team.mp3",
+  "/assets/audio/ATTRIBUTION.md",
+  "/assets/audio/CC-BY-4.0.txt",
   "/data/art-bounds.js",
   "/assets/world/canal-lane.webp",
   "/assets/world/home.webp",

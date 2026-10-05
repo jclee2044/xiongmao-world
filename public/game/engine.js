@@ -2,6 +2,9 @@ import { scenes, move, nearest, canStand, interactionPoint } from "./world.js";
 import { draw } from "./render.js";
 import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
+import { lifeActors } from "./life.js";
+import artBounds from "../data/art-bounds.js";
+const animalHeights = { cat: 64, duck: 54, rabbit: 58 };
 export class World {
   constructor(
     canvas,
@@ -31,6 +34,8 @@ export class World {
     this.route = [];
     this.facing = 1;
     this.walkDistance = 0;
+    this.ambientTime = 0;
+    this.animalPoses = [];
     this.last = 0;
     const editable = () =>
       /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
@@ -79,7 +84,24 @@ export class World {
         c = this.camera;
       const x = (e.clientX - r.left) / c.scale + c.camX - c.ox,
         y = (e.clientY - r.top) / c.scale + c.camY - c.oy;
+      // Use the poses from the last painted frame, so a click never advances
+      // the simulation or misses an animal that moved away from its map stop.
+      const animal = this.animalPoses.find((pose) => {
+        const height = animalHeights[pose.animal],
+          frames = artBounds.animals?.[pose.animal];
+        if (!height || !frames) return false;
+        const width =
+          (height * Math.max(...frames.map((f) => f.w))) /
+          Math.max(...frames.map((f) => f.h));
+        return (
+          x > pose.x - width / 2 - 7 &&
+          x < pose.x + width / 2 + 7 &&
+          y > pose.y - height - 7 &&
+          y < pose.y + 7
+        );
+      });
       const target =
+        this.scene.interactables.find((o) => o.id === animal?.id) ||
         this.scene.interactables.find(
           (o) =>
             o.type === "npc" &&
@@ -87,7 +109,8 @@ export class World {
             x < (o.artX ?? o.x) + 80 &&
             y > (o.artY ?? o.y) - (o.artHeight || actorSizes[o.id]) &&
             y < (o.artY ?? o.y),
-        ) || nearest(this.scene, { x, y }, this.getFound());
+        ) ||
+        nearest(this.scene, { x, y }, this.getFound());
       if (
         target &&
         Math.hypot(target.x - this.player.x, target.y - this.player.y) < 100
@@ -123,6 +146,7 @@ export class World {
       this.transition = { image, start: null };
     } else this.transition = null;
     this.scene = scenes[id] || scenes.shanghai;
+    this.animalPoses = [];
     this.player =
       position && canStand(this.scene, position.x, position.y)
         ? { ...position }
@@ -141,9 +165,16 @@ export class World {
     const n = nearest(this.scene, this.player, this.getFound());
     if (n) this.onInteract(n);
   }
+  enterDoor(door) {
+    if (door?.type !== "door" || !scenes[door.target]) return false;
+    this.changeScene(door.target, door.returnPoint);
+    return true;
+  }
   frame(t) {
     const dt = Math.min(0.1, (t - this.last) / 1000 || 0);
     this.last = t;
+    if (!this.paused && this.getSettings().motion !== false)
+      this.ambientTime += dt;
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
@@ -281,7 +312,7 @@ export class World {
         this.player,
         this.panda,
         {
-          time: t / 1000,
+          time: this.ambientTime,
           walkDistance: this.walkDistance,
           animate: !this.paused && settings.motion !== false,
           moving,
@@ -293,6 +324,14 @@ export class World {
           near,
         },
       );
+      // draw() already advanced life at this exact time; this second call
+      // reads those positions with zero additional elapsed simulation time.
+      this.animalPoses = lifeActors(
+        this.scene,
+        this.ambientTime,
+        this.player,
+        settings.motion !== false,
+      ).filter((o) => o.type === "animal" && animalHeights[o.animal]);
       this.paintKey = paintKey;
       this.lastPaint = t;
     }

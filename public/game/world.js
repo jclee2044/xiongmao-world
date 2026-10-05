@@ -1,5 +1,7 @@
 import artBounds from "../data/art-bounds.js";
-export const MAP_VERSION = 2;
+import { interiors } from "../data/interiors.js";
+export const MAP_VERSION = 3;
+const OUTDOOR_SCALE = 0.9;
 export const landmark = { x: 0, y: 2046, w: 1254, h: 1254 };
 const lane = [
   [92, -40],
@@ -40,16 +42,8 @@ const bridge = [
 ];
 const houses = [
   [470, 810, 580, "小家"],
-  [1320, 800, 600, "茶馆"],
-  [2300, 775, 610, "书店"],
-  [3350, 795, 650, "花店"],
-  [590, 1650, 600, "糕点"],
-  [1710, 1700, 640, "茶馆"],
-  [2830, 1690, 660, "书院"],
-  [3560, 1840, 600, "客栈"],
+  [3550, 2785, 400, "客栈"],
   [2040, 2780, 640, "布店"],
-  [2970, 2830, 660, "茶馆"],
-  [3660, 2850, 580, "小家"],
 ].map(([x, y, w, label]) => ({
   type: "house",
   x,
@@ -58,6 +52,58 @@ const houses = [
   h: w * 1.245,
   label,
 }));
+const storefronts = [
+  [1320, 800, 545, "tea-house", "茶馆"],
+  [2300, 775, 555, "bookshop", "书店"],
+  [3350, 795, 380, "flower-stall", "花店"],
+  [590, 1650, 530, "bakery", "糕点"],
+  [1710, 1700, 475, "dumpling", "饺子"],
+  [3160, 1920, 410, "pavilion", "湖亭"],
+].map(([x, y, h, storefront, label]) => {
+  const source = artBounds.storefronts?.[storefront] || { w: 1.35, h: 1 };
+  return {
+    type: "storefront",
+    storefront,
+    x,
+    y,
+    h,
+    w: (h * source.w) / source.h,
+    label,
+  };
+});
+const landmarks = [
+  [1710, 2360, 460, "pagoda", "虎丘"],
+  [2960, 2830, 530, "museum", "博物馆"],
+  [3080, 2090, 300, "moon-gate", "月洞门"],
+  [3510, 2270, 210, "rockery", "假山"],
+].map(([x, y, h, landmark, label]) => {
+  const source = artBounds.landmarks?.[landmark] || {
+    w: landmark === "museum" ? 1.5 : 0.8,
+    h: 1,
+  };
+  return {
+    type: "landmark",
+    landmark,
+    x,
+    y,
+    h,
+    w: (h * source.w) / source.h,
+    label,
+  };
+});
+const nature = [
+  [410, 1350, 440, "bamboo"],
+  [1720, 2170, 380, "bamboo"],
+  [3230, 2510, 400, "bamboo"],
+  [2790, 1700, 105, "lotus-bank"],
+  [3500, 1720, 110, "lotus-bank"],
+].map(([x, y, h, nature]) => {
+  const source = artBounds.landmarks?.[nature] || {
+    w: nature === "bamboo" ? 0.65 : 2.5,
+    h: 1,
+  };
+  return { type: "nature", nature, x, y, h, w: (h * source.w) / source.h };
+});
 const trees = [
   [130, 530],
   [850, 580],
@@ -67,7 +113,7 @@ const trees = [
   [220, 1210],
   [1030, 1310],
   [2410, 1210],
-  [3240, 1260],
+  [3690, 1450],
   [3900, 1310],
   [480, 1860],
   [1010, 1810],
@@ -168,8 +214,8 @@ const streets = [
   },
   {
     points: [
-      [3560, 1940],
-      [3560, 1915],
+      [3550, 2975],
+      [3550, 2860],
     ],
     width: 125,
   },
@@ -180,24 +226,116 @@ const streets = [
     ],
     width: 130,
   },
+  {
+    points: [
+      [2290, 1120],
+      [2500, 1050],
+      [2890, 1070],
+      [3400, 1080],
+      [3620, 1300],
+      [3620, 1740],
+      [3400, 1830],
+      [2860, 1770],
+      [2380, 1680],
+      [2290, 1430],
+      [2290, 1120],
+    ],
+    width: 105,
+  },
+  {
+    points: [
+      [2200, 1120],
+      [2290, 1120],
+    ],
+    width: 115,
+  },
+  {
+    points: [
+      [2200, 1700],
+      [2380, 1680],
+    ],
+    width: 115,
+  },
+  {
+    points: [
+      [3400, 1830],
+      [3400, 1940],
+    ],
+    width: 120,
+  },
+  {
+    points: [
+      [2200, 2270],
+      [1960, 2460],
+      [1710, 2440],
+    ],
+    width: 115,
+  },
+  {
+    points: [
+      [2540, 2390],
+      [3080, 2160],
+    ],
+    width: 125,
+  },
+  {
+    points: [
+      [3200, 2975],
+      [3200, 2915],
+    ],
+    width: 120,
+  },
+  {
+    points: [
+      [1140, 1940],
+      [1400, 1940],
+      [1450, 2220],
+      [1650, 2190],
+    ],
+    width: 105,
+  },
 ];
+const lake = {
+  type: "lake",
+  shape: "polygon",
+  x: 2420,
+  y: 1120,
+  w: 1130,
+  h: 560,
+  polygon: [
+    [2420, 1320],
+    [2460, 1210],
+    [2640, 1140],
+    [2890, 1170],
+    [3100, 1120],
+    [3320, 1175],
+    [3520, 1320],
+    [3550, 1480],
+    [3440, 1630],
+    [3250, 1680],
+    [3020, 1625],
+    [2820, 1670],
+    [2600, 1600],
+    [2450, 1510],
+  ],
+};
 const groundZones = [
   { type: "courtyard", x: 210, y: 835, w: 700, h: 400, shape: "ellipse" },
   { type: "courtyard", x: 1040, y: 840, w: 750, h: 420, shape: "ellipse" },
   { type: "courtyard", x: 2110, y: 840, w: 710, h: 370, shape: "ellipse" },
   { type: "garden", x: 3060, y: 840, w: 805, h: 660, shape: "ellipse" },
-  { type: "garden", x: 95, y: 1080, w: 760, h: 500, shape: "ellipse" },
+  { type: "orchard", x: 95, y: 1080, w: 760, h: 500, shape: "ellipse" },
   { type: "courtyard", x: 355, y: 1710, w: 1700, h: 490, shape: "ellipse" },
   { type: "garden", x: 2300, y: 1160, w: 1500, h: 1170, shape: "ellipse" },
-  { type: "pond", x: 2360, y: 1250, w: 470, h: 230, shape: "ellipse" },
+  lake,
   { type: "courtyard", x: 2550, y: 1990, w: 640, h: 380, shape: "ellipse" },
   { type: "courtyard", x: 1620, y: 2865, w: 2280, h: 330, shape: "ellipse" },
-  { type: "garden", x: 1590, y: 2100, w: 600, h: 335, shape: "ellipse" },
+  { type: "bamboo-garden", x: 1440, y: 2050, w: 710, h: 450, shape: "ellipse" },
 ];
 const smallScenery = [
   { type: "bench", x: 750, y: 1320, h: 130 },
-  { type: "bench", x: 2330, y: 1590, h: 130 },
-  { type: "bench", x: 3540, y: 2270, h: 130 },
+  { type: "bench", x: 2450, y: 1810, h: 130 },
+  { type: "bench", x: 3330, y: 2270, h: 130 },
   { type: "bench", x: 1870, y: 2310, h: 130 },
   { type: "tea-table", x: 1760, y: 1120, h: 140 },
   { type: "well", x: 1850, y: 1265, h: 125 },
@@ -206,9 +344,9 @@ const smallScenery = [
   { type: "bench", x: 2790, y: 2120, h: 130, label: "画画" },
   { type: "planter", x: 1090, y: 890, h: 90, flowers: true },
   { type: "planter", x: 1700, y: 1030, h: 90, flowers: true },
-  { type: "planter", x: 2460, y: 1050, h: 90, flowers: true },
-  { type: "planter", x: 3150, y: 1060, h: 105, flowers: true },
-  { type: "planter", x: 3470, y: 1100, h: 105, flowers: true },
+  { type: "planter", x: 2420, y: 1010, h: 90, flowers: true },
+  { type: "planter", x: 3150, y: 1015, h: 105, flowers: true },
+  { type: "planter", x: 3550, y: 1100, h: 105, flowers: true },
   { type: "planter", x: 3670, y: 1220, h: 105, flowers: true },
   { type: "planter", x: 1180, y: 2080, h: 90, flowers: true },
   { type: "planter", x: 2490, y: 2160, h: 105, flowers: true },
@@ -239,6 +377,14 @@ const newNeighbors = [
   approachX: x,
   approachY: y + 45,
 }));
+function buildingFootprint(o, depth = 0.25) {
+  return {
+    x: o.x - o.w * 0.34,
+    y: o.y - o.h * depth,
+    w: o.w * 0.68,
+    h: o.h * depth,
+  };
+}
 export const scenes = {
   // Keep the saved scene identifier so existing journals and sessions survive.
   shanghai: {
@@ -251,7 +397,14 @@ export const scenes = {
     landmark: { ...landmark, walkable: [lane, bridge] },
     paths: streets,
     groundZones,
-    scenery: [...houses, ...trees, ...smallScenery],
+    scenery: [
+      ...houses,
+      ...storefronts,
+      ...landmarks,
+      ...nature,
+      ...trees,
+      ...smallScenery,
+    ],
     solids: [
       ...houses.map((o) => ({
         x: o.x - o.w * 0.37,
@@ -260,6 +413,23 @@ export const scenes = {
         h: o.h * 0.31,
       })),
       ...trees.map((o) => ({ x: o.x - 17, y: o.y - 20, w: 34, h: 24 })),
+      ...storefronts.map((o) =>
+        buildingFootprint(o, o.storefront === "pavilion" ? 0.16 : 0.25),
+      ),
+      ...landmarks
+        .filter((o) => o.landmark !== "moon-gate")
+        .map((o) =>
+          buildingFootprint(o, o.landmark === "rockery" ? 0.35 : 0.2),
+        ),
+      ...landmarks
+        .filter((o) => o.landmark === "moon-gate")
+        .flatMap((o) => [
+          { x: o.x - o.w * 0.45, y: o.y - 28, w: o.w * 0.18, h: 32 },
+          { x: o.x + o.w * 0.27, y: o.y - 28, w: o.w * 0.18, h: 32 },
+        ]),
+      ...nature
+        .filter((o) => o.nature === "bamboo")
+        .map((o) => ({ x: o.x - 15, y: o.y - 25, w: 30, h: 30 })),
       ...smallScenery
         .filter((o) => o.type !== "sign")
         .map((o) => ({
@@ -269,7 +439,7 @@ export const scenes = {
           h: Math.min(o.h * 0.38, 62),
         })),
     ],
-    solidEllipses: groundZones.filter((o) => o.type === "pond"),
+    solidPolygons: [lake.polygon],
     solidCircles: [
       { x: 1155, y: landmark.y + 932, r: 20 },
       { x: 387, y: landmark.y + 346, r: 18 },
@@ -344,7 +514,8 @@ export const scenes = {
       },
       {
         id: "tea",
-        type: "inspect",
+        type: "door",
+        target: "teahouse",
         name: "Tea house · 茶馆",
         x: 1320,
         y: 875,
@@ -354,7 +525,8 @@ export const scenes = {
       },
       {
         id: "books",
-        type: "inspect",
+        type: "door",
+        target: "bookshop",
         name: "Bookshop · 书店",
         x: 2300,
         y: 850,
@@ -374,7 +546,8 @@ export const scenes = {
       },
       {
         id: "bakery",
-        type: "inspect",
+        type: "door",
+        target: "bakery",
         name: "Bakery · 糕点",
         x: 590,
         y: 1725,
@@ -406,8 +579,8 @@ export const scenes = {
         id: "inn",
         type: "inspect",
         name: "Inn · 客栈",
-        x: 3560,
-        y: 1915,
+        x: 3550,
+        y: 2860,
         zh: "请问，还有房间吗？",
         pinyin: "Qǐngwèn, hái yǒu fángjiān ma?",
         meaning: "Excuse me, are there any rooms available?",
@@ -436,11 +609,110 @@ export const scenes = {
         id: "garden-bench",
         type: "inspect",
         name: "Garden bench · 长椅",
-        x: 3540,
+        x: 3330,
         y: 2330,
         zh: "我们坐一会儿，再去散步。",
         pinyin: "Wǒmen zuò yíhuìr, zài qù sànbù.",
         meaning: "Let’s sit for a while, then go for a walk.",
+      },
+      {
+        id: "dumplings",
+        type: "inspect",
+        name: "Dumpling stand · 饺子摊",
+        x: 1660,
+        y: 1775,
+        zh: "我想吃一盘饺子。",
+        pinyin: "Wǒ xiǎng chī yì pán jiǎozi.",
+        meaning: "I'd like a plate of dumplings.",
+      },
+      {
+        id: "lake",
+        type: "inspect",
+        name: "Lake walk · 湖边",
+        x: 2320,
+        y: 1720,
+        zh: "我们沿着湖边慢慢走。",
+        pinyin: "Wǒmen yánzhe hú biān mànman zǒu.",
+        meaning: "Let's walk slowly along the lake.",
+      },
+      {
+        id: "tiger-hill",
+        type: "inspect",
+        culture: "tiger-hill",
+        name: "Tiger Hill corner · 虎丘",
+        x: 1710,
+        y: 2440,
+        zh: "这座塔让我想起虎丘。",
+        pinyin: "Zhè zuò tǎ ràng wǒ xiǎngqǐ Hǔqiū.",
+        meaning: "This pagoda reminds me of Tiger Hill.",
+      },
+      {
+        id: "classical-garden",
+        type: "inspect",
+        culture: "classical-garden",
+        name: "Classical garden · 园林",
+        x: 3080,
+        y: 2160,
+        zh: "我们从月洞门走进花园吧。",
+        pinyin: "Wǒmen cóng yuèdòngmén zǒu jìn huāyuán ba.",
+        meaning: "Let's enter the garden through the moon gate.",
+      },
+      {
+        id: "suzhou-museum",
+        type: "inspect",
+        culture: "suzhou-museum",
+        name: "Museum reading corner · 苏州博物馆",
+        x: 3200,
+        y: 2915,
+        zh: "我们一起看看苏州的故事吧。",
+        pinyin: "Wǒmen yìqǐ kànkan Sūzhōu de gùshi ba.",
+        meaning: "Let's explore Suzhou's stories together.",
+      },
+      {
+        id: "pingjiang",
+        type: "inspect",
+        culture: "pingjiang",
+        name: "Pingjiang canal walk · 平江河巷",
+        x: 515,
+        y: landmark.y + 650,
+        zh: "我们沿着河边走一走。",
+        pinyin: "Wǒmen yánzhe hé biān zǒu yi zǒu.",
+        meaning: "Let's take a walk beside the canal.",
+      },
+      {
+        id: "lake-cat",
+        type: "animal",
+        animal: "cat",
+        name: "Cat · 小猫",
+        x: 2320,
+        y: 1740,
+        zh: "小猫在湖边休息。",
+        pinyin: "Xiǎomāo zài hú biān xiūxi.",
+        meaning: "The cat is resting by the lake.",
+      },
+      {
+        id: "lake-duck",
+        type: "animal",
+        animal: "duck",
+        name: "Duck · 小鸭",
+        x: 3550,
+        y: 1470,
+        approachX: 3590,
+        approachY: 1480,
+        zh: "小鸭在水里游泳。",
+        pinyin: "Xiǎoyā zài shuǐ lǐ yóuyǒng.",
+        meaning: "The duck is swimming in the water.",
+      },
+      {
+        id: "garden-rabbit",
+        type: "animal",
+        animal: "rabbit",
+        name: "Rabbit · 小兔",
+        x: 1650,
+        y: 2190,
+        zh: "小兔在竹林旁边。",
+        pinyin: "Xiǎotù zài zhúlín pángbiān.",
+        meaning: "The rabbit is beside the bamboo grove.",
       },
       ...newNeighbors,
     ],
@@ -596,7 +868,65 @@ export const scenes = {
       { id: "momo-home", type: "friend", name: "Momo · 桃桃", x: 940, y: 520 },
     ],
   },
+  ...interiors,
 };
+function compactOutdoor(scene) {
+  const point = (o) => {
+    const next = { ...o };
+    for (const key of [
+      "x",
+      "y",
+      "w",
+      "h",
+      "r",
+      "artX",
+      "artY",
+      "approachX",
+      "approachY",
+    ])
+      if (Number.isFinite(next[key])) next[key] *= OUTDOOR_SCALE;
+    if (next.polygon)
+      next.polygon = next.polygon.map(([x, y]) => [
+        x * OUTDOOR_SCALE,
+        y * OUTDOOR_SCALE,
+      ]);
+    return next;
+  };
+  scene.width = 3600;
+  scene.height = 3000;
+  scene.spawn = point(scene.spawn);
+  scene.landmark = {
+    ...point(scene.landmark),
+    walkable: scene.landmark.walkable.map((polygon) =>
+      polygon.map(([x, y]) => [x * OUTDOOR_SCALE, y * OUTDOOR_SCALE]),
+    ),
+  };
+  Object.assign(landmark, scene.landmark);
+  for (const key of [
+    "scenery",
+    "solids",
+    "solidCircles",
+    "groundZones",
+    "districts",
+    "interactables",
+    "foreground",
+  ])
+    scene[key] = scene[key].map(point);
+  scene.solidPolygons = scene.solidPolygons.map((polygon) =>
+    polygon.map(([x, y]) => [x * OUTDOOR_SCALE, y * OUTDOOR_SCALE]),
+  );
+  scene.paths = scene.paths.map((path) => ({
+    ...path,
+    width: path.width * OUTDOOR_SCALE,
+    points: path.points.map(([x, y]) => [x * OUTDOOR_SCALE, y * OUTDOOR_SCALE]),
+  }));
+}
+compactOutdoor(scenes.shanghai);
+for (const room of Object.values(interiors)) {
+  const exit = room.interactables.find((o) => o.returnDoor),
+    door = scenes.shanghai.interactables.find((o) => o.id === exit?.returnDoor);
+  if (exit && door) exit.returnPoint = interactionPoint(door);
+}
 export function circleHitsRect(x, y, r, rect) {
   const nx = Math.max(rect.x, Math.min(x, rect.x + rect.w)),
     ny = Math.max(rect.y, Math.min(y, rect.y + rect.h));
@@ -715,6 +1045,19 @@ export function districtAt(scene, position) {
 }
 export function upgradeState(state) {
   const scene = scenes[state.scene] || scenes.shanghai;
+  if (state.mapVersion === 2) {
+    return upgradeState({
+      ...state,
+      mapVersion: MAP_VERSION,
+      position:
+        state.scene === "shanghai"
+          ? {
+              x: state.position?.x * OUTDOOR_SCALE,
+              y: state.position?.y * OUTDOOR_SCALE,
+            }
+          : { ...state.position },
+    });
+  }
   if (state.mapVersion === MAP_VERSION) {
     if (canStand(scene, state.position?.x, state.position?.y)) return state;
     // A furniture correction should move an existing learner onto nearby floor,

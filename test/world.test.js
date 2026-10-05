@@ -11,6 +11,7 @@ import {
 } from "../public/game/world.js";
 import { pathTo } from "../public/game/pathfinding.js";
 import { Store, newState } from "../server/store.js";
+import { interiors } from "../public/data/interiors.js";
 test("collision cannot tunnel through a building and allows sliding along walls", () => {
   const scene = {
     width: 1300,
@@ -50,10 +51,13 @@ test("discovery removes the outside stuffy and enables it at home", () => {
   assert.equal(nearest(scenes.shanghai, momo, true), undefined);
   assert.equal(nearest(scenes.home, home, true).id, "momo-home");
 });
-test("expanded district is about ten times the original map and its destinations share walkable routes", () => {
+test("compact district keeps its destinations connected while reducing the expanded map by about twenty percent", () => {
   const scene = scenes.shanghai;
   const ratio = (scene.width * scene.height) / (1300 * 1000);
-  assert.ok(ratio > 9.5 && ratio < 10.5);
+  assert.equal(scene.width, 3600);
+  assert.equal(scene.height, 3000);
+  assert.ok(ratio > 8 && ratio < 8.5);
+  assert.ok((scene.width * scene.height) / (4000 * 3300) < 0.83);
   for (const destination of scene.interactables) {
     const target = interactionPoint(destination),
       route = pathTo(scene, scene.spawn, target);
@@ -78,14 +82,14 @@ test("expanded district is about ten times the original map and its destinations
       previous = point;
     }
   }
-  assert.equal(canStand(scene, 100, 2646), false, "Canal water is blocked");
+  assert.equal(canStand(scene, 90, 2381.4), false, "Canal water is blocked");
   assert.equal(
-    canStand(scene, 900, 3180),
+    canStand(scene, 810, 2862),
     false,
     "Water below bridge is blocked",
   );
 });
-test("narrow streets join nine neighbors and gardens, while pond water stays blocked", () => {
+test("narrow streets join nine neighbors, lake and varied gardens without crossing water", () => {
   const scene = scenes.shanghai;
   assert.equal(scene.interactables.filter((o) => o.type === "npc").length, 9);
   assert.ok(scene.paths.every((p) => p.width <= 175));
@@ -109,7 +113,9 @@ test("narrow streets join nine neighbors and gardens, while pond water stays blo
   assert.ok(approximatePavedArea < scene.width * scene.height * 0.3);
   assert.ok(scene.groundZones.some((o) => o.type === "garden"));
   assert.ok(scene.scenery.some((o) => o.type === "market"));
-  assert.equal(canStand(scene, 2595, 1365), false, "Pond water is blocked");
+  assert.equal(canStand(scene, 2610, 1278), false, "Lake water is blocked");
+  assert.ok(scene.groundZones.some((o) => o.type === "orchard"));
+  assert.ok(scene.groundZones.some((o) => o.type === "bamboo-garden"));
   for (const street of scene.paths) {
     for (let i = 1; i < street.points.length; i++) {
       const a = street.points[i - 1],
@@ -129,13 +135,48 @@ test("narrow streets join nine neighbors and gardens, while pond water stays blo
 });
 test("both canal-lane exits allow continuous movement while shop and water boundaries remain solid", () => {
   const scene = scenes.shanghai;
-  const north = move(scene, { x: 200, y: 2066 }, 0, -80),
-    east = move(scene, { x: 1234, y: 2965 }, 80, 0);
-  assert.ok(Math.abs(north.y - 1986) < 0.001);
-  assert.ok(Math.abs(east.x - 1314) < 0.001);
-  const shopEdge = move(scene, { x: 1350, y: 2600 }, -300, 0);
+  const plate = scene.landmark,
+    north = move(scene, { x: plate.x + 180, y: plate.y + 18 }, 0, -72),
+    east = move(
+      scene,
+      { x: plate.x + plate.w - 18, y: plate.y + 827.1 },
+      72,
+      0,
+    );
+  assert.ok(Math.abs(north.y - (plate.y - 54)) < 0.001);
+  assert.ok(Math.abs(east.x - (plate.x + plate.w + 54)) < 0.001);
+  assert.equal(plate.w, plate.h, "Canal artwork keeps its square aspect ratio");
+  const shopEdge = move(
+    scene,
+    { x: plate.x + plate.w + 90, y: plate.y + 500 },
+    -300,
+    0,
+  );
   assert.ok(shopEdge.x >= scene.landmark.x + scene.landmark.w + 15);
   assert.ok(canStand(scene, shopEdge.x, shopEdge.y));
+});
+test("lake uses the same irregular shore for rendering and collision, with an accessible duck approach", () => {
+  const scene = scenes.shanghai,
+    lake = scene.groundZones.find((o) => o.type === "lake"),
+    duck = scene.interactables.find((o) => o.id === "lake-duck"),
+    approach = interactionPoint(duck);
+  assert.equal(lake.shape, "polygon");
+  assert.ok(
+    lake.polygon.length >= 10,
+    "Shore has varied coves rather than a rectangle",
+  );
+  assert.deepEqual(scene.solidPolygons[0], lake.polygon);
+  assert.equal(canStand(scene, duck.x, duck.y), false);
+  assert.ok(canStand(scene, approach.x, approach.y));
+  assert.equal(nearest(scene, approach).id, "lake-duck");
+  assert.equal(
+    pathTo(scene, scene.spawn, { x: 2610, y: 1278 }).length,
+    0,
+    "A lake-center click cannot enter the water",
+  );
+  const stopped = move(scene, approach, -300, 0);
+  assert.ok(canStand(scene, stopped.x, stopped.y));
+  assert.ok(stopped.x > duck.x, "Walking toward the duck stops on the shore");
 });
 test("routes can be followed at normal movement speed without stalling near furniture, people or lane boundaries", () => {
   for (const scene of Object.values(scenes))
@@ -221,6 +262,123 @@ test("home rear and left walls cannot be walked or routed onto", () => {
   assert.ok(canStand(scene, 600, 620), "Main open floor stays walkable");
   assert.ok(canStand(scene, 600, 725), "Doorway approach stays walkable");
 });
+test("three distinct shop interiors keep furniture and walls solid, with usable practice counters", () => {
+  const furniture = {
+    bakery: [
+      { x: 500, y: 280 },
+      { x: 880, y: 300 },
+      { x: 190, y: 390 },
+    ],
+    teahouse: [
+      { x: 750, y: 340 },
+      { x: 350, y: 270 },
+      { x: 530, y: 220 },
+    ],
+    bookshop: [
+      { x: 550, y: 250 },
+      { x: 850, y: 370 },
+      { x: 220, y: 385 },
+    ],
+  };
+  assert.deepEqual(Object.keys(interiors).sort(), [
+    "bakery",
+    "bookshop",
+    "teahouse",
+  ]);
+  for (const room of Object.values(interiors)) {
+    assert.equal(room.width / room.height, 1.5);
+    assert.ok(room.backgroundPath.endsWith(`${room.id}-interior.webp`));
+    assert.ok(
+      room.interactables.filter((o) => o.type === "practice").length >= 2,
+    );
+    assert.equal(canStand(room, 700, 100), false, `${room.id} rear wall`);
+    assert.equal(pathTo(room, room.spawn, { x: 700, y: 100 }).length, 0);
+    for (const point of furniture[room.id])
+      assert.equal(
+        canStand(room, point.x, point.y),
+        false,
+        `${room.id} furniture`,
+      );
+    for (const point of room.interactables)
+      assert.ok(
+        pathTo(room, room.spawn, interactionPoint(point)).length,
+        `${room.id}: ${point.id}`,
+      );
+  }
+});
+test("shop exits return to the exact entry approach and a save can resume inside each room", () => {
+  for (const room of Object.values(interiors)) {
+    const exit = room.interactables.find((o) => o.returnDoor),
+      entry = scenes.shanghai.interactables.find(
+        (o) => o.id === exit.returnDoor,
+      ),
+      store = new Store(":memory:");
+    assert.equal(entry.type, "door");
+    assert.equal(entry.target, room.id);
+    assert.equal(exit.target, "shanghai");
+    assert.deepEqual(exit.returnPoint, interactionPoint(entry));
+    assert.ok(
+      canStand(scenes.shanghai, exit.returnPoint.x, exit.returnPoint.y),
+    );
+    try {
+      const { id } = store.create(),
+        state = newState();
+      state.scene = room.id;
+      state.position = { ...room.spawn };
+      state.found = ["momo"];
+      state.settings.pinyin = false;
+      assert.equal(store.save(id, 0, state).revision, 1);
+      const saved = store.read(id).state;
+      assert.equal(saved.scene, room.id);
+      assert.deepEqual(saved.position, room.spawn);
+      assert.deepEqual(saved.found, ["momo"]);
+      assert.equal(saved.settings.pinyin, false);
+    } finally {
+      store.close();
+    }
+  }
+});
+test("shop front walls block feet while their central doorways and repaired saves remain usable", () => {
+  for (const id of ["bakery", "teahouse"]) {
+    const room = scenes[id],
+      wall = { x: 900, y: 620 },
+      exit = room.interactables.find((o) => o.returnDoor);
+    assert.equal(canStand(room, wall.x, wall.y), false, `${id} front wall`);
+    const stopped = move(room, { x: 900, y: 520 }, 0, 250);
+    assert.ok(canStand(room, stopped.x, stopped.y));
+    assert.ok(stopped.y < wall.y - 15, `${id} cannot walk onto the fence`);
+    const wallRoute = pathTo(room, room.spawn, wall);
+    assert.ok(
+      wallRoute.every((p) => canStand(room, p.x, p.y)),
+      `${id} routes stay inside the floor`,
+    );
+    for (const point of [room.spawn, interactionPoint(exit)])
+      assert.ok(canStand(room, point.x, point.y), `${id} safe doorway`);
+    assert.ok(pathTo(room, room.spawn, interactionPoint(exit)).length);
+    const state = {
+      ...newState(),
+      scene: id,
+      position: wall,
+      found: ["momo"],
+      journal: ["An indoor memory"],
+    };
+    state.settings.pinyin = false;
+    const repaired = upgradeState(state);
+    assert.equal(repaired.scene, id);
+    assert.ok(canStand(room, repaired.position.x, repaired.position.y));
+    assert.ok(
+      Math.hypot(repaired.position.x - wall.x, repaired.position.y - wall.y) <
+        150,
+    );
+    assert.ok(
+      pathTo(room, repaired.position, interactionPoint(exit)).length,
+      `${id} repaired save can leave`,
+    );
+    assert.deepEqual(repaired.found, state.found);
+    assert.deepEqual(repaired.journal, state.journal);
+    assert.equal(repaired.settings.pinyin, false);
+  }
+});
 test("a furniture correction moves an existing learner to nearby floor and preserves progress", () => {
   const state = {
     ...newState(),
@@ -281,4 +439,39 @@ test("older saves relocate safely and preserve settings, conversations and disco
   } finally {
     store.close();
   }
+});
+test("version two district saves keep their scaled location and learning progress", () => {
+  const old = {
+    ...newState(),
+    mapVersion: 2,
+    position: { x: 1360, y: 945 },
+    found: ["momo"],
+    journal: ["Kept before compacting"],
+  };
+  old.settings.pinyin = false;
+  const upgraded = upgradeState(old);
+  assert.equal(upgraded.mapVersion, MAP_VERSION);
+  assert.deepEqual(upgraded.position, { x: 1224, y: 850.5 });
+  assert.deepEqual(upgraded.found, old.found);
+  assert.equal(upgraded.settings, old.settings);
+  assert.equal(upgraded.learner, old.learner);
+  assert.deepEqual(upgraded.journal, old.journal);
+});
+test("a saved position now covered by the lake moves to nearby shore without losing progress", () => {
+  const old = {
+      ...newState(),
+      mapVersion: 2,
+      position: { x: 3300, y: 1360 },
+      found: ["momo"],
+      journal: ["A lake memory"],
+    },
+    upgraded = upgradeState(old);
+  assert.ok(
+    canStand(scenes.shanghai, upgraded.position.x, upgraded.position.y),
+  );
+  assert.ok(
+    Math.hypot(upgraded.position.x - 2970, upgraded.position.y - 1224) < 300,
+  );
+  assert.deepEqual(upgraded.found, old.found);
+  assert.deepEqual(upgraded.journal, old.journal);
 });

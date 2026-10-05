@@ -3,6 +3,7 @@ import { Persistence, api } from "./game/persistence.js";
 import { Speech } from "./game/speech.js";
 import { Music } from "./game/music.js";
 import { npcs, lexicon, starters } from "./data/content.js";
+import { culture } from "./data/culture.js";
 import { expose, explicitPreference } from "./data/learner.js";
 import { createPanels } from "./game/panels.js";
 import { createPractice } from "./game/practice.js";
@@ -10,6 +11,14 @@ import { registerPwa } from "./game/pwa.js";
 import { prepareArt } from "./game/render.js";
 import { scenes, districtAt } from "./game/world.js";
 const $ = (id) => document.getElementById(id);
+const escape = (text) =>
+  String(text).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 let world,
   currentNpc = null,
   currentReply = null,
@@ -30,6 +39,7 @@ const speech = new Speech(
     $("dialog-status").textContent = text;
     if ($("practice-audio-status"))
       $("practice-audio-status").textContent = text;
+    if ($("panel-audio-status")) $("panel-audio-status").textContent = text;
   },
   () => persistence.state.settings,
   (active) => music.duck(active),
@@ -86,7 +96,15 @@ const practice = createPractice({
   persistence,
   openPanel,
   speech,
-  openMap: panels.map,
+  openMap: () => {
+    if (world.scene.interior || world.scene.id === "home") {
+      const exit = world.scene.interactables.find(
+        (o) => o.type === "door" && o.target === "shanghai",
+      );
+      if (exit) world.enterDoor(exit);
+    }
+    panels.map();
+  },
   openConversation,
   onChange: () => updatePracticeStatus(),
 });
@@ -170,9 +188,11 @@ function startWorld() {
 }
 function interact(n) {
   if (practice.visit(n.id)) return;
-  if (n.type === "door") {
+  if (n.type === "practice") {
+    practice.start(n.activity);
+  } else if (n.type === "door") {
     speech.stop();
-    world.changeScene(n.target);
+    world.enterDoor(n);
     updatePlace();
   } else if (n.type === "npc") openConversation(n.id);
   else if (n.type === "journal") panels.journal();
@@ -198,11 +218,42 @@ function interact(n) {
       "Momo · 桃桃",
       '<p class="chinese" lang="zh-CN">和你在一起，真好。</p><p>It’s good to be with you.</p>',
     );
-  else if (n.type === "inspect") {
+  else if (n.type === "animal") {
+    const animals = {
+      "lake-cat": {
+        zh: "你好，小猫！你在湖边做什么？",
+        pinyin: "Nǐ hǎo, xiǎo māo! Nǐ zài hú biān zuò shénme?",
+        meaning: "Hello, kitty! What are you doing by the lake?",
+      },
+      "lake-duck": {
+        zh: "你好，小鸭子！你喜欢游泳吗？",
+        pinyin: "Nǐ hǎo, xiǎo yāzi! Nǐ xǐhuan yóuyǒng ma?",
+        meaning: "Hello, little duck! Do you like swimming?",
+      },
+      "garden-rabbit": {
+        zh: "你好，小兔子！你的耳朵真长。",
+        pinyin: "Nǐ hǎo, xiǎo tùzi! Nǐ de ěrduo zhēn cháng.",
+        meaning: "Hello, little rabbit! Your ears are so long.",
+      },
+    };
+    const text = animals[n.id];
+    if (!text) return;
     openPanel(
       n.name,
-      `<p class="chinese" lang="zh-CN">${n.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${n.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${n.meaning}</p>` : ""}<button id="place-replay">Replay</button>`,
+      `<p class="chinese" lang="zh-CN">${text.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${text.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${text.meaning}</p>` : ""}<div class="small-actions"><button id="animal-replay">听一听</button><button id="animal-practice">湖边找动物</button></div><p id="panel-audio-status" role="status" class="muted"></p>`,
     );
+    $("animal-replay").onclick = () => speech.speak(text.zh);
+    $("animal-practice").onclick = () => practice.start("lake-animals");
+  } else if (n.type === "inspect") {
+    const fact = culture[n.culture];
+    const factHtml = fact
+      ? `<div class="panel-section"><h3 lang="zh-CN">${escape(fact.title.split(" · ")[0])}</h3><p class="chinese" lang="zh-CN">${escape(fact.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(fact.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(fact.meaning)}</p>` : ""}<div class="small-actions"><button id="culture-replay">听苏州的故事</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">资料来源 ↗</a></div><p class="notice" lang="zh-CN">这是简化的苏州绘本世界，景点的位置和路线经过了调整。</p>${persistence.state.settings.translation ? '<p class="notice">This is a condensed illustrated interpretation of Suzhou; places and routes have been rearranged.</p>' : ""}</div>`
+      : "";
+    openPanel(
+      n.name,
+      `<p class="chinese" lang="zh-CN">${escape(n.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(n.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(n.meaning)}</p>` : ""}<button id="place-replay">Replay</button>${factHtml}<p id="panel-audio-status" role="status" class="muted"></p>`,
+    );
+    if (fact) $("culture-replay").onclick = () => speech.speak(fact.zh);
     $("place-replay").onclick = () => speech.speak(n.zh);
     const hosts = {
       tea: "qiao",

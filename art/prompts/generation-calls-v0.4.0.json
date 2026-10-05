@@ -1,0 +1,139 @@
+{
+  "mode": "built-in",
+  "initial": [
+    {
+      "key": "storefronts",
+      "transparent_background": true,
+      "prompt": "Use case: illustration-story. Asset type: production sprites for a cozy Chinese-learning exploration game. Style reference is the attached existing house image ONLY for warm watercolor-and-gouache illustrated game style, soft cream walls, muted sage and peach, natural painted texture, gentle afternoon sunlight, isometric 3/4 raised view. Use slightly simpler detail so sprites read at game size. No UI, people, captions, labels, watermarks or baked ground rectangle. Create ONE transparent 3-column by 2-row sprite atlas, six visibly DIFFERENT small Suzhou/Jiangnan places. Equal cells, 35px clear transparent gutter around EVERY sprite, no overlap. Row1 left pastry bakery with glass display and wooden awning; middle dumpling restaurant with bamboo steamers and warm open counter; right bookshop with shelves visible through wide doors. Row2 left tranquil teahouse with lattice windows and tea sets; middle compact flower stall with canvas canopy and buckets of flowers; right open garden pavilion with curved tiled roof and benches. Each full freestanding facade/structure fits its cell including roof/steps/plants. Same scale and viewing angle; no two identical roof silhouettes. Signs are blank surfaces; runtime adds Chinese. True alpha background. Landscape atlas.",
+      "referenced_image_paths": [
+        "/home/jlrj/Documents/lotus/public/assets/world/house.webp"
+      ]
+    },
+    {
+      "key": "landmarks",
+      "transparent_background": true,
+      "prompt": "Use case: illustration-story. Asset type: production sprites for a cozy Chinese-learning exploration game. Style reference is the attached existing house image ONLY for warm watercolor-and-gouache illustrated game style, soft cream walls, muted sage and peach, natural painted texture, gentle afternoon sunlight, isometric 3/4 raised view. Use slightly simpler detail so sprites read at game size. No UI, people, captions, labels, watermarks or baked ground rectangle. Create ONE transparent 3-column by 2-row atlas of SIX small cutout landmarks/nature features; equal cells and clear 35px transparent gutters. Row1 left a recognizable small seven-tier octagonal stone Tiger Hill Yunyan pagoda-inspired tower with slight lean, no exaggerated lean; middle a white Jiangnan garden wall with circular moon gate and a short wall segment, empty open arch; right Taihu-style porous limestone garden rockery with irregular sculptural rocks and tiny moss. Row2 left a miniature Suzhou Museum main-building-inspired facade: low white walls with angular dark gray geometric roof forms, no tower or modern glass skyscraper; middle a natural clump of slender green bamboo with visible canes; right lotus-bed shoreline cutout with lotus leaves/pink blooms, low grasses and uneven bank stones. Each isolated structure/nature cluster entirely in its own cell, no connecting backgrounds, no ground rectangle. These are tasteful recognizable game interpretations rather than technical replicas. Truly transparent background.",
+      "referenced_image_paths": [
+        "/home/jlrj/Documents/lotus/public/assets/world/house.webp"
+      ]
+    },
+    {
+      "key": "animals",
+      "transparent_background": true,
+      "prompt": "Use case: illustration-story. Asset type: animated animal game sprite sheet matching a cozy warm gouache/watercolor Suzhou illustrated game. Create ONE transparent 3-column by 4-row atlas. Equal cells, plenty of fully transparent gutter. Each ROW is one tiny cute friendly animal in three simple motion poses, same size/identity/orientation, facing right in raised 3/4 game view. Row1 orange-and-white small cat: left paw step, passing paws, right paw step, tail positions vary slightly. Row2 cream-white duck with orange bill: waddle left, rest, waddle right, subtle wing variation. Row3 small warm brown rabbit: crouch, stretch-hop, crouch other ears. Row4 little sparrow: wings down, half-raised, raised. Each full body has comfortable space to all cell edges, no crop clipping, no species mixed between rows. Soft warm shadows within fur but NO cast floor shadows, backgrounds, UI, words, frames or watermark. Modest detail, readable silhouettes, natural paper brush texture, matched muted warm palette. True alpha background."
+    },
+    {
+      "key": "bakery-interior",
+      "transparent_background": false,
+      "prompt": "Use case: illustration-story. Asset type: production sprites for a cozy Chinese-learning exploration game. Style reference is the attached existing house image ONLY for warm watercolor-and-gouache illustrated game style, soft cream walls, muted sage and peach, natural painted texture, gentle afternoon sunlight, isometric 3/4 raised view. Use slightly simpler detail so sprites read at game size. No UI, people, captions, labels, watermarks or baked ground rectangle. Create ONE full landscape 3:2 interior environment painting for an explorable small Suzhou pastry bakery. Camera raised isometric 3/4 dollhouse view, roof removed, one room. Cozy wooden pastry display counter and bamboo steaming baskets along rear/top and left wall, jars and small pastry trays, osmanthus flower motif as subtle decor, a small worktable with rice-flour bowl at upper-right. Wide clear walkable central floor, at least lower60% of image, warm timber floor with wovenmat offside. Welcoming open doorway centered at bottom edge. Furniture stays at perimeter, distinct floor from walls, no foreground object obscuring doorway. No PEOPLE, animals, UI, printed text, built-in labels. Fill image edge-to-edge, opaque backdrop, no white border.",
+      "referenced_image_paths": [
+        "/home/jlrj/Documents/lotus/public/assets/world/house.webp"
+      ]
+    },
+    {
+      "key": "teahouse-interior",
+      "transparent_background": false,
+      "prompt": "Use case: illustration-story. Asset type: production sprites for a cozy Chinese-learning exploration game. Style reference is the attached existing house image ONLY for warm watercolor-and-gouache illustrated game style, soft cream walls, muted sage and peach, natural painted texture, gentle afternoon sunlight, isometric 3/4 raised view. Use slightly simpler detail so sprites read at game size. No UI, people, captions, labels, watermarks or baked ground rectangle. Create ONE full landscape 3:2 interior painting for an explorable small Jiangnan tea house. Raised isometric 3/4 dollhouse view, roof removed, one room, cozy cream plaster and timber, left rear wall lattice window views tiny garden, ceramic pots/cups and service counter along top-right, two small wooden tea tables with stools clustered at upper-left/top, bamboo screen and modest calligraphy scroll with abstract strokes. Wide clear WALKABLE central and lower60% floor, warm pale stone/wood, a welcome open doorway centered bottom edge. Furniture at perimeter, floor/wall boundaries readable. No people, animals, UI, words, labels, watermarks. Full edge-to-edge opaque landscape, no border.",
+      "referenced_image_paths": [
+        "/home/jlrj/Documents/lotus/public/assets/world/house.webp"
+      ]
+    },
+    {
+      "key": "bookshop-interior",
+      "transparent_background": false,
+      "prompt": "Use case: illustration-story. Asset type: production sprites for a cozy Chinese-learning exploration game. Style reference is the attached existing house image ONLY for warm watercolor-and-gouache illustrated game style, soft cream walls, muted sage and peach, natural painted texture, gentle afternoon sunlight, isometric 3/4 raised view. Use slightly simpler detail so sprites read at game size. No UI, people, captions, labels, watermarks or baked ground rectangle. Create ONE full landscape 3:2 room painting for an explorable Suzhou bookshop. Raised isometric 3/4 dollhouse camera, roof removed, one room. Rear/top and left perimeter tall wood book shelves, muted colored book spines without text, small calligraphy brush/paper reading desk along upper-right, a window with softly glowing daylight and garden glimpse. Two low reading cushions at side, central and lower60% warm wood floor spacious and clear for walking. Open entrance centered at bottom edge. Furniture at perimeter and distinct floor/wall silhouette. No people, animals, UI, printed text or labels, no watermark. Opaque edge-to-edge landscape, no border.",
+      "referenced_image_paths": [
+        "/home/jlrj/Documents/lotus/public/assets/world/house.webp"
+      ]
+    }
+  ],
+  "corrections": [
+    {
+      "key": "storefronts",
+      "source": "exec-0d789d0d-ca5c-4279-a40b-09d1be04bb10.png",
+      "transparent_background": true,
+      "prompt": "Edit ONLY atlas layout/gutters. Preserve exactly these six shop designs, painted style, identities, colors and all facade details. Keep 3 equal columns and 2 equal rows. Shrink each complete individual sprite about15% within its OWN equal cell, centered horizontally and resting near bottom with35px transparent margin on every side. No roofs, plants, stairs or objects may cross any cell boundary. Truly transparent background, including every gutter. Do not add backgrounds, labels, borders or new objects.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-0d789d0d-ca5c-4279-a40b-09d1be04bb10.png"
+      ]
+    },
+    {
+      "key": "landmarks",
+      "source": "exec-48ed8590-1824-45ad-b03c-e0f40958b677.png",
+      "transparent_background": true,
+      "prompt": "Edit ONLY atlas layout/gutters. Preserve these six landmark/nature designs, seven-story pagoda identity, moon gate, rockery, museum, bamboo and lotus patch, warm paintedstyle. Keep3equalcolumns and2equalrows. Shrink every complete individual sprite25% withinitsOWN cell so museum never crossescolumnboundary and pagoda feet never crossrowboundary. Center eachcell with35px fully transparent margin on EVERY side includingplants/roof/tower. Preserve all details ratherthan clipping. Truealphaeverywhereoutsideeachsprite. No words/borders/backgrounds.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-48ed8590-1824-45ad-b03c-e0f40958b677.png"
+      ]
+    },
+    {
+      "key": "animals",
+      "source": "exec-a97386af-5995-43bd-a21f-0ff6fc8cc6d8.png",
+      "transparent_background": true,
+      "prompt": "Edit ONLY sprite sheet spacing. Preserve exactly these four cuteanimal identities andallthreeposesperrow, artstyle and colors. KeepthreeEQUALcolumnsandfourEQUALrows. Shrink every animalposeabout20%insideitsOWNcell, centeredwithcomfortable30pxtransparentmargin on every side. No nose/ear/tail/paw/wing maytouchorcrossanycellboundary. The cat'srightmostnosemustbeentirelypresent. Truealphaoutsideeveryanimal; nofloorshadows,labelsorframes.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-a97386af-5995-43bd-a21f-0ff6fc8cc6d8.png"
+      ]
+    },
+    {
+      "key": "bakery-interior",
+      "source": "exec-8325ab8b-c4ae-47af-aebd-2072b97cc2eb.png",
+      "transparent_background": false,
+      "prompt": "Change ONLY the empty background outside this painted room. Replace black or white empty backdrop outside exterior walls with a soft warm ivory/beige parchment-colored background (#e9d7b5) with subtle gouache paper texture. Preserve the exact room geometry, furniture, floor, doorway, camera angle, positions, size and originalillustrated style. Do notmove,addorremoveanythinginsideoronthewalls. Opaque background edge-to-edge, no blackvoid, no whitebordernocaptions.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-8325ab8b-c4ae-47af-aebd-2072b97cc2eb.png"
+      ]
+    },
+    {
+      "key": "teahouse-interior",
+      "source": "exec-5b266a88-58ad-4495-81ee-f93b7fe9c009.png",
+      "transparent_background": false,
+      "prompt": "Change ONLY the empty background outside this painted room. Replace black or white empty backdrop outside exterior walls with a soft warm ivory/beige parchment-colored background (#e9d7b5) with subtle gouache paper texture. Preserve the exact room geometry, furniture, floor, doorway, camera angle, positions, size and originalillustrated style. Do notmove,addorremoveanythinginsideoronthewalls. Opaque background edge-to-edge, no blackvoid, no whitebordernocaptions.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-5b266a88-58ad-4495-81ee-f93b7fe9c009.png"
+      ]
+    },
+    {
+      "key": "bookshop-interior",
+      "source": "exec-deb044a5-fc1f-45b6-a96c-070c9a90b129.png",
+      "transparent_background": false,
+      "prompt": "Change ONLY the empty background outside this painted room. Replace black or white empty backdrop outside exterior walls with a soft warm ivory/beige parchment-colored background (#e9d7b5) with subtle gouache paper texture. Preserve the exact room geometry, furniture, floor, doorway, camera angle, positions, size and originalillustrated style. Do notmove,addorremoveanythinginsideoronthewalls. Opaque background edge-to-edge, no blackvoid, no whitebordernocaptions.",
+      "referenced_image_paths": [
+        "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-deb044a5-fc1f-45b6-a96c-070c9a90b129.png"
+      ]
+    }
+  ],
+  "date": "2026-10-05",
+  "selected": [
+    {
+      "key": "storefronts",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-cb936ec1-0b07-49ac-ae6a-fa539f988cd0.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/world/storefronts.webp"
+    },
+    {
+      "key": "landmarks",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-e331b3c7-9b80-46ca-ad2b-fb8e15343212.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/world/landmarks.webp"
+    },
+    {
+      "key": "animals",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-2e4d7c0f-4486-4126-b9ac-99edd7f07c78.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/characters/animals.webp"
+    },
+    {
+      "key": "bakery-interior",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-9cc703ad-965d-476b-9fff-af91ed7471e6.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/world/bakery-interior.webp"
+    },
+    {
+      "key": "teahouse-interior",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-4cf6a838-a1da-4e25-881c-f98604e884fe.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/world/teahouse-interior.webp"
+    },
+    {
+      "key": "bookshop-interior",
+      "builtin_original": "/home/jlrj/.codex/generated_images/01a10c66-6299-74a0-9005-e0f8306850ff/exec-2fcffe90-3e3d-453a-aff5-fb95fa797112.png",
+      "shipped": "/home/jlrj/Documents/lotus/public/assets/world/bookshop-interior.webp"
+    }
+  ]
+}

@@ -4,6 +4,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { enterWorld, walkToStop } from "./browser-helpers.js";
 import { scenes, interactionPoint } from "../public/game/world.js";
 import { npcs } from "../public/data/content.js";
+import { activityRound } from "../public/data/activities.js";
+import { culture } from "../public/data/culture.js";
 
 await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
@@ -67,6 +69,15 @@ try {
     await page.locator("#practice").isVisible(),
     true,
     "Chinese practice is visible without opening Panda help",
+  );
+  assert.equal(
+    await page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem("panda-world-v1")).state.settings
+          .pinyin,
+    ),
+    false,
+    "New learner pinyin starts off",
   );
   const greeted = [];
   for (const id of [
@@ -234,6 +245,7 @@ try {
   assert.deepEqual((await cachedPractice()).active, {
     id: "yun-find",
     step: 1,
+    round: 0,
   });
   await page.waitForFunction(
     () => !JSON.parse(localStorage.getItem("panda-world-v1")).dirty,
@@ -246,18 +258,262 @@ try {
   assert.deepEqual((await cachedPractice()).active, {
     id: "yun-find",
     step: 2,
+    round: 0,
   });
   await visit("bo");
   assert.equal((await cachedPractice()).completed.includes("yun-find"), true);
   await start("hao-letter");
   await visit("bo");
+
+  async function closePanel() {
+    if (await page.locator("#panel").evaluate((dialog) => dialog.open))
+      await page.locator('[data-close="panel"]').click();
+  }
+  async function localStop(sceneId, id) {
+    await page.getByRole("button", { name: "Map", exact: true }).click();
+    await page.locator(`[data-map-stop="${id}"]`).click();
+    const target = interactionPoint(
+      scenes[sceneId].interactables.find((o) => o.id === id),
+    );
+    await page.waitForFunction(
+      ({ sceneId, target }) => {
+        const d = document.querySelector("#world").dataset;
+        return (
+          d.scene === sceneId &&
+          d.routeLength === "0" &&
+          Math.hypot(Number(d.x) - target.x, Number(d.y) - target.y) < 50
+        );
+      },
+      { sceneId, target },
+      { timeout: 45000 },
+    );
+    await page.locator("#interact").click();
+  }
+  async function enterShop(door, sceneId) {
+    await closePanel();
+    await localStop("shanghai", door);
+    await page.waitForFunction(
+      (id) => document.querySelector("#world").dataset.scene === id,
+      sceneId,
+    );
+    await page.waitForFunction(
+      () => document.querySelector("#world").dataset.artReady === "true",
+    );
+    await page.screenshot({
+      path: `test-results/life-${sceneId}-interior.png`,
+    });
+  }
+  async function leaveShop(sceneId) {
+    await closePanel();
+    const exit = scenes[sceneId].interactables.find(
+      (o) => o.id === `${sceneId}-exit`,
+    );
+    await localStop(sceneId, exit.id);
+    await page.waitForFunction((point) => {
+      const d = document.querySelector("#world").dataset;
+      return (
+        d.scene === "shanghai" &&
+        Math.hypot(Number(d.x) - point.x, Number(d.y) - point.y) < 2
+      );
+    }, exit.returnPoint);
+  }
+  async function saveAndResume() {
+    await page.waitForFunction(
+      () => !JSON.parse(localStorage.getItem("panda-world-v1")).dirty,
+    );
+    await page.reload();
+    await enterWorld(page);
+    await openCatalog();
+    await page.locator("#practice-resume").click();
+  }
+  const game = async () => {
+    const p = await cachedPractice();
+    return activityRound(p.active.id, p.active.round);
+  };
+  const pieces = async (from = 0) => {
+    const a = await game();
+    for (let i = from; i < a.pieces.length; i++)
+      await page.locator(`[data-practice-piece="${i}"]`).click();
+    await page.locator("#practice-check-pieces").click();
+  };
+  await enterShop("bakery", "bakery");
+  await localStop("bakery", "bakery-workbench");
+  assert.equal((await cachedPractice()).active.id, "bakery-recipe");
+  const firstRecipe = (await game()).prompt.zh;
+  await page.locator('[data-practice-piece="1"]').click();
+  await page.locator("#practice-check-pieces").click();
+  assert.equal(
+    (await cachedPractice()).completed.includes("bakery-recipe"),
+    false,
+  );
+  await page.locator('[data-practice-remove="0"]').click();
+  await page.locator('[data-practice-piece="0"]').click();
+  await page.locator('[data-practice-piece="1"]').click();
+  await saveAndResume();
+  assert.deepEqual((await cachedPractice()).active.tiles, [0, 1]);
+  await pieces(2);
+  await page.locator("#practice-again").click();
+  assert.notEqual(
+    (await game()).prompt.zh,
+    firstRecipe,
+    "Next recipe round teaches a different sequence",
+  );
+  await pieces();
+  await leaveShop("bakery");
+
+  await enterShop("tea", "teahouse");
+  await localStop("teahouse", "teahouse-counter");
+  assert.equal((await cachedPractice()).active.id, "tea-listen-order");
+  assert.equal(
+    await page.locator("#practice-transcript-content").isVisible(),
+    false,
+  );
+  await page.locator("#practice-slow").click();
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#practice-audio-status")
+      .textContent.includes("Local Mandarin"),
+  );
+  await page.locator("#practice-stop").click();
+  await page.locator("#practice-basket button").click();
+  assert.equal(
+    (await cachedPractice()).completed.includes("tea-listen-order"),
+    false,
+  );
+  const firstOrder = (await game()).quantities;
+  await page.locator('[name="fruit-0"]').selectOption(String(firstOrder[0]));
+  await saveAndResume();
+  assert.equal((await cachedPractice()).active.order[0], firstOrder[0]);
+  for (let i = 0; i < firstOrder.length; i++)
+    await page
+      .locator(`[name="fruit-${i}"]`)
+      .selectOption(String(firstOrder[i]));
+  await page.locator("#practice-basket button").click();
+  await page.locator("#practice-again").click();
+  const nextOrder = (await game()).quantities;
+  assert.notDeepEqual(
+    nextOrder,
+    firstOrder,
+    "The next customer has a different order",
+  );
+  for (let i = 0; i < nextOrder.length; i++)
+    await page
+      .locator(`[name="fruit-${i}"]`)
+      .selectOption(String(nextOrder[i]));
+  await page.locator("#practice-basket button").click();
+  await leaveShop("teahouse");
+
+  await enterShop("books", "bookshop");
+  await localStop("bookshop", "bookshop-table");
+  assert.equal((await cachedPractice()).active.id, "book-memory");
+  const firstWord = (await game()).pairs[0].zh;
+  await page.locator('[data-practice-word="0"]').click();
+  await page.locator('[data-practice-picture="1"]').click();
+  assert.deepEqual((await cachedPractice()).active.matches || [], []);
+  await page.locator('[data-practice-picture="0"]').click();
+  await page.locator('[data-practice-word="1"]').click();
+  await page.locator('[data-practice-picture="1"]').click();
+  await saveAndResume();
+  assert.deepEqual((await cachedPractice()).active.matches, [0, 1]);
+  for (let i = 2; i < 4; i++) {
+    await page.locator(`[data-practice-word="${i}"]`).click();
+    await page.locator(`[data-practice-picture="${i}"]`).click();
+  }
+  await page.locator("#practice-again").click();
+  assert.notEqual(
+    (await game()).pairs[0].zh,
+    firstWord,
+    "Memory matching introduces a different object set",
+  );
+  for (let i = 0; i < 4; i++) {
+    await page.locator(`[data-practice-word="${i}"]`).click();
+    await page.locator(`[data-practice-picture="${i}"]`).click();
+  }
+  await start("shop-sentences");
+  await page.locator('[data-practice-piece="1"]').click();
+  await page.locator('[data-practice-remove="0"]').click();
+  await pieces();
+  await page.locator("#practice-again").click();
+  await page.locator("#practice-own").fill("我想和朋友一起喝绿茶。");
+  await page.locator("#practice-share button").click();
+  await start("lake-animals");
+  const animalStops = (await game()).steps.map((step) => step.target);
+  for (const id of animalStops) await visit(id);
+  assert.equal(
+    (await cachedPractice()).completed.includes("lake-animals"),
+    true,
+  );
+  await page.locator("#practice-again").click();
+  assert.notDeepEqual(
+    (await game()).steps.map((step) => step.target),
+    animalStops,
+    "The next animal walk changes the route clue order",
+  );
+  for (const step of (await game()).steps) await visit(step.target);
+  await closePanel();
+  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.waitForFunction(
+    () => document.querySelector("#world").dataset.scene === "home",
+  );
+  await start("lake-animals");
+  await page.locator("#practice-map").click();
+  await page.waitForFunction(
+    () => document.querySelector("#world").dataset.scene === "shanghai",
+  );
+  assert.equal(
+    await page.locator("#world").getAttribute("data-scene"),
+    "shanghai",
+    "An outdoor errand opened at home leaves home before showing its map",
+  );
+  assert.equal(
+    await page.locator('[data-map-stop="lake-cat"]').isVisible(),
+    true,
+  );
+  await closePanel();
+  await openCatalog();
+  await page.locator("#practice-resume").click();
+  await page.locator("#practice-pause").click();
+  const cultureStops = [];
+  for (const id of [
+    "tiger-hill",
+    "classical-garden",
+    "suzhou-museum",
+    "pingjiang",
+  ]) {
+    await closePanel();
+    await localStop("shanghai", id);
+    assert.equal(await page.locator("#culture-replay").isVisible(), true);
+    assert.ok(
+      (await page.locator("#panel-content").textContent()).includes(
+        culture[id].zh,
+      ),
+    );
+    assert.equal(
+      await page.locator("#panel-content a").getAttribute("href"),
+      culture[id].source,
+    );
+    assert.ok(
+      (await page.locator("#panel-content").textContent()).includes(
+        "位置和路线经过了调整",
+      ),
+    );
+    await page.locator("#culture-replay").click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector("#panel-audio-status")
+        .textContent.includes("Local Mandarin"),
+    );
+    cultureStops.push(id);
+  }
+  await closePanel();
+  await openCatalog();
   await page.waitForFunction(
     () => !JSON.parse(localStorage.getItem("panda-world-v1")).dirty,
   );
   const saved = await page.evaluate(
     async () => (await (await fetch("/api/state")).json()).state,
   );
-  assert.equal(saved.practice.completed.length, 9);
+  assert.equal(saved.practice.completed.length, 14);
   assert.equal(saved.practice.active, null);
   assert.ok(
     saved.history.some((item) => item.npc === "bo" && item.user === idea),
@@ -273,7 +529,7 @@ try {
   await openCatalog();
   assert.equal(
     await page.locator("[data-activity]").filter({ hasText: "✓" }).count(),
-    9,
+    14,
   );
   await page.screenshot({ path: "test-results/life-completed-errands.png" });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -301,6 +557,13 @@ try {
     mockedAudio: true,
     completed: saved.practice.completed,
     resumedMidErrand: true,
+    gameRounds: saved.practice.rounds,
+    minigamesVaried: true,
+    partialGameResumed: true,
+    interiorReturnAfterReload: true,
+    defaultPinyinOff: true,
+    cultureStops,
+    cultureSourcesChecked: true,
     learnerEvidenceUnchanged: true,
     panelCloseStopsVoice: true,
     speechCalls: speechCalls.length,

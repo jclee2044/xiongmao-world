@@ -36,6 +36,8 @@ try {
   await enter();
   await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await shown(false);
+  await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
   await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();
   await shown(false);
@@ -90,11 +92,17 @@ try {
   await shown(true);
   await saved();
   await page.screenshot({ path: "test-results/pinyin-shown-mobile.png" });
+  await page.reload();
+  await enter();
+  await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await shown(true);
   assert.deepEqual(errors, []);
   await writeFile(
     "test-results/pinyin.json",
     JSON.stringify(
       {
+        defaultOff: true,
+        explicitOptInPreserved: true,
         immediateToggle: true,
         persistedAfterReload: true,
         settingsAgreement: true,

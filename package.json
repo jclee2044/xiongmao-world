@@ -1,6 +1,6 @@
 {
   "name": "pandas-little-world",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,7 +11,7 @@
     "test": "node --test test/*.test.js",
     "check": "node scripts/check.js",
     "format": "prettier --write public server test scripts package.json *.md",
-    "test:browser": "node scripts/browser-movement.js && node scripts/browser-slice.js && node scripts/browser-pwa.js && node scripts/browser-pinyin.js && node scripts/browser-preview.js && node scripts/browser-art.js && node scripts/browser-life.js && node scripts/browser-music.js",
+    "test:browser": "node scripts/browser-movement.js && node scripts/browser-slice.js && node scripts/browser-pwa.js && node scripts/browser-pinyin.js && node scripts/browser-preview.js && node scripts/browser-art.js && node scripts/browser-life.js && node scripts/browser-music.js && node scripts/browser-ambient.js",
     "backup": "node --env-file-if-exists=.env scripts/backup.js"
   },
   "devDependencies": {

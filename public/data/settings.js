@@ -1,4 +1,4 @@
-export const defaultSettings={outfit:'#b4a6c3',hair:'bun',pace:'normal',motion:true,pinyin:true,translation:true,challenge:'standard',help:'standard',textSize:'normal',voice:true,voiceVolume:0.75,music:0.15,ambience:0.25};
+export const defaultSettings={outfit:'#b4a6c3',hair:'bun',pace:'normal',motion:true,pinyin:false,translation:true,challenge:'standard',help:'standard',textSize:'normal',voice:true,voiceVolume:0.75,music:0.15,ambience:0.25};
 const options={outfit:['#b4a6c3','#899b7c','#d3a890','#8ca6a2'],hair:['bun','short'],pace:['slow','normal'],motion:[true,false],pinyin:[true,false],translation:[true,false],challenge:['gentler','standard','challenging'],help:['more','standard','less'],textSize:['normal','large'],voice:[true,false]};
 export function validatePatch(patch){
   if(!patch||Array.isArray(patch)||typeof patch!=='object'||Object.keys(patch).length===0)throw new Error('Choose a supported change.');

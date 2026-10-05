@@ -13,6 +13,9 @@ const types = {
   ".css": "text/css; charset=utf-8",
   ".png": "image/png",
   ".webp": "image/webp",
+  ".mp3": "audio/mpeg",
+  ".txt": "text/plain; charset=utf-8",
+  ".md": "text/plain; charset=utf-8",
   ".svg": "image/svg+xml",
   ".webmanifest": "application/manifest+json",
 };
@@ -63,7 +66,7 @@ export function createApp({
       if (pathname === "/api/health") {
         return json(200, {
           ok: true,
-          version: "0.3.0",
+          version: "0.4.0",
           provider: providerConfig.provider || process.env.PROVIDER || "story",
           speech: speechAvailable() ? "espeak-cmn" : "unavailable",
         });

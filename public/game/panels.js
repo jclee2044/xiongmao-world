@@ -1,6 +1,7 @@
 import { api } from "./persistence.js";
 import { npcs } from "../data/content.js";
 import { validatePatch, parseCustomization } from "../data/settings.js";
+import { backgroundTrack } from "./music.js";
 const $ = (id) => document.getElementById(id);
 const escape = (text) =>
   String(text).replace(
@@ -176,7 +177,7 @@ export function createPanels({
       ])}${select("translation", "English meaning", [
         [true, "Shown"],
         [false, "Hidden"],
-      ])}${select("motion", "Gentle hopping", [
+      ])}${select("motion", "Environment motion", [
         [true, "On"],
         [false, "Reduced motion"],
       ])}${select("textSize", "Text size", [
@@ -199,6 +200,10 @@ export function createPanels({
           .join("") || "<li>No requests yet.</li>"
       }</ul><p>New maps, art and mechanics are stored as pending. A source-editing agent is not connected.</p></div>`,
     );
+    const credit = document.createElement("p");
+    credit.className = "muted";
+    credit.innerHTML = `Music: <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Local copy compressed for this game.`;
+    $("music-volume").after(credit);
     for (const select of document.querySelectorAll("[data-setting]"))
       select.onchange = () => {
         let value = select.value;

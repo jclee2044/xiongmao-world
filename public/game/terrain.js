@@ -1,7 +1,12 @@
 const plates = new WeakMap();
 function zonePath(ctx, zone) {
   ctx.beginPath();
-  if (zone.shape === "ellipse")
+  if (zone.polygon) {
+    zone.polygon.forEach(([x, y], i) =>
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y),
+    );
+    ctx.closePath();
+  } else if (zone.shape === "ellipse")
     ctx.ellipse(
       zone.x + zone.w / 2,
       zone.y + zone.h / 2,
@@ -31,6 +36,96 @@ function strokePath(ctx, path) {
   ctx.beginPath();
   path.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
 }
+function paintWater(ctx, zone, time, animate) {
+  ctx.save();
+  ctx.lineJoin = "round";
+  // The same polygon defines the water and its collider. Broad translucent bank
+  // strokes soften the corners without painting a rectangular patch over paths.
+  for (const [width, color] of [
+    [48, "#899b7320"],
+    [30, "#a9ad7c55"],
+    [16, "#bcb39499"],
+  ]) {
+    zonePath(ctx, zone);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.stroke();
+  }
+  zonePath(ctx, zone);
+  const water = ctx.createLinearGradient(
+    zone.x,
+    zone.y,
+    zone.x + zone.w * 0.4,
+    zone.y + zone.h,
+  );
+  water.addColorStop(0, "#92b3a4");
+  water.addColorStop(0.48, "#72a399");
+  water.addColorStop(1, "#558780");
+  ctx.fillStyle = water;
+  ctx.fill();
+  ctx.save();
+  zonePath(ctx, zone);
+  ctx.clip();
+  for (let i = 0; i < 95; i++) {
+    const x = zone.x + ((i * 137.31) % zone.w),
+      y = zone.y + ((i * 71.53) % zone.h);
+    const shift = animate ? Math.sin(time * 0.45 + i) * 6 : 0;
+    ctx.fillStyle = i % 3 === 0 ? "#c9ddc514" : "#386e6b0c";
+    ctx.beginPath();
+    ctx.ellipse(
+      x + shift,
+      y,
+      15 + (i % 18),
+      1.5 + (i % 3),
+      (i % 5) * 0.08,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+    if (i % 7 === 0) {
+      ctx.strokeStyle = "#d6e2bc55";
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.ellipse(x + shift, y, 18 + (i % 15), 2.8, 0, 0.2, Math.PI * 0.9);
+      ctx.stroke();
+    }
+    if (i % 13 === 0) {
+      ctx.fillStyle = "#aabc79aa";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 5, 12, 5, -0.2, 0.12, Math.PI * 1.9);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+  zonePath(ctx, zone);
+  ctx.strokeStyle = "#dad0ad88";
+  ctx.lineWidth = 5;
+  ctx.stroke();
+  if (zone.polygon)
+    for (let i = 0; i < zone.polygon.length; i++) {
+      const a = zone.polygon[i],
+        b = zone.polygon[(i + 1) % zone.polygon.length];
+      const count = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 27);
+      for (let j = 0; j < count; j++) {
+        const t = (j + 0.35) / count,
+          x = a[0] + (b[0] - a[0]) * t,
+          y = a[1] + (b[1] - a[1]) * t;
+        ctx.fillStyle = ["#bdb79d88", "#cfc2a799", "#a5ac8588"][(i + j) % 3];
+        ctx.beginPath();
+        ctx.ellipse(
+          x,
+          y,
+          6 + ((i + j) % 5),
+          3 + (j % 3),
+          (i + j) * 0.5,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+    }
+  ctx.restore();
+}
 export function paintGround(
   ctx,
   scene,
@@ -55,44 +150,15 @@ export function paintGround(
       zone.y > view.y + view.h
     )
       continue;
-    if (zone.type === "pond") {
+    if (["pond", "lake"].includes(zone.type)) {
+      paintWater(ctx, zone, time, animate);
+    } else if (["garden", "orchard", "bamboo-garden"].includes(zone.type)) {
       softZone(
         ctx,
-        {
-          ...zone,
-          x: zone.x - 20,
-          y: zone.y - 20,
-          w: zone.w + 40,
-          h: zone.h + 40,
-        },
-        "#8b9f86",
-        "#a9b88c00",
+        zone,
+        zone.type === "orchard" ? "#bec99c" : "#aebd8d",
+        "#bdc59600",
       );
-      zonePath(ctx, zone);
-      ctx.fillStyle = "#699f99";
-      ctx.fill();
-      ctx.save();
-      zonePath(ctx, zone);
-      ctx.clip();
-      for (let i = 0; i < 13; i++) {
-        const x = zone.x + ((i * 79) % zone.w),
-          y = zone.y + ((i * 43) % zone.h);
-        const shift = animate ? Math.sin(time * 0.55 + i) * 5 : 0;
-        ctx.strokeStyle = "#d8ecce55";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.ellipse(x + shift, y, 22 + (i % 4) * 8, 4, 0, 0, Math.PI);
-        ctx.stroke();
-        if (i % 3 === 0) {
-          ctx.fillStyle = "#b9c789";
-          ctx.beginPath();
-          ctx.ellipse(x, y + 8, 15, 8, -0.2, 0.15, Math.PI * 1.92);
-          ctx.fill();
-        }
-      }
-      ctx.restore();
-    } else if (zone.type === "garden") {
-      softZone(ctx, zone, "#aebd8d", "#bdc59600");
       // Small irregular tufts and blossoms are anchored to world coordinates.
       for (let i = 0; i < 50; i++) {
         const px = zone.x + ((i * 137.13) % zone.w),
@@ -149,17 +215,18 @@ export function paintGround(
   // image edge, including the two real exits from the detailed canal painting.
   if (scene.landmark) {
     const p = scene.landmark;
+    const unit = p.w / 1254;
     ctx.save();
     ctx.lineCap = "round";
     ctx.strokeStyle = paving;
-    ctx.lineWidth = 190;
+    ctx.lineWidth = 190 * unit;
     ctx.beginPath();
-    ctx.moveTo(p.x + 190, p.y + 100);
-    ctx.lineTo(p.x + 200, p.y - 90);
+    ctx.moveTo(p.x + 190 * unit, p.y + 100 * unit);
+    ctx.lineTo(p.x + 200 * unit, p.y - 90 * unit);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(p.x + p.w - 160, p.y + 895);
-    ctx.lineTo(p.x + p.w + 90, p.y + 930);
+    ctx.moveTo(p.x + p.w - 160 * unit, p.y + 895 * unit);
+    ctx.lineTo(p.x + p.w + 90 * unit, p.y + 930 * unit);
     ctx.stroke();
     ctx.restore();
   }

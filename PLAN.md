@@ -61,3 +61,18 @@ The user prefers modestly simpler art with more movement, variety and Chinese pr
 4. Add six distinct neighbors and nine optional Chinese activities: ordering, quantities, gifts, listening, open expression and visits. Preserve hints, replay, optional pinyin/meaning, free conversation and absence of grading gates. Save activity progress independently of learning evidence.
 5. Add original local music with a user-gesture start, saved on/off/volume, speech ducking and hidden-page suspension.
 6. Validate meaningful collision/routes, old saves and bounded long-use evidence; exercise all activities, reloads, phone-sized panels, actual audio lifecycle and real local dialogue. Inspect art screenshots, review the final changes and document remaining device/learning gates.
+
+## Denser Suzhou, culture and repeatable practice — version 0.4.0
+
+The user approved a roughly 20% smaller area if it creates more variety, and confirmed pinyin should default off. Preserve the previous release as `v0.3.0` before changing the district.
+
+1. Compact outdoor coordinates uniformly to 3600 × 3000, about 18% smaller. Scale version 0.3 positions once, retain journals/settings/activity progress, and repair positions inside new obstacles. Keep actor sizes and indoor worlds unchanged.
+2. Replace the flat oval lake with one irregular polygon shared by painting and collision. Add soft banks, ripples and lotus details; validate shore corners and every walking destination at normal and low frame rates.
+3. Add distinctly shaped Suzhou landmark interpretations, bamboo/garden areas and six shop/pavilion facades. Trace three shop interiors with safe floors, furniture, doors and exact outdoor return points. Preload room/outdoor assets to avoid popping on saved-scene exits.
+4. Add lightweight wandering animals, visitors, sparrows and falling leaves. Advance ambient time only during active play; pause and reduced motion keep it steady. Animate with small atlases and existing visitor art, and hit-test the visible animals.
+5. Teach language through recipe sequencing, tea-order listening, matching, sentence building and animal directions. Vary replay rounds, persist partial progress, retain optional hints/meaning/pinyin and free expression, and avoid inventing mastery evidence from activity completion.
+6. Add short Mandarin cultural entries for Tiger Hill, classical gardens, Suzhou Museum, Pingjiang lanes and osmanthus sweets. Paraphrase verified primary sources, link them in the game, and identify the map as a condensed interpretation.
+7. Find a recording with explicit game redistribution rights. Bundle “Asia” by FSM Team under CC BY 4.0 with attribution/license, preserve saved music controls and speech ducking, and keep the procedural fallback. Default pinyin off only for new worlds.
+8. Validate old-save migration, all fourteen activities, varied rounds and partial reloads, shop returns, real local dialogue/audio, looping/mute/offline music, actual ambient pixels, reduced motion, lake collision and phone-sized layouts. Inspect screenshots, record measured limits, commit the finished revision and request the integrated-browser preview.
+
+Next interaction candidates: lantern riddles using clues, a silk/embroidery workshop using colors and directions, a market shopping list with budgets, and a photo journal that asks the learner to describe a discovery. These are future content, not implemented features. Check cultural specifics against primary sources before authoring each activity.

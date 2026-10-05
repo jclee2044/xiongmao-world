@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
@@ -9,6 +9,11 @@ const browser = await chromium.launch({
 });
 try {
   const page = await browser.newPage({ serviceWorkers: "block" });
+  let recordingRequests = 0;
+  page.on("request", (request) => {
+    if (request.url().endsWith("/assets/audio/asia-fsm-team.mp3"))
+      recordingRequests++;
+  });
   await page.route("**/music-check", (route) =>
     route.fulfill({
       contentType: "text/html",
@@ -84,11 +89,59 @@ try {
     false,
     "Restoring settings must not create an audio device before a gesture",
   );
+  assert.equal(recordingRequests, 0, "No music fetch before a user gesture");
   await page.getByRole("button", { name: "Start music" }).click();
-  await page.waitForFunction(() => check.music.context?.state === "running");
+  await page.waitForFunction(
+    () =>
+      check.music.context?.state === "running" &&
+      check.music.audio?.currentTime > 0.1,
+  );
   await page.waitForTimeout(650);
   assert.ok(await page.evaluate(() => check.music.master.gain.value > 0.17));
-  assert.ok(await page.evaluate(() => check.music.notes.size > 0));
+  assert.equal(await page.evaluate(() => check.music.trackFailed), undefined);
+  assert.equal(await page.evaluate(() => check.music.notes.size), 0);
+  assert.equal(await page.evaluate(() => check.music.audio.loop), true);
+  assert.equal(await page.evaluate(() => check.music.audio.paused), false);
+  const recording = await page.request.get(
+    "http://127.0.0.1:3210/assets/audio/asia-fsm-team.mp3",
+  );
+  assert.equal(recording.status(), 200);
+  assert.match(recording.headers()["content-type"], /audio\/mpeg/);
+  const recordedSound = await page.evaluate(async () => {
+    const response = await fetch("/assets/audio/asia-fsm-team.mp3");
+    const buffer = await check.music.context.decodeAudioData(
+      await response.arrayBuffer(),
+    );
+    const analyser = check.music.context.createAnalyser();
+    check.music.master.connect(analyser);
+    const samples = new Float32Array(analyser.fftSize);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    analyser.getFloatTimeDomainData(samples);
+    check.music.master.disconnect(analyser);
+    return {
+      duration: buffer.duration,
+      channels: buffer.numberOfChannels,
+      playbackRms: Math.sqrt(
+        samples.reduce((sum, sample) => sum + sample * sample, 0) /
+          samples.length,
+      ),
+    };
+  });
+  assert.ok(recordedSound.duration > 210 && recordedSound.duration < 212);
+  assert.equal(recordedSound.channels, 2);
+  assert.ok(
+    recordedSound.playbackRms > 0.0001,
+    "Real music reaches the gain graph",
+  );
+  assert.ok(
+    (await readFile("public/assets/audio/asia-fsm-team.mp3")).byteLength <
+      8 * 1024 * 1024,
+  );
+  await page.evaluate(() => {
+    check.music.audio.currentTime = check.music.audio.duration - 0.2;
+  });
+  await page.waitForFunction(() => check.music.audio.currentTime < 1);
+  assert.equal(await page.evaluate(() => check.music.audio.paused), false);
 
   // The Web Audio device and HTMLAudioElement are real. This one-second local
   // WAV fixture exercises playback lifecycle without depending on an OS voice.
@@ -162,10 +215,13 @@ try {
   await page.evaluate(() => check.panels.settings());
   await page.getByLabel("Background music").selectOption("off");
   await page.waitForFunction(() => check.music.context.state === "suspended");
+  assert.equal(await page.evaluate(() => check.music.audio.paused), true);
+  assert.equal(await page.evaluate(() => check.music.master.gain.value), 0);
   assert.equal(await page.getByLabel("Music volume").isDisabled(), true);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0);
   await page.getByLabel("Background music").selectOption("on");
   await page.waitForFunction(() => check.music.context.state === "running");
+  await page.waitForFunction(() => !check.music.audio.paused);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0.2);
   await page.getByLabel("Music volume").evaluate((input) => {
     input.value = "0.35";
@@ -182,6 +238,7 @@ try {
   });
   await page.waitForFunction(() => check.music.context.state === "suspended");
   assert.equal(await page.evaluate(() => check.music.notes.size), 0);
+  assert.equal(await page.evaluate(() => check.music.audio.paused), true);
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {
       configurable: true,
@@ -192,10 +249,105 @@ try {
   await page.waitForFunction(() => check.music.context.state === "running");
   await page.evaluate(() => check.music.pause());
   await page.waitForFunction(() => check.music.context.state === "suspended");
+  const pausedAt = await page.evaluate(() => check.music.audio.currentTime);
+  await page.waitForTimeout(150);
+  assert.equal(
+    await page.evaluate(() => check.music.audio.currentTime),
+    pausedAt,
+  );
+  await page.context().setOffline(true);
   await page.evaluate(() => check.music.play());
   await page.waitForFunction(() => check.music.context.state === "running");
+  await page.waitForFunction(
+    (time) => check.music.audio.currentTime > time + 0.05,
+    pausedAt,
+  );
   await page.evaluate(() => check.music.dispose());
   assert.equal(await page.evaluate(() => check.music.context.state), "closed");
+  assert.equal(await page.evaluate(() => check.music.audio.paused), true);
+
+  await page.context().setOffline(false);
+  // Muting while an actual recording request is pending also stops playback
+  // when its data arrives after the mute.
+  const pending = await browser.newPage({ serviceWorkers: "block" });
+  await pending.route("**/music-check", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: '<button id="start">Start music</button>',
+    }),
+  );
+  let releaseRecording, recordingRequested;
+  const heldRecording = new Promise((resolve) => (releaseRecording = resolve)),
+    requestedRecording = new Promise(
+      (resolve) => (recordingRequested = resolve),
+    );
+  const recordingBytes = await readFile(
+    "public/assets/audio/asia-fsm-team.mp3",
+  );
+  await pending.route("**/assets/audio/asia-fsm-team.mp3", async (route) => {
+    recordingRequested();
+    await heldRecording;
+    await route.fulfill({ contentType: "audio/mpeg", body: recordingBytes });
+  });
+  await pending.goto("http://127.0.0.1:3210/music-check");
+  await pending.evaluate(async () => {
+    const { Music } = await import("/game/music.js");
+    window.music = new Music({ music: 0.2 });
+    document.querySelector("#start").onclick = () => music.enable();
+  });
+  await pending.getByRole("button", { name: "Start music" }).click();
+  await requestedRecording;
+  await pending.evaluate(() => music.applySettings({ music: 0 }));
+  await pending.waitForFunction(() => music.context.state === "suspended");
+  releaseRecording();
+  await pending.waitForTimeout(300);
+  assert.equal(await pending.evaluate(() => music.audio.paused), true);
+  assert.equal(await pending.evaluate(() => music.master.gain.value), 0);
+  assert.equal(await pending.evaluate(() => music.notes.size), 0);
+  await pending.evaluate(() => music.dispose());
+  await pending.close();
+
+  // A missing or corrupt bundled recording falls back to the local score,
+  // with the same mute and speech-ducking behavior.
+  const fallback = await browser.newPage({ serviceWorkers: "block" });
+  await fallback.route("**/music-check", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: '<button id="start">Start music</button>',
+    }),
+  );
+  await fallback.route("**/assets/audio/asia-fsm-team.mp3", (route) =>
+    route.fulfill({ status: 404, body: "Missing recording fixture" }),
+  );
+  await fallback.goto("http://127.0.0.1:3210/music-check");
+  await fallback.evaluate(async () => {
+    const { Music } = await import("/game/music.js");
+    window.music = new Music({ music: 0.2 });
+    document.querySelector("#start").onclick = () => music.enable();
+  });
+  await fallback.getByRole("button", { name: "Start music" }).click();
+  await fallback.waitForFunction(
+    () => music.trackFailed && music.notes.size > 0,
+  );
+  await fallback.waitForTimeout(650);
+  assert.ok(await fallback.evaluate(() => music.master.gain.value > 0.17));
+  await fallback.evaluate(() => music.duck(true));
+  await fallback.waitForTimeout(200);
+  assert.ok(await fallback.evaluate(() => music.master.gain.value < 0.04));
+  await fallback.evaluate(() => music.applySettings({ music: 0 }));
+  await fallback.waitForFunction(() => music.context.state === "suspended");
+  assert.equal(await fallback.evaluate(() => music.notes.size), 0);
+  assert.equal(await fallback.evaluate(() => music.master.gain.value), 0);
+  await fallback.context().setOffline(true);
+  await fallback.evaluate(() => {
+    music.duck(false);
+    music.applySettings({ music: 0.2 });
+  });
+  await fallback.waitForFunction(
+    () => music.context.state === "running" && music.notes.size > 0,
+  );
+  await fallback.evaluate(() => music.dispose());
+  await fallback.close();
 
   // Exercise the actual game's save/gesture/load ordering. A saved mute must
   // remain silent while a delayed state response is still in flight.
@@ -208,8 +360,10 @@ try {
     window.AudioContext = function (...args) {
       const graph = new OriginalContext(...args),
         createGain = graph.createGain.bind(graph),
-        createOscillator = graph.createOscillator.bind(graph);
+        createOscillator = graph.createOscillator.bind(graph),
+        createMediaElementSource = graph.createMediaElementSource.bind(graph);
       graph.createdNotes = 0;
+      graph.musicTracks = [];
       graph.createGain = () => {
         const gain = createGain();
         if (!graph.musicMaster) graph.musicMaster = gain;
@@ -218,6 +372,10 @@ try {
       graph.createOscillator = () => {
         graph.createdNotes++;
         return createOscillator();
+      };
+      graph.createMediaElementSource = (audio) => {
+        graph.musicTracks.push(audio);
+        return createMediaElementSource(audio);
       };
       musicGraphs.push(graph);
       return graph;
@@ -237,7 +395,7 @@ try {
     () =>
       musicGraphs[0]?.state === "running" &&
       musicGraphs[0]?.musicMaster.gain.value > 0.1 &&
-      musicGraphs[0]?.createdNotes > 0,
+      musicGraphs[0]?.musicTracks[0]?.currentTime > 0.1,
   );
   await game.getByRole("button", { name: "Settings", exact: true }).click();
   await game.getByLabel("Background music").selectOption("off");
@@ -275,6 +433,7 @@ try {
     gain: musicGraphs[0].musicMaster.gain.value,
     maximumGain: Math.max(...musicGainSamples),
     createdNotes: musicGraphs[0].createdNotes,
+    createdTracks: musicGraphs[0].musicTracks.length,
     state: musicGraphs[0].state,
   }));
   assert.equal(
@@ -291,6 +450,11 @@ try {
     pendingMute.createdNotes,
     0,
     "Muted loading must not schedule music notes",
+  );
+  assert.equal(
+    pendingMute.createdTracks,
+    0,
+    "Muted loading creates no recording",
   );
   assert.equal(pendingMute.state, "suspended");
   releaseState();
@@ -317,7 +481,11 @@ try {
 
   const result = {
     noAudioBeforeGesture: true,
-    localSynthesis: true,
+    licensedLocalRecording: recordedSound,
+    realRecordingPlaybackAndLoop: true,
+    bufferedRecordingResumesOffline: true,
+    pendingRecordingMuteStaysSilent: true,
+    localSynthesisFallbackOffline: true,
     realAudioPlaybackDucking: true,
     stopLateResponseAndErrorRestore: true,
     staleNativeSpeechIgnored: true,
