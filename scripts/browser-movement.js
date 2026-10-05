@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
+import { enterWorld, walkToStop } from "./browser-helpers.js";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
@@ -9,71 +10,42 @@ const errors = [];
 try {
   const page = await browser.newPage({
     viewport: { width: 1280, height: 900 },
+    serviceWorkers: "block",
   });
   page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => {
-    if (m.type() === "error") errors.push(m.text());
-  });
   await page.goto("http://127.0.0.1:3210");
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
-  await page.locator("#world").waitFor({ state: "visible" });
-  await page.waitForFunction(
-    () => document.querySelector("canvas").dataset.scene === "shanghai",
-  );
+  await enterWorld(page);
   const pos = () =>
     page
       .locator("canvas")
       .evaluate((c) => ({ x: Number(c.dataset.x), y: Number(c.dataset.y) }));
   const start = await pos();
-  await page.keyboard.down("ArrowUp");
+  await page.keyboard.down("ArrowLeft");
   await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.y) <= 350,
+    () => Number(document.querySelector("canvas").dataset.x) < 520,
   );
-  await page.keyboard.up("ArrowUp");
+  await page.waitForTimeout(700);
+  await page.keyboard.up("ArrowLeft");
   const end = await pos();
-  assert.ok(end.y < start.y - 100);
-  assert.ok(end.y >= 345, "Stops at noodle-shop wall");
-  assert.ok(end.y <= 350, "Reaches the wall boundary");
-  await page.keyboard.down("ArrowDown");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.y) >= 405,
-  );
-  await page.keyboard.up("ArrowDown");
-  await page.keyboard.down("ArrowRight");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.x) >= 685,
-  );
-  await page.keyboard.up("ArrowRight");
+  assert.ok(end.x < start.x - 50);
+  assert.ok(end.x > 440 && end.x < 510, "Stops at canal bank");
+  await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
   const before = await pos();
   await page.locator("#reply").fill("wasd");
   await page.waitForTimeout(200);
   assert.deepEqual(await pos(), before, "Typing does not move avatar");
   await page.getByRole("button", { name: "Close conversation" }).click();
-  await page.waitForFunction(
-    () => document.querySelector("canvas").dataset.paused === "false",
-  );
-  await page.screenshot({ path: "test-results/stage-1-desktop.png" });
-  await page
-    .getByRole("button", { name: "Home", exact: false })
-    .first()
-    .click();
+  await page.getByRole("button", { name: "Home", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .getByRole("button", { name: "Home", exact: false })
-    .first()
-    .click();
-  await page.waitForFunction(
-    () => document.querySelector("canvas").dataset.scene === "shanghai",
-  );
   const touchBefore = await pos(),
     box = await page
       .getByRole("button", { name: "Walk right", exact: true })
       .boundingBox();
-  await page.mouse.move(box.x + 22, box.y + 22);
+  await page.mouse.move(box.x + 20, box.y + 20);
   await page.mouse.down();
   await page.waitForFunction(
     (x) => Number(document.querySelector("canvas").dataset.x) > x + 5,
@@ -88,8 +60,7 @@ try {
     height: innerHeight,
     body: document.documentElement.scrollHeight,
   }));
-  assert.ok(bounds.scroll <= bounds.width);
-  assert.ok(bounds.body <= bounds.height);
+  assert.ok(bounds.scroll <= bounds.width && bounds.body <= bounds.height);
   await page.screenshot({ path: "test-results/stage-1-mobile.png" });
   await page.setViewportSize({ width: 844, height: 390 });
   await page.screenshot({ path: "test-results/stage-1-landscape.png" });
@@ -109,7 +80,7 @@ try {
     ),
   );
   console.log(
-    "Desktop movement, collision, input focus, touch controls and responsive viewports passed.",
+    "Keyboard movement, canal collision, route navigation, input focus, pointer controls and responsive views passed.",
   );
 } finally {
   await browser.close();

@@ -5,6 +5,8 @@ import { npcs, lexicon, starters } from "./data/content.js";
 import { expose, explicitPreference } from "./data/learner.js";
 import { createPanels } from "./game/panels.js";
 import { registerPwa } from "./game/pwa.js";
+import { prepareArt } from "./game/render.js";
+import { scenes, districtAt } from "./game/world.js";
 const $ = (id) => document.getElementById(id);
 let world,
   currentNpc = null,
@@ -30,8 +32,13 @@ function toast(text) {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 4500);
 }
 function updatePlace() {
-  $("place").textContent = world.scene.title;
-  $("place-cn").textContent = world.scene.chinese;
+  const district = districtAt(world.scene, world.player);
+  $("place").textContent = district
+    ? `Suzhou · ${district.name}`
+    : world.scene.title;
+  $("place-cn").textContent = district
+    ? `苏州 · ${district.zh}`
+    : world.scene.chinese;
 }
 function applySettings() {
   document.documentElement.dataset.textSize =
@@ -56,6 +63,13 @@ const panels = createPanels({
   toast,
   applySettings,
   restoreWorld,
+  getWorld: () => world,
+  navigate: (position) => {
+    $("panel").close();
+    world.pause(false);
+    $("world").focus();
+    if (!world.walkTo(position)) toast("No walkable route to this point.");
+  },
 });
 registerPwa({
   onStatus: toast,
@@ -98,6 +112,7 @@ function startWorld() {
         s.scene = scene;
         s.position = { ...position };
       });
+      updatePlace();
     },
     onInteract: interact,
   });
@@ -116,26 +131,31 @@ function interact(n) {
     if (!persistence.state.found.includes("momo"))
       persistence.change((s) => {
         s.found.push("momo");
-        s.journal.push(
-          "Momo, a quiet little bear, was waiting by the courtyard tree. Panda invited Momo home.",
-        );
+        s.journal.push("Met Momo beside the canal and brought Momo home.");
         s.journal = s.journal.slice(-50);
       });
     openPanel(
-      "A little friend · 桃桃",
-      '<p class="chinese" lang="zh-CN">我们一起回家吧。</p><p>“Let’s go home together.” Momo is a little bear who likes quiet window seats. There’s a cozy place waiting at home.</p><button class="primary" id="bring-home">Take Momo home ↗</button>',
+      "Momo · 桃桃",
+      '<p class="chinese" lang="zh-CN">我们一起回家吧。</p><p>Let’s go home together.</p><button class="primary" id="bring-home">Take Momo home ↗</button>',
     );
     $("bring-home").onclick = () => {
       $("panel").close();
       world.changeScene("home");
       updatePlace();
-      toast("Momo is home. No chores, just company.");
+      toast("Momo is home.");
     };
   } else if (n.type === "friend")
     openPanel(
       "Momo · 桃桃",
-      '<p class="chinese" lang="zh-CN">和你在一起，真好。</p><p>“It’s lovely being with you.” Momo has settled into the window-side sofa. Your courtyard memory is in the journal.</p>',
+      '<p class="chinese" lang="zh-CN">和你在一起，真好。</p><p>It’s good to be with you.</p>',
     );
+  else if (n.type === "inspect") {
+    openPanel(
+      n.name,
+      `<p class="chinese" lang="zh-CN">${n.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${n.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${n.meaning}</p>` : ""}<button id="place-replay">Replay</button>`,
+    );
+    $("place-replay").onclick = () => speech.speak(n.zh);
+  }
 }
 function openConversation(id) {
   requestGeneration++;
@@ -151,7 +171,7 @@ function openConversation(id) {
     last?.reply || {
       ...npcs[id].greeting,
       mode: "authored",
-      notice: "A little hello · reply in your own way.",
+      notice: "",
     },
   );
   $("dialog-status").textContent = last
@@ -196,7 +216,7 @@ function displayReply(reply) {
       ? "Local AI · on your PC"
       : reply.mode === "story"
         ? "Limited story mode"
-        : "Shanghai · make yourself at home";
+        : "Suzhou";
   $("reply-notice").textContent = reply.notice || "";
   updateHelp();
 }
@@ -225,7 +245,7 @@ function updateHelp() {
       ? `You can say… ${starter.example}`
       : helpLevel >= 2
         ? starter.zh
-        : "Take your time. I’m right here.";
+        : "帮助";
   $("panda-explanation").textContent =
     helpLevel >= 2
       ? starter.why
@@ -242,8 +262,16 @@ function updateHelp() {
 }
 $("begin").onclick = async () => {
   $("begin").disabled = true;
-  $("begin").textContent = "Opening your little world…";
+  $("begin").textContent = "Loading…";
   await persistence.load();
+  try {
+    await prepareArt(scenes[persistence.state.scene]);
+  } catch {
+    $("begin").disabled = false;
+    $("begin").textContent = "Retry loading";
+    toast("Artwork could not load. Check the connection and retry.");
+    return;
+  }
   $("welcome").hidden = true;
   $("game").hidden = false;
   startWorld();
@@ -267,6 +295,7 @@ $("home").onclick = () => {
 };
 $("journal").onclick = panels.journal;
 $("settings").onclick = panels.settings;
+$("map").onclick = panels.map;
 for (const button of document.querySelectorAll("[data-close]"))
   button.onclick = () => $(button.dataset.close).close();
 for (const dialog of document.querySelectorAll("dialog"))
@@ -277,7 +306,7 @@ for (const dialog of document.querySelectorAll("dialog"))
       speech.stop();
       currentNpc = null;
       $("panda-help").open = false;
-      $("panda-message").textContent = "Take your time. I’m right here.";
+      $("panda-message").textContent = "帮助";
     }
     if (!$("panel").open && !$("conversation").open) world?.pause(false);
   });

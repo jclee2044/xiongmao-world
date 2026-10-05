@@ -1,5 +1,5 @@
 .env
-data/
+/data/
 node_modules/
 test-results/
 *.log
@@ -7,3 +7,5 @@ test-results/
 tools/downloads/
 tools/ollama/
 tools/speech/
+
+art/source/

@@ -4,10 +4,17 @@ import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { defaultSettings, validatePatch } from "../public/data/settings.js";
 import { newLearner } from "../public/data/learner.js";
-import { scenes, canStand } from "../public/game/world.js";
+import {
+  scenes,
+  canStand,
+  MAP_VERSION,
+  upgradeState,
+} from "../public/game/world.js";
+import { npcs } from "../public/data/content.js";
 const hash = (text) => createHash("sha256").update(text).digest("hex");
 export const newState = () => ({
   schema: 1,
+  mapVersion: MAP_VERSION,
   scene: "shanghai",
   position: { ...scenes.shanghai.spawn },
   found: [],
@@ -50,7 +57,7 @@ export function validateState(s) {
   for (const h of s.history) {
     if (
       !h ||
-      !["mei", "lin"].includes(h.npc) ||
+      !Object.hasOwn(npcs, h.npc) ||
       typeof h.user !== "string" ||
       h.user.length > 500 ||
       !h.reply ||
@@ -92,12 +99,12 @@ export function validateState(s) {
     !s.memories ||
     typeof s.memories !== "object" ||
     Array.isArray(s.memories) ||
-    Object.keys(s.memories).length > 2
+    Object.keys(s.memories).length > Object.keys(npcs).length
   )
     throw new Error("Invalid memories.");
   for (const [npc, items] of Object.entries(s.memories)) {
     if (
-      !["mei", "lin"].includes(npc) ||
+      !Object.hasOwn(npcs, npc) ||
       !Array.isArray(items) ||
       items.length > 8 ||
       items.some((x) => typeof x !== "string" || x.length > 80)
@@ -176,10 +183,13 @@ export class Store {
     const row = this.db
       .prepare("SELECT revision,state FROM learners WHERE id=?")
       .get(id);
-    return { revision: row.revision, state: JSON.parse(row.state) };
+    return {
+      revision: row.revision,
+      state: upgradeState(JSON.parse(row.state)),
+    };
   }
   save(id, revision, state) {
-    const clean = validateState(state);
+    const clean = validateState(upgradeState(state));
     const previous = this.read(id);
     if (previous.revision !== revision) return null;
     if (previous.state.found.some((x) => !clean.found.includes(x)))

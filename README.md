@@ -1,18 +1,20 @@
 # Panda’s Little World
 
-A self-hosted Chinese exploration game: one playable Shanghai courtyard and a cozy home. [PLAN.md](PLAN.md) contains the materials review and step-by-step plan. [PROGRESS.md](PROGRESS.md) separates completed checks from remaining gates.
+A self-hosted Chinese exploration game: a painted Suzhou canal district and a cozy home. Version 0.2.0 expands the district footprint from 1300 × 1000 to 4000 × 3300, about 10.15 times the original area. [PLAN.md](PLAN.md) contains the materials review and step-by-step plan. [PROGRESS.md](PROGRESS.md) separates completed checks from remaining gates.
 
 ## Play on this PC
 
-Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. Walk with WASD/arrows, on-screen direction buttons, or tap/click on clear ground. Tap-to-walk stops at obstacles; it does not calculate a route around buildings. Press E or use the interaction button near a person/object.
+Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. Walk with WASD/arrows, on-screen direction buttons, or tap/click on clear ground. Tap-to-walk routes around buildings and canal edges. Open Map and select a destination to walk there. Press E or use the interaction button near a person/object.
 
 Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Replay/slow replay generates Mandarin on demand. Underlined phrases offer grounded explanations. More help offers a starter, then an optional “You can say…” example. No expected answer is required.
 
-Find Momo southeast of the bookshop and return home. The Home button is always available for a quiet break. Journal retains the discovery and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion and voice volume. Changes can be undone; unsupported development feedback is visibly pending.
+Find Momo near the canal bridge and return home. Meet Mei, Lin and Yun around Canal Lane; explore the eight named neighborhoods and simple Chinese phrase interactions in the outer streets. The Home button is always available for a quiet break. Journal retains the discovery and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion and voice volume. Changes can be undone; unsupported development feedback is visibly pending.
 
 Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
 
-This release uses simple separate Canvas scenery/humans and the supplied stylized Panda. Production watercolor/textile scenery, five cities, microphone transcription, verified automatic ability assessment, music/ambience and a source-editing agent are future work.
+Canal Lane uses a detailed environment plate edited from the supplied reference, with separate painted people and the supplied Panda. Reusable houses, willows and paving extend the district; scenery outside the camera view is skipped. Decorative English remarks have been removed; functional controls and optional translations remain. [art/ASSETS.md](art/ASSETS.md) records saved assets, exact generation prompts and lossless encoding.
+
+The larger footprint is a foundation, with three conversation NPCs and basic outer-street interactions. It is not ten times the authored story content. Five cities, richer routines, full walking animation, microphone transcription, verified automatic ability assessment, music/ambience and a source-editing agent are future work. Existing saves preserve journals, discoveries and preferences; the map migration moves old positions to a safe spawn once.
 
 ## Run, stop and restart
 

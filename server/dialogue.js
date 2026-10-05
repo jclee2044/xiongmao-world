@@ -51,10 +51,10 @@ export function storyReply(npcId, text, state) {
     };
   else if (/在哪|怎么走|方向|where|direction/i.test(text))
     reply = {
-      chinese: "书店在小院的右边。我们一起去看看吧。",
-      pinyin: "Shūdiàn zài xiǎoyuàn de yòubian. Wǒmen yìqǐ qù kànkan ba.",
+      chinese: "书店在北边的书街。你可以打开地图。",
+      pinyin: "Shūdiàn zài běibian de shūjiē. Nǐ kěyǐ dǎkāi dìtú.",
       meaning:
-        "The bookshop is on the right side of the courtyard. Let’s go have a look.",
+        "The bookshop is on Book Street to the north. You can open the map.",
       topic: "travel",
     };
   else if (/再见|拜拜|bye|leave/i.test(text))

@@ -1,5 +1,6 @@
-import { scenes, move, nearest } from "./world.js";
+import { scenes, move, nearest, canStand } from "./world.js";
 import { draw } from "./render.js";
+import { pathTo } from "./pathfinding.js";
 export class World {
   constructor(
     canvas,
@@ -24,8 +25,10 @@ export class World {
     this.paused = true;
     this.scene = scenes.shanghai;
     this.player = { ...this.scene.spawn };
-    this.panda = { x: this.player.x - 45, y: this.player.y + 10 };
+    this.panda = { x: this.player.x + 130, y: this.player.y - 15 };
     this.trail = [];
+    this.route = [];
+    this.facing = 1;
     this.last = 0;
     const editable = () =>
       /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
@@ -74,32 +77,48 @@ export class World {
         c = this.camera;
       const x = (e.clientX - r.left) / c.scale + c.camX - c.ox,
         y = (e.clientY - r.top) / c.scale + c.camY - c.oy;
-      const target = nearest(this.scene, { x, y }, this.getFound());
+      const target =
+        this.scene.interactables.find(
+          (o) =>
+            o.type === "npc" &&
+            x > (o.artX ?? o.x) - 80 &&
+            x < (o.artX ?? o.x) + 80 &&
+            y > (o.artY ?? o.y) - o.artHeight &&
+            y < (o.artY ?? o.y),
+        ) || nearest(this.scene, { x, y }, this.getFound());
       if (
         target &&
         Math.hypot(target.x - this.player.x, target.y - this.player.y) < 100
       )
-        this.interact();
-      else this.destination = { x, y };
+        this.onInteract(target);
+      else this.walkTo(target || { x, y });
     });
     requestAnimationFrame((t) => this.frame(t));
   }
   clear() {
     this.keys.clear();
-    this.destination = null;
+    this.route = [];
+  }
+  walkTo(point) {
+    this.route = pathTo(this.scene, this.player, point);
+    return this.route.length > 0;
   }
   pause(value) {
+    if (value || this.paused !== value) this.clear();
     this.paused = value;
     this.canvas.dataset.paused = String(value);
-    this.clear();
   }
   changeScene(id, position) {
     this.scene = scenes[id] || scenes.shanghai;
     this.player =
-      position && Number.isFinite(position.x) && Number.isFinite(position.y)
+      position && canStand(this.scene, position.x, position.y)
         ? { ...position }
         : { ...this.scene.spawn };
-    this.panda = { x: this.player.x - 38, y: this.player.y + 12 };
+    this.panda = [
+      { x: this.player.x + 130, y: this.player.y - 15 },
+      { x: this.player.x - 100, y: this.player.y + 10 },
+      this.player,
+    ].find((p) => canStand(this.scene, p.x, p.y));
     this.trail = [];
     this.clear();
     this.onMove?.(this.scene.id, this.player);
@@ -121,27 +140,43 @@ export class World {
       let dy =
         Number(this.keys.has("s") || this.keys.has("arrowdown")) -
         Number(this.keys.has("w") || this.keys.has("arrowup"));
-      if (dx || dy) this.destination = null;
-      if (this.destination) {
+      if (dx || dy) this.route = [];
+      while (
+        this.route.length &&
+        Math.hypot(
+          this.route[0].x - this.player.x,
+          this.route[0].y - this.player.y,
+        ) < 4
+      )
+        this.route.shift();
+      if (this.route.length) {
+        const destination = this.route[0];
         const d = Math.hypot(
-          this.destination.x - this.player.x,
-          this.destination.y - this.player.y,
+          destination.x - this.player.x,
+          destination.y - this.player.y,
         );
-        if (d < 8) this.destination = null;
-        else {
-          dx = (this.destination.x - this.player.x) / d;
-          dy = (this.destination.y - this.player.y) / d;
-        }
+        dx = (destination.x - this.player.x) / d;
+        dy = (destination.y - this.player.y) / d;
       }
       const len = Math.hypot(dx, dy),
-        speed = this.getSettings().pace === "slow" ? 115 : 165;
+        speed = this.getSettings().pace === "slow" ? 165 : 230;
       if (len) {
+        if (Math.abs(dx) > 0.1) this.facing = Math.sign(dx);
+        const step = Math.min(
+          speed * dt,
+          this.route.length
+            ? Math.hypot(
+                this.route[0].x - this.player.x,
+                this.route[0].y - this.player.y,
+              )
+            : Infinity,
+        );
         const previous = this.player;
         this.player = move(
           this.scene,
           this.player,
-          (dx / len) * speed * dt,
-          (dy / len) * speed * dt,
+          (dx / len) * step,
+          (dy / len) * step,
         );
         moving =
           Math.hypot(this.player.x - previous.x, this.player.y - previous.y) >
@@ -153,7 +188,7 @@ export class World {
             this.onMove?.(this.scene.id, this.player);
             this.lastMove = t;
           }
-        } else this.destination = null;
+        } else this.route = [];
       }
       // Follow the player's actual traversable route, rather than cutting through buildings.
       while (
@@ -161,7 +196,7 @@ export class World {
         Math.hypot(
           this.player.x - this.trail[0].x,
           this.player.y - this.trail[0].y,
-        ) > 48
+        ) > 125
       ) {
         const target = this.trail[0],
           dist = Math.hypot(target.x - this.panda.x, target.y - this.panda.y),
@@ -189,25 +224,61 @@ export class World {
     this.canvas.dataset.x = this.player.x.toFixed(1);
     this.canvas.dataset.y = this.player.y.toFixed(1);
     this.canvas.dataset.scene = this.scene.id;
-    this.camera = draw(
-      this.ctx,
-      this.canvas,
-      this.scene,
-      this.player,
-      this.panda,
-      {
-        time: t / 1000,
-        moving,
-        pandaMoving:
-          Math.hypot(
-            this.panda.x - previousPanda.x,
-            this.panda.y - previousPanda.y,
-          ) > 0.05,
-        settings: this.getSettings(),
-        found: this.getFound(),
-        near,
-      },
-    );
+    const pandaMoving =
+      Math.hypot(
+        this.panda.x - previousPanda.x,
+        this.panda.y - previousPanda.y,
+      ) > 0.05;
+    const settings = this.getSettings(),
+      found = this.getFound(),
+      paintKey = JSON.stringify([
+        this.scene.id,
+        this.player,
+        this.panda,
+        this.facing,
+        settings,
+        found,
+        near?.id,
+        this.route.at(-1),
+        this.canvas.clientWidth,
+        this.canvas.clientHeight,
+        window.devicePixelRatio,
+      ]);
+    if (
+      moving ||
+      pandaMoving ||
+      this.animatedLastFrame ||
+      paintKey !== this.paintKey ||
+      this.canvas.dataset.artReady !== "true"
+    ) {
+      this.camera = draw(
+        this.ctx,
+        this.canvas,
+        this.scene,
+        this.player,
+        this.panda,
+        {
+          time: t / 1000,
+          moving,
+          facing: this.facing,
+          route: this.route,
+          pandaMoving,
+          settings,
+          found,
+          near,
+        },
+      );
+      this.paintKey = paintKey;
+    }
+    this.animatedLastFrame = moving || pandaMoving;
+    Object.assign(this.canvas.dataset, {
+      camX: String(this.camera.camX),
+      camY: String(this.camera.camY),
+      scale: String(this.camera.scale),
+      ox: String(this.camera.ox),
+      oy: String(this.camera.oy),
+      routeLength: String(this.route.length),
+    });
     requestAnimationFrame((t) => this.frame(t));
   }
 }

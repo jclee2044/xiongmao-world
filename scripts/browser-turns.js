@@ -1,3 +1,4 @@
+import { enterWorld, walkToStop } from "./browser-helpers.js";
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 const browser = await chromium.launch({
@@ -10,18 +11,8 @@ try {
     serviceWorkers: "block",
   });
   await page.goto("http://127.0.0.1:3210");
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
-  await page.locator("#world").waitFor({ state: "visible" });
-  await page.keyboard.down("ArrowUp");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.y) < 440,
-  );
-  await page.keyboard.up("ArrowUp");
-  await page.keyboard.down("ArrowRight");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.x) > 680,
-  );
-  await page.keyboard.up("ArrowRight");
+  await enterWorld(page);
+  await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
   let calls = 0;
   let release;

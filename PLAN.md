@@ -32,6 +32,18 @@ All five images were inspected. The original toy has an egg-shaped cream body, b
 
 First delivery is a playable locally hosted vertical slice with explicit limited-mode labeling if AI is absent. Tests can validate the implementation but cannot validate Mandarin quality, learner experience, real phone audio/microphone, installation or networking. Keep those items visible in PROGRESS.md. No public exposure, router edits, system-wide packages, cloud hosting, or autonomous source activation as routine implementation shortcuts.
 
+## Reference art and larger district follow-up
+
+The user requested a first-version checkpoint, removal of decorative English remarks, reference-quality art and a district about ten times larger. The recommended approach keeps rich canal/shop/bridge landmarks and uses simpler reusable scenery between destinations. Reducing tiny details lowers asset creation, revision and matching work; map dimensions alone do not create worthwhile exploration content.
+
+1. Preserve the first version as `v0.1.0`, then work on a separate revision.
+2. Remove decorative English commentary while retaining functional controls and optional Chinese translations.
+3. Edit the supplied third reference into an environment plate with no baked-in people or UI. Create separate painted actors, home and reusable scenery in the same style. Save generation prompts and selected assets.
+4. Expand the single district to 4000 × 3300, roughly 10.15 times its former bounding area. Keep the saved scene identifier; migrate only old map positions while preserving progress.
+5. Define geometry independently of artwork, add safe route navigation and map destinations, and reuse/cull scenery instead of allocating a single giant background.
+6. Verify every destination's route, save migration, keyboard/touch-sized controls, dialogue/audio, pinyin, offline caching and delayed replies. Inspect screenshots at desktop and phone sizes.
+7. Review art and layout with the user before filling the outer streets with more NPC routines, stories and discoveries. Real-device performance and the external hosting gates remain separate.
+
 ## Primary documentation checked (2026-10-05)
 
 - https://nodejs.org/api/sqlite.html — built-in persistence API.

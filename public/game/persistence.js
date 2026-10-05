@@ -1,10 +1,12 @@
 import { defaultSettings } from "../data/settings.js";
 import { newLearner } from "../data/learner.js";
+import { scenes, MAP_VERSION, upgradeState } from "./world.js";
 const cacheKey = "panda-world-v1";
 export const initialState = () => ({
   schema: 1,
+  mapVersion: MAP_VERSION,
   scene: "shanghai",
-  position: { x: 620, y: 600 },
+  position: { ...scenes.shanghai.spawn },
   found: [],
   settings: { ...defaultSettings },
   settingsHistory: [],
@@ -65,7 +67,7 @@ export class Persistence {
       cached = JSON.parse(localStorage.getItem(cacheKey));
     } catch {}
     if (cached?.state?.schema === 1) {
-      this.state = cached.state;
+      this.state = upgradeState(cached.state);
       this.revision = cached.revision;
       this.identity = cached.identity;
       this.generation = cached.dirty ? 1 : 0;
@@ -87,7 +89,7 @@ export class Persistence {
           this.onConflict(remote);
         }
       } else {
-        this.state = remote.state;
+        this.state = upgradeState(remote.state);
         this.revision = remote.revision;
         this.identity = remote.identity;
         this.onStatus("Saved on this PC");
@@ -146,7 +148,7 @@ export class Persistence {
   async choose(source) {
     const remote = await api("/api/state");
     if (source === "server") {
-      this.state = remote.state;
+      this.state = upgradeState(remote.state);
       this.revision = remote.revision;
       this.identity = remote.identity;
       this.generation = 0;

@@ -1,3 +1,4 @@
+import { enterWorld, walkToStop } from "./browser-helpers.js";
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
@@ -15,35 +16,22 @@ try {
     page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("http://127.0.0.1:3210");
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
-  await page.locator("#world").waitFor({ state: "visible" });
-  async function walkTo(key, axis, target, direction) {
-    await page.keyboard.down(key);
-    try {
-      await page.waitForFunction(
-        ({ axis, target, direction }) =>
-          direction * Number(document.querySelector("canvas").dataset[axis]) >=
-          direction * target,
-        { axis, target, direction },
-        { timeout: 15000 },
-      );
-    } finally {
-      await page.keyboard.up(key);
-    }
-  }
-  await walkTo("ArrowUp", "y", 440, -1);
-  await walkTo("ArrowRight", "x", 680, 1);
+  await enterWorld(page);
+  await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
   await page.getByRole("button", { name: "More help", exact: true }).click();
   await page.getByRole("button", { name: "More help", exact: true }).click();
   await page.getByRole("button", { name: "More help", exact: true }).click();
   assert.match(await page.locator("#help-inline").textContent(), /You can say/);
   await page.locator("#reply").fill("我喜欢吃面，但是我不太能吃辣。");
-  const replyPromise = page.waitForResponse((r) =>
-    r.url().endsWith("/api/dialogue"),
+  const replyPromise = page.waitForResponse(
+    (r) => r.url().endsWith("/api/dialogue"),
+    { timeout: 70000 },
   );
+  const replyStarted = Date.now();
   await page.getByRole("button", { name: "Send" }).click();
   const response = await replyPromise;
+  results.replyMs = Date.now() - replyStarted;
   results.reply = await response.json();
   await page.waitForFunction(() => !document.getElementById("send").disabled);
   assert.equal(response.status(), 200);
@@ -91,11 +79,8 @@ try {
     () => document.querySelector("canvas").dataset.paused === "false",
   );
   await page.locator("#world").focus();
-  await walkTo("ArrowDown", "y", 800, 1);
-  await walkTo("ArrowRight", "x", 985, 1);
-  await page
-    .getByRole("button", { name: "A small, quiet friend", exact: true })
-    .click();
+  await walkToStop(page, "momo");
+  await page.locator("#interact").click();
   await page.getByRole("button", { name: "Take Momo home" }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",

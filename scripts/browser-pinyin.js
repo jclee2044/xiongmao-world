@@ -1,3 +1,4 @@
+import { enterWorld, walkToStop } from "./browser-helpers.js";
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
@@ -13,13 +14,7 @@ try {
     serviceWorkers: "block",
   });
   page.on("pageerror", (e) => errors.push(e.message));
-  const enter = async () => {
-    await page.getByRole("button", { name: "Wander with Panda" }).click();
-    await page.locator("canvas").waitFor({ state: "visible" });
-    await page.waitForFunction(
-      () => document.querySelector("canvas").dataset.scene === "shanghai",
-    );
-  };
+  const enter = () => enterWorld(page);
   const saved = async () =>
     page.waitForFunction(
       () =>
@@ -39,16 +34,7 @@ try {
   };
   await page.goto("http://127.0.0.1:3210");
   await enter();
-  await page.keyboard.down("ArrowUp");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.y) <= 440,
-  );
-  await page.keyboard.up("ArrowUp");
-  await page.keyboard.down("ArrowRight");
-  await page.waitForFunction(
-    () => Number(document.querySelector("canvas").dataset.x) >= 685,
-  );
-  await page.keyboard.up("ArrowRight");
+  await walkToStop(page, "mei");
   await page.getByRole("button", { name: /Say hello to Mei/ }).click();
   await shown(true);
   await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();

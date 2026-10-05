@@ -15,34 +15,27 @@
   </head>
   <body>
     <main class="welcome" id="welcome">
-      <span class="eyebrow">A LITTLE CHINESE, A LITTLE EVERY DAY</span>
       <img
         class="welcome-panda"
         src="/assets/panda.png"
         alt="Panda, your round cream-and-black plush companion"
       />
       <h1>Panda’s Little World</h1>
-      <p lang="zh-CN">慢慢来，我们一起走。</p>
-      <p>Take your time. We’ll wander together.</p>
       <button class="primary" id="begin">
         Wander with Panda <span aria-hidden="true">↗</span>
       </button>
-      <p class="muted">No hurry. No right path. Just a little curiosity.</p>
     </main>
     <main class="game" id="game" hidden>
       <header class="topbar">
         <div class="place">
-          <span class="eyebrow" id="place-cn" lang="zh-CN">上海 · 小院</span>
-          <h1 id="place">Shanghai · A little courtyard</h1>
+          <span class="eyebrow" id="place-cn" lang="zh-CN">苏州 · 河巷</span>
+          <h1 id="place">Suzhou · Canal Lane</h1>
         </div>
         <nav aria-label="Your world">
           <button id="update" hidden aria-label="Apply update">Update</button
-          ><button
-            id="home"
-            aria-label="Home"
-            title="Return to your little home"
-          >
+          ><button id="home" aria-label="Home" title="Home">
             ⌂ <span>Home</span></button
+          ><button id="map" aria-label="Map">⌖ <span>Map</span></button
           ><button id="journal" aria-label="Journal">
             ▤ <span>Journal</span></button
           ><button id="settings" aria-label="Settings">
@@ -57,13 +50,12 @@
           aria-label="Explore the courtyard with WASD or arrow keys. Press E near a person or object. Touch controls are below."
         ></canvas>
         <div class="scene-note">
-          <span class="dot"></span
-          ><span id="mode">A little world, just for you</span>
+          <span class="dot"></span><span id="mode">Suzhou</span>
         </div>
         <aside class="panda-bubble">
           <img src="/assets/panda.png" alt="" />
           <div>
-            <span id="panda-message">Take your time.<br />I’m right here.</span>
+            <span id="panda-message">帮助</span>
             <details id="panda-help">
               <summary aria-label="Expand Panda’s help">▾</summary>
               <p id="panda-explanation">
@@ -85,7 +77,7 @@
         </div>
         <div class="control-note">
           WASD / arrows · tap to walk<br /><span id="save-status"
-            >Welcome to your little world</span
+            >Loading save…</span
           >
         </div>
         <button class="primary" id="interact" disabled>

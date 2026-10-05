@@ -16,7 +16,25 @@ export function createPanels({
   toast,
   applySettings,
   restoreWorld,
+  getWorld,
+  navigate,
 }) {
+  function map() {
+    const world = getWorld(),
+      scene = world.scene;
+    const stops = scene.interactables.filter(
+      (o) =>
+        !(o.id === "momo" && persistence.state.found.includes("momo")) &&
+        !(o.id === "momo-home" && !persistence.state.found.includes("momo")),
+    );
+    openPanel(
+      "Map",
+      `<svg class="district-map" viewBox="0 0 ${scene.width} ${scene.height}" role="img" aria-label="District map and your current position"><rect width="100%" height="100%" fill="#eee1c4"/>${(scene.districts || []).map((d) => `<rect x="${d.x + 8}" y="${d.y + 8}" width="${d.w - 16}" height="${d.h - 16}" rx="70" fill="#ded2b3"/><text x="${d.x + d.w / 2}" y="${d.y + d.h / 2}" text-anchor="middle" fill="#64543b" font-size="110">${d.zh}</text>`).join("")}${scene.landmark ? `<image href="/assets/world/canal-lane.webp" x="${scene.landmark.x}" y="${scene.landmark.y}" width="${scene.landmark.w}" height="${scene.landmark.h}"/>` : ""}<circle cx="${world.player.x}" cy="${world.player.y}" r="70" fill="#986748" stroke="#fff8eb" stroke-width="24"/></svg><p>Choose a place to walk there.</p><div class="map-stops">${stops.map((o) => `<button data-map-stop="${o.id}">${escape(o.name)}</button>`).join("")}</div>`,
+    );
+    for (const button of document.querySelectorAll("[data-map-stop]"))
+      button.onclick = () =>
+        navigate(stops.find((o) => o.id === button.dataset.mapStop));
+  }
   function refreshHistory() {
     if ($("settings-history"))
       $("settings-history").innerHTML =
@@ -61,7 +79,7 @@ export function createPanels({
       .join("");
     openPanel(
       "A page for today",
-      `<div class="panel-section"><h3>Little memories</h3>${s.journal.length ? "<ul>" + s.journal.map((x) => `<li>${escape(x)}</li>`).join("") + "</ul>" : "<p>Your first page is waiting. Try saying hello to Mei, then wander toward the tree beyond the bookshop.</p>"}${memories ? `<ul>${memories}</ul>` : ""}</div><div class="panel-section"><h3>Carry a little Chinese with you</h3><p lang="zh-CN">你今天忙吗？ · 我们一起喝茶吧。</p><p>Ask someone how their day is going, or invite them for tea.</p><p>Panda remembers where you meet familiar words. These visits are practice, not a score. Choose the Chinese challenge in Settings; help requests never count against you.</p></div><div class="panel-section"><h3>Your progress</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry sync</button><button id="export-save">Download this device’s save</button></div>${persistence.conflict ? '<p class="notice">Another device or session has newer progress. Your local copy is preserved. Choose explicitly; keeping this device also preserves discoveries from the server.</p><div class="small-actions"><button id="use-server">Use server progress</button><button id="use-local">Keep this device’s progress</button></div>' : ""}</div><div class="panel-section"><h3>Connect another device</h3><p>Open the same private HTTPS game URL on your phone. Pairing shares this world and its journal. Codes last five minutes and work once.</p><button id="pair-code">Create pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from your other device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Pair</button></div></div>`,
+      `<div class="panel-section"><h3>Memories</h3>${s.journal.length ? "<ul>" + s.journal.map((x) => `<li>${escape(x)}</li>`).join("") + "</ul>" : "<p>No memories yet. Meet Mei and explore the canal lane.</p>"}${memories ? `<ul>${memories}</ul>` : ""}</div><div class="panel-section"><h3>Chinese phrases</h3><p lang="zh-CN">你今天忙吗？ · 我们一起喝茶吧。</p><p>Ask someone how their day is going, or invite them for tea.</p><p>Panda remembers where you meet familiar words. These visits are practice, not a score. Choose the Chinese challenge in Settings; help requests never count against you.</p></div><div class="panel-section"><h3>Your progress</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry sync</button><button id="export-save">Download this device’s save</button></div>${persistence.conflict ? '<p class="notice">Another device or session has newer progress. Your local copy is preserved. Choose explicitly; keeping this device also preserves discoveries from the server.</p><div class="small-actions"><button id="use-server">Use server progress</button><button id="use-local">Keep this device’s progress</button></div>' : ""}</div><div class="panel-section"><h3>Connect another device</h3><p>Open the same private HTTPS game URL on your phone. Pairing shares this world and its journal. Codes last five minutes and work once.</p><button id="pair-code">Create pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from your other device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Pair</button></div></div>`,
     );
     $("retry-save").onclick = () => persistence.flush();
     $("export-save").onclick = () => {
@@ -121,7 +139,7 @@ export function createPanels({
     const select = (key, label, values) =>
       `<label>${label}<select data-setting="${key}">${values.map(([v, name]) => `<option value="${v}" ${String(s[key]) === String(v) ? "selected" : ""}>${name}</option>`).join("")}</select></label>`;
     openPanel(
-      "Make yourself at home",
+      "Settings",
       `<div class="settings-grid">${select("outfit", "Outfit", [
         ["#b4a6c3", "Lavender"],
         ["#899b7c", "Sage"],
@@ -223,5 +241,5 @@ export function createPanels({
       toast("Restored the previous settings.");
     };
   }
-  return { journal, settings, setSettings: applyPatch };
+  return { journal, settings, map, setSettings: applyPatch };
 }
