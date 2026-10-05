@@ -42,14 +42,20 @@ export function createApp({
         `panda_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000${req.headers["x-forwarded-proto"] === "https" || (process.env.APP_ORIGIN?.startsWith("https:") && req.headers.host === new URL(process.env.APP_ORIGIN).host) ? "; Secure" : ""}`,
       );
     try {
-      const port = server.address()?.port;
-      const origins = new Set([
-        `http://127.0.0.1:${port}`,
-        `http://localhost:${port}`,
-        ...(process.env.APP_ORIGIN ? [process.env.APP_ORIGIN] : []),
-      ]);
-      if (![...origins].some((o) => new URL(o).host === req.headers.host))
+      // Local preview proxies can forward their own ephemeral port in Host.
+      const host = req.headers.host || "";
+      const loopback =
+        /^(localhost|127\.0\.0\.1|\[::1\])(?::([0-9]{1,5}))?$/i.exec(host);
+      const localHost =
+        !!loopback && (!loopback[2] || Number(loopback[2]) <= 65535);
+      const configuredOrigin = process.env.APP_ORIGIN
+        ? new URL(process.env.APP_ORIGIN)
+        : null;
+      if (!localHost && host !== configuredOrigin?.host)
         return json(403, { error: "Unrecognized host." });
+      const ownOrigin = localHost
+        ? new URL(`http://${host}`).origin
+        : configuredOrigin.origin;
       const pathname = decodeURIComponent(
         new URL(req.url, "http://local").pathname,
       );
@@ -78,7 +84,7 @@ export function createApp({
           return json(401, { error: "Open your world to start a session." });
         if (req.method !== "POST")
           return json(405, { error: "Method not supported." });
-        if (!origins.has(req.headers.origin))
+        if (req.headers.origin !== ownOrigin)
           return json(403, { error: "Use the game on its own origin." });
         if (!req.headers["content-type"]?.startsWith("application/json"))
           return json(415, { error: "JSON required." });

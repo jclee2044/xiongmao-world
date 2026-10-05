@@ -80,6 +80,6 @@ node scripts/browser-turns.js
 npm run format
 ```
 
-Behavior tests cover collision, geometry, revisions, pairing, evidence rules, allowlisted settings, provider failure/malformed output and waiting PWA updates. Browser checks use isolated installed Chromium, not a real phone. Pinyin checks cover immediate visibility, reload persistence, phrase help, agreement with Settings and undo. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
+Behavior tests cover collision, geometry, revisions, pairing, evidence rules, allowlisted settings, provider failure/malformed output waiting PWA updates and forwarded localhost preview hosts. Browser checks use isolated installed Chromium, not a real phone. A localhost forwarding-proxy check verifies preview loading, session creation and saved settings across reload. Pinyin checks cover immediate visibility, reload persistence, phrase help, agreement with Settings and undo. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
 
 Qwen3 4B returned relevant food/hobby/homework replies in **7.1–13.9 seconds**. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin, but eSpeak’s basic robotic voice needs learner feedback. No prerecorded dialogue or remote inference API is used.
