@@ -1,6 +1,20 @@
 // Short paraphrases checked against primary sources on 2026-10-05.
 // This district is a condensed illustrated interpretation, not a street map.
 export const culture = {
+  "lantern-festival": {
+    title: "元宵灯谜 · Lantern Festival riddles",
+    zh: "元宵节，人们可以赏花灯、猜灯谜。苏州也有这样的节日活动。这里的小谜语是为中文练习编写的。",
+    pinyin: "Yuánxiāo Jié, rénmen kěyǐ shǎng huādēng, cāi dēngmí. Sūzhōu yě yǒu zhèyàng de jiérì huódòng. Zhèlǐ de xiǎo míyǔ shì wèi Zhōngwén liànxí biānxiě de.",
+    meaning: "At the Lantern Festival, people can admire lanterns and guess riddles. Suzhou holds these celebrations too. The little riddles here were written for Chinese practice.",
+    source: "https://www.suzhou.gov.cn/2025ndzt/xwbd/202502/0ba3f9fe64c644208f1688a196388e02.shtml",
+  },
+  "suzhou-embroidery": {
+    title: "苏绣 · Suzhou embroidery",
+    zh: "苏绣是苏州的传统手工艺。艺人用彩色丝线绣出图案。这里的配色小游戏练习颜色和方位，不教真正的苏绣针法。",
+    pinyin: "Sūxiù shì Sūzhōu de chuántǒng shǒugōngyì. Yìrén yòng cǎisè sīxiàn xiù chū tú'àn. Zhèlǐ de pèisè xiǎo yóuxì liànxí yánsè hé fāngwèi, bù jiāo zhēnzhèng de Sūxiù zhēnfǎ.",
+    meaning: "Suzhou embroidery is a traditional local craft. Artisans stitch designs with colored silk thread. This color game practices colors and positions; it does not teach real Suzhou embroidery stitches.",
+    source: "https://english.suzhou.gov.cn/szsenglish/News/202510/c12f98a0f7d1481aba7d1e46757368bc.shtml",
+  },
   "tiger-hill": {
     title: "虎丘塔 · Tiger Hill Pagoda",
     zh: "虎丘塔也叫云岩寺塔。它有七层，塔身有一点倾斜。我们站在塔下看看吧。",

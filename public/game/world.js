@@ -43,7 +43,7 @@ const bridge = [
 const houses = [
   [470, 810, 580, "小家"],
   [3550, 2785, 400, "客栈"],
-  [2040, 2780, 640, "布店"],
+  [2040, 2780, 640, "刺绣坊"],
 ].map(([x, y, w, label]) => ({
   type: "house",
   x,
@@ -377,6 +377,13 @@ const newNeighbors = [
   approachX: x,
   approachY: y + 45,
 }));
+const lanternRack = {
+  type: "festival-lanterns",
+  x: 2800,
+  y: 2915,
+  w: 330,
+  h: 210,
+};
 function buildingFootprint(o, depth = 0.25) {
   return {
     x: o.x - o.w * 0.34,
@@ -404,8 +411,12 @@ export const scenes = {
       ...nature,
       ...trees,
       ...smallScenery,
+      lanternRack,
     ],
     solids: [
+      // The festival rack sits beside the lane; its posts do not block the road.
+      { x: lanternRack.x - 153, y: lanternRack.y - 10, w: 12, h: 20 },
+      { x: lanternRack.x + 141, y: lanternRack.y - 10, w: 12, h: 20 },
       ...houses.map((o) => ({
         x: o.x - o.w * 0.37,
         y: o.y - o.h * 0.31,
@@ -567,13 +578,30 @@ export const scenes = {
       },
       {
         id: "fabric",
-        type: "inspect",
-        name: "Cloth shop · 布店",
+        type: "practice",
+        activity: "silk-workshop",
+        name: "Silk workshop · 刺绣坊",
         x: 2040,
         y: 2855,
         zh: "我喜欢这个颜色。",
         pinyin: "Wǒ xǐhuan zhège yánsè.",
         meaning: "I like this color.",
+      },
+      {
+        id: "lanterns",
+        type: "practice",
+        activity: "lantern-riddles",
+        name: "Lantern riddles · 猜灯谜",
+        x: 2800,
+        y: 3000,
+      },
+      {
+        id: "market-budget",
+        type: "practice",
+        activity: "market-budget",
+        name: "Market shopping · 集市买东西",
+        x: 1460,
+        y: 1875,
       },
       {
         id: "inn",

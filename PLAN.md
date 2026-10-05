@@ -75,4 +75,13 @@ The user approved a roughly 20% smaller area if it creates more variety, and con
 7. Find a recording with explicit game redistribution rights. Bundle “Asia” by FSM Team under CC BY 4.0 with attribution/license, preserve saved music controls and speech ducking, and keep the procedural fallback. Default pinyin off only for new worlds.
 8. Validate old-save migration, all fourteen activities, varied rounds and partial reloads, shop returns, real local dialogue/audio, looping/mute/offline music, actual ambient pixels, reduced motion, lake collision and phone-sized layouts. Inspect screenshots, record measured limits, commit the finished revision and request the integrated-browser preview.
 
-Next interaction candidates: lantern riddles using clues, a silk/embroidery workshop using colors and directions, a market shopping list with budgets, and a photo journal that asks the learner to describe a discovery. These are future content, not implemented features. Check cultural specifics against primary sources before authoring each activity.
+The lantern, silk-color and budget-shopping candidates are implemented in version 0.5.0 below. A photo journal that asks the learner to describe a discovery remains a future candidate. Check cultural specifics against primary sources before authoring further content.
+
+## Cultural mini-games — version 0.5.0
+
+1. Preserve the fourteen existing activity IDs. Add a small content module for three games and bounded validation for partial riddle steps, cloth colors and shopping quantities. Keep rounds and progress separate from learner ability evidence.
+2. Check primary Suzhou sources for Lantern Festival riddles and local embroidery. Write short original cultural notes and beginner riddles; label the cloth as simplified language practice and prices as fictional practice prices.
+3. Add native HTML/SVG/CSS interactions: three lantern answers, a 3 × 3 cloth with labeled threads/positions and undo/eraser, and a shopping receipt with integer yuan totals/change. Reuse replay, hints, optional pinyin/meaning and free-conversation follow-up.
+4. Put the activities at a lantern rack, the existing cloth shop and the market. Trace the rack posts beside the road, preserve existing map coordinates and validate all approach routes/collisions.
+5. Check both new and existing games in isolated Chromium. Exercise wrong attempts, two varied rounds per game, real server partial saves/reloads, keyboard/touch-sized play, per-square Mandarin requests, cultural links and unchanged learner evidence. Verify actual computed colors under the unchanged content-security policy.
+6. Cache the new content module for offline exploration, verify reconnect/pairing/conflict behavior, inspect screenshots, document limits, commit and open the finished preview.

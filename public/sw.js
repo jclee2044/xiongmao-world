@@ -1,4 +1,4 @@
-const CACHE = "panda-shell-0.4.0-2";
+const CACHE = "panda-shell-0.5.0-1";
 const SHELL = [
   "/",
   "/index.html",
@@ -22,6 +22,7 @@ const SHELL = [
   "/game/practice.js",
   "/game/life.js",
   "/data/culture.js",
+  "/data/cultural-activities.js",
   "/data/interiors.js",
   "/assets/world/storefronts.webp",
   "/assets/world/landmarks.webp",

@@ -1,3 +1,6 @@
+import { culturalActivities } from "./cultural-activities.js";
+export { correctRiddle, finishedPattern, marketTotal, marketResult } from "./cultural-activities.js";
+
 const line = (zh, pinyin, meaning) => ({ zh, pinyin, meaning });
 
 export const activities = [
@@ -118,12 +121,13 @@ export const activities = [
       { prompt: line("用这些词问：请问，书店在哪儿？", "Yòng zhèxiē cí wèn: qǐngwèn, shūdiàn zài nǎr?", "Use the tiles to ask: Excuse me, where is the bookshop?"), pieces: [line("请问", "qǐngwèn", "excuse me"), line("书店", "shūdiàn", "bookshop"), line("在哪儿", "zài nǎr", "where is") ] },
     ],
   },
+  ...culturalActivities,
 ];
 export const activityById = Object.fromEntries(activities.map((a) => [a.id, a]));
 export const newPractice = () => ({ completed: [], active: null, rounds: {} });
 export function activityRound(id, round = 0) {
+  if (!Object.hasOwn(activityById, id)) throw new Error("Unknown practice.");
   const activity = activityById[id];
-  if (!activity) throw new Error("Unknown practice.");
   return { ...activity, ...(activity.variants?.[round % activity.variants.length] || {}) };
 }
 export function pieceOrder(length, round = 0) {
@@ -140,16 +144,19 @@ export function validatePractice(value) {
   const rounds = value.rounds ?? {};
   if (!rounds || typeof rounds !== "object" || Array.isArray(rounds) || Object.keys(rounds).length > activities.length || Object.entries(rounds).some(([id, count]) => !Object.hasOwn(activityById, id) || !Number.isSafeInteger(count) || count < 0 || count > 1000000)) throw new Error("Invalid practice rounds.");
   const active = value.active;
-  if (active !== null && (!active || typeof active !== "object" || Array.isArray(active) || Object.keys(active).some((key) => !["id", "step", "round", "tiles", "matches", "order"].includes(key)) || !Object.hasOwn(activityById, active.id) || !Number.isSafeInteger(active.step) || active.step < 0 || !Number.isSafeInteger(active.round ?? 0) || (active.round ?? 0) < 0 || (active.round ?? 0) > 1000000)) throw new Error("Invalid active practice.");
+  if (active !== null && (!active || typeof active !== "object" || Array.isArray(active) || Object.keys(active).some((key) => !["id", "step", "round", "tiles", "matches", "order", "stitches"].includes(key)) || !Object.hasOwn(activityById, active.id) || !Number.isSafeInteger(active.step) || active.step < 0 || !Number.isSafeInteger(active.round ?? 0) || (active.round ?? 0) < 0 || (active.round ?? 0) > 1000000)) throw new Error("Invalid active practice.");
   if (active) {
     const a = activityRound(active.id, active.round ?? 0);
     if (active.step >= (a.steps?.length || 1)) throw new Error("Invalid active practice step.");
     for (const [key, length] of [["tiles", a.pieces?.length], ["matches", a.pairs?.length]]) {
       if (active[key] !== undefined && (!length || !Array.isArray(active[key]) || active[key].length > length || new Set(active[key]).size !== active[key].length || active[key].some((n) => !Number.isSafeInteger(n) || n < 0 || n >= length))) throw new Error("Invalid practice cards.");
     }
-    if (active.order !== undefined && (a.type !== "order" || !Array.isArray(active.order) || active.order.length !== a.items.length || active.order.some((n) => !Number.isSafeInteger(n) || n < 0 || n > 5))) throw new Error("Invalid practice order.");
+    if (active.order !== undefined && (!["order", "market"].includes(a.type) || !Array.isArray(active.order) || active.order.length !== a.items.length || active.order.some((n) => !Number.isSafeInteger(n) || n < 0 || n > 5))) throw new Error("Invalid practice order.");
+    if (active.stitches !== undefined && (a.type !== "weaving" || !Array.isArray(active.stitches) || active.stitches.length !== 9 || active.stitches.some((n) => !Number.isSafeInteger(n) || n < -1 || n >= a.palette.length))) throw new Error("Invalid practice stitches.");
   }
-  return { completed: [...value.completed], active: active ? { ...active, round: active.round ?? 0 } : null, rounds: { ...rounds } };
+  const cleanActive = active ? { ...active, round: active.round ?? 0 } : null;
+  if (cleanActive) for (const key of ["tiles", "matches", "order", "stitches"]) if (cleanActive[key]) cleanActive[key] = [...cleanActive[key]];
+  return { completed: [...value.completed], active: cleanActive, rounds: { ...rounds } };
 }
 export function beginPractice(practice, id) {
   const clean = validatePractice(practice);

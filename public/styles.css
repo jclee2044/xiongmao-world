@@ -686,6 +686,251 @@ input[type="range"] {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+.practice-picture-icon {
+  font-size: 2rem;
+}
+[data-thread-color="0"] {
+  --thread-color: #d9839b;
+}
+[data-thread-color="1"] {
+  --thread-color: #619477;
+}
+[data-thread-color="2"] {
+  --thread-color: #699aae;
+}
+[data-thread-color="3"] {
+  --thread-color: #e4be64;
+}
+.riddle-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.riddle-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 8px;
+  min-width: 0;
+  background: linear-gradient(#fff9ec, #f8ead2);
+}
+.riddle-card small,
+.thread-palette small,
+.market-name small {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.riddle-lantern {
+  display: block;
+  width: 58px;
+  height: 73px;
+  color: #9c604a;
+}
+.silk-instructions ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 20px;
+  padding-left: 23px;
+}
+.silk-instructions button {
+  width: 100%;
+  padding: 9px 7px;
+  text-align: left;
+  font-size: 14px;
+}
+.silk-instructions small {
+  display: block;
+  margin: 3px 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.thread-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+.thread-palette button {
+  flex: 1 1 78px;
+  padding: 9px;
+  min-width: 0;
+}
+.thread-palette button[aria-pressed="true"] {
+  outline: 3px solid #597763;
+  outline-offset: 2px;
+  background: #f5f1de;
+}
+.thread-swatch {
+  display: block;
+  margin: 2px auto 8px;
+  width: 32px;
+  height: 24px;
+  border-radius: 9px;
+  background: repeating-linear-gradient(
+    -15deg,
+    var(--thread-color),
+    var(--thread-color) 3px,
+    #fff5 4px,
+    var(--thread-color) 5px
+  );
+  border: 1px solid #66574155;
+}
+.silk-hoop {
+  width: min(100%, 350px);
+  margin: 18px auto;
+  padding: 18px;
+  border: 10px solid #c39c72;
+  border-radius: 40px;
+  box-shadow:
+    inset 0 0 0 2px #96744f,
+    0 3px 10px #68513218;
+  background: #f7eedc;
+}
+.silk-cloth {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+.silk-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 92px;
+  padding: 5px 2px;
+  border: 1px dashed #bca98c;
+  border-radius: 9px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff6e8,
+    #fff6e8 3px,
+    #f4e6d1 4px
+  );
+}
+.silk-flower {
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px;
+}
+.stitched .silk-flower {
+  background:
+    linear-gradient(
+      45deg,
+      transparent 44%,
+      var(--thread-color) 44% 56%,
+      transparent 56%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 44%,
+      var(--thread-color) 44% 56%,
+      transparent 56%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 44%,
+      var(--thread-color) 44% 56%,
+      transparent 56%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 44%,
+      var(--thread-color) 44% 56%,
+      transparent 56%
+    );
+  border-radius: 50%;
+}
+.silk-position,
+.silk-color {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.silk-color {
+  color: #715e48;
+}
+.silk-position-meaning {
+  display: block;
+  font-size: 10px;
+  line-height: 1.3;
+  margin: 2px 0;
+  overflow-wrap: anywhere;
+}
+.silk-cell[data-current-cell="true"] {
+  border: 2px solid #597763;
+}
+.market-budget,
+.market-receipt {
+  padding: 13px 16px;
+  border: 1px solid #d8c8a7;
+  border-radius: 12px;
+  background: #f7eedc;
+}
+.market-goods {
+  display: grid;
+  gap: 8px;
+  margin: 15px 0;
+}
+.market-item {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 68px;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e2d5bd;
+  border-radius: 12px;
+  background: #fff9ee;
+}
+.market-icon {
+  font-size: 28px;
+}
+.market-item select {
+  width: 100%;
+}
+.market-price {
+  margin-top: 7px;
+  color: #715e48;
+}
+.market-receipt {
+  margin: 15px 0;
+  border-style: dashed;
+}
+.market-receipt p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 5px 0;
+}
+@media (max-width: 430px) {
+  .riddle-cards {
+    gap: 6px;
+  }
+  .riddle-card {
+    padding: 10px 5px;
+  }
+  .silk-instructions ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .silk-hoop {
+    padding: 12px;
+    border-width: 7px;
+  }
+  .silk-cell {
+    min-height: 80px;
+  }
+  .market-item {
+    grid-template-columns: 30px minmax(0, 1fr) 60px;
+    gap: 7px;
+    padding: 9px;
+  }
+}
 @media (max-width: 650px) {
   .game {
     padding: 0;

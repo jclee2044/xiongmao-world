@@ -68,6 +68,71 @@ function shadow(ctx, x, y, w) {
   ctx.ellipse(x, y, w, w * 0.25, 0, 0, Math.PI * 2);
   ctx.fill();
 }
+function festivalLanterns(ctx, rack, time, motion) {
+  ctx.save();
+  ctx.translate(rack.x, rack.y);
+  const unit = rack.w / 330;
+  ctx.scale(unit, unit);
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#795138";
+  ctx.lineWidth = 11;
+  ctx.beginPath();
+  ctx.moveTo(-147, 0);
+  ctx.lineTo(-147, -196);
+  ctx.lineTo(147, -196);
+  ctx.lineTo(147, 0);
+  ctx.stroke();
+  ctx.strokeStyle = "#c69e69";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  for (let i = 0; i < 3; i++) {
+    ctx.save();
+    ctx.translate((i - 1) * 87, -192);
+    ctx.rotate(motion ? Math.sin(time * 0.8 + i) * 0.035 : 0);
+    ctx.strokeStyle = "#7d5738";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 24);
+    ctx.stroke();
+    const glow = ctx.createRadialGradient(-7, 58, 3, 0, 67, 55);
+    glow.addColorStop(0, "#ffda8b");
+    glow.addColorStop(0.6, "#e99563");
+    glow.addColorStop(1, "#be6749");
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.ellipse(0, 66, 32, 44, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#f2c58b99";
+    ctx.lineWidth = 1.2;
+    for (const width of [12, 23]) {
+      ctx.beginPath();
+      ctx.ellipse(0, 66, width, 42, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#795138";
+    ctx.fillRect(-12, 21, 24, 5);
+    ctx.fillRect(-12, 107, 24, 5);
+    ctx.strokeStyle = "#be6749";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 112);
+    ctx.lineTo(0, 137);
+    ctx.stroke();
+    ctx.fillStyle = "#623d2a";
+    ctx.font = '23px "Noto Serif CJK SC",serif';
+    ctx.textAlign = "center";
+    ctx.fillText(["一", "二", "三"][i], 0, 73);
+    ctx.restore();
+  }
+  ctx.fillStyle = "#fff0cf";
+  ctx.fillRect(-58, -28, 116, 29);
+  ctx.fillStyle = "#624833";
+  ctx.textAlign = "center";
+  ctx.font = '19px "Noto Serif CJK SC",serif';
+  ctx.fillText("猜灯谜", 0, -7);
+  ctx.restore();
+}
 function sprite(
   ctx,
   name,
@@ -242,6 +307,8 @@ export function draw(
         ctx.fillStyle = "#453420";
         ctx.fillText(o.label, o.x - 5, o.y - o.h * 0.27);
       }
+    } else if (o.type === "festival-lanterns") {
+      festivalLanterns(ctx, o, time, settings.motion !== false);
     } else if (["storefront", "landmark", "nature"].includes(o.type)) {
       const group = o.type === "storefront" ? "storefronts" : "landmarks";
       const key = o.storefront || o.landmark || o.nature,

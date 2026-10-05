@@ -12,6 +12,7 @@ import {
 import { pathTo } from "../public/game/pathfinding.js";
 import { Store, newState } from "../server/store.js";
 import { interiors } from "../public/data/interiors.js";
+import { activityById } from "../public/data/activities.js";
 test("collision cannot tunnel through a building and allows sliding along walls", () => {
   const scene = {
     width: 1300,
@@ -50,6 +51,27 @@ test("discovery removes the outside stuffy and enables it at home", () => {
   assert.equal(nearest(scenes.shanghai, momo, false).id, "momo");
   assert.equal(nearest(scenes.shanghai, momo, true), undefined);
   assert.equal(nearest(scenes.home, home, true).id, "momo-home");
+});
+test("cultural activity stations have clear approaches and festival posts stay beside the lane", () => {
+  const scene = scenes.shanghai;
+  for (const id of ["fabric", "lanterns", "market-budget"]) {
+    const station = scene.interactables.find((o) => o.id === id);
+    assert.equal(station.type, "practice");
+    assert.ok(
+      activityById[station.activity],
+      "Station starts a registered activity",
+    );
+    const approach = interactionPoint(station);
+    assert.ok(canStand(scene, approach.x, approach.y));
+    assert.equal(nearest(scene, approach).id, id);
+  }
+  const rack = scene.scenery.find((o) => o.type === "festival-lanterns");
+  assert.equal(canStand(scene, rack.x - 147 * 0.9, rack.y), false);
+  assert.equal(canStand(scene, rack.x + 147 * 0.9, rack.y), false);
+  assert.ok(
+    canStand(scene, rack.x, 2975 * 0.9),
+    "The lane stays open beneath the rack",
+  );
 });
 test("compact district keeps its destinations connected while reducing the expanded map by about twenty percent", () => {
   const scene = scenes.shanghai;

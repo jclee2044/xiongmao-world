@@ -5,20 +5,25 @@ import {
   activityRound,
   pieceOrder,
   orderedPieces,
+  correctRiddle,
+  finishedPattern,
+  marketTotal,
+  marketResult,
   newPractice,
   validatePractice,
   beginPractice,
   completePractice,
   visitPractice,
 } from "../public/data/activities.js";
+import { culture } from "../public/data/culture.js";
 import { npcs } from "../public/data/content.js";
 import { newState, Store, validateState } from "../server/store.js";
 import { reply, ollamaReply } from "../server/dialogue.js";
 import { Persistence } from "../public/game/persistence.js";
 
 test("Chinese errands have distinct places, meaningful clues, and replayable responses", () => {
-  assert.equal(activities.length, 14);
-  assert.equal(new Set(activities.map((a) => a.id)).size, 14);
+  assert.equal(activities.length, 17);
+  assert.equal(new Set(activities.map((a) => a.id)).size, 17);
   assert.deepEqual(
     new Set(activities.map((a) => a.type)),
     new Set([
@@ -31,6 +36,9 @@ test("Chinese errands have distinct places, meaningful clues, and replayable res
       "order",
       "matching",
       "tiles",
+      "riddle",
+      "weaving",
+      "market",
     ]),
   );
   for (const a of activities) {
@@ -50,7 +58,7 @@ test("Chinese errands have distinct places, meaningful clues, and replayable res
     }
     if (a.options) assert.ok(a.options[a.answer]);
     for (const step of a.steps || [])
-      assert.ok(Object.hasOwn(npcs, step.target));
+      if (a.type === "visit") assert.ok(Object.hasOwn(npcs, step.target));
   }
 });
 
@@ -228,6 +236,9 @@ test("mini-game rounds vary their material and layouts, and do not advance on re
     "book-memory",
     "lake-animals",
     "shop-sentences",
+    "lantern-riddles",
+    "silk-workshop",
+    "market-budget",
   ]) {
     const first = activityRound(id, 0),
       next = activityRound(id, 1);
@@ -292,4 +303,175 @@ test("partial mini-game cards and orders survive a save, with bounded validation
   } finally {
     store.close();
   }
+});
+
+test("culture games preserve all earlier activities and teach distinct replayable material", () => {
+  assert.deepEqual(
+    activities.slice(0, 14).map((a) => a.id),
+    [
+      "mei-order",
+      "qiao-tea",
+      "wei-basket",
+      "lan-gift",
+      "bo-books",
+      "lin-plans",
+      "an-listen",
+      "hao-letter",
+      "yun-find",
+      "bakery-recipe",
+      "tea-listen-order",
+      "book-memory",
+      "lake-animals",
+      "shop-sentences",
+    ],
+  );
+  for (const id of ["lantern-riddles", "silk-workshop", "market-budget"]) {
+    const activity = activityRound(id, 0);
+    assert.notDeepEqual(activity, activityRound(id, 1));
+    const fact = culture[activity.culture];
+    assert.match(fact.zh, /\p{Script=Han}/u);
+    assert.ok(fact.pinyin && fact.meaning);
+    assert.match(
+      fact.source,
+      /^https:\/\/(www\.|english\.|jyj\.)suzhou\.gov\.cn\//,
+    );
+    for (const variant of activity.variants) {
+      for (const text of [
+        variant.prompt,
+        variant.patternName,
+        ...(variant.instructions || []).map((i) => i.clue),
+        ...(variant.steps || []).flatMap((s) => [s.clue, s.hint, ...s.options]),
+      ].filter(Boolean)) {
+        assert.match(text.zh, /\p{Script=Han}/u);
+        assert.ok(text.pinyin && text.meaning);
+      }
+    }
+  }
+  assert.match(
+    culture["lantern-festival"].meaning,
+    /written for Chinese practice/,
+  );
+  assert.match(culture["suzhou-embroidery"].meaning, /does not teach real/);
+});
+
+test("riddle answers, color placements and market quantity budgets accept the requested task only", () => {
+  for (let round = 0; round < 2; round++) {
+    const riddle = activityRound("lantern-riddles", round);
+    riddle.steps.forEach((step, index) => {
+      assert.equal(correctRiddle(riddle, index, step.answer), true);
+      assert.equal(
+        correctRiddle(riddle, index, (step.answer + 1) % step.options.length),
+        false,
+      );
+      assert.equal(correctRiddle(riddle, index, String(step.answer)), false);
+    });
+    assert.equal(correctRiddle(riddle, riddle.steps.length, 0), false);
+    assert.equal(correctRiddle(riddle, -1, 0), false);
+    const cloth = activityRound("silk-workshop", round),
+      stitches = Array(9).fill(-1);
+    cloth.instructions.forEach(({ cell, color }) => {
+      stitches[cell] = color;
+    });
+    assert.equal(finishedPattern(cloth, stitches), true);
+    assert.equal(finishedPattern(cloth, stitches.slice(1)), false);
+    stitches[0] = -1;
+    assert.equal(finishedPattern(cloth, stitches), false);
+    stitches[0] = (cloth.instructions[0].color + 1) % cloth.palette.length;
+    assert.equal(finishedPattern(cloth, stitches), false);
+  }
+  for (let round = 0; round < 3; round++) {
+    const market = activityRound("market-budget", round),
+      result = marketResult(market, market.quantities);
+    assert.equal(result.complete, true);
+    assert.equal(result.total + result.remaining, market.budget);
+    assert.equal(marketResult(market, [0, 0, 0]).complete, false);
+    assert.equal(marketResult(market, [5, 5, 5]).withinBudget, false);
+    assert.equal(marketResult(market, [5, 5, 5]).remaining < 0, true);
+    for (const bad of [
+      [1, 0],
+      [1, -1, 0],
+      [1, 1.1, 0],
+      [1, 6, 0],
+      ["1", 1, 0],
+      null,
+    ]) {
+      assert.equal(marketTotal(market, bad), null);
+      assert.equal(marketResult(market, bad).complete, false);
+    }
+  }
+});
+
+test("culture-game partial saves survive reload and keep earlier evidence and preferences", () => {
+  const store = new Store(":memory:");
+  try {
+    const learner = store.create(),
+      initial = store.read(learner.id);
+    initial.state.settings.pinyin = true;
+    initial.state.found = ["momo"];
+    initial.state.practice = completePractice(
+      beginPractice(initial.state.practice, "book-memory"),
+      "book-memory",
+    );
+    const evidence = structuredClone(initial.state.learner);
+    let revision = initial.revision;
+    for (const [id, fields] of [
+      ["lantern-riddles", { step: 1 }],
+      ["silk-workshop", { stitches: [2, 0, -1, -1, -1, -1, -1, -1, -1] }],
+      ["market-budget", { order: [1, 1, 0] }],
+    ]) {
+      const state =
+        revision === 0 ? initial.state : store.read(learner.id).state;
+      state.practice = beginPractice(state.practice, id);
+      Object.assign(state.practice.active, fields);
+      revision = store.save(learner.id, revision, state).revision;
+      const saved = store.read(learner.id).state;
+      assert.deepEqual(saved.practice.active, {
+        id,
+        step: 0,
+        round: 0,
+        ...fields,
+      });
+      assert.deepEqual(saved.practice.completed, ["book-memory"]);
+      assert.equal(saved.practice.rounds["book-memory"], 1);
+      assert.deepEqual(saved.learner, evidence);
+      assert.deepEqual(saved.found, ["momo"]);
+      assert.equal(saved.settings.pinyin, true);
+    }
+    const partial = store.read(learner.id).state.practice,
+      completed = completePractice(partial, "market-budget");
+    assert.equal(completed.rounds["market-budget"], 1);
+    assert.equal(
+      completePractice(completed, "market-budget").rounds["market-budget"],
+      1,
+    );
+    assert.deepEqual(completed.completed, ["book-memory", "market-budget"]);
+  } finally {
+    store.close();
+  }
+});
+
+test("new partial progress refuses unknown, cross-game, out-of-range and future fields", () => {
+  for (const active of [
+    { id: "lantern-riddles", step: 3 },
+    { id: "lantern-riddles", step: 0, stitches: Array(9).fill(-1) },
+    { id: "silk-workshop", step: 1 },
+    { id: "silk-workshop", step: 0, stitches: Array(8).fill(-1) },
+    { id: "silk-workshop", step: 0, stitches: [-2, ...Array(8).fill(-1)] },
+    { id: "silk-workshop", step: 0, stitches: [4, ...Array(8).fill(-1)] },
+    { id: "silk-workshop", step: 0, stitches: [0.1, ...Array(8).fill(-1)] },
+    { id: "market-budget", step: 0, order: [1, 2] },
+    { id: "market-budget", step: 0, order: [1, 6, 0] },
+    { id: "market-budget", step: 0, order: [1, 2, 0], bonus: 100 },
+    { id: "mei-order", step: 0, order: [1, 2, 0] },
+  ])
+    assert.throws(() => validatePractice({ completed: [], active }));
+  assert.throws(() => activityRound("constructor"));
+  const original = {
+    completed: ["mei-order"],
+    active: { id: "silk-workshop", step: 0, stitches: Array(9).fill(-1) },
+  };
+  const snapshot = structuredClone(original),
+    clean = validatePractice(original);
+  clean.active.stitches[0] = 2;
+  assert.deepEqual(original, snapshot);
 });

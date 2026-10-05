@@ -40,17 +40,21 @@ try {
   );
   const cache = await page.evaluate(async () => ({
     keys: await caches.keys(),
-    requests: (await (await caches.open("panda-shell-0.4.0-2")).keys()).map(
+    requests: (await (await caches.open("panda-shell-0.5.0-1")).keys()).map(
       (x) => new URL(x.url).pathname,
     ),
   }));
   assert.ok(cache.requests.includes("/assets/panda.png"));
+  assert.ok(cache.requests.includes("/data/cultural-activities.js"));
   assert.ok(!cache.requests.some((x) => x.startsWith("/api")));
   results.cache = cache;
   await context.setOffline(true);
   await page.reload();
   await page.getByRole("button", { name: "Wander with Panda" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
+  await page.locator("#practice").click();
+  assert.equal(await page.locator("[data-activity]").count(), 17);
+  await page.getByRole("button", { name: "Close panel" }).click();
   await page.getByRole("button", { name: "Home", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
