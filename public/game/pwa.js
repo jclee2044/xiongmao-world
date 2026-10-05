@@ -15,11 +15,12 @@ export async function registerPwa({ onUpdate, onStatus }) {
         );
     };
     announce();
-    registration.addEventListener("updatefound", () =>
-      registration.installing?.addEventListener("statechange", () => {
-        if (registration.installing?.state === "installed") announce();
-      }),
-    );
+    registration.addEventListener("updatefound", () => {
+      const worker = registration.installing;
+      worker?.addEventListener("statechange", () => {
+        if (worker.state === "installed") announce();
+      });
+    });
     let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (wasControlled && !reloading) {

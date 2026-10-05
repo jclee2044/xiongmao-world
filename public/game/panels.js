@@ -223,5 +223,5 @@ export function createPanels({
       toast("Restored the previous settings.");
     };
   }
-  return { journal, settings };
+  return { journal, settings, setSettings: applyPatch };
 }

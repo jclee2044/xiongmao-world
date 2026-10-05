@@ -10,6 +10,8 @@ Meet Mei at the noodle shop. Type a short Chinese or English reply, ask question
 
 Find Momo southeast of the bookshop and return home. The Home button is always available for a quiet break. Journal retains the discovery and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion and voice volume. Changes can be undone; unsupported development feedback is visibly pending.
 
+Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
+
 This release uses simple separate Canvas scenery/humans and the supplied stylized Panda. Production watercolor/textile scenery, five cities, microphone transcription, verified automatic ability assessment, music/ambience and a source-editing agent are future work.
 
 ## Run, stop and restart
@@ -56,13 +58,13 @@ A consistent live SQLite backup goes under `data/backups/`; this was actually te
 
 For machine backup, preserve the whole project including ignored `data/`, `.env`, and `tools/`, plus Ollama’s normal `~/.ollama/` identity. Git excludes saves, models, config, downloaded runtimes and test output. Source alone does not include downloaded Ollama/eSpeak binaries or model weights.
 
-## Phone/PWA — HTTPS approval pending
+## Phone/PWA — Tailscale activation pending
 
-Prepared origin: **https://omarchy.tail18f12c.ts.net**. The PC is already connected to Tailscale, but **the HTTPS route is not enabled**. Automatic approval review rejected persistent Serve because the permitted tailnet audience/access expansion was not explicitly authorized. Localhost works. No alternate LAN/public route was enabled.
+Prepared origin: **https://omarchy.tail18f12c.ts.net**. The user explicitly approved persistent private HTTPS for the existing Tailscale network. The retry was accepted, but Tailscale reports that Serve is disabled for this network and requires its account activation page. **The HTTPS route is not yet enabled or verified.** Localhost works.
 
-The proposed route uses Tailscale Serve for devices permitted by existing tailnet policy. Those devices can open the game and create a world; accessing an existing world requires its session or pairing code. It does not use public Funnel hosting. Explicit audience approval is needed before activation.
+The approved route uses Tailscale Serve for devices permitted by existing tailnet policy. Those devices can open the game and create a world; accessing an existing world requires its session or pairing code. It does not use public Funnel hosting. After enabling Serve in the Tailscale account, run `tailscale serve --bg --https=443 http://127.0.0.1:3210` and verify `tailscale serve status`.
 
-After approval/activation: use the same HTTPS URL on PC and phone, with the phone connected to the same Tailscale network. Create a Journal pairing code on the device whose progress you want and enter it on the other. Install using the browser menu on Android/desktop or Safari Share → Add to Home Screen on iPhone. These actual-device steps are unverified.
+After activation: use the same HTTPS URL on PC and phone, with the phone connected to the same Tailscale network. Create a Journal pairing code on the device whose progress you want and enter it on the other. Install using the browser menu on Android/desktop or Safari Share → Add to Home Screen on iPhone. These actual-device steps are unverified.
 
 The offline cache contains the exploration shell/assets, never API identities, saves, dialogue responses or audio. Offline exploration/settings use the last device copy. Server AI, speech, pairing and sync need connectivity. Updates wait for the Update button and require synced progress. Bump the cache version in `public/sw.js` for new releases, keeping old/new caches separate until activation.
 
@@ -78,6 +80,6 @@ node scripts/browser-turns.js
 npm run format
 ```
 
-Behavior tests cover collision, geometry, revisions, pairing, evidence rules, allowlisted settings, and provider failure/malformed output. Browser checks use isolated installed Chromium, not a real phone. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
+Behavior tests cover collision, geometry, revisions, pairing, evidence rules, allowlisted settings, provider failure/malformed output and waiting PWA updates. Browser checks use isolated installed Chromium, not a real phone. Pinyin checks cover immediate visibility, reload persistence, phrase help, agreement with Settings and undo. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
 
 Qwen3 4B returned relevant food/hobby/homework replies in **7.1–13.9 seconds**. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin, but eSpeak’s basic robotic voice needs learner feedback. No prerecorded dialogue or remote inference API is used.

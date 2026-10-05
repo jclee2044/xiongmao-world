@@ -1,4 +1,4 @@
-const CACHE = "panda-shell-0.1.0-2";
+const CACHE = "panda-shell-0.1.0-3";
 const SHELL = [
   "/",
   "/index.html",

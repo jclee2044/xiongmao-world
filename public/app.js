@@ -185,6 +185,10 @@ function displayReply(reply) {
   }
   $("npc-pinyin").textContent = reply.pinyin;
   $("npc-pinyin").hidden = !settings.pinyin;
+  $("toggle-pinyin").textContent = settings.pinyin
+    ? "Hide pinyin"
+    : "Show pinyin";
+  $("toggle-pinyin").setAttribute("aria-pressed", String(settings.pinyin));
   $("npc-meaning").textContent = reply.meaning;
   $("npc-meaning").hidden = !settings.translation;
   $("mode").textContent =
@@ -205,12 +209,14 @@ function explain(word) {
       true,
     );
   });
-  $("panda-message").textContent = `${word.zh} · ${word.pinyin}`;
+  const pronunciation = persistence.state.settings.pinyin ? word.pinyin : "";
+  $("panda-message").textContent = pronunciation
+    ? `${word.zh} · ${pronunciation}`
+    : word.zh;
   $("panda-explanation").textContent =
     `${word.meaning}. ${word.why} Example: ${word.example}`;
   $("panda-help").open = true;
-  $("dialog-status").textContent =
-    `${word.zh} (${word.pinyin}): ${word.meaning}. ${word.why}`;
+  $("dialog-status").textContent = `${word.zh}: ${word.meaning}. ${word.why}`;
 }
 function updateHelp() {
   const starter = starters[currentReply?.topic || "greeting"];
@@ -278,6 +284,10 @@ for (const dialog of document.querySelectorAll("dialog"))
 $("replay").onclick = () => speech.speak(currentReply.chinese);
 $("slow-replay").onclick = () => speech.speak(currentReply.chinese, true);
 $("stop-speech").onclick = () => speech.stop();
+$("toggle-pinyin").onclick = () => {
+  const pinyin = !persistence.state.settings.pinyin;
+  panels.setSettings({ pinyin }, `Pinyin: ${pinyin ? "shown" : "hidden"}`);
+};
 $("more-help").onclick = () => {
   helpLevel = Math.min(3, helpLevel + 1);
   updateHelp();
