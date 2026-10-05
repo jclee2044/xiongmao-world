@@ -9,9 +9,19 @@ try {
   await page.goto("http://127.0.0.1:3210");
   const metadata = await page.evaluate(async () => {
     const output = {};
-    for (const name of ["player-atlas", "mei", "lin", "yun", "momo"]) {
+    const files = [
+      "player-atlas",
+      "mei",
+      "lin",
+      "yun",
+      "momo",
+      "neighbors",
+      "player-walk",
+      "props",
+    ];
+    for (const name of files) {
       const img = new Image();
-      img.src = `/assets/characters/${name}.webp`;
+      img.src = `/assets/${name === "props" ? "world" : "characters"}/${name}.webp`;
       await img.decode();
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -25,14 +35,15 @@ try {
           x1 = left,
           y1 = top;
         for (let y = top; y < bottom; y++)
-          for (let x = left; x < right; x++) {
+          for (let x = left; x < right; x++)
             if (pixels[(y * img.width + x) * 4 + 3] > 24) {
               x0 = Math.min(x0, x);
               y0 = Math.min(y0, y);
               x1 = Math.max(x1, x);
               y1 = Math.max(y1, y);
             }
-          }
+        if (x0 >= x1 || y0 >= y1)
+          throw new Error(`Empty sprite cell: ${name} ${left},${top}`);
         return {
           x: Math.max(left, x0 - 2),
           y: Math.max(top, y0 - 2),
@@ -40,6 +51,17 @@ try {
           h: Math.min(bottom, y1 + 3) - Math.max(top, y0 - 2),
         };
       };
+      const grid = (cols, rows) =>
+        Array.from({ length: rows }, (_, row) =>
+          Array.from({ length: cols }, (_, col) =>
+            bounds(
+              Math.floor((img.width * col) / cols),
+              Math.floor((img.height * row) / rows),
+              Math.floor((img.width * (col + 1)) / cols),
+              Math.floor((img.height * (row + 1)) / rows),
+            ),
+          ),
+        );
       if (name === "player-atlas") {
         const rows = [];
         let start = null;
@@ -55,12 +77,26 @@ try {
           }
         }
         if (rows.length !== 4)
-          throw new Error(`Expected four atlas rows; found ${rows.length}`);
+          throw new Error(`Expected 4 appearance rows: ${rows.length}`);
         output.player = rows.map(([top, bottom]) => [
           bounds(0, top, Math.floor(img.width / 2), bottom),
           bounds(Math.floor(img.width / 2), top, img.width, bottom),
         ]);
-      } else output[name] = bounds(0, 0, img.width, img.height);
+      } else if (name === "player-walk") output.walk = grid(3, 8);
+      else if (name === "neighbors")
+        output.neighbors = Object.fromEntries(
+          ["qiao", "bo", "lan", "wei", "an", "hao"].map((id, i) => [
+            id,
+            grid(3, 2).flat()[i],
+          ]),
+        );
+      else if (name === "props")
+        output.props = Object.fromEntries(
+          ["market", "bench", "planter", "sign", "well", "tea-table"].map(
+            (id, i) => [id, grid(3, 2).flat()[i]],
+          ),
+        );
+      else output[name] = bounds(0, 0, img.width, img.height);
     }
     return output;
   });

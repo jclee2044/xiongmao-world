@@ -1,9 +1,11 @@
 import { World } from "./game/engine.js";
 import { Persistence, api } from "./game/persistence.js";
 import { Speech } from "./game/speech.js";
+import { Music } from "./game/music.js";
 import { npcs, lexicon, starters } from "./data/content.js";
 import { expose, explicitPreference } from "./data/learner.js";
 import { createPanels } from "./game/panels.js";
+import { createPractice } from "./game/practice.js";
 import { registerPwa } from "./game/pwa.js";
 import { prepareArt } from "./game/render.js";
 import { scenes, districtAt } from "./game/world.js";
@@ -21,9 +23,16 @@ const persistence = new Persistence(
       "Another device has newer progress. Choose which to keep in Journal.",
     ),
 );
+// Unlock audio in the first gesture, but wait for saved preferences before sound.
+const music = new Music({ ...persistence.state.settings, music: 0 });
 const speech = new Speech(
-  (text) => ($("dialog-status").textContent = text),
+  (text) => {
+    $("dialog-status").textContent = text;
+    if ($("practice-audio-status"))
+      $("practice-audio-status").textContent = text;
+  },
   () => persistence.state.settings,
+  (active) => music.duck(active),
 );
 function toast(text) {
   $("toast").textContent = text;
@@ -41,9 +50,11 @@ function updatePlace() {
     : world.scene.chinese;
 }
 function applySettings() {
+  music.applySettings(persistence.state.settings);
   document.documentElement.dataset.textSize =
     persistence.state.settings.textSize;
   if (currentReply) displayReply(currentReply);
+  practice.refresh();
 }
 function restoreWorld() {
   world.changeScene(persistence.state.scene, persistence.state.position);
@@ -71,6 +82,42 @@ const panels = createPanels({
     if (!world.walkTo(position)) toast("No walkable route to this point.");
   },
 });
+const practice = createPractice({
+  persistence,
+  openPanel,
+  speech,
+  openMap: panels.map,
+  openConversation,
+  onChange: () => updatePracticeStatus(),
+});
+function updatePracticeStatus() {
+  const status = practice.status();
+  if ($("practice-active"))
+    $("practice-active").textContent = status ? `进行中：${status}` : "";
+}
+const practiceButton = document.createElement("button");
+practiceButton.id = "practice";
+practiceButton.textContent = "练习中文";
+practiceButton.setAttribute("aria-label", "Chinese errands");
+practiceButton.onclick = () => {
+  $("conversation").close();
+  practice.catalog();
+};
+$("panda-help").parentElement.append(practiceButton);
+const practiceStatus = document.createElement("p");
+practiceStatus.id = "practice-active";
+practiceStatus.lang = "zh-CN";
+practiceStatus.setAttribute("role", "status");
+$("panda-help").append(practiceStatus);
+const neighborPractice = document.createElement("button");
+neighborPractice.id = "neighbor-practice";
+neighborPractice.textContent = "中文小任务";
+neighborPractice.onclick = () => {
+  const id = currentNpc;
+  $("conversation").close();
+  practice.openForNpc(id);
+};
+$("speech-controls").append(neighborPractice);
 registerPwa({
   onStatus: toast,
   onUpdate: (activate) => {
@@ -119,8 +166,10 @@ function startWorld() {
   world.changeScene(state.scene, state.position);
   updatePlace();
   applySettings();
+  updatePracticeStatus();
 }
 function interact(n) {
+  if (practice.visit(n.id)) return;
   if (n.type === "door") {
     speech.stop();
     world.changeScene(n.target);
@@ -155,6 +204,21 @@ function interact(n) {
       `<p class="chinese" lang="zh-CN">${n.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${n.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${n.meaning}</p>` : ""}<button id="place-replay">Replay</button>`,
     );
     $("place-replay").onclick = () => speech.speak(n.zh);
+    const hosts = {
+      tea: "qiao",
+      books: "bo",
+      flowers: "lan",
+      market: "wei",
+      garden: "an",
+      fabric: "an",
+      inn: "hao",
+    };
+    if (hosts[n.id]) {
+      const button = document.createElement("button");
+      button.textContent = "中文小任务";
+      button.onclick = () => practice.openForNpc(hosts[n.id]);
+      $("panel-content").append(button);
+    }
   }
 }
 function openConversation(id) {
@@ -165,6 +229,9 @@ function openConversation(id) {
   helpLevel = persistence.state.settings.help === "more" ? 1 : 0;
   $("npc-name").textContent = npcs[id].name;
   $("reply").value = "";
+  $("last-user").textContent = "";
+  $("reply").placeholder =
+    npcs[id].starter?.example || starters[npcs[id].topic].example;
   $("send").disabled = false;
   const last = persistence.state.history.filter((h) => h.npc === id).at(-1);
   displayReply(
@@ -239,7 +306,10 @@ function explain(word) {
   $("dialog-status").textContent = `${word.zh}: ${word.meaning}. ${word.why}`;
 }
 function updateHelp() {
-  const starter = starters[currentReply?.topic || "greeting"];
+  const starter =
+    (currentReply?.topic === npcs[currentNpc]?.topic &&
+      npcs[currentNpc]?.starter) ||
+    starters[currentReply?.topic || "greeting"];
   $("panda-message").textContent =
     helpLevel >= 3
       ? `You can say… ${starter.example}`
@@ -261,9 +331,11 @@ function updateHelp() {
   if (helpLevel >= 2) $("panda-help").open = true;
 }
 $("begin").onclick = async () => {
+  music.enable().catch(() => {});
   $("begin").disabled = true;
   $("begin").textContent = "Loading…";
   await persistence.load();
+  applySettings();
   try {
     await prepareArt(scenes[persistence.state.scene]);
   } catch {
@@ -300,7 +372,8 @@ for (const button of document.querySelectorAll("[data-close]"))
   button.onclick = () => $(button.dataset.close).close();
 for (const dialog of document.querySelectorAll("dialog"))
   dialog.addEventListener("close", () => {
-    if (dialog.id === "conversation") {
+    if (dialog.id === "panel" && !dialog.open) speech.stop();
+    if (dialog.id === "conversation" && !dialog.open) {
       requestGeneration++;
       controller?.abort();
       speech.stop();

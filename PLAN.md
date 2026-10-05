@@ -50,3 +50,14 @@ The user requested a first-version checkpoint, removal of decorative English rem
 - https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/getVoices — enumerate device voices; language selection alone is insufficient.
 - https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable — manifest and secure-context requirements.
 - https://docs.ollama.com/api/chat — server-side local-model adapter.
+
+## Scene continuity, life and practice follow-up
+
+The user prefers modestly simpler art with more movement, variety and Chinese practice. Preserve the large single district and existing saves while improving the actual exploration loop.
+
+1. Trace furniture and walking boundaries independently of the painting; add neighbor body colliders, safe approach points and recovery for saved positions inside new obstacles. Validate every destination at normal and low frame rates.
+2. Narrow paved connections and add gardens, a pond, courtyards and reusable activity props. Feather the reference plate into matching path aprons, keep camera motion continuous and soften actual home transitions.
+3. Normalize human heights, shrink Panda, increase walking speed and add three simple poses for each existing appearance. Respect reduced motion and skip unchanged paused rendering.
+4. Add six distinct neighbors and nine optional Chinese activities: ordering, quantities, gifts, listening, open expression and visits. Preserve hints, replay, optional pinyin/meaning, free conversation and absence of grading gates. Save activity progress independently of learning evidence.
+5. Add original local music with a user-gesture start, saved on/off/volume, speech ducking and hidden-page suspension.
+6. Validate meaningful collision/routes, old saves and bounded long-use evidence; exercise all activities, reloads, phone-sized panels, actual audio lifecycle and real local dialogue. Inspect art screenshots, review the final changes and document remaining device/learning gates.

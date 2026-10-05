@@ -1,9 +1,21 @@
 import {topics} from './content.js';
 export function newLearner(){return {exposures:{},evidence:{}};}
+const RECENT_CONTEXTS = 192;
 export function expose(learner,wordId,context,assisted=false){
   const key=`${wordId}:${context}`;
   const old=learner.exposures[key]||{count:0,assisted:0};
-  return {...learner,exposures:{...learner.exposures,[key]:{count:old.count+1,assisted:old.assisted+Number(assisted)}}};
+  const exposures={...learner.exposures};
+  // Object insertion order keeps the most recently encountered contexts last.
+  // Earlier contexts are summarized by word, retaining every exposure count.
+  delete exposures[key];
+  exposures[key]={count:old.count+1,assisted:old.assisted+Number(assisted)};
+  const recent=Object.keys(exposures).filter(k=>!k.endsWith(':earlier'));
+  for(const expired of recent.slice(0,Math.max(0,recent.length-RECENT_CONTEXTS))){
+    const summaryKey=`${expired.split(':')[0]}:earlier`,summary=exposures[summaryKey]||{count:0,assisted:0},value=exposures[expired];
+    exposures[summaryKey]={count:summary.count+value.count,assisted:summary.assisted+value.assisted};
+    delete exposures[expired];
+  }
+  return {...learner,exposures};
 }
 export function evidence(learner,{skill,topic,correct,assisted=false,recognitionError=false,source='unvalidated',id}){
   // Display, help, timing, English and unverified transcripts do not grade ability.

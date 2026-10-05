@@ -11,6 +11,7 @@ import {
   upgradeState,
 } from "../public/game/world.js";
 import { npcs } from "../public/data/content.js";
+import { newPractice, validatePractice } from "../public/data/activities.js";
 const hash = (text) => createHash("sha256").update(text).digest("hex");
 export const newState = () => ({
   schema: 1,
@@ -25,6 +26,7 @@ export const newState = () => ({
   learner: newLearner(),
   history: [],
   journal: [],
+  practice: newPractice(),
 });
 export function validateState(s) {
   if (
@@ -143,7 +145,7 @@ export function validateState(s) {
     )
       throw new Error("Invalid learning evidence.");
   if (JSON.stringify(s).length > 45000) throw new Error("Save is too large.");
-  return structuredClone(s);
+  return { ...structuredClone(s), practice: validatePractice(s.practice) };
 }
 export class Store {
   constructor(dir) {
@@ -194,6 +196,12 @@ export class Store {
     if (previous.revision !== revision) return null;
     if (previous.state.found.some((x) => !clean.found.includes(x)))
       throw new Error("Discoveries cannot be lost.");
+    if (
+      validatePractice(previous.state.practice).completed.some(
+        (id) => !clean.practice.completed.includes(id),
+      )
+    )
+      throw new Error("Completed practice cannot be lost.");
     const row = this.db
       .prepare(
         "UPDATE learners SET state=?, revision=revision+1 WHERE id=? AND revision=? RETURNING revision",

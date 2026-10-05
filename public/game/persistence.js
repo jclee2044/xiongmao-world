@@ -1,5 +1,6 @@
 import { defaultSettings } from "../data/settings.js";
 import { newLearner } from "../data/learner.js";
+import { newPractice, validatePractice } from "../data/activities.js";
 import { scenes, MAP_VERSION, upgradeState } from "./world.js";
 const cacheKey = "panda-world-v1";
 export const initialState = () => ({
@@ -15,6 +16,7 @@ export const initialState = () => ({
   learner: newLearner(),
   history: [],
   journal: [],
+  practice: newPractice(),
 });
 export async function api(path, body, signal) {
   const response = await fetch(path, {
@@ -157,6 +159,14 @@ export class Persistence {
       this.state.found = [
         ...new Set([...this.state.found, ...remote.state.found]),
       ];
+      const localPractice = validatePractice(this.state.practice),
+        remotePractice = validatePractice(remote.state.practice);
+      this.state.practice = {
+        ...localPractice,
+        completed: [
+          ...new Set([...localPractice.completed, ...remotePractice.completed]),
+        ],
+      };
       this.revision = remote.revision;
       this.identity = remote.identity;
       this.generation++;

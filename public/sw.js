@@ -1,4 +1,4 @@
-const CACHE = "panda-shell-0.2.0-3";
+const CACHE = "panda-shell-0.3.0-2";
 const SHELL = [
   "/",
   "/index.html",
@@ -16,12 +16,19 @@ const SHELL = [
   "/game/panels.js",
   "/game/pwa.js",
   "/game/pathfinding.js",
+  "/game/appearance.js",
+  "/game/terrain.js",
+  "/game/music.js",
+  "/game/practice.js",
   "/data/art-bounds.js",
   "/assets/world/canal-lane.webp",
   "/assets/world/home.webp",
   "/assets/world/paving.webp",
   "/assets/world/house.webp",
   "/assets/world/willow.webp",
+  "/assets/world/props.webp",
+  "/assets/characters/neighbors.webp",
+  "/assets/characters/player-walk.webp",
   "/assets/characters/player-atlas.webp",
   "/assets/characters/mei.webp",
   "/assets/characters/lin.webp",
@@ -30,6 +37,7 @@ const SHELL = [
   "/data/content.js",
   "/data/learner.js",
   "/data/settings.js",
+  "/data/activities.js",
 ];
 self.addEventListener("install", (event) =>
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL))),

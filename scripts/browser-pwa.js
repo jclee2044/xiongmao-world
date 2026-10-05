@@ -23,7 +23,7 @@ try {
   );
   const cache = await page.evaluate(async () => ({
     keys: await caches.keys(),
-    requests: (await (await caches.open("panda-shell-0.2.0-3")).keys()).map(
+    requests: (await (await caches.open("panda-shell-0.3.0-2")).keys()).map(
       (x) => new URL(x.url).pathname,
     ),
   }));

@@ -10,6 +10,7 @@ import {
 } from "../public/data/learner.js";
 import { parseCustomization, validatePatch } from "../public/data/settings.js";
 import { reply, validateReply } from "../server/dialogue.js";
+import { lexicon, npcs, topics } from "../public/data/content.js";
 
 test("save revisions reject overwrites; pairing is single-use and shares identity", () => {
   const store = new Store(":memory:");
@@ -86,6 +87,58 @@ test("repeated verified evidence is separate by skill and topic with hysteresis"
   });
   assert.equal(challengeFor(learner, "typing", "food"), 3);
   assert.equal(challengeFor(learner, "typing", "food", "gentler"), 1);
+});
+test("long-term word exposure keeps bounded recent contexts, lifetime counts and independent evidence", () => {
+  let learner = evidence(newLearner(), {
+    skill: "reading",
+    topic: "food",
+    correct: true,
+    source: "verified",
+    id: "kept-evidence",
+  });
+  const independentEvidence = learner.evidence;
+  for (let visit = 0; visit < 3; visit++)
+    for (const word of lexicon)
+      for (const npc of Object.keys(npcs))
+        for (const topic of topics)
+          learner = expose(
+            learner,
+            word.id,
+            `shanghai:${npc}:${topic}`,
+            visit === 1,
+          );
+  assert.ok(Object.keys(learner.exposures).length <= 192 + lexicon.length);
+  for (const word of lexicon) {
+    const values = Object.entries(learner.exposures)
+      .filter(([key]) => key.startsWith(`${word.id}:`))
+      .map(([, value]) => value);
+    assert.equal(
+      values.reduce((sum, value) => sum + value.count, 0),
+      3 * Object.keys(npcs).length * topics.length,
+      `Lifetime count for ${word.id}`,
+    );
+    assert.equal(
+      values.reduce((sum, value) => sum + value.assisted, 0),
+      Object.keys(npcs).length * topics.length,
+    );
+  }
+  assert.equal(learner.evidence, independentEvidence);
+  assert.ok(
+    learner.exposures[
+      `${lexicon.at(-1).id}:shanghai:${Object.keys(npcs).at(-1)}:${topics.at(-1)}`
+    ],
+    "Most recent context remains detailed",
+  );
+  const state = newState(),
+    store = new Store(":memory:");
+  state.learner = learner;
+  try {
+    const { id } = store.create();
+    assert.equal(store.save(id, 0, state).revision, 1);
+    assert.deepEqual(store.read(id).state.learner, learner);
+  } finally {
+    store.close();
+  }
 });
 test("supported customization is allowlisted; development/hostile requests remain pending", () => {
   assert.deepEqual(parseCustomization("sage outfit and short hair").patch, {

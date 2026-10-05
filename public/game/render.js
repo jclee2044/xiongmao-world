@@ -1,4 +1,6 @@
 import bounds from "../data/art-bounds.js";
+import { actorSizes, appearanceRow, walkFrame } from "./appearance.js";
+import { paintGround, blendedPlate } from "./terrain.js";
 const images = new Map();
 function asset(path) {
   if (!images.has(path)) {
@@ -20,12 +22,15 @@ const paths = {
   paving: "/assets/world/paving.webp",
   house: "/assets/world/house.webp",
   tree: "/assets/world/willow.webp",
+  neighbors: "/assets/characters/neighbors.webp",
+  walk: "/assets/characters/player-walk.webp",
+  props: "/assets/world/props.webp",
 };
 export const pandaImage = asset(paths.panda);
 export async function prepareArt(scene) {
   const names =
     scene.id === "home"
-      ? ["home", "player", "panda", "momo"]
+      ? ["home", "player", "walk", "panda", "momo"]
       : [
           "lane",
           "paving",
@@ -37,6 +42,10 @@ export async function prepareArt(scene) {
           "lin",
           "yun",
           "momo",
+          "walk",
+          "neighbors",
+          "props",
+          "home",
         ];
   await Promise.all(names.map((name) => asset(paths[name]).decode()));
 }
@@ -49,14 +58,24 @@ function shadow(ctx, x, y, w) {
   ctx.ellipse(x, y, w, w * 0.25, 0, 0, Math.PI * 2);
   ctx.fill();
 }
-function sprite(ctx, name, x, y, height, { crop, flip = false, bob = 0 } = {}) {
+function sprite(
+  ctx,
+  name,
+  x,
+  y,
+  height,
+  { crop, flip = false, bob = 0, sway = 0, uniformHeight } = {},
+) {
   const img = asset(paths[name]);
   if (!ready(img)) return;
   const source = crop ||
     bounds[name] || { x: 0, y: 0, w: img.width, h: img.height };
-  const width = (height * source.w) / source.h;
+  const ratio = height / (uniformHeight || source.h),
+    width = source.w * ratio,
+    drawnHeight = source.h * ratio;
   ctx.save();
   ctx.translate(x, y + bob);
+  ctx.rotate(sway);
   if (flip) ctx.scale(-1, 1);
   ctx.drawImage(
     img,
@@ -65,9 +84,9 @@ function sprite(ctx, name, x, y, height, { crop, flip = false, bob = 0 } = {}) {
     source.w,
     source.h,
     -width / 2,
-    -height,
+    -drawnHeight,
     width,
-    height,
+    drawnHeight,
   );
   ctx.restore();
 }
@@ -88,6 +107,7 @@ function plateVisible(p, view) {
   );
 }
 let groundPattern;
+const opacity = new WeakMap();
 export function draw(
   ctx,
   canvas,
@@ -96,6 +116,8 @@ export function draw(
   companion,
   {
     time = 0,
+    walkDistance = 0,
+    animate = false,
     moving = false,
     pandaMoving = false,
     facing = 1,
@@ -145,13 +167,13 @@ export function draw(
         groundPattern.setTransform(new DOMMatrix().scale(0.48));
       }
       ctx.fillStyle = groundPattern;
-      ctx.fillRect(view.x, view.y, view.w, view.h);
+      paintGround(ctx, scene, view, groundPattern, { time, animate });
     }
     if (plateVisible(scene.landmark, view)) {
       const img = asset(paths.lane);
       if (ready(img))
         ctx.drawImage(
-          img,
+          blendedPlate(img),
           scene.landmark.x,
           scene.landmark.y,
           scene.landmark.w,
@@ -178,8 +200,21 @@ export function draw(
         ctx.save();
         ctx.translate(o.x, o.y);
         const obscures = (p) =>
-          p.y < o.y && p.y > o.y - o.h && Math.abs(p.x - o.x) < o.w * 0.37;
-        if (obscures(player) || obscures(companion)) ctx.globalAlpha = 0.58;
+          p.y < o.y &&
+          p.y > o.y - o.h &&
+          Math.abs(p.x - o.x) < o.w * (o.type === "tree" ? 0.48 : 0.37);
+        const target =
+          obscures(player) || obscures(companion)
+            ? o.type === "tree"
+              ? 0.18
+              : 0.4
+            : 1;
+        const previous = opacity.get(o) ?? 1;
+        const alpha = animate ? previous + (target - previous) * 0.3 : target;
+        opacity.set(o, alpha);
+        ctx.globalAlpha = alpha;
+        if (o.type === "tree" && animate)
+          ctx.rotate(Math.sin(time * 0.55 + o.x) * 0.003);
         if (o.flip) ctx.scale(-1, 1);
         ctx.drawImage(img, -o.w / 2, -o.h, o.w, o.h);
         ctx.restore();
@@ -190,39 +225,73 @@ export function draw(
         ctx.fillStyle = "#453420";
         ctx.fillText(o.label, o.x - 5, o.y - o.h * 0.27);
       }
+    } else if (bounds.props?.[o.type]) {
+      shadow(ctx, o.x, o.y, o.w * 0.3);
+      const img = asset(paths.props),
+        source = bounds.props[o.type];
+      if (ready(img))
+        ctx.drawImage(
+          img,
+          source.x,
+          source.y,
+          source.w,
+          source.h,
+          o.x - o.w / 2,
+          o.y - o.h,
+          o.w,
+          o.h,
+        );
+      if (o.label) {
+        ctx.font = '17px "Noto Serif CJK SC",serif';
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#4c3727";
+        ctx.fillText(o.label, o.x, o.y - o.h * 0.5);
+      }
     } else if (o.type === "player") {
-      const row = ["#b4a6c3", "#899b7c", "#d3a890", "#8ca6a2"].indexOf(
-          settings.outfit,
-        ),
+      const row = appearanceRow(settings),
         col = settings.hair === "short" ? 1 : 0;
-      shadow(ctx, o.x, o.y, 43);
-      sprite(ctx, "player", o.x, o.y, 250, {
-        crop: bounds.player[Math.max(0, row)][col],
+      const animatedWalk = moving && settings.motion !== false;
+      const frames = bounds.walk?.[row + col * 4];
+      shadow(ctx, o.x, o.y, 32);
+      sprite(ctx, frames ? "walk" : "player", o.x, o.y, actorSizes.player, {
+        crop: frames
+          ? frames[animatedWalk ? walkFrame(walkDistance) : 1]
+          : bounds.player[row][col],
+        uniformHeight: frames ? Math.max(...frames.map((f) => f.h)) : undefined,
         flip: facing < 0,
-        bob: moving && settings.motion !== false ? Math.sin(time * 9) * 2 : 0,
+        bob: animatedWalk ? Math.sin(walkDistance / 17) * 1.5 : 0,
       });
     } else if (o.type === "npc") {
-      if (o.id !== "mei") shadow(ctx, o.x, o.y, o.id === "yun" ? 32 : 45);
+      if (o.id !== "mei") shadow(ctx, o.x, o.y, 30);
+      const neighbor = bounds.neighbors?.[o.id];
       sprite(
         ctx,
-        o.id,
+        neighbor ? "neighbors" : o.id,
         o.artX ?? o.x,
         o.artY ?? o.y,
-        o.artHeight,
+        actorSizes[o.id] || o.artHeight,
         o.id === "mei"
           ? { crop: { ...bounds.mei, h: Math.round(bounds.mei.h * 0.57) } }
-          : {},
+          : {
+              crop: neighbor,
+              bob: animate ? Math.sin(time * 1.3 + o.x) * 0.8 : 0,
+            },
       );
     } else if (o.type === "panda") {
-      shadow(ctx, o.x, o.y, 45);
+      shadow(ctx, o.x, o.y, 30);
       const hop =
         pandaMoving && settings.motion !== false
           ? Math.max(0, Math.sin(time * 9)) * 9
           : 0;
-      sprite(ctx, "panda", o.x, o.y - hop, 160);
+      sprite(ctx, "panda", o.x, o.y - hop, actorSizes.panda, {
+        sway:
+          pandaMoving && settings.motion !== false
+            ? Math.sin(time * 9) * 0.025
+            : 0,
+      });
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
-      sprite(ctx, "momo", o.x, o.y, 85);
+      sprite(ctx, "momo", o.x, o.y, actorSizes.momo);
     } else if (o.type === "foreground" && plateVisible(scene.landmark, view)) {
       const img = asset(paths.lane);
       if (!ready(img)) continue;

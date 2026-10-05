@@ -1,6 +1,6 @@
 # Panda’s Little World
 
-A self-hosted Chinese exploration game: a painted Suzhou canal district and a cozy home. Version 0.2.0 expands the district footprint from 1300 × 1000 to 4000 × 3300, about 10.15 times the original area. [PLAN.md](PLAN.md) contains the materials review and step-by-step plan. [PROGRESS.md](PROGRESS.md) separates completed checks from remaining gates.
+A self-hosted Chinese exploration game: a painted Suzhou canal district and a cozy home. Version 0.3.0 adds nine neighbors, nine optional Chinese activities, narrower connected lanes, gardens, walking animation and local background music. The district is 4000 × 3300, about 10.15 times the original bounding area. [PLAN.md](PLAN.md) contains the materials review and step-by-step plan. [PROGRESS.md](PROGRESS.md) separates completed checks from remaining gates.
 
 ## Play on this PC
 
@@ -8,13 +8,19 @@ Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user se
 
 Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Replay/slow replay generates Mandarin on demand. Underlined phrases offer grounded explanations. More help offers a starter, then an optional “You can say…” example. No expected answer is required.
 
-Find Momo near the canal bridge and return home. Meet Mei, Lin and Yun around Canal Lane; explore the eight named neighborhoods and simple Chinese phrase interactions in the outer streets. The Home button is always available for a quiet break. Journal retains the discovery and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion and voice volume. Changes can be undone; unsupported development feedback is visibly pending.
+Find Momo near the canal bridge and return home. Meet Mei, Lin and Yun around Canal Lane, and six more neighbors in the outer streets. Explore garden paths, a pond, book and tea corners, flowers and market stalls. The Home button is always available for a quiet break. Journal retains discoveries and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion, voice and music volume. Changes can be undone; unsupported development feedback is visibly pending.
+
+Choose **练习中文** beside Panda or **中文小任务** in a conversation. Order noodles or tea, fill a fruit basket, choose a flower gift, share a book idea or weekend plan, follow a listening clue, deliver a letter and find neighbors around town. These short authored activities offer replay, slower speech, optional transcripts and hints. Retries have no penalty; completing an activity does not claim language mastery. Open expression is saved in the neighbor's conversation history, where local AI can continue the conversation. Visit errands preserve their current step across reloads.
+
+Walking is faster, with three alternating painted poses and a smaller Panda. Human sprites use consistent height targets. Furniture and people block walking, and old positions inside newly blocked scenery move to nearby safe ground. Reduced motion keeps poses and scenery steady. Narrow paths and soft scene edges replace the broad tiled extension; entering and leaving home uses a short fade.
+
+An original gentle pentatonic background score is synthesized locally with Web Audio. It starts after pressing Wander, quiets during Mandarin speech and pauses when the page is hidden. Use **Settings → Music** to switch it on/off or change the volume. There are no downloaded music tracks or remote music requests.
 
 Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
 
 Canal Lane uses a detailed environment plate edited from the supplied reference, with separate painted people and the supplied Panda. Reusable houses, willows and paving extend the district; scenery outside the camera view is skipped. Decorative English remarks have been removed; functional controls and optional translations remain. [art/ASSETS.md](art/ASSETS.md) records saved assets, exact generation prompts and lossless encoding.
 
-The larger footprint is a foundation, with three conversation NPCs and basic outer-street interactions. It is not ten times the authored story content. Five cities, richer routines, full walking animation, microphone transcription, verified automatic ability assessment, music/ambience and a source-editing agent are future work. Existing saves preserve journals, discoveries and preferences; the map migration moves old positions to a safe spawn once.
+The larger footprint is a foundation with nine conversation neighbors and nine short activities. It is not ten times the authored story content. Five cities, richer daily routines, full directional animation, environmental audio, microphone transcription, verified automatic ability assessment and a source-editing agent are future work. Existing saves preserve journals, discoveries and preferences; the map migration moves old positions to a safe spawn once.
 
 ## Run, stop and restart
 
@@ -82,6 +88,6 @@ node scripts/browser-turns.js
 npm run format
 ```
 
-Behavior tests cover collision, geometry, revisions, pairing, evidence rules, allowlisted settings, provider failure/malformed output waiting PWA updates and forwarded localhost preview hosts. Browser checks use isolated installed Chromium, not a real phone. A localhost forwarding-proxy check verifies preview loading, session creation and saved settings across reload. Pinyin checks cover immediate visibility, reload persistence, phrase help, agreement with Settings and undo. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
+Behavior tests cover collision, geometry, revisions, pairing, evidence rules, bounded long-use exposure, activity progress, allowlisted settings, provider failure/malformed output, waiting PWA updates and forwarded localhost preview hosts. Browser checks use isolated installed Chromium, not a real phone. A localhost forwarding-proxy check verifies preview loading, session creation and saved settings across reload. Pinyin checks cover immediate visibility, reload persistence, phrase help, agreement with Settings and undo. Movement/art checks measure speed, actual walking frames, collision, sprite sizes, soft edges and camera continuity. All nine activities are checked with controlled dialogue/audio mocks, including retries, listening, open expression and mid-errand reload. Music checks exercise real browser audio, volume, speech ducking and hidden-page suspension. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
 
 Qwen3 4B returned relevant food/hobby/homework replies in **7.1–13.9 seconds**. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin, but eSpeak’s basic robotic voice needs learner feedback. No prerecorded dialogue or remote inference API is used.

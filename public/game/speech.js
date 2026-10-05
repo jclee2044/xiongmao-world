@@ -1,7 +1,9 @@
 export class Speech {
-  constructor(onStatus, getSettings) {
+  constructor(onStatus, getSettings, onActivity = () => {}) {
     this.onStatus = onStatus;
     this.getSettings = getSettings;
+    this.onActivity = onActivity;
+    this.active = false;
     this.generation = 0;
     this.voices = [];
     this.refresh();
@@ -23,11 +25,26 @@ export class Speech {
   stop() {
     this.generation++;
     this.controller?.abort();
+    this.controller = null;
     window.speechSynthesis?.cancel();
+    this.finish(this.generation);
+  }
+  activity(active, generation = this.generation) {
+    if (generation !== this.generation || this.active === active) return;
+    this.active = active;
+    this.onActivity(active);
+  }
+  finish(generation) {
+    if (generation !== this.generation) return;
+    this.activity(false, generation);
     if (this.audio) {
-      this.audio.pause();
-      this.audio.src = "";
+      const audio = this.audio;
       this.audio = null;
+      audio.onended = null;
+      audio.onerror = null;
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
     }
     if (this.url) {
       URL.revokeObjectURL(this.url);
@@ -46,11 +63,21 @@ export class Speech {
       utterance.lang = this.voices[0].lang;
       utterance.rate = slow ? 0.65 : 0.9;
       utterance.volume = settings.voiceVolume;
+      utterance.onstart = () =>
+        this.activity(settings.voiceVolume > 0, generation);
+      utterance.onend = () => this.finish(generation);
       utterance.onerror = () => {
-        if (generation === this.generation)
+        if (generation === this.generation) {
+          this.finish(generation);
           this.onStatus("Device speech could not play. Try again.");
+        }
       };
-      speechSynthesis.speak(utterance);
+      try {
+        speechSynthesis.speak(utterance);
+      } catch {
+        this.finish(generation);
+        return this.onStatus("Device speech could not play. Try again.");
+      }
       return this.onStatus(`Device Mandarin voice: ${utterance.voice.name}`);
     }
     this.onStatus("Preparing local Mandarin speech…");
@@ -68,14 +95,24 @@ export class Speech {
       this.url = URL.createObjectURL(blob);
       this.audio = new Audio(this.url);
       this.audio.volume = settings.voiceVolume;
+      this.audio.onended = () => this.finish(generation);
+      this.audio.onerror = () => {
+        if (generation === this.generation) {
+          this.finish(generation);
+          this.onStatus("Mandarin audio could not play. Try again.");
+        }
+      };
+      this.activity(settings.voiceVolume > 0, generation);
       await this.audio.play();
       if (generation === this.generation)
         this.onStatus("Local Mandarin · basic synthesized voice");
     } catch (error) {
-      if (generation === this.generation && error.name !== "AbortError")
+      if (generation === this.generation && error.name !== "AbortError") {
+        this.finish(generation);
         this.onStatus(
           "Mandarin audio is unavailable right now. Text practice still works.",
         );
+      }
     }
   }
 }

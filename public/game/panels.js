@@ -19,6 +19,16 @@ export function createPanels({
   getWorld,
   navigate,
 }) {
+  let musicVolume = 0.15;
+  function refreshMusicControls() {
+    const volume = persistence.state.settings.music;
+    if (volume > 0) musicVolume = volume;
+    if ($("music-toggle")) $("music-toggle").value = volume > 0 ? "on" : "off";
+    if ($("music-volume")) {
+      $("music-volume").value = musicVolume;
+      $("music-volume").disabled = volume === 0;
+    }
+  }
   function map() {
     const world = getWorld(),
       scene = world.scene;
@@ -66,6 +76,7 @@ export function createPanels({
     refreshHistory();
     for (const select of document.querySelectorAll("[data-setting]"))
       select.value = String(persistence.state.settings[select.dataset.setting]);
+    refreshMusicControls();
     toast(`Changed: ${Object.keys(clean).join(", ")}`);
   }
   function journal() {
@@ -174,7 +185,7 @@ export function createPanels({
       ])}${select("voice", "Mandarin voice", [
         [true, "On"],
         [false, "Off"],
-      ])}</div><label>Voice volume<input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"></label><p class="notice">Mandarin uses an available local device voice or the PC’s basic eSpeak voice. Music and ambience are planned. Microphone input is not enabled yet.</p><div class="panel-section"><h3>Describe a small change</h3><p>Supported now: lavender/sage/peach/teal outfit, short hair or bun, slower walking, help and challenge. This changes a simple avatar; unrestricted prompt-to-art is a later feature.</p><form id="custom-form"><label for="custom-prompt">Appearance or game feedback</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="Sage outfit and short hair"></textarea><div class="small-actions"><button class="primary">Apply supported change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo last change</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Change history</h3><ul id="settings-history">${
+      ])}</div><label for="voice-volume">Voice volume</label><input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"><label for="music-toggle">Background music</label><select id="music-toggle"><option value="on" ${s.music > 0 ? "selected" : ""}>On</option><option value="off" ${s.music === 0 ? "selected" : ""}>Off</option></select><label for="music-volume">Music volume</label><input id="music-volume" type="range" min="0.05" max="1" step="0.05" value="${s.music || musicVolume}" ${s.music === 0 ? "disabled" : ""}><p class="notice">Music becomes quieter while Mandarin plays. Microphone input is not enabled yet.</p><div class="panel-section"><h3>Describe a small change</h3><p>Supported now: lavender/sage/peach/teal outfit, short hair or bun, slower walking, help and challenge. This changes a simple avatar; unrestricted prompt-to-art is a later feature.</p><form id="custom-form"><label for="custom-prompt">Appearance or game feedback</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="Sage outfit and short hair"></textarea><div class="small-actions"><button class="primary">Apply supported change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo last change</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Change history</h3><ul id="settings-history">${
         persistence.state.settingsHistory
           .slice(-5)
           .reverse()
@@ -197,6 +208,17 @@ export function createPanels({
           `${select.dataset.setting}: ${select.selectedOptions[0].textContent}`,
         );
       };
+    refreshMusicControls();
+    $("music-toggle").onchange = (e) =>
+      applyPatch(
+        { music: e.target.value === "on" ? musicVolume : 0 },
+        `Background music: ${e.target.value}`,
+      );
+    $("music-volume").onchange = (e) =>
+      applyPatch(
+        { music: Number(e.target.value) },
+        `Music volume: ${e.target.value}`,
+      );
     $("voice-volume").onchange = (e) =>
       applyPatch(
         { voiceVolume: Number(e.target.value) },

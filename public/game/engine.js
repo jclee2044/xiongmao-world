@@ -1,6 +1,7 @@
-import { scenes, move, nearest, canStand } from "./world.js";
+import { scenes, move, nearest, canStand, interactionPoint } from "./world.js";
 import { draw } from "./render.js";
 import { pathTo } from "./pathfinding.js";
+import { actorSizes } from "./appearance.js";
 export class World {
   constructor(
     canvas,
@@ -29,6 +30,7 @@ export class World {
     this.trail = [];
     this.route = [];
     this.facing = 1;
+    this.walkDistance = 0;
     this.last = 0;
     const editable = () =>
       /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
@@ -83,7 +85,7 @@ export class World {
             o.type === "npc" &&
             x > (o.artX ?? o.x) - 80 &&
             x < (o.artX ?? o.x) + 80 &&
-            y > (o.artY ?? o.y) - o.artHeight &&
+            y > (o.artY ?? o.y) - (o.artHeight || actorSizes[o.id]) &&
             y < (o.artY ?? o.y),
         ) || nearest(this.scene, { x, y }, this.getFound());
       if (
@@ -100,7 +102,7 @@ export class World {
     this.route = [];
   }
   walkTo(point) {
-    this.route = pathTo(this.scene, this.player, point);
+    this.route = pathTo(this.scene, this.player, interactionPoint(point));
     return this.route.length > 0;
   }
   pause(value) {
@@ -109,6 +111,17 @@ export class World {
     this.canvas.dataset.paused = String(value);
   }
   changeScene(id, position) {
+    if (
+      this.camera &&
+      this.scene.id !== id &&
+      this.getSettings().motion !== false
+    ) {
+      const image = document.createElement("canvas");
+      image.width = this.canvas.width;
+      image.height = this.canvas.height;
+      image.getContext("2d").drawImage(this.canvas, 0, 0);
+      this.transition = { image, start: null };
+    } else this.transition = null;
     this.scene = scenes[id] || scenes.shanghai;
     this.player =
       position && canStand(this.scene, position.x, position.y)
@@ -129,7 +142,7 @@ export class World {
     if (n) this.onInteract(n);
   }
   frame(t) {
-    const dt = Math.min(0.04, (t - this.last) / 1000 || 0);
+    const dt = Math.min(0.1, (t - this.last) / 1000 || 0);
     this.last = t;
     let moving = false;
     const previousPanda = this.panda;
@@ -159,7 +172,7 @@ export class World {
         dy = (destination.y - this.player.y) / d;
       }
       const len = Math.hypot(dx, dy),
-        speed = this.getSettings().pace === "slow" ? 165 : 230;
+        speed = this.getSettings().pace === "slow" ? 230 : 330;
       if (len) {
         if (Math.abs(dx) > 0.1) this.facing = Math.sign(dx);
         const step = Math.min(
@@ -182,6 +195,10 @@ export class World {
           Math.hypot(this.player.x - previous.x, this.player.y - previous.y) >
           0.01;
         if (moving) {
+          this.walkDistance += Math.hypot(
+            this.player.x - previous.x,
+            this.player.y - previous.y,
+          );
           this.trail.push({ ...this.player });
           if (this.trail.length > 240) this.trail.shift();
           if (t - (this.lastMove || 0) > 500) {
@@ -244,10 +261,16 @@ export class World {
         this.canvas.clientHeight,
         window.devicePixelRatio,
       ]);
+    const ambientFrame =
+      !this.paused &&
+      settings.motion !== false &&
+      t - (this.lastPaint || 0) > 90;
     if (
       moving ||
       pandaMoving ||
       this.animatedLastFrame ||
+      this.transition ||
+      ambientFrame ||
       paintKey !== this.paintKey ||
       this.canvas.dataset.artReady !== "true"
     ) {
@@ -259,6 +282,8 @@ export class World {
         this.panda,
         {
           time: t / 1000,
+          walkDistance: this.walkDistance,
+          animate: !this.paused && settings.motion !== false,
           moving,
           facing: this.facing,
           route: this.route,
@@ -269,6 +294,23 @@ export class World {
         },
       );
       this.paintKey = paintKey;
+      this.lastPaint = t;
+    }
+    if (this.transition) {
+      this.transition.start ??= t;
+      const progress = Math.min(1, (t - this.transition.start) / 220);
+      this.ctx.save();
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.ctx.globalAlpha = 1 - progress;
+      this.ctx.drawImage(
+        this.transition.image,
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height,
+      );
+      this.ctx.restore();
+      if (progress === 1) this.transition = null;
     }
     this.animatedLastFrame = moving || pandaMoving;
     Object.assign(this.canvas.dataset, {

@@ -63,7 +63,7 @@ export function createApp({
       if (pathname === "/api/health") {
         return json(200, {
           ok: true,
-          version: "0.2.0",
+          version: "0.3.0",
           provider: providerConfig.provider || process.env.PROVIDER || "story",
           speech: speechAvailable() ? "espeak-cmn" : "unavailable",
         });

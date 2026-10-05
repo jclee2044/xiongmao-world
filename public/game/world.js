@@ -1,3 +1,4 @@
+import artBounds from "../data/art-bounds.js";
 export const MAP_VERSION = 2;
 export const landmark = { x: 0, y: 2046, w: 1254, h: 1254 };
 const lane = [
@@ -65,16 +66,16 @@ const trees = [
   [3800, 540],
   [220, 1210],
   [1030, 1310],
-  [2210, 1250],
+  [2410, 1210],
   [3240, 1260],
   [3900, 1310],
-  [210, 1910],
+  [480, 1860],
   [1010, 1810],
   [2090, 2040],
   [3160, 2170],
   [3830, 2240],
   [1630, 2660],
-  [2530, 2640],
+  [2470, 2600],
   [3370, 2470],
   [1490, 3160],
   [2460, 3170],
@@ -87,6 +88,157 @@ const trees = [
   h: 615 + (i % 3) * 60,
   flip: i % 2 === 0,
 }));
+const streets = [
+  {
+    points: [
+      [420, 945],
+      [3760, 945],
+    ],
+    width: 160,
+  },
+  {
+    points: [
+      [950, 945],
+      [1140, 1130],
+      [1140, 1940],
+    ],
+    width: 155,
+  },
+  {
+    points: [
+      [2200, 945],
+      [2200, 2320],
+      [2540, 2390],
+      [2540, 2975],
+    ],
+    width: 165,
+  },
+  {
+    points: [
+      [3760, 945],
+      [3940, 1210],
+      [3940, 2390],
+      [2540, 2390],
+    ],
+    width: 150,
+  },
+  {
+    points: [
+      [200, 2046],
+      [200, 1960],
+      [650, 1940],
+      [3940, 1940],
+    ],
+    width: 175,
+  },
+  {
+    points: [
+      [1254, 2975],
+      [3940, 2975],
+    ],
+    width: 170,
+  },
+  {
+    points: [
+      [460, 945],
+      [460, 865],
+    ],
+    width: 120,
+  },
+  {
+    points: [
+      [590, 1940],
+      [590, 1725],
+    ],
+    width: 130,
+  },
+  {
+    points: [
+      [2750, 2390],
+      [2750, 2250],
+    ],
+    width: 140,
+  },
+  {
+    points: [
+      [3190, 2390],
+      [3190, 2210],
+    ],
+    width: 135,
+  },
+  {
+    points: [
+      [3560, 1940],
+      [3560, 1915],
+    ],
+    width: 125,
+  },
+  {
+    points: [
+      [2040, 2975],
+      [2040, 2855],
+    ],
+    width: 130,
+  },
+];
+const groundZones = [
+  { type: "courtyard", x: 210, y: 835, w: 700, h: 400, shape: "ellipse" },
+  { type: "courtyard", x: 1040, y: 840, w: 750, h: 420, shape: "ellipse" },
+  { type: "courtyard", x: 2110, y: 840, w: 710, h: 370, shape: "ellipse" },
+  { type: "garden", x: 3060, y: 840, w: 805, h: 660, shape: "ellipse" },
+  { type: "garden", x: 95, y: 1080, w: 760, h: 500, shape: "ellipse" },
+  { type: "courtyard", x: 355, y: 1710, w: 1700, h: 490, shape: "ellipse" },
+  { type: "garden", x: 2300, y: 1160, w: 1500, h: 1170, shape: "ellipse" },
+  { type: "pond", x: 2360, y: 1250, w: 470, h: 230, shape: "ellipse" },
+  { type: "courtyard", x: 2550, y: 1990, w: 640, h: 380, shape: "ellipse" },
+  { type: "courtyard", x: 1620, y: 2865, w: 2280, h: 330, shape: "ellipse" },
+  { type: "garden", x: 1590, y: 2100, w: 600, h: 335, shape: "ellipse" },
+];
+const smallScenery = [
+  { type: "bench", x: 750, y: 1320, h: 130 },
+  { type: "bench", x: 2330, y: 1590, h: 130 },
+  { type: "bench", x: 3540, y: 2270, h: 130 },
+  { type: "bench", x: 1870, y: 2310, h: 130 },
+  { type: "tea-table", x: 1760, y: 1120, h: 140 },
+  { type: "well", x: 1850, y: 1265, h: 125 },
+  { type: "market", x: 1490, y: 1800, h: 250, label: "水果" },
+  { type: "tea-table", x: 1775, y: 1800, h: 140, label: "茶水" },
+  { type: "bench", x: 2790, y: 2120, h: 130, label: "画画" },
+  { type: "planter", x: 1090, y: 890, h: 90, flowers: true },
+  { type: "planter", x: 1700, y: 1030, h: 90, flowers: true },
+  { type: "planter", x: 2460, y: 1050, h: 90, flowers: true },
+  { type: "planter", x: 3150, y: 1060, h: 105, flowers: true },
+  { type: "planter", x: 3470, y: 1100, h: 105, flowers: true },
+  { type: "planter", x: 3670, y: 1220, h: 105, flowers: true },
+  { type: "planter", x: 1180, y: 2080, h: 90, flowers: true },
+  { type: "planter", x: 2490, y: 2160, h: 105, flowers: true },
+  { type: "planter", x: 2990, y: 2130, h: 105, flowers: true },
+  { type: "planter", x: 1800, y: 3050, h: 105, flowers: true },
+  { type: "planter", x: 3170, y: 3080, h: 105, flowers: true },
+  { type: "sign", x: 2070, y: 1150, h: 130, label: "书街 ↑" },
+  { type: "sign", x: 2330, y: 2110, h: 130, label: "花园 →" },
+].map((o) => {
+  const source = artBounds.props[o.type];
+  return { ...o, w: Math.round((o.h * source.w) / source.h) };
+});
+const newNeighbors = [
+  ["qiao", "Qiao · 乔", 1360, 900, "tea"],
+  ["bo", "Bo · 博", 2330, 900, "books"],
+  ["lan", "Lan · 兰", 3380, 900, "flowers"],
+  ["wei", "Wei · 伟", 1540, 1880, "fruit"],
+  ["an", "An · 安", 2750, 2200, "art"],
+  ["hao", "Hao · 浩", 2940, 2930, "directions"],
+].map(([id, name, x, y, topic]) => ({
+  id,
+  name,
+  x,
+  y,
+  topic,
+  type: "npc",
+  artHeight: 245,
+  approachX: x,
+  approachY: y + 45,
+}));
 export const scenes = {
   // Keep the saved scene identifier so existing journals and sessions survive.
   shanghai: {
@@ -97,7 +249,9 @@ export const scenes = {
     height: 3300,
     spawn: { x: 590, y: landmark.y + 720 },
     landmark: { ...landmark, walkable: [lane, bridge] },
-    scenery: [...houses, ...trees],
+    paths: streets,
+    groundZones,
+    scenery: [...houses, ...trees, ...smallScenery],
     solids: [
       ...houses.map((o) => ({
         x: o.x - o.w * 0.37,
@@ -106,6 +260,20 @@ export const scenes = {
         h: o.h * 0.31,
       })),
       ...trees.map((o) => ({ x: o.x - 17, y: o.y - 20, w: 34, h: 24 })),
+      ...smallScenery
+        .filter((o) => o.type !== "sign")
+        .map((o) => ({
+          x: o.x - o.w * 0.42,
+          y: o.y - Math.min(o.h * 0.38, 62),
+          w: o.w * 0.84,
+          h: Math.min(o.h * 0.38, 62),
+        })),
+    ],
+    solidEllipses: groundZones.filter((o) => o.type === "pond"),
+    solidCircles: [
+      { x: 1155, y: landmark.y + 932, r: 20 },
+      { x: 387, y: landmark.y + 346, r: 18 },
+      ...newNeighbors.map((o) => ({ x: o.x, y: o.y, r: 20 })),
     ],
     districts: [
       { name: "Canal Lane", zh: "河巷", x: 0, y: 2046, w: 1254, h: 1254 },
@@ -135,7 +303,9 @@ export const scenes = {
         name: "Lin · 林",
         x: 1155,
         y: landmark.y + 932,
-        artHeight: 390,
+        artHeight: 260,
+        approachX: 1123,
+        approachY: landmark.y + 964,
         topic: "school",
       },
       {
@@ -144,7 +314,9 @@ export const scenes = {
         name: "Yun · 云奶奶",
         x: 387,
         y: landmark.y + 346,
-        artHeight: 195,
+        artHeight: 230,
+        approachX: 405,
+        approachY: landmark.y + 385,
         topic: "activities",
       },
       {
@@ -240,6 +412,37 @@ export const scenes = {
         pinyin: "Qǐngwèn, hái yǒu fángjiān ma?",
         meaning: "Excuse me, are there any rooms available?",
       },
+      {
+        id: "tea-table",
+        type: "inspect",
+        name: "Tea courtyard · 茶院",
+        x: 1760,
+        y: 1180,
+        zh: "我们坐下来喝茶吧。",
+        pinyin: "Wǒmen zuò xiàlái hē chá ba.",
+        meaning: "Let’s sit down and have tea.",
+      },
+      {
+        id: "well",
+        type: "inspect",
+        name: "Old well · 水井",
+        x: 1850,
+        y: 1325,
+        zh: "这是一个很老的水井。",
+        pinyin: "Zhè shì yí ge hěn lǎo de shuǐjǐng.",
+        meaning: "This is a very old well.",
+      },
+      {
+        id: "garden-bench",
+        type: "inspect",
+        name: "Garden bench · 长椅",
+        x: 3540,
+        y: 2330,
+        zh: "我们坐一会儿，再去散步。",
+        pinyin: "Wǒmen zuò yíhuìr, zài qù sànbù.",
+        meaning: "Let’s sit for a while, then go for a walk.",
+      },
+      ...newNeighbors,
     ],
     foreground: [
       {
@@ -284,10 +487,95 @@ export const scenes = {
     height: 800,
     spawn: { x: 600, y: 620 },
     scenery: [],
-    solids: [
-      { x: 80, y: 60, w: 340, h: 190 },
-      { x: 290, y: 275, w: 255, h: 130 },
-      { x: 770, y: 260, w: 330, h: 150 },
+    // The visible floor meets the rear walls behind the tea table, then narrows
+    // around the sofa, side cabinets and foreground planting by the doorway.
+    walkableFloor: [
+      [180, 525],
+      [180, 355],
+      [260, 310],
+      [420, 250],
+      [650, 250],
+      [770, 330],
+      [900, 430],
+      [1050, 510],
+      [1130, 570],
+      [1040, 680],
+      [890, 725],
+      [825, 785],
+      [385, 785],
+      [310, 710],
+      [230, 650],
+      [160, 570],
+    ],
+    solids: [],
+    // These are the visible furniture outlines in the 1200 × 800 painting.
+    // Blocking the whole outline keeps feet off both tops and cabinet fronts.
+    solidPolygons: [
+      [
+        [122, 75],
+        [408, 80],
+        [431, 213],
+        [235, 293],
+        [133, 244],
+      ], // bed
+      [
+        [0, 305],
+        [133, 335],
+        [177, 396],
+        [165, 523],
+        [0, 469],
+      ], // left cabinet
+      [
+        [514, 76],
+        [644, 105],
+        [645, 252],
+        [514, 222],
+      ], // back cabinet
+      [
+        [404, 117],
+        [485, 137],
+        [498, 220],
+        [430, 244],
+      ], // bedside table
+      [
+        [288, 270],
+        [459, 233],
+        [553, 286],
+        [548, 354],
+        [365, 414],
+        [292, 363],
+      ], // tea table
+      [
+        [766, 242],
+        [862, 220],
+        [1058, 313],
+        [1043, 449],
+        [926, 455],
+        [766, 373],
+      ], // sofa
+      [
+        [1022, 367],
+        [1111, 348],
+        [1190, 389],
+        [1178, 526],
+        [1048, 487],
+      ], // right cabinet
+      [
+        [198, 328],
+        [242, 306],
+        [299, 342],
+        [287, 393],
+        [228, 402],
+        [198, 373],
+      ], // floor cushion
+      [
+        [464, 331],
+        [510, 317],
+        [552, 349],
+        [548, 390],
+        [494, 411],
+        [460, 386],
+      ], // floor cushion
     ],
     interactables: [
       {
@@ -302,10 +590,10 @@ export const scenes = {
         id: "journal",
         type: "journal",
         name: "Journal · 旅行日记",
-        x: 485,
-        y: 443,
+        x: 596,
+        y: 418,
       },
-      { id: "momo-home", type: "friend", name: "Momo · 桃桃", x: 915, y: 460 },
+      { id: "momo-home", type: "friend", name: "Momo · 桃桃", x: 940, y: 520 },
     ],
   },
 };
@@ -324,15 +612,55 @@ export function pointInPolygon(x, y, polygon) {
   }
   return inside;
 }
+function circleHitsPolygon(x, y, r, polygon) {
+  if (pointInPolygon(x, y, polygon)) return true;
+  for (let i = 0; i < polygon.length; i++) {
+    const [ax, ay] = polygon[i],
+      [bx, by] = polygon[(i + 1) % polygon.length],
+      dx = bx - ax,
+      dy = by - ay,
+      t = Math.max(
+        0,
+        Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)),
+      );
+    if (Math.hypot(x - ax - t * dx, y - ay - t * dy) < r) return true;
+  }
+  return false;
+}
 export function canStand(scene, x, y, r = 15) {
   if (
+    !Number.isFinite(x) ||
+    !Number.isFinite(y) ||
     x < r + 25 ||
     y < r + 25 ||
     x > scene.width - r - 25 ||
     y > scene.height - r - 25 ||
-    scene.solids.some((rect) => circleHitsRect(x, y, r, rect))
+    (scene.solids || []).some((rect) => circleHitsRect(x, y, r, rect)) ||
+    (scene.solidPolygons || []).some((polygon) =>
+      circleHitsPolygon(x, y, r, polygon),
+    ) ||
+    (scene.solidCircles || []).some(
+      (o) => Math.hypot(x - o.x, y - o.y) < r + o.r,
+    ) ||
+    (scene.solidEllipses || []).some(
+      (o) =>
+        ((x - o.x - o.w / 2) / (o.w / 2 + r)) ** 2 +
+          ((y - o.y - o.h / 2) / (o.h / 2 + r)) ** 2 <
+        1,
+    )
   )
     return false;
+  if (scene.walkableFloor) {
+    for (let i = 0; i < 12; i++)
+      if (
+        !pointInPolygon(
+          x + Math.cos((i * Math.PI) / 6) * r,
+          y + Math.sin((i * Math.PI) / 6) * r,
+          scene.walkableFloor,
+        )
+      )
+        return false;
+  }
   const plate = scene.landmark;
   if (!plate) return true;
   for (let i = 0; i < 12; i++) {
@@ -348,6 +676,12 @@ export function canStand(scene, x, y, r = 15) {
       return false;
   }
   return true;
+}
+export function interactionPoint(interactable) {
+  return {
+    x: interactable.approachX ?? interactable.x,
+    y: interactable.approachY ?? interactable.y,
+  };
 }
 export function move(scene, position, dx, dy) {
   const next = { ...position },
@@ -380,10 +714,27 @@ export function districtAt(scene, position) {
   );
 }
 export function upgradeState(state) {
-  if (state.mapVersion === MAP_VERSION) return state;
+  const scene = scenes[state.scene] || scenes.shanghai;
+  if (state.mapVersion === MAP_VERSION) {
+    if (canStand(scene, state.position?.x, state.position?.y)) return state;
+    // A furniture correction should move an existing learner onto nearby floor,
+    // without discarding where they were exploring or any progress.
+    if (
+      Number.isFinite(state.position?.x) &&
+      Number.isFinite(state.position?.y)
+    ) {
+      for (let distance = 24; distance <= 512; distance += 16) {
+        for (let i = 0; i < 32; i++) {
+          const x = state.position.x + Math.cos((i * Math.PI) / 16) * distance,
+            y = state.position.y + Math.sin((i * Math.PI) / 16) * distance;
+          if (canStand(scene, x, y)) return { ...state, position: { x, y } };
+        }
+      }
+    }
+  }
   return {
     ...state,
     mapVersion: MAP_VERSION,
-    position: { ...(scenes[state.scene]?.spawn || scenes.shanghai.spawn) },
+    position: { ...scene.spawn },
   };
 }
