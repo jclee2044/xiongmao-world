@@ -1,0 +1,6 @@
+handoff/
+data/
+tools/
+test-results/
+node_modules/
+package-lock.json

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#7b8f79" />
+    <title>Panda’s Little World</title>
+    <link rel="icon" href="/assets/panda.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="welcome" id="welcome">
+      <span class="eyebrow">A LITTLE CHINESE, A LITTLE EVERY DAY</span>
+      <img
+        class="welcome-panda"
+        src="/assets/panda.png"
+        alt="Panda, your round cream-and-black plush companion"
+      />
+      <h1>Panda’s Little World</h1>
+      <p lang="zh-CN">慢慢来，我们一起走。</p>
+      <p>Take your time. We’ll wander together.</p>
+      <button class="primary" id="begin">
+        Wander with Panda <span aria-hidden="true">↗</span>
+      </button>
+      <p class="muted">No hurry. No right path. Just a little curiosity.</p>
+    </main>
+    <main class="game" id="game" hidden>
+      <header class="topbar">
+        <div class="place">
+          <span class="eyebrow" id="place-cn" lang="zh-CN">上海 · 小院</span>
+          <h1 id="place">Shanghai · A little courtyard</h1>
+        </div>
+        <nav aria-label="Your world">
+          <button id="update" hidden aria-label="Apply update">Update</button
+          ><button
+            id="home"
+            aria-label="Home"
+            title="Return to your little home"
+          >
+            ⌂ <span>Home</span></button
+          ><button id="journal" aria-label="Journal">
+            ▤ <span>Journal</span></button
+          ><button id="settings" aria-label="Settings">
+            ⚙ <span>Settings</span>
+          </button>
+        </nav>
+      </header>
+      <section class="world-wrap" aria-label="Neighborhood">
+        <canvas
+          id="world"
+          tabindex="0"
+          aria-label="Explore the courtyard with WASD or arrow keys. Press E near a person or object. Touch controls are below."
+        ></canvas>
+        <div class="scene-note">
+          <span class="dot"></span
+          ><span id="mode">A little world, just for you</span>
+        </div>
+        <aside class="panda-bubble">
+          <img src="/assets/panda.png" alt="" />
+          <div>
+            <span id="panda-message">Take your time.<br />I’m right here.</span>
+            <details id="panda-help">
+              <summary aria-label="Expand Panda’s help">▾</summary>
+              <p id="panda-explanation">
+                Walk over to Mei at the noodle shop. Say hello in any way you
+                like.
+              </p>
+            </details>
+          </div>
+        </aside>
+      </section>
+      <footer class="bottom-bar">
+        <div class="controls" aria-label="Movement controls">
+          <button data-direction="arrowup" aria-label="Walk up">↑</button
+          ><button data-direction="arrowleft" aria-label="Walk left">←</button
+          ><button data-direction="arrowdown" aria-label="Walk down">↓</button
+          ><button data-direction="arrowright" aria-label="Walk right">
+            →
+          </button>
+        </div>
+        <div class="control-note">
+          WASD / arrows · tap to walk<br /><span id="save-status"
+            >Welcome to your little world</span
+          >
+        </div>
+        <button class="primary" id="interact" disabled>
+          Walk closer to say hello
+        </button>
+      </footer>
+    </main>
+    <dialog id="conversation" class="conversation">
+      <div class="dialog-heading">
+        <span id="npc-name">Mei · 梅</span
+        ><button
+          class="close"
+          data-close="conversation"
+          aria-label="Close conversation"
+        >
+          ×
+        </button>
+      </div>
+      <div class="conversation-body">
+        <p id="last-user" class="muted"></p>
+        <p id="npc-zh" class="chinese" lang="zh-CN">你好！欢迎你。</p>
+        <p id="npc-pinyin" class="pinyin"></p>
+        <p id="npc-meaning" class="meaning"></p>
+        <div class="small-actions" id="speech-controls">
+          <button id="replay">↻ Replay</button
+          ><button id="slow-replay">Replay slowly</button
+          ><button id="stop-speech">Stop voice</button
+          ><button id="more-help">More help</button
+          ><button id="less-help">Less help</button>
+        </div>
+        <p id="help-inline" class="notice"></p>
+      </div>
+      <form id="reply-form">
+        <label for="reply">Your turn · say what’s on your mind</label>
+        <div class="reply-row">
+          <input
+            id="reply"
+            maxlength="500"
+            autocomplete="off"
+            placeholder="你好！我想吃面。"
+          /><button class="primary" id="send">Send ↗</button>
+        </div>
+      </form>
+      <p id="dialog-status" role="status" class="muted"></p>
+      <p id="reply-notice" class="muted"></p>
+    </dialog>
+    <dialog id="panel">
+      <div class="dialog-heading">
+        <h2 id="panel-title"></h2>
+        <button class="close" data-close="panel" aria-label="Close panel">
+          ×
+        </button>
+      </div>
+      <div id="panel-content"></div>
+    </dialog>
+    <div id="toast" role="status" hidden></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

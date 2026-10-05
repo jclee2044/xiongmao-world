@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "Panda’s Little World",
+  "short_name": "Panda’s World",
+  "description": "Wander, meet people, and carry a little Chinese into your day.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5efdf",
+  "theme_color": "#7b8f79",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

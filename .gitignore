@@ -1,0 +1,9 @@
+.env
+data/
+node_modules/
+test-results/
+*.log
+*.sqlite*
+tools/downloads/
+tools/ollama/
+tools/speech/

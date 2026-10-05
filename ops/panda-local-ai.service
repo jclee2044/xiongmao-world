@@ -1,0 +1,19 @@
+[Unit]
+Description=Panda's Little World private local AI
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/jlrj/Documents/lotus
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Environment=OLLAMA_MODELS=/home/jlrj/Documents/lotus/data/models
+Environment=OLLAMA_NO_CLOUD=1
+Environment=LD_LIBRARY_PATH=/home/jlrj/Documents/lotus/tools/ollama/usr/lib/ollama
+ExecStart=/home/jlrj/Documents/lotus/tools/ollama/usr/bin/ollama serve
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+UMask=0077
+
+[Install]
+WantedBy=default.target

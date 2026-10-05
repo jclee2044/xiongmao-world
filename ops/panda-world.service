@@ -1,0 +1,17 @@
+[Unit]
+Description=Panda's Little World local game
+After=network.target panda-local-ai.service
+Wants=panda-local-ai.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/jlrj/Documents/lotus
+EnvironmentFile=-/home/jlrj/Documents/lotus/.env
+ExecStart=/home/jlrj/.local/share/mise/installs/node/26.8.2/bin/node /home/jlrj/Documents/lotus/server/index.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+UMask=0077
+
+[Install]
+WantedBy=default.target
