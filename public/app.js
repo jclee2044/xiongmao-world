@@ -1,6 +1,13 @@
+import { createDirections } from "./game/directions.js";
+import { shops } from "./data/shops.js";
+import { createGoals } from "./game/goals.js";
+import { createWordHelp } from "./game/words.js";
+import { createAdventure } from "./game/adventure.js";
+import { AREA_XP, award } from "./data/adventure.js";
 import { World } from "./game/engine.js";
 import { Persistence, api } from "./game/persistence.js";
 import { Speech } from "./game/speech.js";
+import { Ambience } from "./game/ambience.js";
 import { Music } from "./game/music.js";
 import { npcs, lexicon, starters } from "./data/content.js";
 import { culture } from "./data/culture.js";
@@ -20,6 +27,7 @@ const escape = (text) =>
       ],
   );
 let world,
+  lastRounds = null,
   currentNpc = null,
   currentReply = null,
   helpLevel = 0,
@@ -34,6 +42,14 @@ const persistence = new Persistence(
 );
 // Unlock audio in the first gesture, but wait for saved preferences before sound.
 const music = new Music({ ...persistence.state.settings, music: 0 });
+const ambience = new Ambience(
+  () => world,
+  () => persistence.state.settings,
+);
+const duckAudio = (active) => {
+  music.duck(active);
+  ambience.duck(active);
+};
 const speech = new Speech(
   (text) => {
     $("dialog-status").textContent = text;
@@ -42,7 +58,7 @@ const speech = new Speech(
     if ($("panel-audio-status")) $("panel-audio-status").textContent = text;
   },
   () => persistence.state.settings,
-  (active) => music.duck(active),
+  duckAudio,
 );
 function toast(text) {
   $("toast").textContent = text;
@@ -61,6 +77,10 @@ function updatePlace() {
 }
 function applySettings() {
   music.applySettings(persistence.state.settings);
+  ambience.applySettings();
+  document.documentElement.dataset.motion = String(
+    persistence.state.settings.motion,
+  );
   document.documentElement.dataset.textSize =
     persistence.state.settings.textSize;
   if (currentReply) displayReply(currentReply);
@@ -75,9 +95,61 @@ function openPanel(title, html) {
   speech.stop();
   $("panel-title").textContent = title;
   $("panel-content").innerHTML = html;
+  animatePanel($("panel-content"));
   if (!$("panel").open) $("panel").showModal();
   world?.pause(true);
 }
+function animatePanel(element) {
+  if (
+    persistence.state.settings.motion &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+    element.animate(
+      [
+        { opacity: 0, transform: "translateY(6px)" },
+        { opacity: 1, transform: "translateY(0)" },
+      ],
+      { duration: 180, easing: "ease-out" },
+    );
+}
+function panda(text) {
+  $("panda-message").textContent = text;
+}
+function updateXP() {
+  goals.refresh();
+  if (!$("xp-progress")) return;
+  const xp = persistence.state.adventure.xp;
+  $("xp-progress").value = Math.min(AREA_XP, xp);
+  $("xp-text").textContent = `${xp} / ${AREA_XP} XP`;
+  $("xp-progress").setAttribute(
+    "aria-label",
+    xp >= AREA_XP
+      ? "Next neighborhood unlocked"
+      : `${xp} of ${AREA_XP} experience`,
+  );
+}
+const goals = createGoals({ persistence, world: () => world, panda, speech });
+const wordHelp = createWordHelp({
+  discover: (word) => goals.discover(word),
+  speech,
+});
+const adventure = createAdventure({
+  persistence,
+  openPanel,
+  speech,
+  world: () => world,
+  panda,
+  refresh: updateXP,
+  onRecording: duckAudio,
+});
+const directions = createDirections({
+  persistence,
+  openPanel,
+  speech,
+  world: () => world,
+  panda,
+  refresh: updateXP,
+});
 const panels = createPanels({
   persistence,
   openPanel,
@@ -109,6 +181,14 @@ const practice = createPractice({
   onChange: () => updatePracticeStatus(),
 });
 function updatePracticeStatus() {
+  const rounds = Object.values(persistence.state.practice.rounds || {}).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  if (lastRounds !== null && rounds > lastRounds)
+    persistence.change((s) => award(s.adventure, 20 * (rounds - lastRounds)));
+  lastRounds = rounds;
+  updateXP();
   const status = practice.status();
   if ($("practice-active"))
     $("practice-active").textContent = status ? `进行中：${status}` : "";
@@ -122,6 +202,13 @@ practiceButton.onclick = () => {
   practice.catalog();
 };
 $("panda-help").parentElement.append(practiceButton);
+const pandaListen = document.createElement("button");
+pandaListen.id = "panda-listen";
+pandaListen.textContent = "🔊";
+pandaListen.setAttribute("aria-label", "听熊猫说话");
+pandaListen.onclick = () =>
+  speech.speak($("panda-message").textContent, false, "male");
+$("panda-help").parentElement.append(pandaListen);
 const practiceStatus = document.createElement("p");
 practiceStatus.id = "practice-active";
 practiceStatus.lang = "zh-CN";
@@ -164,15 +251,41 @@ function startWorld() {
         !matchMedia("(prefers-reduced-motion: reduce)").matches,
     }),
     getFound: () => persistence.state.found.includes("momo"),
+    getAdventure: () => persistence.state.adventure,
+    onGuestArrive: () => {
+      persistence.change((s) => {
+        if (s.adventure.tea === "invited") s.adventure.tea = "seated";
+      });
+      panda("乔已经坐下了，我们也去喝茶吧。");
+    },
     onNear: (n) => {
       $("interact").disabled = !n;
-      $("interact").textContent = n
-        ? n.type === "npc"
-          ? `Say hello to ${n.name}`
-          : n.name
-        : "Walk closer to say hello";
+      $("interact").textContent = n ? n.name : "四处走走";
+      if (n && Date.now() - (panda.last || 0) > 6500) {
+        panda.last = Date.now();
+        const hints = {
+          lian: "莲饿了。我们请她吃火锅吧！",
+          lan: "兰好像在找什么。去问问她吧。",
+          qiao: "乔今天有空。要不要请她喝茶？",
+          "tea-table": "两只杯子！找个朋友一起喝茶吧。",
+          "lost-flowers": "石头旁边是不是有一束花？",
+          museum: "里面有苏州的故事，我们进去看看吧。",
+          dumplings: "你想吃什么？试着用中文点菜吧。",
+        };
+        panda(
+          hints[n.id] ||
+            (n.type === "npc" || n.type === "passerby"
+              ? "我们和他聊聊吧。"
+              : n.type === "door"
+                ? "我们可以进去。"
+                : n.type === "inspect"
+                  ? "看看这里吧。"
+                  : "我们一起试试吧。"),
+        );
+      }
     },
     onMove: (scene, position) => {
+      music.setScene(scenes[scene]);
       persistence.change((s) => {
         s.scene = scene;
         s.position = { ...position };
@@ -185,16 +298,39 @@ function startWorld() {
   updatePlace();
   applySettings();
   updatePracticeStatus();
+  updateXP();
+  panda("欢迎！先认识五位邻居吧。左上角有我们的小目标。");
 }
 function interact(n) {
+  goals.nature(n.id);
+  directions.visit(n.id);
+  if (n.shopId) return openConversation(shops[n.shopId].seller, n.shopId);
+  if (n.id === "sheep-keepsake") {
+    openPanel(
+      "小羊 · A gift from Lian",
+      `<img src="/assets/world/sheep-gift.png" alt="Your stuffed sheep" width="130" height="145" class="keepsake-portrait"/><p class="chinese" lang="zh-CN">${escape(n.zh)}</p><p class="notice">Earned by treating Lian to hotpot at the canal restaurant.</p>`,
+    );
+    speech.speak(n.zh, false, "female");
+    return;
+  }
+  if (adventure.interact(n)) return;
   if (practice.visit(n.id)) return;
   if (n.type === "practice") {
     practice.start(n.activity);
   } else if (n.type === "door") {
     speech.stop();
     world.enterDoor(n);
+    if (
+      n.target === "restaurant" &&
+      persistence.state.adventure.hungry === "invited"
+    ) {
+      persistence.change((s) => (s.adventure.hungry = "dining"));
+      panda("莲跟我们进来了！一起坐下吃火锅吧。");
+      updateXP();
+    }
     updatePlace();
-  } else if (n.type === "npc") openConversation(n.id);
+  } else if (["npc", "passerby", "guest"].includes(n.type))
+    openConversation(n.dialogueId || n.id);
   else if (n.type === "journal") panels.journal();
   else if (n.type === "stuffy") {
     if (!persistence.state.found.includes("momo"))
@@ -205,7 +341,7 @@ function interact(n) {
       });
     openPanel(
       "Momo · 桃桃",
-      '<p class="chinese" lang="zh-CN">我们一起回家吧。</p><p>Let’s go home together.</p><button class="primary" id="bring-home">Take Momo home ↗</button>',
+      `<p class="chinese" lang="zh-CN">我们一起回家吧。</p>${persistence.state.settings.translation ? "<p>Let’s go home together.</p>" : ""}<button class="primary" id="bring-home">Take Momo home ↗</button>`,
     );
     $("bring-home").onclick = () => {
       $("panel").close();
@@ -216,7 +352,7 @@ function interact(n) {
   } else if (n.type === "friend")
     openPanel(
       "Momo · 桃桃",
-      '<p class="chinese" lang="zh-CN">和你在一起，真好。</p><p>It’s good to be with you.</p>',
+      `<p class="chinese" lang="zh-CN">和你在一起，真好。</p>${persistence.state.settings.translation ? "<p>It’s good to be with you.</p>" : ""}`,
     );
   else if (n.type === "animal") {
     const animals = {
@@ -236,8 +372,8 @@ function interact(n) {
         meaning: "Hello, little rabbit! Your ears are so long.",
       },
     };
-    const text = animals[n.id];
-    if (!text) return;
+    const text = animals[n.id] || n;
+    if (!text.zh) return;
     openPanel(
       n.name,
       `<p class="chinese" lang="zh-CN">${text.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${text.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${text.meaning}</p>` : ""}<div class="small-actions"><button id="animal-replay">听一听</button><button id="animal-practice">湖边找动物</button></div><p id="panel-audio-status" role="status" class="muted"></p>`,
@@ -247,7 +383,7 @@ function interact(n) {
   } else if (n.type === "inspect") {
     const fact = culture[n.culture];
     const factHtml = fact
-      ? `<div class="panel-section"><h3 lang="zh-CN">${escape(fact.title.split(" · ")[0])}</h3><p class="chinese" lang="zh-CN">${escape(fact.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(fact.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(fact.meaning)}</p>` : ""}<div class="small-actions"><button id="culture-replay">听苏州的故事</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">资料来源 ↗</a></div><p class="notice" lang="zh-CN">这是简化的苏州绘本世界，景点的位置和路线经过了调整。</p>${persistence.state.settings.translation ? '<p class="notice">This is a condensed illustrated interpretation of Suzhou; places and routes have been rearranged.</p>' : ""}</div>`
+      ? `<div class="panel-section"><h3 lang="zh-CN">${escape(fact.title.split(" · ")[0])}</h3><p class="chinese" lang="zh-CN">${escape(fact.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(fact.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(fact.meaning)}</p>` : ""}<div class="small-actions"><button id="culture-replay">听苏州的故事</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">资料来源 ↗</a></div><p class="notice" lang="zh-CN">这是游戏里的苏州。真的苏州更大，路也不一样。</p>${persistence.state.settings.translation ? '<p class="notice">This is a condensed illustrated interpretation of Suzhou; places and routes have been rearranged.</p>' : ""}</div>`
       : "";
     openPanel(
       n.name,
@@ -255,6 +391,7 @@ function interact(n) {
     );
     if (fact) $("culture-replay").onclick = () => speech.speak(fact.zh);
     $("place-replay").onclick = () => speech.speak(n.zh);
+    speech.speak(n.zh);
     const hosts = {
       tea: "qiao",
       books: "bo",
@@ -272,11 +409,18 @@ function interact(n) {
     }
   }
 }
-function openConversation(id) {
+let currentShop = null;
+function openConversation(id, shopId = null) {
+  currentShop = shopId;
+  $("shop-view")?.remove();
+  $("shop-purchases")?.remove();
+  $("conversation").classList.toggle("shop-conversation", Boolean(shopId));
   requestGeneration++;
   controller?.abort();
   speech.stop();
   currentNpc = id;
+  goals.meet(id);
+  speech.voice = npcs[id]?.voice || "male";
   helpLevel = persistence.state.settings.help === "more" ? 1 : 0;
   $("npc-name").textContent = npcs[id].name;
   $("reply").value = "";
@@ -292,35 +436,130 @@ function openConversation(id) {
       notice: "",
     },
   );
-  $("dialog-status").textContent = last
-    ? "Welcome back. Your conversation is remembered."
-    : "Say hello, ask a question, or choose a new topic.";
+  $("dialog-status").textContent = "";
+  $("npc-quest")?.remove();
+  $("directions-quest")?.remove();
+  if (["lin", "hao"].includes(id) && !shopId) {
+    const button = document.createElement("button");
+    button.id = "directions-quest";
+    button.className = "quest-invitation";
+    button.textContent = id === "lin" ? "火锅店怎么走？" : "我来帮你找书店。";
+    button.onclick = () => {
+      $("conversation").close();
+      id === "lin" ? directions.find() : directions.give();
+    };
+    $("speech-controls").append(button);
+  }
+  if (id === "lan" || id === "qiao" || id === "lian") {
+    const button = document.createElement("button");
+    button.id = "npc-quest";
+    button.className = "quest-invitation";
+    button.textContent =
+      id === "lian"
+        ? "我请你吃火锅吧！"
+        : id === "lan"
+          ? persistence.state.adventure.flowers === "found"
+            ? "我找到你的花了！"
+            : "你在找什么？"
+          : "想一起喝茶吗？";
+    button.onclick = () => {
+      $("conversation").close();
+      id === "lian"
+        ? adventure.hungryQuest()
+        : id === "lan"
+          ? adventure.flowerQuest()
+          : adventure.teaQuest();
+    };
+    $("speech-controls").append(button);
+  }
+  if (shopId) {
+    const shop = shops[shopId],
+      view = document.createElement("img");
+    view.id = "shop-view";
+    view.src = shop.image;
+    view.alt = shop.name;
+    $("conversation").insertBefore(
+      view,
+      $("conversation").querySelector(".conversation-body"),
+    );
+    $("npc-name").textContent = shop.name + " · " + npcs[id].name;
+    $("reply").placeholder = "这个多少钱？";
+    displayReply({
+      chinese: shop.greeting,
+      pinyin: shop.pinyin,
+      meaning: shop.items.map((i) => `${i.en}: ¥${i.price}`).join(" · "),
+      topic: "food",
+      mode: "authored",
+      notice: "",
+    });
+    renderShopPurchases();
+  }
   $("conversation").showModal();
+  animatePanel($("conversation"));
   world.pause(true);
   $("reply").focus();
+  speech.speak(currentReply.chinese, false, npcs[id]?.voice || "male");
+}
+function renderShopPurchases() {
+  $("shop-purchases")?.remove();
+  if (!currentShop) return;
+  const box = document.createElement("section");
+  box.id = "shop-purchases";
+  const a = persistence.state.adventure;
+  const money = document.createElement("p");
+  money.textContent = `零钱 ¥${a.coins} · Game coins`;
+  box.append(money);
+  for (const item of shops[currentShop].items) {
+    const b = document.createElement("button");
+    b.dataset.buy = item.id;
+    const bought = a.purchases.includes(item.id);
+    b.textContent = bought
+      ? `${item.zh} ✓ 已买`
+      : `${item.zh} · ¥${item.price}`;
+    b.disabled = bought || a.coins < item.price;
+    b.onclick = () => {
+      persistence.change((s) => {
+        const a = s.adventure;
+        if (a.purchases.includes(item.id) || a.coins < item.price) return;
+        a.coins -= item.price;
+        a.purchases.push(item.id);
+        award(a, 10);
+        s.journal.push(
+          `Bought ${item.zh} at ${shops[currentShop].name} for ¥${item.price}.`,
+        );
+        s.journal = s.journal.slice(-50);
+      });
+      const thanks = "谢谢！给你。下次再来！";
+      displayReply({
+        chinese: thanks,
+        pinyin: "Xièxie! Gěi nǐ. Xià cì zài lái!",
+        meaning: "Thank you! Here you are. Come again!",
+        topic: "food",
+        mode: "authored",
+        notice: "",
+      });
+      speech.speak(thanks, false, npcs[currentNpc]?.voice || "female");
+      updateXP();
+      renderShopPurchases();
+    };
+    box.append(b);
+  }
+  const ask = document.createElement("button");
+  ask.textContent = "多少钱？";
+  ask.onclick = () => {
+    $("reply").value = "这个多少钱？";
+    $("reply-form").requestSubmit();
+  };
+  box.append(ask);
+  $("conversation").querySelector(".conversation-body").append(box);
 }
 function displayReply(reply) {
   currentReply = reply;
   const settings = persistence.state.settings;
   $("npc-zh").replaceChildren();
-  const words = [...lexicon].sort((a, b) => b.zh.length - a.zh.length);
-  let remaining = reply.chinese;
-  while (remaining) {
-    const match = words.find((w) => remaining.startsWith(w.zh));
-    if (match) {
-      const b = document.createElement("button");
-      b.className = "help-word";
-      b.textContent = match.zh;
-      b.type = "button";
-      b.setAttribute("aria-label", `Explain ${match.zh}`);
-      b.onclick = () => explain(match);
-      $("npc-zh").append(b);
-      remaining = remaining.slice(match.zh.length);
-    } else {
-      $("npc-zh").append(document.createTextNode(remaining[0]));
-      remaining = remaining.slice(1);
-    }
-  }
+  animatePanel($("npc-zh"));
+  $("npc-zh").textContent = reply.chinese;
+  wordHelp.annotate($("npc-zh"));
   $("npc-pinyin").textContent = reply.pinyin;
   $("npc-pinyin").hidden = !settings.pinyin;
   $("toggle-pinyin").textContent = settings.pinyin
@@ -381,8 +620,99 @@ function updateHelp() {
           : "";
   if (helpLevel >= 2) $("panda-help").open = true;
 }
+let coachController,
+  coachGeneration = 0;
+function showPandaCoach() {
+  coachController?.abort();
+  coachGeneration++;
+  $("coach-send").disabled = false;
+  $("coach-status").textContent = "";
+  $("coach-pinyin").hidden = true;
+  const starter =
+    (currentReply?.topic === npcs[currentNpc]?.topic &&
+      npcs[currentNpc]?.starter) ||
+    starters[currentReply?.topic || "greeting"];
+  const message =
+    helpLevel >= 3
+      ? starter.example
+      : helpLevel >= 2
+        ? starter.zh
+        : "别着急，我们一起想。";
+  $("coach-zh").textContent = message;
+  $("coach-tip").textContent =
+    helpLevel >= 2 ? starter.why : `They said: ${currentReply.meaning}`;
+  $("coach-next").textContent =
+    helpLevel >= 2 ? "Show an example" : "Give me a sentence starter";
+  $("coach-next").hidden = helpLevel >= 3;
+  $("coach-use").hidden = helpLevel < 3;
+  $("coach-next").onclick = () => {
+    helpLevel = Math.min(3, helpLevel + 1);
+    updateHelp();
+    showPandaCoach();
+  };
+  $("coach-use").onclick = () => {
+    $("reply").value = starter.example;
+    $("panda-coach").close();
+    $("reply").focus();
+  };
+  $("coach-listen").onclick = () => speech.speak(message, false, "male");
+  if (!$("panda-coach").open) $("panda-coach").showModal();
+  wordHelp.annotate($("coach-zh"));
+  speech.speak(message, false, "male");
+}
+$("foreground-panda").onclick = () => {
+  helpLevel = Math.max(1, helpLevel);
+  showPandaCoach();
+};
+$("coach-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const question = $("coach-question").value.trim();
+  if (!question) return;
+  coachController?.abort();
+  coachController = new AbortController();
+  const token = ++coachGeneration;
+  $("coach-send").disabled = true;
+  $("coach-status").textContent = "Panda is thinking…";
+  speech.stop();
+  try {
+    const answer = await api(
+      "/api/coach",
+      {
+        question,
+        context: `${currentReply?.chinese || ""} (${currentReply?.meaning || ""})`,
+      },
+      AbortSignal.any([coachController.signal, AbortSignal.timeout(65000)]),
+    );
+    if (token !== coachGeneration || !$("panda-coach").open) return;
+    $("coach-zh").textContent = answer.chinese;
+    $("coach-tip").textContent = answer.explanation;
+    $("coach-pinyin").textContent = answer.pinyin;
+    $("coach-pinyin").hidden = !persistence.state.settings.pinyin;
+    $("coach-status").textContent =
+      answer.mode === "local"
+        ? "Panda’s language tutor"
+        : "Panda’s offline language guide";
+    $("coach-listen").onclick = () =>
+      speech.speak(answer.chinese, false, "male");
+    $("coach-use").hidden = false;
+    $("coach-use").onclick = () => {
+      $("reply").value = answer.chinese;
+      $("panda-coach").close();
+      $("reply").focus();
+    };
+    wordHelp.annotate($("coach-zh"));
+    speech.speak(answer.chinese, false, "male");
+  } catch (error) {
+    if (token === coachGeneration && $("panda-coach").open)
+      $("coach-status").textContent =
+        "I couldn’t finish that answer. Try again, or use a sentence starter.";
+  } finally {
+    if (token === coachGeneration) $("coach-send").disabled = false;
+  }
+};
 $("begin").onclick = async () => {
   music.enable().catch(() => {});
+  ambience.enable();
   $("begin").disabled = true;
   $("begin").textContent = "Loading…";
   await persistence.load();
@@ -413,7 +743,27 @@ $("begin").onclick = async () => {
 $("interact").onclick = () => world.interact();
 $("home").onclick = () => {
   speech.stop();
-  world.changeScene(world.scene.id === "home" ? "shanghai" : "home");
+  if (world.scene.id === "home") {
+    world.enterDoor(
+      world.scene.interactables.find((o) => o.id === "outside-door"),
+    );
+  } else {
+    if (world.scene.id !== "shanghai") {
+      const exit = world.scene.interactables.find(
+        (o) => o.type === "door" && o.target === "shanghai",
+      );
+      if (exit) world.enterDoor(exit);
+    }
+    world.walkTo(
+      scenes.shanghai.interactables.find((o) => o.id === "home-north"),
+      true,
+    );
+    panda(
+      persistence.state.adventure.hungry === "done"
+        ? "回家吧！小羊在家里等我们。"
+        : "回家吧！我们一起走。",
+    );
+  }
   updatePlace();
 };
 $("journal").onclick = panels.journal;
@@ -423,19 +773,31 @@ for (const button of document.querySelectorAll("[data-close]"))
   button.onclick = () => $(button.dataset.close).close();
 for (const dialog of document.querySelectorAll("dialog"))
   dialog.addEventListener("close", () => {
-    if (dialog.id === "panel" && !dialog.open) speech.stop();
+    if (dialog.id === "panda-coach" && !dialog.open) {
+      speech.stop();
+      coachController?.abort();
+      coachGeneration++;
+    }
+    if (dialog.id === "panel" && !dialog.open) {
+      speech.stop();
+      adventure.close();
+      world?.standUp();
+      dialog.classList.remove("seated-panel");
+    }
     if (dialog.id === "conversation" && !dialog.open) {
       requestGeneration++;
       controller?.abort();
       speech.stop();
       currentNpc = null;
       $("panda-help").open = false;
-      $("panda-message").textContent = "帮助";
+      panda("我们接下来做什么？看看左上角的目标吧。");
     }
     if (!$("panel").open && !$("conversation").open) world?.pause(false);
   });
-$("replay").onclick = () => speech.speak(currentReply.chinese);
-$("slow-replay").onclick = () => speech.speak(currentReply.chinese, true);
+$("replay").onclick = () =>
+  speech.speak(currentReply.chinese, false, npcs[currentNpc]?.voice || "male");
+$("slow-replay").onclick = () =>
+  speech.speak(currentReply.chinese, true, npcs[currentNpc]?.voice || "male");
 $("stop-speech").onclick = () => speech.stop();
 $("toggle-pinyin").onclick = () => {
   const pinyin = !persistence.state.settings.pinyin;
@@ -444,6 +806,7 @@ $("toggle-pinyin").onclick = () => {
 $("more-help").onclick = () => {
   helpLevel = Math.min(3, helpLevel + 1);
   updateHelp();
+  showPandaCoach();
 };
 $("less-help").onclick = () => {
   helpLevel = Math.max(0, helpLevel - 1);
@@ -462,7 +825,12 @@ $("reply-form").onsubmit = async (e) => {
   try {
     const result = await api(
       "/api/dialogue",
-      { npcId: id, text, history: persistence.state.history },
+      {
+        npcId: id,
+        text,
+        history: persistence.state.history,
+        shopId: currentShop,
+      },
       AbortSignal.any([controller.signal, AbortSignal.timeout(65000)]),
     );
     if (
@@ -487,11 +855,12 @@ $("reply-form").onsubmit = async (e) => {
           helpLevel > 0,
         );
     });
-    $("last-user").textContent = `You: ${text}`;
+    adventure.conversation();
+    $("last-user").textContent = text;
     $("reply").value = "";
     displayReply(result);
-    $("dialog-status").textContent =
-      "Ask something else, change topics, or pause whenever you like.";
+    speech.speak(result.chinese, false, npcs[id]?.voice || "male");
+    $("dialog-status").textContent = "+10 XP";
   } catch (error) {
     if (generation === requestGeneration && error.name !== "AbortError")
       $("dialog-status").textContent = error.message;
@@ -506,7 +875,20 @@ window.addEventListener("online", () => persistence.flush());
 window.addEventListener("pagehide", () => persistence.cache());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
+    adventure.close();
     speech.stop();
     persistence.flush();
   }
+});
+
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (
+    b &&
+    persistence.state.settings.motion &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+    b.animate([{ transform: "scale(.96)" }, { transform: "scale(1)" }], {
+      duration: 160,
+    });
 });

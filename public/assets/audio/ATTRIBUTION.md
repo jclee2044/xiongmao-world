@@ -1,5 +1,18 @@
 # Music attribution
 
+**Asian Music – Magical Dream — Sonican**
+
+- Track and authorized download: https://pixabay.com/music/china-asian-music-magical-dream-321895/
+- License: Pixabay Content License, https://pixabay.com/service/license-summary/
+- File: `sonican-asian-music-magical-dream.mp3`
+- Duration: 78.86 seconds; 256 kbps stereo MP3.
+- Downloaded on: 2026-10-06 from Pixabay's published CDN URL: https://cdn.pixabay.com/download/audio/2025/04/02/audio_84a4440c17.mp3?filename=sonican-asian-music-magical-dream-321895.mp3
+- SHA-256: `7f8404dbafe5de1ff1db11b30080ce774e4e7b5cc8aecf32a9e241739abce320`
+
+This is the indoor recording selected by the user. Credit is shown in Settings even though Pixabay does not require attribution. The track page labels it Content ID registered; retain the source and license record when publishing gameplay videos.
+
+## Outdoor recording
+
 **Asia — FSM Team**
 
 Music by https://www.free-stock-music.com

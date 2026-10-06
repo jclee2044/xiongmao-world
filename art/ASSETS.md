@@ -61,3 +61,61 @@ Six initial built-in generations and six built-in corrections add three atlases 
 The six additions total **8,885,810 bytes**. All six PNG/WebP pixel comparisons reported absolute error zero; alpha is preserved in the atlases. All shipped generated WebPs now total **24,900,318 bytes**. Local reproduction PNGs remain in ignored `art/source/`; shipped assets and alpha-bound metadata are versioned.
 
 Room plates render in a 1200 × 800 world with traced floor and furniture polygons. Foreground wall clips put nearby actors behind the doorway/walls. The outdoor lake is drawn directly with Canvas gradients, irregular banks, clipped ripples and lily pads; its collision uses the same polygon. No raster art edit creates the water. Animals use three simple poses; visitors reuse existing human art. Pause/reduced motion freeze ambient time and movement. All outdoor and room plates preload before play, including a saved-home first exit. Settled room, lake and mobile screenshots were inspected after automated checks.
+
+## Version 0.6.0
+
+The six selected assets below were generated with the **built-in image-generation tool**. Exact prompts are preserved in [prompts/v0.6.json](prompts/v0.6.json). The supplied Panda and Suzhou scene references guided style and identity. The assets are interpretations tailored to the game's sprite/atlas layout, not exact reproductions of the references.
+
+| Shipped asset                                 | Built-in original                               | Use                                                          |
+| --------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| `public/assets/characters/panda-v2.png`       | `exec-5b4f0686-c302-4880-a062-f844373c0e5f.png` | Six-state Panda atlas: idle, hops, direction and expressions |
+| `public/assets/characters/neighbors-walk.png` | `exec-ab86b5af-07b4-4279-9ce0-2fae950a4330.png` | Six neighbors, three walk poses each                         |
+| `public/assets/characters/qiao-seated.png`    | `exec-5fe8259c-0989-4286-b0b6-f11c01edd23d.png` | Tea guest seated at the courtyard table                      |
+| `public/assets/world/earth.png`               | `exec-83c94f90-276e-4383-a5c2-0e1f6f9621a9.png` | Tiled earth/gravel ground material                           |
+| `public/assets/world/museum-interior.png`     | `exec-b9185f96-6ad3-4c58-971f-96c0eb55b1ca.png` | Walkable illustrative museum interior                        |
+| `public/assets/world/restaurant-interior.png` | `exec-2d10d774-ce9f-4dcd-9ba3-a65531ebbb69.png` | Walkable restaurant and hot-pot interior                     |
+
+The Panda sheet crops six equal cells. The neighbor walking atlas has three columns and six rows. Museum and restaurant pictures show simplified exhibits and furnishings. Suzhou collection sources are in [SUZHOU_RESEARCH.md](../SUZHOU_RESEARCH.md). Source PNGs remain outside the public source tree; shipped PNG assets are cached for offline exploration.
+
+## Xiongmao World 0.7
+
+Generated using the built-in `image_gen` tool. Exact prompts and final saved asset paths are in [`art/prompts/v0.7.json`](prompts/v0.7.json).
+
+- `public/assets/characters/player-idle.png`: ten transparent watercolor poses (five bun, five short hair), referenced from the existing player atlas. Runtime crops align the feet, mirror retained facing and recolor the sweatshirt to preserve outfit preferences.
+- `public/assets/world/hotpot-table.png`: transparent watercolor shared hotpot table and stools. Used for the extra restaurant tables.
+- Existing neighbor walking-sheet row crops were tightened to exclude the preceding row's feet, removing the floating artifact above the florist's head. Three walking poses remain distinct.
+
+- `public/assets/world/hotpot-view.png`: a close first-person tabletop painting with five ingredient plates. Transparent button regions over each plate speak its name and reveal pinyin/meaning. Built-in original: `exec-8439b36d-93f6-48bb-92a9-5ae1b3401dbd.png`.
+
+## Xiongmao World 0.8
+
+All eight final raster assets below were generated or edited with the built-in `image_gen.imagegen` tool. The exact calls are recorded in [v0.8.json](prompts/v0.8.json) and [market refinements](prompts/v0.8-market-refinements.json). The final market retains the rich stalls and lanterns of the earlier design with modestly widened paths, complete roofs and clear perimeter paving. Earlier market iterations remain as source alternatives; runtime uses only v3.
+
+| Saved asset                                      | Selected built-in output                        | Use                                                                                   |
+| ------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `public/assets/characters/neighbors-walk-v2.png` | `exec-625decf1-9a1d-4aa4-8ce7-b514f981c1ea.png` | Four distinct poses for each of six adult neighbors; individually bounded atlas cells |
+| `public/assets/characters/children-walk.png`     | `exec-3c6acd78-9454-4c74-b3fa-115af7a5f091.png` | Four walking poses each for two children                                              |
+| `public/assets/characters/lin-walk.png`          | `exec-48ccbb77-e973-4b2d-bbf5-3d8f5b410ef1.png` | Lin's four actual walking frames                                                      |
+| `public/assets/characters/seated-friends.png`    | `exec-19c35a3e-80c1-4104-8aee-a5a9893d3735.png` | Both player hairstyles and Lian seated; player clothes recolored at runtime           |
+| `public/assets/world/restaurant-interior-v2.png` | `exec-fec82fa0-1174-44d0-a8b9-1be13a925ea1.png` | Four matching hotpot tables, two occupied and two empty                               |
+| `public/assets/world/fruit-trees-v2.png`         | `exec-866aa2f1-5369-4e7e-aa7b-b8baa58ea604.png` | Watercolor pear, bayberry and tangerine trees                                         |
+| `public/assets/world/sheep-gift.png`             | `exec-cb4dfead-883c-42ce-a0fa-3f562db5ec77.png` | Lian's persistent hotpot thank-you keepsake                                           |
+| `public/assets/world/market-lane-v3.png`         | `exec-b0b99064-d499-4aeb-b372-d22d20bef02d.png` | Final balanced canal market with traced shop, water and bridge geometry               |
+
+Original generation files remain in `/home/jlrj/.codex/generated_images/01a10ec6-5476-7552-8f5a-8bfc761b6f49/`. PNGs are copied losslessly into the game; sprite cropping and clothing colors are runtime canvas operations. The service worker includes all final assets for offline exploration.
+
+## Character consistency and market conversations — 0.9
+
+All assets below were made with the built-in `image_gen.imagegen` tool and copied into the project. The exact prompt sets are [character](prompts/v0.8-character-consistency.json), [player](prompts/v0.8-player-consistency.json), [diners](prompts/v0.8-diner-consistency.json), [shop scenes](prompts/v0.9.json), and [final water refinement](prompts/v0.9-water-refinement.json).
+
+- `public/assets/characters/player-walk-v2.png`: four distinct walking poses per hairstyle, matching the idle sheet. Idle, walking and seated clothing all use the same normalized color palette.
+- `public/assets/characters/lian-poses.png`: one idle, four walking and one seated pose preserving Lian’s bob, sage cardigan and peach skirt.
+- `public/assets/world/restaurant-interior-v3.png`: seated diners match the street characters’ clothing and identities.
+- `public/assets/world/shop-breakfast.png`, `shop-snacks.png`, `shop-produce.png`, `shop-souvenirs.png`, `shop-streetfood.png`: first-person counters with matching seller identities, merchandise and watercolor canal-town settings.
+- `public/assets/world/canal-water-v2.png`: final calm turquoise watercolor water tile, referenced from the market painting. Shared by every surrounding canal and the painted market’s feathered water edges. Earlier `canal-water.png` is an unused, brighter draft.
+
+Runtime preserves the full shop illustration without cropping faces. New assets are included in the versioned offline cache.
+
+## Suzhou departure boat
+
+`public/assets/world/suzhou-passenger-boat.png` is a transparent medium-large passenger boat with an arched wooden cabin, lattice windows, warm curtains and red lanterns. Generated with the built-in `image_gen.imagegen` tool using the market painting as a style reference. Original output: `exec-212ce8ea-8720-48d2-99dd-1952766cdf66.png`. The [exact prompt](prompts/suzhou-passenger-boat.json) records the reference, source and final saved path. Runtime gently bobs the boat when motion is enabled, and uses the same asset in the boarding dialogue.

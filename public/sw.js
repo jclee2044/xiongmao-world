@@ -1,8 +1,46 @@
-const CACHE = "panda-shell-0.5.0-1";
+const CACHE = "xiongmao-shell-0.9.0-4";
 const SHELL = [
+  "/assets/world/suzhou-passenger-boat.png",
+  "/assets/world/canal-water-v2.png",
+  "/assets/world/shop-breakfast.png",
+  "/assets/world/shop-souvenirs.png",
+  "/assets/world/shop-produce.png",
+  "/assets/world/shop-snacks.png",
+  "/assets/world/shop-streetfood.png",
+  "/data/shops.js",
+  "/data/navigation.js",
+  "/game/directions.js",
+  "/assets/characters/player-walk-v2.png",
+  "/assets/characters/lian-poses.png",
+  "/assets/world/fruit-trees-v2.png",
+  "/assets/world/sheep-gift.png",
+  "/assets/characters/lin-walk.png",
+  "/assets/characters/seated-friends.png",
+  "/data/market.js",
+  "/assets/world/market-lane-v3.png",
+  "/assets/world/restaurant-interior-v3.png",
+  "/assets/characters/neighbors-walk-v2.png",
+  "/assets/characters/children-walk.png",
+  "/assets/world/hotpot-view.png",
+  "/assets/world/hotpot-table.png",
+  "/game/ambience.js",
+  "/game/goals.js",
+  "/game/words.js",
+  "/assets/characters/player-idle.png",
+  "/assets/characters/qiao-seated.png",
+  "/assets/world/earth.png",
+  "/data/town.js",
+  "/data/town-rooms.js",
+  "/data/adventure.js",
+  "/game/adventure.js",
+  "/assets/characters/panda-v2.png",
+  "/assets/characters/neighbors-walk.png",
+  "/assets/world/restaurant-interior.png",
+  "/assets/world/museum-interior.png",
   "/",
   "/index.html",
   "/styles.css",
+  "/styles-v9.css",
   "/app.js",
   "/manifest.webmanifest",
   "/assets/panda.png",
@@ -31,6 +69,7 @@ const SHELL = [
   "/assets/world/teahouse-interior.webp",
   "/assets/world/bookshop-interior.webp",
   "/assets/audio/asia-fsm-team.mp3",
+  "/assets/audio/sonican-asian-music-magical-dream.mp3",
   "/assets/audio/ATTRIBUTION.md",
   "/assets/audio/CC-BY-4.0.txt",
   "/data/art-bounds.js",
@@ -59,7 +98,11 @@ self.addEventListener("activate", (event) =>
   event.waitUntil(
     (async () => {
       for (const name of await caches.keys())
-        if (name.startsWith("panda-shell-") && name !== CACHE)
+        if (
+          (name.startsWith("panda-shell-") ||
+            name.startsWith("xiongmao-shell-")) &&
+          name !== CACHE
+        )
           await caches.delete(name);
       await self.clients.claim();
     })(),
@@ -80,6 +123,24 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => caches.match("/index.html")),
+    );
+    return;
+  }
+  if (["script", "style"].includes(event.request.destination)) {
+    event.respondWith(
+      fetch(event.request)
+        .then(async (response) => {
+          if (response.ok) {
+            const cache = await caches.open(CACHE);
+            await cache.put(event.request, response.clone());
+          }
+          return response;
+        })
+        .catch(() =>
+          caches
+            .match(event.request)
+            .then((cached) => cached || caches.match(url.pathname)),
+        ),
     );
     return;
   }

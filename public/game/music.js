@@ -28,6 +28,14 @@ export const backgroundTrack = {
   credit: "Music by https://www.free-stock-music.com",
 };
 
+export const indoorTrack = {
+  url: "/assets/audio/sonican-asian-music-magical-dream.mp3",
+  title: "Asian Music - Magical Dream",
+  artist: "Sonican",
+  source: "https://pixabay.com/music/china-asian-music-magical-dream-321895/",
+  license: "https://pixabay.com/service/license-summary/",
+};
+
 // The licensed recording is bundled locally. The original pentatonic score
 // remains available when the recording cannot load or decode.
 export class Music {
@@ -39,6 +47,7 @@ export class Music {
     this.notes = new Set();
     this.step = 0;
     this.version = 0;
+    this.track = backgroundTrack;
     this.onVisibility = () => this.sync();
     document.addEventListener("visibilitychange", this.onVisibility);
     this.applySettings(settings);
@@ -82,6 +91,31 @@ export class Music {
     this.setGain();
   }
 
+  setScene(scene) {
+    const track = scene?.interior || scene?.id === "home" ? indoorTrack : backgroundTrack;
+    if (track === this.track) return;
+    this.track = track;
+    ++this.version;
+    this.stopNotes();
+    if (this.audio) {
+      this.audio.onplay = null;
+      this.audio.onerror = null;
+      this.audio.pause();
+      this.source?.disconnect();
+      this.audio.removeAttribute("src");
+      this.audio.load();
+      this.audio = null;
+      this.source = null;
+    }
+    this.trackFailed = false;
+    if (this.master) {
+      const now = this.context.currentTime;
+      this.master.gain.cancelScheduledValues(now);
+      this.master.gain.value = 0;
+    }
+    this.sync();
+  }
+
   setGain() {
     if (!this.master) return;
     const now = this.context.currentTime;
@@ -107,7 +141,7 @@ export class Music {
   createTrack() {
     if (this.audio || this.trackFailed) return;
     try {
-      this.audio = new Audio(backgroundTrack.url);
+      this.audio = new Audio(this.track.url);
       this.audio.loop = true;
       this.audio.preload = "auto";
       this.audio.onplay = () => {

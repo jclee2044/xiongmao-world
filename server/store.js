@@ -1,3 +1,4 @@
+import { newAdventure, validateAdventure } from "../public/data/adventure.js";
 import { DatabaseSync } from "node:sqlite";
 import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -27,6 +28,7 @@ export const newState = () => ({
   history: [],
   journal: [],
   practice: newPractice(),
+  adventure: newAdventure(),
 });
 export function validateState(s) {
   if (
@@ -145,7 +147,11 @@ export function validateState(s) {
     )
       throw new Error("Invalid learning evidence.");
   if (JSON.stringify(s).length > 45000) throw new Error("Save is too large.");
-  return { ...structuredClone(s), practice: validatePractice(s.practice) };
+  return {
+    ...structuredClone(s),
+    practice: validatePractice(s.practice),
+    adventure: validateAdventure(s.adventure),
+  };
 }
 export class Store {
   constructor(dir) {

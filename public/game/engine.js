@@ -14,6 +14,8 @@ export class World {
       onMove,
       getSettings = () => ({}),
       getFound = () => false,
+      getAdventure = () => ({}),
+      onGuestArrive = () => {},
     },
   ) {
     Object.assign(this, {
@@ -23,13 +25,15 @@ export class World {
       onMove,
       getSettings,
       getFound,
+      getAdventure,
+      onGuestArrive,
     });
     this.ctx = canvas.getContext("2d");
     this.keys = new Set();
     this.paused = true;
     this.scene = scenes.shanghai;
     this.player = { ...this.scene.spawn };
-    this.panda = { x: this.player.x + 130, y: this.player.y - 15 };
+    this.panda = { x: this.player.x + 65, y: this.player.y - 15 };
     this.trail = [];
     this.route = [];
     this.facing = 1;
@@ -43,6 +47,11 @@ export class World {
       if (editable() || this.paused) return;
       const k = e.key.toLowerCase();
       if (
+        k === " " &&
+        /^(BUTTON|SUMMARY|A)$/.test(document.activeElement?.tagName)
+      )
+        return;
+      if (
         [
           "w",
           "a",
@@ -53,11 +62,12 @@ export class World {
           "arrowleft",
           "arrowright",
           "e",
+          " ",
         ].includes(k)
       ) {
         e.preventDefault();
         this.keys.add(k);
-        if (k === "e" && !e.repeat) this.interact();
+        if ((k === "e" || k === " ") && !e.repeat) this.interact();
       }
     });
     window.addEventListener("keyup", (e) =>
@@ -84,47 +94,261 @@ export class World {
         c = this.camera;
       const x = (e.clientX - r.left) / c.scale + c.camX - c.ox,
         y = (e.clientY - r.top) / c.scale + c.camY - c.oy;
-      // Use the poses from the last painted frame, so a click never advances
-      // the simulation or misses an animal that moved away from its map stop.
-      const animal = this.animalPoses.find((pose) => {
-        const height = animalHeights[pose.animal],
-          frames = artBounds.animals?.[pose.animal];
-        if (!height || !frames) return false;
-        const width =
-          (height * Math.max(...frames.map((f) => f.w))) /
-          Math.max(...frames.map((f) => f.h));
-        return (
-          x > pose.x - width / 2 - 7 &&
-          x < pose.x + width / 2 + 7 &&
-          y > pose.y - height - 7 &&
-          y < pose.y + 7
-        );
-      });
-      const target =
-        this.scene.interactables.find((o) => o.id === animal?.id) ||
-        this.scene.interactables.find(
-          (o) =>
-            o.type === "npc" &&
-            x > (o.artX ?? o.x) - 80 &&
-            x < (o.artX ?? o.x) + 80 &&
-            y > (o.artY ?? o.y) - (o.artHeight || actorSizes[o.id]) &&
-            y < (o.artY ?? o.y),
-        ) ||
-        nearest(this.scene, { x, y }, this.getFound());
+      const target = this.hitAt(x, y);
       if (
         target &&
-        Math.hypot(target.x - this.player.x, target.y - this.player.y) < 100
+        Math.hypot(
+          interactionPoint(target).x - this.player.x,
+          interactionPoint(target).y - this.player.y,
+        ) < 100
       )
         this.onInteract(target);
-      else this.walkTo(target || { x, y });
+      else this.walkTo(target || { x, y }, !!target);
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (this.paused || !this.camera) return;
+      const r = canvas.getBoundingClientRect(),
+        c = this.camera;
+      this.hover = this.hitAt(
+        (e.clientX - r.left) / c.scale + c.camX - c.ox,
+        (e.clientY - r.top) / c.scale + c.camY - c.oy,
+      );
+      canvas.style.cursor = this.hover ? "pointer" : "default";
+    });
+    canvas.addEventListener("pointerleave", () => {
+      this.hover = null;
     });
     requestAnimationFrame((t) => this.frame(t));
+  }
+  actors() {
+    return lifeActors(
+      this.scene,
+      this.ambientTime,
+      this.player,
+      this.getSettings().motion !== false,
+    );
+  }
+  destinations() {
+    return [
+      ...this.scene.interactables.filter(
+        (o) =>
+          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === "lian" && this.hungryGuest) &&
+          !(
+            o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
+          ) &&
+          !(o.id === "qiao" && this.guest) &&
+          !(
+            o.id === "lost-flowers" &&
+            this.getAdventure().flowers !== "accepted"
+          ),
+      ),
+      ...this.actors().filter((o) => o.type === "passerby"),
+      ...(this.guest ? [this.guest] : []),
+      ...(this.hungryGuest ? [this.hungryGuest] : []),
+    ];
+  }
+  nearby() {
+    const chosen = this.destinations().find(
+      (o) => o.id === this.navigationFocus,
+    );
+    if (chosen) {
+      const p = interactionPoint(chosen);
+      if (Math.hypot(p.x - this.player.x, p.y - this.player.y) < 100)
+        return chosen;
+    }
+    return nearest(
+      { ...this.scene, interactables: this.destinations() },
+      this.player,
+      this.getFound(),
+    );
+  }
+  hitAt(x, y) {
+    const actors = [
+      ...this.actors().filter((o) => o.type === "passerby"),
+      ...this.scene.interactables.filter(
+        (o) =>
+          o.type === "npc" &&
+          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === "lian" && this.hungryGuest) &&
+          !(
+            o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
+          ) &&
+          !(o.id === "qiao" && this.guest),
+      ),
+      ...(this.guest ? [this.guest] : []),
+      ...(this.hungryGuest ? [this.hungryGuest] : []),
+    ].sort((a, b) => b.y - a.y);
+    const person = actors.find(
+      (o) =>
+        x > o.x - 43 &&
+        x < o.x + 43 &&
+        y > o.y - (o.artHeight || 235) &&
+        y < o.y + 8,
+    );
+    if (person) return person;
+    const animal = this.animalPoses.find(
+      (o) => Math.abs(x - o.x) < 45 && y > o.y - 70 && y < o.y + 10,
+    );
+    if (animal) return this.scene.interactables.find((o) => o.id === animal.id);
+    const b = [...this.scene.scenery]
+      .reverse()
+      .find(
+        (o) =>
+          o.doorId &&
+          x > o.x - o.w * 0.45 &&
+          x < o.x + o.w * 0.45 &&
+          y > o.y - o.h &&
+          y < o.y,
+      );
+    if (b) return this.scene.interactables.find((o) => o.id === b.doorId);
+    const painted = this.destinations().find(
+      (o) =>
+        o.hitRect &&
+        x >= o.hitRect.x &&
+        x <= o.hitRect.x + o.hitRect.w &&
+        y >= o.hitRect.y &&
+        y <= o.hitRect.y + o.hitRect.h,
+    );
+    if (painted) return painted;
+    return nearest(
+      { ...this.scene, interactables: this.destinations() },
+      { x, y },
+      this.getFound(),
+    );
+  }
+  updateGuest(dt) {
+    const state = this.getAdventure().tea;
+    const teaTable = this.scene.interactables.find((o) => o.id === "tea-table");
+    if (this.scene.id !== "shanghai" || state === "new") {
+      this.guest = null;
+      return;
+    }
+    if (!this.guest) {
+      const q = this.scene.interactables.find((o) => o.id === "qiao");
+      this.guest = {
+        ...q,
+        type: "guest",
+        dialogueId: "qiao",
+        appearance: "qiao",
+        distance: 0,
+        facing: 1,
+      };
+    }
+    if (state === "seated" || state === "done") {
+      Object.assign(this.guest, {
+        x: teaTable.x - 80,
+        y: teaTable.y - 7,
+        seated: true,
+        moving: false,
+      });
+      return;
+    }
+    const goal = { x: teaTable.x - 85, y: teaTable.y + 5 };
+    if (!this.guestRoute?.length)
+      this.guestRoute = pathTo(this.scene, this.guest, goal);
+    const target = this.guestRoute[0];
+    if (!target) return;
+    const d = Math.hypot(target.x - this.guest.x, target.y - this.guest.y);
+    if (d < 3) {
+      this.guestRoute.shift();
+      if (!this.guestRoute.length) this.onGuestArrive();
+      return;
+    }
+    const step = Math.min(d, 150 * dt),
+      dx = (target.x - this.guest.x) / d,
+      dy = (target.y - this.guest.y) / d;
+    const next = move(this.scene, this.guest, dx * step, dy * step);
+    this.guest.distance += Math.hypot(
+      next.x - this.guest.x,
+      next.y - this.guest.y,
+    );
+    Object.assign(this.guest, { x: next.x, y: next.y, moving: true });
+    if (Math.abs(dx) > 0.1) this.guest.facing = Math.sign(dx);
+  }
+  updateHungryGuest(dt) {
+    const state = this.getAdventure().hungry;
+    if (
+      state === "new" ||
+      (state === "done" && this.scene.id !== "restaurant")
+    ) {
+      this.hungryGuest = null;
+      return;
+    }
+    if (!this.hungryGuest)
+      this.hungryGuest = {
+        id: "lian",
+        dialogueId: "lian",
+        type: "guest",
+        name: "莲 · Lian",
+        appearance: "lian",
+        x: this.player.x - 50,
+        y: this.player.y,
+        distance: 0,
+        facing: this.facing,
+        artHeight: 171,
+      };
+    const g = this.hungryGuest;
+    if (
+      this.scene.id === "restaurant" &&
+      (state === "dining" || state === "done")
+    ) {
+      Object.assign(g, { x: 1045, y: 375, artHeight: 165, moving: false });
+      return;
+    }
+    g.moving = false;
+    if (Math.hypot(g.x - this.player.x, g.y - this.player.y) < 115) return;
+    if (!this.friendRoute?.length)
+      this.friendRoute = pathTo(this.scene, g, this.player);
+    const p = this.friendRoute?.[0];
+    if (!p) return;
+    const d = Math.hypot(p.x - g.x, p.y - g.y);
+    if (d < 5) {
+      this.friendRoute.shift();
+      return;
+    }
+    const step = Math.min(d, 315 * dt),
+      next = move(
+        this.scene,
+        g,
+        ((p.x - g.x) / d) * step,
+        ((p.y - g.y) / d) * step,
+      );
+    g.distance += Math.hypot(next.x - g.x, next.y - g.y);
+    g.moving = true;
+    if (Math.abs(next.x - g.x) > 0.1) g.facing = Math.sign(next.x - g.x);
+    Object.assign(g, { x: next.x, y: next.y });
+  }
+  sitAt(table, kind) {
+    this.seat =
+      kind === "tea"
+        ? { kind, x: table.x + 80, y: table.y - 2, flip: true }
+        : { kind, x: table.x - 128, y: table.y + 52, flip: false };
+    if (kind === "hotpot" && this.hungryGuest)
+      Object.assign(this.hungryGuest, {
+        seated: true,
+        moving: false,
+        x: table.x + 126,
+        y: table.y + 50,
+      });
+    this.canvas.dataset.seated = kind;
+    this.paintKey = null;
+  }
+  standUp() {
+    this.seat = null;
+    if (this.hungryGuest) this.hungryGuest.seated = false;
+    delete this.canvas.dataset.seated;
+    this.paintKey = null;
   }
   clear() {
     this.keys.clear();
     this.route = [];
+    this.pendingInteraction = null;
+    this.navigationFocus = null;
   }
-  walkTo(point) {
+  walkTo(point, interactOnArrival = false) {
+    this.pendingInteraction = interactOnArrival ? point.id : null;
+    this.navigationFocus = point.id || null;
     this.route = pathTo(this.scene, this.player, interactionPoint(point));
     return this.route.length > 0;
   }
@@ -145,15 +369,21 @@ export class World {
       image.getContext("2d").drawImage(this.canvas, 0, 0);
       this.transition = { image, start: null };
     } else this.transition = null;
+    this.standUp();
     this.scene = scenes[id] || scenes.shanghai;
     this.animalPoses = [];
+    this.guest = null;
+    this.hungryGuest = null;
+    this.friendRoute = [];
+    this.guestRoute = [];
+    this.hover = null;
     this.player =
       position && canStand(this.scene, position.x, position.y)
         ? { ...position }
         : { ...this.scene.spawn };
     this.panda = [
-      { x: this.player.x + 130, y: this.player.y - 15 },
-      { x: this.player.x - 100, y: this.player.y + 10 },
+      { x: this.player.x + 65, y: this.player.y - 15 },
+      { x: this.player.x - 65, y: this.player.y + 10 },
       this.player,
     ].find((p) => canStand(this.scene, p.x, p.y));
     this.trail = [];
@@ -162,7 +392,7 @@ export class World {
   }
   interact() {
     if (this.paused) return;
-    const n = nearest(this.scene, this.player, this.getFound());
+    const n = this.nearby();
     if (n) this.onInteract(n);
   }
   enterDoor(door) {
@@ -178,13 +408,19 @@ export class World {
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
+      this.updateGuest(dt);
+      this.updateHungryGuest(dt);
       let dx =
         Number(this.keys.has("d") || this.keys.has("arrowright")) -
         Number(this.keys.has("a") || this.keys.has("arrowleft"));
       let dy =
         Number(this.keys.has("s") || this.keys.has("arrowdown")) -
         Number(this.keys.has("w") || this.keys.has("arrowup"));
-      if (dx || dy) this.route = [];
+      if (dx || dy) {
+        this.route = [];
+        this.pendingInteraction = null;
+        this.navigationFocus = null;
+      }
       while (
         this.route.length &&
         Math.hypot(
@@ -238,17 +474,34 @@ export class World {
           }
         } else this.route = [];
       }
+      if (this.pendingInteraction) {
+        const target = this.destinations().find(
+          (o) => o.id === this.pendingInteraction,
+        );
+        if (!target) this.pendingInteraction = null;
+        else {
+          const p = interactionPoint(target);
+          if (Math.hypot(p.x - this.player.x, p.y - this.player.y) < 72) {
+            this.pendingInteraction = null;
+            this.route = [];
+            this.onInteract(target);
+          } else if (!this.route.length) {
+            this.route = pathTo(this.scene, this.player, p);
+            if (!this.route.length) this.pendingInteraction = null;
+          }
+        }
+      }
       // Follow the player's actual traversable route, rather than cutting through buildings.
       while (
         this.trail.length &&
         Math.hypot(
           this.player.x - this.trail[0].x,
           this.player.y - this.trail[0].y,
-        ) > 125
+        ) > 65
       ) {
         const target = this.trail[0],
           dist = Math.hypot(target.x - this.panda.x, target.y - this.panda.y),
-          step = Math.min(dist, speed * 1.16 * dt);
+          step = Math.min(dist, speed * 1.6 * dt);
         if (dist < 4) {
           this.trail.shift();
           continue;
@@ -264,7 +517,7 @@ export class World {
     }
     if (this.wasMoving && !moving) this.onMove?.(this.scene.id, this.player);
     this.wasMoving = moving;
-    const near = nearest(this.scene, this.player, this.getFound());
+    const near = this.nearby();
     if (this.nearId !== near?.id) {
       this.nearId = near?.id;
       this.onNear(near);
@@ -287,6 +540,11 @@ export class World {
         settings,
         found,
         near?.id,
+        this.hover?.id,
+        this.guest,
+        this.hungryGuest,
+        this.seat,
+        this.getAdventure().hungry,
         this.route.at(-1),
         this.canvas.clientWidth,
         this.canvas.clientHeight,
@@ -317,6 +575,11 @@ export class World {
           animate: !this.paused && settings.motion !== false,
           moving,
           facing: this.facing,
+          hover: this.hover,
+          guest: this.guest,
+          hungryGuest: this.hungryGuest,
+          seat: this.seat,
+          adventure: this.getAdventure(),
           route: this.route,
           pandaMoving,
           settings,
@@ -359,6 +622,10 @@ export class World {
       ox: String(this.camera.ox),
       oy: String(this.camera.oy),
       routeLength: String(this.route.length),
+      facing: String(this.facing),
+      hover: this.hover?.id || "",
+      pandaX: String(this.panda.x),
+      pandaY: String(this.panda.y),
     });
     requestAnimationFrame((t) => this.frame(t));
   }

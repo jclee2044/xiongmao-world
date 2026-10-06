@@ -4,8 +4,15 @@ node_modules/
 test-results/
 *.log
 *.sqlite*
+*.ses
 tools/downloads/
 tools/ollama/
 tools/speech/
 
 art/source/
+tools/asr-venv/
+tools/whisper-base/
+tools/huggingface/
+
+tools/vits-icefall-zh-aishell3/
+tools/vits-zh-hf-fanchen-wnj/

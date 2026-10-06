@@ -1,0 +1,17 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "path": "public/assets/characters/player-idle.png",
+      "prompt": "Create a production transparent PNG sprite sheet matching the reference game's soft watercolor storybook character: young woman with brown hair, lavender sweatshirt, cream trousers, grey sneakers and sage crossbody bag. This is a new idle animation sheet, not walking. Exactly 10 full-body figures in a strict 5 columns by 2 rows grid, equally sized cells, identical scale, centered with feet on identical baseline within every cell. Row 1 brown hair in bun, row 2 short brown bob hairstyle. Each row has five distinct subtle standing poses: 1 relaxed feet together arms down eyes open; 2 breathing shoulders slightly raised; 3 gentle head turn; 4 blink eyes closed; 5 hand lightly adjusting bag strap. All face three-quarter right. Feet planted, no strides. Generous transparent margins separating all cells. No text, no lines, no scenery, no floating objects, no shadows, nothing except characters. Preserve character identity and watercolor brush texture from reference. Wide landscape 5:2 sheet."
+    },
+    {
+      "path": "public/assets/world/hotpot-table.png",
+      "prompt": "Transparent PNG game prop cutout: one small round wooden Chinese hotpot restaurant table seen from a 35 degree elevated three-quarter top-down perspective, soft detailed watercolor storybook illustration warm Suzhou restaurant style. Rustic medium brown wood grain tabletop and four visible short legs, a silver divided hotpot in center with red chili broth on one side and pale golden broth on the other, subtle translucent steam, four white ceramic rice bowls, pairs of chopsticks, small dishes of greens, tofu, mushrooms. Four small matching wooden stools around it. No people, no background, no floor, no lettering. Entire prop fits inside image with transparent generous margins. Clearly readable food, cozy warm lighting, hand painted texture, high detail but clean silhouette. Square image."
+    },
+    {
+      "path": "public/assets/world/hotpot-view.png",
+      "prompt": "Use case: illustration-story. Asset type: first-person game hotpot dining view, wide landscape image. Primary request: a seated diner's own view looking down toward a steaming Chinese divided hotpot on a wooden table in a cozy Suzhou canal restaurant. Soft detailed watercolor storybook style matching the attached table prop. Camera is AT THE DINER'S SEAT: crop the tabletop across all edges, no table legs, no stools, no people, no exterior room view. Central silver divided pot with pale golden broth and red broth occupies center 42% of image. Five clearly separated ingredient plates in a ring: white tofu cubes at left middle, leafy greens at upper left, brown mushrooms at upper right, thin red beef slices at right middle, pale yellow noodles at lower right. Personal white bowl and chopsticks at bottom center edge. Entire canvas filled with warm wood and dishes. Faint steam but clear food. Warm soft lighting, brush textures, no words, no lettering, no symbols. Landscape 16:9 composition for an interactive food-learning panel."
+    }
+  ]
+}

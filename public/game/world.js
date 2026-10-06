@@ -1,6 +1,10 @@
+import { townRooms, homeObjects } from "../data/town-rooms.js";
+import { validateAdventure } from "../data/adventure.js";
+import { refineMarket } from "../data/market.js";
+import { buildTown } from "../data/town.js";
 import artBounds from "../data/art-bounds.js";
 import { interiors } from "../data/interiors.js";
-export const MAP_VERSION = 3;
+export const MAP_VERSION = 8;
 const OUTDOOR_SCALE = 0.9;
 export const landmark = { x: 0, y: 2046, w: 1254, h: 1254 };
 const lane = [
@@ -950,7 +954,110 @@ function compactOutdoor(scene) {
   }));
 }
 compactOutdoor(scenes.shanghai);
-for (const room of Object.values(interiors)) {
+scenes.shanghai = refineMarket(buildTown(scenes.shanghai));
+// A shared transform gives the wider market room while keeping art and collision aligned.
+const townScale = 0.9;
+function scaleGeometry(value, key = "") {
+  if (typeof value === "number")
+    return [
+      "x",
+      "y",
+      "w",
+      "h",
+      "width",
+      "height",
+      "r",
+      "artX",
+      "artY",
+      "approachX",
+      "approachY",
+      "artHeight",
+    ].includes(key)
+      ? value * townScale
+      : value;
+  if (Array.isArray(value))
+    return value.map((v) =>
+      Array.isArray(v) &&
+      v.length === 2 &&
+      v.every((n) => typeof n === "number")
+        ? v.map((n) => n * townScale)
+        : scaleGeometry(v),
+    );
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, scaleGeometry(v, k)]),
+    );
+  return value;
+}
+scenes.shanghai = scaleGeometry(scenes.shanghai);
+scenes.shanghai.worldScale = townScale;
+for (const b of scenes.shanghai.bridges) {
+  if (b.axis === "x") {
+    b.x -= 12;
+    b.w += 24;
+  } else {
+    b.y -= 12;
+    b.h += 24;
+  }
+}
+Object.assign(scenes, townRooms);
+scenes.shantang.interactables.find((o) => o.id === "back-town").returnPoint =
+  interactionPoint(
+    scenes.shanghai.interactables.find((o) => o.id === "next-area"),
+  );
+scenes.home.interactables.push(...homeObjects, {
+  id: "sheep-keepsake",
+  hitRect: { x: 775, y: 408, w: 65, h: 70 },
+  type: "inspect",
+  name: "小羊 · Lian’s gift",
+  x: 805,
+  y: 475,
+  approachX: 800,
+  approachY: 555,
+  zh: "这是莲送我的小羊。我们一起吃了火锅。谢谢你，莲！",
+  pinyin:
+    "Zhè shì Lián sòng wǒ de xiǎoyáng. Wǒmen yìqǐ chī le huǒguō. Xièxie nǐ, Lián!",
+  meaning:
+    "A stuffed sheep from Lian, earned by treating her to hotpot. A memory of our first meal together.",
+});
+// A genuinely smaller home footprint keeps the same 160-unit character scale.
+const homeScale = 0.75;
+function compactHome(value, key = "") {
+  if (typeof value === "number")
+    return [
+      "x",
+      "y",
+      "w",
+      "h",
+      "width",
+      "height",
+      "r",
+      "approachX",
+      "approachY",
+    ].includes(key)
+      ? value * homeScale
+      : value;
+  if (Array.isArray(value))
+    return value.map((v) =>
+      Array.isArray(v) &&
+      v.length === 2 &&
+      v.every((n) => typeof n === "number")
+        ? v.map((n) => n * homeScale)
+        : compactHome(v),
+    );
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, compactHome(v, k)]),
+    );
+  return value;
+}
+scenes.home = compactHome(scenes.home);
+scenes.home.roomScale = homeScale;
+const homeExit = scenes.home.interactables.find((o) => o.id === "outside-door");
+homeExit.returnPoint = interactionPoint(
+  scenes.shanghai.interactables.find((o) => o.id === "home-north"),
+);
+for (const room of [...Object.values(interiors), ...Object.values(townRooms)]) {
   const exit = room.interactables.find((o) => o.returnDoor),
     door = scenes.shanghai.interactables.find((o) => o.id === exit?.returnDoor);
   if (exit && door) exit.returnPoint = interactionPoint(door);
@@ -1019,6 +1126,17 @@ export function canStand(scene, x, y, r = 15) {
       )
         return false;
   }
+  if (
+    (scene.canals || []).some((z) => circleHitsPolygon(x, y, r, z.polygon)) &&
+    !(scene.bridges || []).some(
+      (b) =>
+        x - r >= b.x &&
+        x + r <= b.x + b.w &&
+        y - r >= b.y &&
+        y + r <= b.y + b.h,
+    )
+  )
+    return false;
   const plate = scene.landmark;
   if (!plate) return true;
   for (let i = 0; i < 12; i++) {
@@ -1072,8 +1190,25 @@ export function districtAt(scene, position) {
   );
 }
 export function upgradeState(state) {
+  state = { ...state, adventure: validateAdventure(state.adventure) };
+  if (state.mapVersion < 5)
+    state = {
+      ...state,
+      settings:
+        state.settings.pinyin || state.settings.translation
+          ? { ...state.settings, pinyin: false, translation: false }
+          : state.settings,
+      ...(state.mapVersion === 4 && state.scene === "shanghai"
+        ? {
+            position: {
+              x: state.position.x * 0.85,
+              y: state.position.y * 0.85,
+            },
+          }
+        : {}),
+    };
   const scene = scenes[state.scene] || scenes.shanghai;
-  if (state.mapVersion === 2) {
+  if (state.mapVersion === 2 && MAP_VERSION === 3) {
     return upgradeState({
       ...state,
       mapVersion: MAP_VERSION,

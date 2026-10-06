@@ -1,5 +1,11 @@
+import { AREA_XP } from "../data/adventure.js";
 import bounds from "../data/art-bounds.js";
-import { actorSizes, appearanceRow, walkFrame } from "./appearance.js";
+import {
+  actorSizes,
+  walkFrame,
+  recolorOutfitPixels,
+  lianPose,
+} from "./appearance.js";
 import { paintGround, blendedPlate } from "./terrain.js";
 import { lifeActors, paintLeaves } from "./life.js";
 const images = new Map();
@@ -12,7 +18,21 @@ function asset(path) {
   return images.get(path);
 }
 const paths = {
-  panda: "/assets/panda.png",
+  boat: "/assets/world/suzhou-passenger-boat.png",
+  water: "/assets/world/canal-water-v2.png",
+  lian: "/assets/characters/lian-poses.png",
+  fruitTrees: "/assets/world/fruit-trees-v2.png",
+  linWalk: "/assets/characters/lin-walk.png",
+  seated: "/assets/characters/seated-friends.png",
+  sheep: "/assets/world/sheep-gift.png",
+  hotpotTable: "/assets/world/hotpot-table.png",
+  idle: "/assets/characters/player-idle.png",
+  panda: "/assets/characters/panda-v2.png",
+  qiaoSeated: "/assets/characters/qiao-seated.png",
+  neighborWalk: "/assets/characters/neighbors-walk-v2.png",
+  children: "/assets/characters/children-walk.png",
+  market: "/assets/world/market-lane-v3.png",
+  restaurant: "/assets/world/restaurant-interior-v3.png",
   player: "/assets/characters/player-atlas.webp",
   mei: "/assets/characters/mei.webp",
   lin: "/assets/characters/lin.webp",
@@ -21,10 +41,11 @@ const paths = {
   lane: "/assets/world/canal-lane.webp",
   home: "/assets/world/home.webp",
   paving: "/assets/world/paving.webp",
+  earth: "/assets/world/earth.png",
   house: "/assets/world/house.webp",
   tree: "/assets/world/willow.webp",
   neighbors: "/assets/characters/neighbors.webp",
-  walk: "/assets/characters/player-walk.webp",
+  walk: "/assets/characters/player-walk-v2.png",
   props: "/assets/world/props.webp",
   storefronts: "/assets/world/storefronts.webp",
   landmarks: "/assets/world/landmarks.webp",
@@ -34,11 +55,21 @@ export const pandaImage = asset(paths.panda);
 export async function prepareArt(scene) {
   if (scene.backgroundPath) await asset(scene.backgroundPath).decode();
   const names = [
+    "boat",
+    "water",
+    "lian",
+    "fruitTrees",
+    "linWalk",
+    "seated",
+    "sheep",
     "lane",
     "paving",
+    "earth",
     "house",
     "tree",
     "player",
+    "idle",
+    "hotpotTable",
     "panda",
     "mei",
     "lin",
@@ -46,6 +77,11 @@ export async function prepareArt(scene) {
     "momo",
     "walk",
     "neighbors",
+    "neighborWalk",
+    "children",
+    "market",
+    "restaurant",
+    "qiaoSeated",
     "props",
     "home",
     "storefronts",
@@ -54,12 +90,124 @@ export async function prepareArt(scene) {
   ];
   await Promise.all(names.map((name) => asset(paths[name]).decode()));
   await Promise.all(
+    ["restaurant", "museum"].map((name) =>
+      asset(`/assets/world/${name}-interior.png`).decode(),
+    ),
+  );
+  await Promise.all(
     ["bakery", "teahouse", "bookshop"].map((name) =>
       asset(`/assets/world/${name}-interior.webp`).decode(),
     ),
   );
 }
+const idleCrops = [];
+function idleCrop(frame, row) {
+  const img = asset(paths.idle),
+    index = row * 5 + frame;
+  if (idleCrops[index]) return idleCrops[index];
+  const xs = [0, 0.24, 0.421, 0.602, 0.783, 1],
+    ys = [0, 0.518, 1];
+  const x = Math.floor(xs[frame] * img.naturalWidth),
+    y = Math.floor(ys[row] * img.naturalHeight),
+    w = Math.floor(xs[frame + 1] * img.naturalWidth) - x,
+    h = Math.floor(ys[row + 1] * img.naturalHeight) - y;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const cx = c.getContext("2d");
+  cx.drawImage(img, x, y, w, h, 0, 0, w, h);
+  const pixels = cx.getImageData(0, 0, w, h).data;
+  let left = w,
+    top = h,
+    right = 0,
+    bottom = 0;
+  for (let py = 0; py < h; py++)
+    for (let px = 0; px < w; px++)
+      if (pixels[(py * w + px) * 4 + 3] > 80) {
+        left = Math.min(left, px);
+        right = Math.max(right, px);
+        top = Math.min(top, py);
+        bottom = Math.max(bottom, py);
+      }
+  return (idleCrops[index] = {
+    x: x + left,
+    y: y + top,
+    w: right - left + 1,
+    h: bottom - top + 1,
+  });
+}
+const atlasCrops = new Map();
+function atlasCrop(name, col, row, columns, rows) {
+  const key = `${name}:${col}:${row}`;
+  if (atlasCrops.has(key)) return atlasCrops.get(key);
+  const img = asset(paths[name]);
+  const xs =
+    name === "neighborWalk"
+      ? [80, 320, 535, 750, 975].map((n) => (n * img.naturalWidth) / 1024)
+      : Array.from(
+          { length: columns + 1 },
+          (_, i) => (i * img.naturalWidth) / columns,
+        );
+  const ys =
+    name === "walk"
+      ? [0, 0.514, 1].map((n) => n * img.naturalHeight)
+      : name === "neighborWalk"
+        ? [0, 260, 525, 780, 1040, 1282, 1536].map(
+            (n) => (n * img.naturalHeight) / 1536,
+          )
+        : Array.from(
+            { length: rows + 1 },
+            (_, i) => (i * img.naturalHeight) / rows,
+          );
+  const x = Math.floor(xs[col]),
+    y = Math.floor(ys[row]);
+  const w = Math.floor(xs[col + 1]) - x,
+    h = Math.floor(ys[row + 1]) - y;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let left = w,
+    top = h,
+    right = 0,
+    bottom = 0;
+  for (let py = 0; py < h; py++)
+    for (let px = 0; px < w; px++)
+      if (data[(py * w + px) * 4 + 3] > 180) {
+        left = Math.min(left, px);
+        right = Math.max(right, px);
+        top = Math.min(top, py);
+        bottom = Math.max(bottom, py);
+      }
+  const crop = {
+    x: x + left,
+    y: y + top,
+    w: right - left + 1,
+    h: bottom - top + 1,
+  };
+  atlasCrops.set(key, crop);
+  return crop;
+}
+const idleOutfits = new Map();
+function playerOutfit(color, name = "idle") {
+  const img = asset(paths[name]);
+  const key = name + color;
+  if (idleOutfits.has(key)) return idleOutfits.get(key);
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth;
+  c.height = img.naturalHeight;
+  const cx = c.getContext("2d");
+  cx.drawImage(img, 0, 0);
+  const frame = cx.getImageData(0, 0, c.width, c.height);
+  recolorOutfitPixels(frame.data, color);
+  cx.putImageData(frame, 0, 0);
+  idleOutfits.set(key, c);
+  return c;
+}
 function ready(img) {
+  if (img instanceof HTMLCanvasElement) return img.width > 0;
   return img.complete && img.naturalWidth > 0;
 }
 function shadow(ctx, x, y, w) {
@@ -139,9 +287,18 @@ function sprite(
   x,
   y,
   height,
-  { crop, flip = false, bob = 0, sway = 0, uniformHeight } = {},
+  {
+    crop,
+    flip = false,
+    bob = 0,
+    sway = 0,
+    uniformHeight,
+    breathe = 0,
+    highlight = false,
+    imageOverride = null,
+  } = {},
 ) {
-  const img = asset(paths[name]);
+  const img = imageOverride || asset(paths[name]);
   if (!ready(img)) return;
   const source = crop ||
     bounds[name] || { x: 0, y: 0, w: img.width, h: img.height };
@@ -151,6 +308,11 @@ function sprite(
   ctx.save();
   ctx.translate(x, y + bob);
   ctx.rotate(sway);
+  ctx.scale(1 + breathe, 1 + breathe * 0.45);
+  if (highlight) {
+    ctx.shadowColor = "white";
+    ctx.shadowBlur = 5;
+  }
   if (flip) ctx.scale(-1, 1);
   ctx.drawImage(
     img,
@@ -181,7 +343,7 @@ function plateVisible(p, view) {
     p.y < view.y + view.h
   );
 }
-let groundPattern;
+let groundPattern, earthPattern, waterPattern;
 const opacity = new WeakMap();
 export function draw(
   ctx,
@@ -196,6 +358,11 @@ export function draw(
     moving = false,
     pandaMoving = false,
     facing = 1,
+    hover = null,
+    guest = null,
+    hungryGuest = null,
+    seat = null,
+    adventure = {},
     settings = {},
     found = false,
     near = null,
@@ -212,12 +379,16 @@ export function draw(
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     groundPattern = null;
+    earthPattern = null;
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
   const scale =
     scene.id === "home" || scene.interior
-      ? Math.max(w / 1200, h / 800)
+      ? Math.max(
+          w / (scene.id === "home" ? scene.width : 1200),
+          h / (scene.id === "home" ? scene.height : 800),
+        )
       : Math.min(1.15, Math.max(0.68, w / 1254, h / 1254));
   const viewW = w / scale,
     viewH = h / scale,
@@ -242,7 +413,21 @@ export function draw(
         groundPattern.setTransform(new DOMMatrix().scale(0.48));
       }
       ctx.fillStyle = groundPattern;
-      paintGround(ctx, scene, view, groundPattern, { time, animate });
+      if (!earthPattern) {
+        earthPattern = ctx.createPattern(asset(paths.earth), "repeat");
+        earthPattern.setTransform(new DOMMatrix().scale(0.4));
+      }
+      if (!waterPattern) {
+        waterPattern = ctx.createPattern(asset(paths.water), "repeat");
+        waterPattern.setTransform(new DOMMatrix().scale(0.42));
+      }
+      const earth = earthPattern;
+      paintGround(ctx, scene, view, groundPattern, {
+        time,
+        animate,
+        earth,
+        water: waterPattern,
+      });
     }
     if (scene.landmark && plateVisible(scene.landmark, view)) {
       const img = asset(paths.lane);
@@ -256,18 +441,66 @@ export function draw(
         );
     }
   }
+  if (scene.marketPlate) {
+    const p = scene.marketPlate,
+      img = asset(p.path);
+    if (ready(img)) {
+      // Continue water below the painting's feathered edge, instead of exposing earth.
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(p.x, p.y, p.w, p.h);
+      ctx.clip();
+      for (const canal of scene.canals.filter((c) => c.painted)) {
+        ctx.beginPath();
+        canal.polygon.forEach(([x, y], i) =>
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y),
+        );
+        ctx.closePath();
+        ctx.fillStyle = waterPattern || "#438e94";
+        ctx.fill();
+      }
+      // Bridge approaches also continue underneath the feathered painting.
+      // Otherwise the water underlay would hide the western bridge's first steps.
+      ctx.fillStyle = groundPattern;
+      for (const bridge of scene.bridges.filter((b) => b.connector)) {
+        const c = bridge.connector;
+        ctx.fillRect(c.x, c.y, c.w, c.h);
+      }
+      ctx.restore();
+      ctx.drawImage(blendedPlate(img, true), p.x, p.y, p.w, p.h);
+    }
+  }
+  const playerHeight =
+    scene.interior || scene.id === "home" ? 160 : actorSizes.player;
   const ambient = lifeActors(scene, time, player, settings.motion !== false);
   const entities = [
     ...scene.scenery.filter((o) => visible(o, view)),
     ...scene.interactables.filter(
       (o) =>
-        o.type === "npc" ||
+        (o.type === "npc" &&
+          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === "lian" && hungryGuest) &&
+          !(o.id === "qiao" && guest)) ||
         (o.type === "stuffy" && !found) ||
         (o.type === "friend" && found),
     ),
-    { ...player, type: "player" },
-    { ...companion, type: "panda" },
+    { ...player, ...(seat || {}), type: "player" },
+    {
+      ...companion,
+      ...(seat?.kind === "tea" ? { x: seat.x + 60, y: seat.y + 35 } : {}),
+      type: "panda",
+    },
     ...ambient,
+    ...(scene.id === "home" && adventure.hungry === "done"
+      ? [
+          {
+            ...scene.interactables.find((o) => o.id === "sheep-keepsake"),
+            type: "sheep-gift",
+          },
+        ]
+      : []),
+    ...(guest ? [guest] : []),
+    ...(hungryGuest ? [hungryGuest] : []),
     ...(scene.roomForeground || []).map((polygon) => ({
       polygon,
       y: Math.max(...polygon.map(([, y]) => y)),
@@ -276,7 +509,89 @@ export function draw(
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
   for (const o of entities) {
-    if (o.type === "house" || o.type === "tree") {
+    if (o.type === "garden-wall") {
+      ctx.fillStyle = "#746a5799";
+      ctx.fillRect(o.x - o.w / 2 + 8, o.y - 8, o.w, 22);
+      const plaster = ctx.createLinearGradient(0, o.y - o.h, 0, o.y);
+      plaster.addColorStop(0, "#faf0d8");
+      plaster.addColorStop(1, "#c9bea3");
+      ctx.fillStyle = plaster;
+      ctx.fillRect(o.x - o.w / 2, o.y - o.h, o.w, o.h);
+      ctx.fillStyle = "#4e534f";
+      ctx.fillRect(o.x - o.w / 2 - 9, o.y - o.h - 12, o.w + 18, 20);
+      ctx.strokeStyle = "#899187";
+      ctx.lineWidth = 3;
+      for (let x = o.x - o.w / 2; x < o.x + o.w / 2; x += 17) {
+        ctx.beginPath();
+        ctx.moveTo(x, o.y - o.h - 11);
+        ctx.lineTo(x - 4, o.y - o.h + 7);
+        ctx.stroke();
+      }
+      for (const dx of [-420, -210, 210, 420]) {
+        ctx.strokeStyle = "#867a65";
+        ctx.lineWidth = 7;
+        ctx.strokeRect(o.x + dx - 31, o.y - 91, 62, 62);
+        ctx.lineWidth = 2;
+        for (let n = -20; n <= 20; n += 10) {
+          ctx.beginPath();
+          ctx.moveTo(o.x + dx + n, o.y - 86);
+          ctx.lineTo(o.x + dx + n, o.y - 35);
+          ctx.moveTo(o.x + dx - 25, o.y - 60 + n);
+          ctx.lineTo(o.x + dx + 25, o.y - 60 + n);
+          ctx.stroke();
+        }
+      }
+    } else if (o.type === "boat-dock") {
+      ctx.fillStyle = "#755437";
+      ctx.fillRect(o.x - o.w / 2, o.y - o.h, o.w, o.h);
+      for (let y = o.y - o.h; y < o.y; y += 11) {
+        ctx.fillStyle = Math.round(y) % 2 ? "#b49364" : "#c3a477";
+        ctx.fillRect(o.x - o.w / 2 + 3, y, o.w - 6, 9);
+      }
+      for (const dx of [-o.w / 2, o.w / 2]) {
+        ctx.fillStyle = "#6e5034";
+        ctx.fillRect(o.x + dx - 4, o.y - 26, 8, 32);
+        ctx.fillStyle = "#c8ad7a";
+        ctx.fillRect(o.x + dx - 6, o.y - 28, 12, 6);
+      }
+    } else if (o.type === "passenger-boat") {
+      const bob = animate ? Math.sin(time * 0.8) * 1.3 : 0;
+      sprite(ctx, "boat", o.x, o.y + bob, o.h, {
+        crop: atlasCrop("boat", 0, 0, 1, 1),
+        highlight: hover?.id === o.interactionId,
+      });
+      ctx.save();
+      ctx.font = 'bold 22px "Noto Serif CJK SC",serif';
+      ctx.textAlign = "center";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#43342b";
+      ctx.fillStyle = "#fff9e9";
+      const label =
+        adventure.xp >= AREA_XP ? "游船 · 可以出发了" : `游船 · ${AREA_XP} XP`;
+      ctx.strokeText(label, o.x, o.y - o.h - 18);
+      ctx.fillText(label, o.x, o.y - o.h - 18);
+      ctx.restore();
+    } else if (o.type === "hotpot-table") {
+      sprite(ctx, "hotpotTable", o.x, o.y + 18, 170, {
+        crop: { x: 30, y: 150, w: 1195, h: 1025 },
+      });
+    } else if (o.type === "fruit-tree") {
+      shadow(ctx, o.x, o.y, 32);
+      sprite(ctx, "fruitTrees", o.x, o.y, o.h, {
+        crop: atlasCrop(
+          "fruitTrees",
+          ["pear", "bayberry", "orange"].indexOf(o.fruit),
+          0,
+          3,
+          1,
+        ),
+      });
+    } else if (o.type === "sheep-gift") {
+      sprite(ctx, "sheep", o.x, o.y, 65, {
+        crop: atlasCrop("sheep", 0, 0, 1, 1),
+      });
+    } else if (o.type === "house" || o.type === "tree") {
       const img = asset(paths[o.type]);
       if (ready(img)) {
         ctx.save();
@@ -294,14 +609,18 @@ export function draw(
         const previous = opacity.get(o) ?? 1;
         const alpha = animate ? previous + (target - previous) * 0.3 : target;
         opacity.set(o, alpha);
-        ctx.globalAlpha = alpha;
+        ctx.globalAlpha = o.type === "tree" ? Math.max(0.55, alpha) : 1;
         if (o.type === "tree" && animate)
           ctx.rotate(Math.sin(time * 0.55 + o.x) * 0.003);
+        if (o.doorId && hover?.id === o.doorId) {
+          ctx.shadowColor = "#6cb9de";
+          ctx.shadowBlur = 12;
+        }
         if (o.flip) ctx.scale(-1, 1);
         ctx.drawImage(img, -o.w / 2, -o.h, o.w, o.h);
         ctx.restore();
       }
-      if (o.label) {
+      if (o.label && !o.doorId) {
         ctx.font = '22px "Noto Serif CJK SC",serif';
         ctx.textAlign = "center";
         ctx.fillStyle = "#453420";
@@ -323,12 +642,19 @@ export function draw(
         previous = opacity.get(o) ?? 1;
       const alpha = animate ? previous + (target - previous) * 0.3 : target;
       opacity.set(o, alpha);
-      ctx.globalAlpha = alpha;
+      ctx.globalAlpha = o.type === "tree" ? Math.max(0.55, alpha) : 1;
       if (o.type === "nature" && animate)
         ctx.translate(Math.sin(time * 0.65 + o.x) * 1.5, 0);
+      if (o.doorId && hover?.id === o.doorId) {
+        ctx.shadowColor = "#6cb9de";
+        ctx.shadowBlur = 12;
+      }
+      if (o.nature === "rockery") {
+        shadow(ctx, o.x + 10, o.y + 9, o.w * 0.38);
+      }
       sprite(ctx, group, o.x, o.y, o.h, { crop });
       ctx.restore();
-      if (o.label) {
+      if (o.label && !o.doorId) {
         ctx.font = '20px "Noto Serif CJK SC",serif';
         ctx.textAlign = "center";
         ctx.fillStyle = "#4c3727";
@@ -338,25 +664,92 @@ export function draw(
       const frames = bounds.animals?.[o.animal];
       if (!frames) continue;
       const height = { cat: 64, duck: 54, rabbit: 58, bird: 30 }[o.animal];
-      if (!o.flying) shadow(ctx, o.x, o.y, height * 0.32);
+      const swimming = o.animal === "duck";
+      const waterline = o.y - height * 0.17;
+      if (!o.flying)
+        shadow(
+          ctx,
+          o.x,
+          swimming ? waterline : o.y,
+          height * (o.animal === "rabbit" ? 0.32 - (o.hop || 0) * 0.1 : 0.32),
+        );
       const active = settings.motion !== false && (o.moving || o.flying);
+      if (swimming) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(o.x - height, o.y - height * 1.2, height * 2, height * 1.03);
+        ctx.clip();
+      }
       sprite(ctx, "animals", o.x, o.y, height, {
-        crop: frames[active ? walkFrame(o.distance) : 1],
+        crop: frames[swimming ? 1 : active ? walkFrame(o.distance) : 1],
         uniformHeight: Math.max(...frames.map((f) => f.h)),
         flip: o.facing < 0,
-        bob:
-          o.animal === "rabbit" && active
-            ? -Math.abs(Math.sin(o.distance / 10)) * 5
-            : 0,
+        bob: o.animal === "rabbit" ? -(o.hop || 0) * 23 : 0,
       });
-    } else if (o.type === "passerby") {
+      if (swimming) ctx.restore();
+    } else if (o.id === "lian" && ["npc", "guest"].includes(o.type)) {
+      const pose = lianPose(o);
       shadow(ctx, o.x, o.y, 25);
-      sprite(ctx, "neighbors", o.x, o.y, 225, {
-        crop: bounds.neighbors[o.appearance],
-        flip: o.facing < 0,
-        bob: o.moving ? Math.sin(o.distance / 10) * 2 : 0,
-        sway: o.moving ? Math.sin(o.distance / 17) * 0.018 : 0,
-      });
+      sprite(
+        ctx,
+        "lian",
+        o.x,
+        o.y,
+        o.seated ? 130 : scene.interior ? 165 : 171,
+        {
+          crop: atlasCrop("lian", pose.col, pose.row, 3, 2),
+          flip: !o.seated && o.facing < 0,
+          highlight: hover?.id === o.id,
+          breathe:
+            animate && !o.moving ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
+        },
+      );
+      if (o.bubbles && Math.floor(time / 5 + o.x) % 3 !== 2)
+        speechBubble(
+          ctx,
+          o.x,
+          o.y - 195,
+          o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length],
+        );
+    } else if (o.type === "passerby" || o.type === "guest") {
+      shadow(ctx, o.x, o.y, 25);
+      const child = ["kid-one", "kid-two"].includes(o.id);
+      const row = child
+        ? Number(o.id === "kid-two")
+        : ["qiao", "bo", "lan", "wei", "an", "hao"].indexOf(o.appearance);
+      const atlas = child
+        ? "children"
+        : o.id === "lin"
+          ? "linWalk"
+          : "neighborWalk";
+      const col = o.moving ? Math.floor(o.distance / 18) % 4 : 1;
+      const crop = atlasCrop(
+        atlas,
+        col,
+        o.id === "lin" ? 0 : Math.max(0, row),
+        4,
+        child ? 2 : o.id === "lin" ? 1 : 6,
+      );
+      sprite(
+        ctx,
+        o.seated ? (o.id === "lian" ? "seated" : "qiaoSeated") : atlas,
+        o.x,
+        o.y,
+        o.seated ? 130 : scene.interior ? 165 : o.artHeight || 165,
+        {
+          crop: o.seated
+            ? o.id === "lian"
+              ? atlasCrop("seated", 2, 0, 3, 1)
+              : { x: 180, y: 80, w: 690, h: 1390 }
+            : crop,
+          flip: o.id === "lin" ? o.facing > 0 : o.seated ? false : o.facing < 0,
+          breathe:
+            animate && !o.moving ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
+          highlight: Boolean(o.id && hover?.id === o.id),
+        },
+      );
+      if (o.bubble && Math.floor(time / 6 + o.phase) % 3 === 0)
+        speechBubble(ctx, o.x, o.y - (o.artHeight || 205) - 30, o.bubble);
     } else if (bounds.props?.[o.type]) {
       shadow(ctx, o.x, o.y, o.w * 0.3);
       const img = asset(paths.props),
@@ -373,54 +766,93 @@ export function draw(
           o.w,
           o.h,
         );
-      if (o.label) {
+      if (o.label && !o.doorId) {
         ctx.font = '17px "Noto Serif CJK SC",serif';
         ctx.textAlign = "center";
         ctx.fillStyle = "#4c3727";
         ctx.fillText(o.label, o.x, o.y - o.h * 0.5);
       }
     } else if (o.type === "player") {
-      const row = appearanceRow(settings),
-        col = settings.hair === "short" ? 1 : 0;
+      const col = settings.hair === "short" ? 1 : 0;
       const animatedWalk = moving && settings.motion !== false;
-      const frames = bounds.walk?.[row + col * 4];
+      const frames = [0, 1, 2, 3].map((f) => atlasCrop("walk", f, col, 4, 2));
       shadow(ctx, o.x, o.y, 32);
-      sprite(ctx, frames ? "walk" : "player", o.x, o.y, actorSizes.player, {
-        crop: frames
-          ? frames[animatedWalk ? walkFrame(walkDistance) : 1]
-          : bounds.player[row][col],
-        uniformHeight: frames ? Math.max(...frames.map((f) => f.h)) : undefined,
-        flip: facing < 0,
-        bob: animatedWalk ? Math.sin(walkDistance / 17) * 1.5 : 0,
-      });
+      if (seat) {
+        sprite(ctx, "seated", o.x, o.y, scene.interior ? 128 : 138, {
+          crop: atlasCrop("seated", col, 0, 3, 1),
+          imageOverride: playerOutfit(settings.outfit, "seated"),
+          flip: Boolean(seat.flip),
+        });
+      } else if (!animatedWalk) {
+        const frame =
+          settings.motion === false
+            ? 0
+            : [0, 0, 1, 1, 2, 2, 0, 0, 3, 0, 4, 4][Math.floor(time * 2) % 12];
+        sprite(ctx, "idle", o.x, o.y, playerHeight, {
+          imageOverride: playerOutfit(settings.outfit),
+          crop: idleCrop(frame, col),
+          uniformHeight: Math.max(
+            ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, col).h),
+          ),
+          flip: facing < 0,
+        });
+      } else
+        sprite(ctx, "walk", o.x, o.y, playerHeight, {
+          imageOverride: playerOutfit(settings.outfit, "walk"),
+          crop: frames[Math.floor(walkDistance / 27) % 4],
+          uniformHeight: Math.max(...frames.map((f) => f.h)),
+          flip: facing < 0,
+        });
     } else if (o.type === "npc") {
-      if (o.id !== "mei") shadow(ctx, o.x, o.y, 30);
-      const neighbor = bounds.neighbors?.[o.id];
-      sprite(
-        ctx,
-        neighbor ? "neighbors" : o.id,
-        o.artX ?? o.x,
-        o.artY ?? o.y,
-        actorSizes[o.id] || o.artHeight,
-        o.id === "mei"
-          ? { crop: { ...bounds.mei, h: Math.round(bounds.mei.h * 0.57) } }
-          : {
-              crop: neighbor,
-              bob: animate ? Math.sin(time * 1.3 + o.x) * 0.8 : 0,
-            },
-      );
+      if (!o.painted && o.id !== "mei") shadow(ctx, o.x, o.y, 30);
+      const neighbor = bounds.neighbors?.[o.appearance || o.id];
+      if (!o.painted)
+        sprite(
+          ctx,
+          neighbor ? "neighbors" : o.id,
+          o.artX ?? o.x,
+          o.artY ?? o.y,
+          o.artHeight || actorSizes[o.id],
+          {
+            crop: neighbor,
+            breathe: animate ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
+            highlight: Boolean(o.id && hover?.id === o.id),
+          },
+        );
+      if (o.bubbles && Math.floor(time / 5 + o.x) % 3 !== 2)
+        speechBubble(
+          ctx,
+          o.x,
+          o.y - (o.artHeight || 205) - 20,
+          o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length],
+        );
     } else if (o.type === "panda") {
       shadow(ctx, o.x, o.y, 30);
       const hop =
         pandaMoving && settings.motion !== false
-          ? Math.max(0, Math.sin(time * 9)) * 9
+          ? Math.max(0, Math.sin(time * 15)) * 9
           : 0;
-      sprite(ctx, "panda", o.x, o.y - hop, actorSizes.panda, {
-        sway:
-          pandaMoving && settings.motion !== false
-            ? Math.sin(time * 9) * 0.025
-            : 0,
-      });
+      const frame =
+        pandaMoving && settings.motion !== false
+          ? [1, 2, 0][Math.floor(time * 8) % 3]
+          : settings.motion !== false && time % 6 > 5.65
+            ? 4
+            : 0;
+      sprite(
+        ctx,
+        "panda",
+        o.x,
+        o.y - hop,
+        scene.interior ? 72 : actorSizes.panda,
+        {
+          crop: { x: frame * 362, y: 0, w: 362, h: 620 },
+          uniformHeight: 510,
+          sway:
+            pandaMoving && settings.motion !== false
+              ? Math.sin(time * 15) * 0.025
+              : 0,
+        },
+      );
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
       sprite(ctx, "momo", o.x, o.y, actorSizes.momo);
@@ -462,13 +894,74 @@ export function draw(
       ctx.restore();
     }
   }
+  for (const o of scene.interactables) {
+    const building = scene.scenery.find((b) => b.doorId === o.id);
+    if (building && o.type === "door") {
+      ctx.save();
+      ctx.font = 'bold 24px "Noto Serif CJK SC",serif';
+      ctx.textAlign = "center";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#302a24";
+      ctx.fillStyle = "#fffef8";
+      ctx.strokeText(
+        building.label || o.name,
+        building.x,
+        building.y - building.h - 35,
+      );
+      ctx.fillText(
+        building.label || o.name,
+        building.x,
+        building.y - building.h - 35,
+      );
+      ctx.restore();
+      ctx.fillStyle = "#64b4d7";
+      ctx.strokeStyle = "#fff5db";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(building.x, building.y - building.h - 16, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    if (o.id === "lost-flowers" && adventure.flowers === "accepted") {
+      ctx.fillStyle = "#d68ba3";
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.ellipse(
+          o.x + (i - 2) * 8,
+          o.y - 10 - Math.abs(i - 2) * 3,
+          8,
+          6,
+          i,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+      ctx.strokeStyle = "#6e8552";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(o.x - 12, o.y - 8);
+      ctx.lineTo(o.x + 10, o.y + 12);
+      ctx.stroke();
+    }
+  }
+  if (hover && !["npc", "passerby"].includes(hover.type)) {
+    ctx.strokeStyle = "#79bcdc";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(hover.x, hover.y, 26, 10, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);
   if (route.length) {
     const end = route.at(-1);
-    ctx.strokeStyle = "#fff5ddaa";
+    ctx.strokeStyle = "#429de1";
+    ctx.fillStyle = "#62baff44";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.ellipse(end.x, end.y, 18, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
   }
   if (near) {
@@ -489,4 +982,21 @@ export function draw(
   canvas.dataset.ambientCount = String(ambient.length);
   canvas.dataset.fallingLeaves = String(leaves);
   return { camX, camY, scale, ox, oy };
+}
+
+function speechBubble(ctx, x, y, text) {
+  ctx.save();
+  ctx.font = '16px "Noto Sans CJK SC",sans-serif';
+  const w = ctx.measureText(text).width + 24;
+  ctx.fillStyle = "#fff4dc";
+  ctx.strokeStyle = "#b99c76";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(x - w / 2, y - 32, w, 34, 12);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#70533b";
+  ctx.textAlign = "center";
+  ctx.fillText(text, x, y - 10);
+  ctx.restore();
 }

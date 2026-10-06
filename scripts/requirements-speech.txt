@@ -1,0 +1,6 @@
+faster-whisper==1.2.1
+# PyAV 19 changed AudioFifo's accepted arguments; 16.1.0 is verified here.
+av==16.1.0
+
+# Neural Mandarin male speech, local CPU inference.
+sherpa-onnx==1.13.8

@@ -1,0 +1,10 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "prompt": "Precise character-consistency edit. IMAGE 1 is the restaurant BACKGROUND TO EDIT. IMAGE 2 is the six-character IDENTITY/STYLE REFERENCE. Preserve every pixel of the room layout as closely as possible: all four tables, their positions and sizes, bowls, hotpots, stools, kitchen, walls, floor, doors, lighting and camera remain unchanged. Change ONLY the four seated diners, maintaining their seated positions and small scale. They must have the exact soft rounded watercolor storybook faces, clothing palettes, hairstyles, and simplified proportions of image 2, instead of the more realistic generic people in image 1. UPPER LEFT seated man: match image 2 bottom-right man Hao, dark tousled short hair, olive-green jacket over cream shirt, charcoal trousers, white canvas shoes; no package while eating. UPPER RIGHT seated woman: match image 2 top-left woman Qiao, braided dark-brown low bun, sage-green Chinese frog-button jacket with cream cuffs, cream long skirt with subtle sage floral embroidery. LOWER LEFT elderly man: match image 2 top-middle Bo, silver-gray hair, ROUND GLASSES visible, tan cardigan over dark-brown vest and cream collared shirt, dark trousers. LOWER RIGHT young woman: match image 2 bottom-middle An, dark high PONYTAIL with light tie, teal knitted sweater, ivory loose trousers, white sneakers; sage shoulder bag can rest beside stool. Everyone uses chopsticks or holds a bowl, sitting naturally at their existing table. Do not add diners or change furniture. No text/UI. Maintain exact image1 dimensions/framing and all clear walking aisles. Match reference identities especially garment hues and recognizable faces.",
+  "references": [
+    "public/assets/world/restaurant-interior-v2.png",
+    "public/assets/characters/neighbors.webp"
+  ],
+  "source": "exec-9b4ae0d9-78e2-4ff2-99f7-df8ef51726d1.png",
+  "destination": "public/assets/world/restaurant-interior-v3.png"
+}

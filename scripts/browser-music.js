@@ -1,3 +1,11 @@
+import { Store } from "../server/store.js";
+import { createApp } from "../server/index.js";
+const testServer = createApp({
+  store: new Store(":memory:"),
+  providerConfig: { provider: "story" },
+});
+await new Promise((resolve) => testServer.listen(0, "127.0.0.1", resolve));
+const base = `http://127.0.0.1:${testServer.address().port}`;
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -20,7 +28,7 @@ try {
       body: '<button id="start">Start music</button><div id="panel-content"></div>',
     }),
   );
-  await page.goto("http://127.0.0.1:3210/music-check");
+  await page.goto(base + "/music-check");
   await page.evaluate(async () => {
     const { Music } = await import("/game/music.js");
     const { Speech } = await import("/game/speech.js");
@@ -143,6 +151,29 @@ try {
   await page.waitForFunction(() => check.music.audio.currentTime < 1);
   assert.equal(await page.evaluate(() => check.music.audio.paused), false);
 
+  await page.evaluate(() => check.music.setScene({ id: "home" }));
+  await page.waitForFunction(
+    () =>
+      check.music.audio?.src.endsWith("sonican-asian-music-magical-dream.mp3") &&
+      check.music.audio.currentTime > 0.1,
+  );
+  const indoor = await page.evaluate(async () => {
+    const response = await fetch("/assets/audio/sonican-asian-music-magical-dream.mp3");
+    const buffer = await check.music.context.decodeAudioData(await response.arrayBuffer());
+    return { duration: buffer.duration, channels: buffer.numberOfChannels };
+  });
+  assert.ok(indoor.duration > 78 && indoor.duration < 80);
+  assert.equal(indoor.channels, 2);
+  assert.equal(await page.evaluate(() => check.music.audio.loop), true);
+  await page.evaluate(() => check.music.setScene({ id: "bakery", interior: true }));
+  assert.ok(await page.evaluate(() => check.music.audio.src.endsWith("sonican-asian-music-magical-dream.mp3")));
+  await page.evaluate(() => check.music.setScene({ id: "shanghai" }));
+  await page.waitForFunction(
+    () =>
+      check.music.audio?.src.endsWith("asia-fsm-team.mp3") &&
+      check.music.audio.currentTime > 0.1,
+  );
+
   // The Web Audio device and HTMLAudioElement are real. This one-second local
   // WAV fixture exercises playback lifecycle without depending on an OS voice.
   await page.evaluate(async () => {
@@ -197,13 +228,13 @@ try {
 
   // A stale native speech end event must not unduck a newer utterance.
   await page.evaluate(async () => {
-    check.speech.voices = [{ lang: "zh-CN", name: "Fixture" }];
+    check.speech.voices = [{ lang: "zh-CN", name: "Fixture female" }];
     const utterances = [];
     window.SpeechSynthesisUtterance = class {};
     speechSynthesis.speak = (utterance) => utterances.push(utterance);
-    await check.speech.speak("一。");
+    await check.speech.speak("一。", false, "female");
     utterances[0].onstart();
-    await check.speech.speak("二。");
+    await check.speech.speak("二。", false, "female");
     utterances[1].onstart();
     utterances[0].onend();
     check.nativeStillDucked = check.music.ducked;
@@ -289,7 +320,7 @@ try {
     await heldRecording;
     await route.fulfill({ contentType: "audio/mpeg", body: recordingBytes });
   });
-  await pending.goto("http://127.0.0.1:3210/music-check");
+  await pending.goto(base + "/music-check");
   await pending.evaluate(async () => {
     const { Music } = await import("/game/music.js");
     window.music = new Music({ music: 0.2 });
@@ -319,7 +350,7 @@ try {
   await fallback.route("**/assets/audio/asia-fsm-team.mp3", (route) =>
     route.fulfill({ status: 404, body: "Missing recording fixture" }),
   );
-  await fallback.goto("http://127.0.0.1:3210/music-check");
+  await fallback.goto(base + "/music-check");
   await fallback.evaluate(async () => {
     const { Music } = await import("/game/music.js");
     window.music = new Music({ music: 0.2 });
@@ -387,7 +418,7 @@ try {
           musicGainSamples.push(graph.musicMaster.gain.value);
     }, 10);
   });
-  await game.goto("http://127.0.0.1:3210");
+  await game.goto(base);
   assert.equal(await game.evaluate(() => musicGraphs.length), 0);
   await game.getByRole("button", { name: "Wander with Panda" }).click();
   await game.locator("#world").waitFor({ state: "visible" });
@@ -499,4 +530,5 @@ try {
   console.log(JSON.stringify(result));
 } finally {
   await browser.close();
+  await new Promise((resolve) => testServer.close(resolve));
 }

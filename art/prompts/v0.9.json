@@ -1,0 +1,55 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "water": {
+    "prompt": "Create a seamless tileable WATER SURFACE texture for the Suzhou watercolor game in the reference. Match ONLY the canal WATER in this image: luminous turquoise/teal blue-green, irregular broad painterly reflections of cream sky and muted jade foliage, layered translucent dark teal depth, small organic broken ripples. No banks, buildings, boats, bridges, fish, trees, leaves or lily pads as objects. View water surface from the same high angle. All four edges seamless. No borders, no text. This will replace the flat green water outside the market, so matching the reference's specific rich turquoise palette and delicate watercolor brush texture is essential. Do not make dark olive water or regular geometric oval reflections. Square 1024x1024 texture.",
+    "source": "exec-99621f62-c419-4950-b850-b8e9df0e29c6.png",
+    "destination": "public/assets/world/canal-water.png"
+  },
+  "shops": [
+    {
+      "key": "breakfast",
+      "identity": "TOP LEFT woman from image2: Qiao-style low braided brown bun, sage frog-button Chinese jacket, cream floral skirt",
+      "wares": "warm bamboo steamers filled with baozi, scallion pancakes on a small griddle, porcelain saucers",
+      "setting": "cream fabric awning, warm wooden noodle-and-breakfast counter",
+      "prompt": "First-person close-up shop interaction for the Suzhou watercolor game. Image1 is the WORLD/SHOP STYLE reference, image2 is the exact SELLER identity reference. Buyer eye-level from immediately in front of the counter looking at a friendly seller at conversational distance. Seller must match TOP LEFT woman from image2: Qiao-style low braided brown bun, sage frog-button Chinese jacket, cream floral skirt, with exactly the same face, hairstyle and clothing colors as image2. One seller, waist-up behind counter, looking toward viewer with friendly attentive expression; no other people. Counter foreground displays warm bamboo steamers filled with baozi, scallion pancakes on a small griddle, porcelain saucers. Behind seller cream fabric awning, warm wooden noodle-and-breakfast counter, flower pots, red lanterns, pale plaster and wooden lattice details. Cozy bright diffuse daylight, warm textured watercolor storybook style matching both references. Medium close framing with seller face at upper center and clearly visible goods below, no wide overhead/isometric view. Landscape 3:2, polished full-bleed game painting. No signs, text, numbers, labels, UI, floating hands or protagonist. Maintain specific character design and clothing.",
+      "source": "exec-1faa5688-827e-4262-8ec5-5ed229304419.png",
+      "destination": "public/assets/world/shop-breakfast.png"
+    },
+    {
+      "key": "souvenirs",
+      "identity": "BOTTOM MIDDLE young woman from image2: An-style dark ponytail with light tie, teal sweater, sage bag and ivory trousers",
+      "wares": "embroidered round silk fans, folded silk scarves, small landscape postcards, wooden display racks",
+      "setting": "dusty rose fabric awning, old wooden souvenir counter",
+      "prompt": "First-person close-up shop interaction for the Suzhou watercolor game. Image1 is the WORLD/SHOP STYLE reference, image2 is the exact SELLER identity reference. Buyer eye-level from immediately in front of the counter looking at a friendly seller at conversational distance. Seller must match BOTTOM MIDDLE young woman from image2: An-style dark ponytail with light tie, teal sweater, sage bag and ivory trousers, with exactly the same face, hairstyle and clothing colors as image2. One seller, waist-up behind counter, looking toward viewer with friendly attentive expression; no other people. Counter foreground displays embroidered round silk fans, folded silk scarves, small landscape postcards, wooden display racks. Behind seller dusty rose fabric awning, old wooden souvenir counter, flower pots, red lanterns, pale plaster and wooden lattice details. Cozy bright diffuse daylight, warm textured watercolor storybook style matching both references. Medium close framing with seller face at upper center and clearly visible goods below, no wide overhead/isometric view. Landscape 3:2, polished full-bleed game painting. No signs, text, numbers, labels, UI, floating hands or protagonist. Maintain specific character design and clothing.",
+      "source": "exec-44021e70-b506-45e0-a733-5e94c94fe1bb.png",
+      "destination": "public/assets/world/shop-souvenirs.png"
+    },
+    {
+      "key": "produce",
+      "identity": "BOTTOM LEFT man from image2: Wei-style stocky cheerful man, short dark hair, blue rolled-sleeve shirt, cream apron and olive trousers",
+      "wares": "wicker baskets of tangerines, pears, leafy greens and eggplants; an old balance scale",
+      "setting": "sage fabric awning, wooden fruit-and-vegetable counter",
+      "prompt": "First-person close-up shop interaction for the Suzhou watercolor game. Image1 is the WORLD/SHOP STYLE reference, image2 is the exact SELLER identity reference. Buyer eye-level from immediately in front of the counter looking at a friendly seller at conversational distance. Seller must match BOTTOM LEFT man from image2: Wei-style stocky cheerful man, short dark hair, blue rolled-sleeve shirt, cream apron and olive trousers, with exactly the same face, hairstyle and clothing colors as image2. One seller, waist-up behind counter, looking toward viewer with friendly attentive expression; no other people. Counter foreground displays wicker baskets of tangerines, pears, leafy greens and eggplants; an old balance scale. Behind seller sage fabric awning, wooden fruit-and-vegetable counter, flower pots, red lanterns, pale plaster and wooden lattice details. Cozy bright diffuse daylight, warm textured watercolor storybook style matching both references. Medium close framing with seller face at upper center and clearly visible goods below, no wide overhead/isometric view. Landscape 3:2, polished full-bleed game painting. No signs, text, numbers, labels, UI, floating hands or protagonist. Maintain specific character design and clothing.",
+      "source": "exec-883ddc7c-6f84-43b7-8679-1dcf2536b50f.png",
+      "destination": "public/assets/world/shop-produce.png"
+    },
+    {
+      "key": "snacks",
+      "identity": "TOP LEFT woman from image2: Qiao-style low braided brown bun, sage frog-button Chinese jacket, cream floral skirt",
+      "wares": "small square osmanthus cakes, round sesame pastries, porcelain tea cups and a small teapot",
+      "setting": "sage-and-cream fabric awning, warm wooden sweets counter",
+      "prompt": "First-person close-up shop interaction for the Suzhou watercolor game. Image1 is the WORLD/SHOP STYLE reference, image2 is the exact SELLER identity reference. Buyer eye-level from immediately in front of the counter looking at a friendly seller at conversational distance. Seller must match TOP LEFT woman from image2: Qiao-style low braided brown bun, sage frog-button Chinese jacket, cream floral skirt, with exactly the same face, hairstyle and clothing colors as image2. One seller, waist-up behind counter, looking toward viewer with friendly attentive expression; no other people. Counter foreground displays small square osmanthus cakes, round sesame pastries, porcelain tea cups and a small teapot. Behind seller sage-and-cream fabric awning, warm wooden sweets counter, flower pots, red lanterns, pale plaster and wooden lattice details. Cozy bright diffuse daylight, warm textured watercolor storybook style matching both references. Medium close framing with seller face at upper center and clearly visible goods below, no wide overhead/isometric view. Landscape 3:2, polished full-bleed game painting. No signs, text, numbers, labels, UI, floating hands or protagonist. Maintain specific character design and clothing.",
+      "source": "exec-f484ad57-cf85-49ad-b16f-5cde9baef9aa.png",
+      "destination": "public/assets/world/shop-snacks.png"
+    },
+    {
+      "key": "streetfood",
+      "identity": "BOTTOM RIGHT young man from image2: Hao-style tousled dark hair, olive jacket, cream shirt and charcoal trousers",
+      "wares": "steaming Suzhou noodle bowls, skewers of grilled vegetables, glossy red tanghulu fruit sticks",
+      "setting": "dark tiled roof, reddish hanging cloth and wooden street-food counter",
+      "prompt": "First-person close-up shop interaction for the Suzhou watercolor game. Image1 is the WORLD/SHOP STYLE reference, image2 is the exact SELLER identity reference. Buyer eye-level from immediately in front of the counter looking at a friendly seller at conversational distance. Seller must match BOTTOM RIGHT young man from image2: Hao-style tousled dark hair, olive jacket, cream shirt and charcoal trousers, with exactly the same face, hairstyle and clothing colors as image2. One seller, waist-up behind counter, looking toward viewer with friendly attentive expression; no other people. Counter foreground displays steaming Suzhou noodle bowls, skewers of grilled vegetables, glossy red tanghulu fruit sticks. Behind seller dark tiled roof, reddish hanging cloth and wooden street-food counter, flower pots, red lanterns, pale plaster and wooden lattice details. Cozy bright diffuse daylight, warm textured watercolor storybook style matching both references. Medium close framing with seller face at upper center and clearly visible goods below, no wide overhead/isometric view. Landscape 3:2, polished full-bleed game painting. No signs, text, numbers, labels, UI, floating hands or protagonist. Maintain specific character design and clothing.",
+      "source": "exec-e3fe7772-04eb-4f9f-8385-cdeba2e5b810.png",
+      "destination": "public/assets/world/shop-streetfood.png"
+    }
+  ]
+}

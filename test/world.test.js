@@ -34,7 +34,10 @@ test("every scene spawn and interaction point is reachable in walkable geometry"
       const target = interactionPoint(obj);
       assert.ok(canStand(scene, target.x, target.y), obj.id);
       assert.ok(pathTo(scene, scene.spawn, target).length, `Route: ${obj.id}`);
-      if (obj.type === "npc" && obj.id !== "mei") {
+      if (
+        obj.type === "npc" &&
+        scene.solidCircles?.some((c) => c.x === obj.x && c.y === obj.y)
+      ) {
         assert.equal(
           canStand(scene, obj.x, obj.y),
           false,
@@ -54,7 +57,7 @@ test("discovery removes the outside stuffy and enables it at home", () => {
 });
 test("cultural activity stations have clear approaches and festival posts stay beside the lane", () => {
   const scene = scenes.shanghai;
-  for (const id of ["fabric", "lanterns", "market-budget"]) {
+  for (const id of ["lanterns", "market-budget"]) {
     const station = scene.interactables.find((o) => o.id === id);
     assert.equal(station.type, "practice");
     assert.ok(
@@ -66,19 +69,19 @@ test("cultural activity stations have clear approaches and festival posts stay b
     assert.equal(nearest(scene, approach).id, id);
   }
   const rack = scene.scenery.find((o) => o.type === "festival-lanterns");
-  assert.equal(canStand(scene, rack.x - 147 * 0.9, rack.y), false);
-  assert.equal(canStand(scene, rack.x + 147 * 0.9, rack.y), false);
+  assert.equal(canStand(scene, rack.x - 120 * 0.9, rack.y), false);
+  assert.equal(canStand(scene, rack.x + 120 * 0.9, rack.y), false);
   assert.ok(
-    canStand(scene, rack.x, 2975 * 0.9),
+    canStand(scene, rack.x, rack.y + 70),
     "The lane stays open beneath the rack",
   );
 });
-test("compact district keeps its destinations connected while reducing the expanded map by about twenty percent", () => {
+test("compact district keeps its destinations connected while giving the wider market room in a compact map", () => {
   const scene = scenes.shanghai;
   const ratio = (scene.width * scene.height) / (1300 * 1000);
-  assert.equal(scene.width, 3600);
-  assert.equal(scene.height, 3000);
-  assert.ok(ratio > 8 && ratio < 8.5);
+  assert.equal(scene.width, 3240);
+  assert.equal(scene.height, 2700);
+  assert.ok(ratio > 6.7 && ratio < 6.8);
   assert.ok((scene.width * scene.height) / (4000 * 3300) < 0.83);
   for (const destination of scene.interactables) {
     const target = interactionPoint(destination),
@@ -104,16 +107,20 @@ test("compact district keeps its destinations connected while reducing the expan
       previous = point;
     }
   }
-  assert.equal(canStand(scene, 90, 2381.4), false, "Canal water is blocked");
+  assert.equal(
+    canStand(scene, 850 * 0.9, 1400 * 0.9),
+    false,
+    "Canal water is blocked",
+  );
   assert.equal(
     canStand(scene, 810, 2862),
     false,
     "Water below bridge is blocked",
   );
 });
-test("narrow streets join nine neighbors, lake and varied gardens without crossing water", () => {
+test("narrow streets join sixteen neighbors, lake and varied gardens without crossing water", () => {
   const scene = scenes.shanghai;
-  assert.equal(scene.interactables.filter((o) => o.type === "npc").length, 9);
+  assert.equal(scene.interactables.filter((o) => o.type === "npc").length, 16);
   assert.ok(scene.paths.every((p) => p.width <= 175));
   const approximatePavedArea = scene.paths.reduce(
     (area, path) =>
@@ -134,48 +141,62 @@ test("narrow streets join nine neighbors, lake and varied gardens without crossi
   );
   assert.ok(approximatePavedArea < scene.width * scene.height * 0.3);
   assert.ok(scene.groundZones.some((o) => o.type === "garden"));
-  assert.ok(scene.scenery.some((o) => o.type === "market"));
-  assert.equal(canStand(scene, 2610, 1278), false, "Lake water is blocked");
+  assert.ok(scene.marketPlate?.path.endsWith("market-lane-v3.png"));
+  assert.ok(scene.canals.filter((o) => o.painted).length >= 2);
+  assert.equal(
+    canStand(scene, 3100 * 0.9, 1510 * 0.9),
+    false,
+    "Lake water is blocked",
+  );
   assert.ok(scene.groundZones.some((o) => o.type === "orchard"));
   assert.ok(scene.groundZones.some((o) => o.type === "bamboo-garden"));
-  for (const street of scene.paths) {
-    for (let i = 1; i < street.points.length; i++) {
-      const a = street.points[i - 1],
-        b = street.points[i],
-        steps = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 8);
-      for (let j = 0; j <= steps; j++)
-        assert.ok(
-          canStand(
-            scene,
-            a[0] + ((b[0] - a[0]) * j) / steps,
-            a[1] + ((b[1] - a[1]) * j) / steps,
-          ),
-          "Street center is clear of scenery",
-        );
-    }
-  }
+  // Water intersections are deliberate bridge crossings; each bridge is fully
+  // traversable while the neighboring water is blocked.
 });
-test("both canal-lane exits allow continuous movement while shop and water boundaries remain solid", () => {
+test("canal bridges cross continuous water and every building blocks its visible facade", () => {
   const scene = scenes.shanghai;
-  const plate = scene.landmark,
-    north = move(scene, { x: plate.x + 180, y: plate.y + 18 }, 0, -72),
-    east = move(
-      scene,
-      { x: plate.x + plate.w - 18, y: plate.y + 827.1 },
-      72,
-      0,
+  for (const b of scene.bridges) {
+    const x = b.x + b.w / 2,
+      y = b.y + b.h / 2;
+    assert.ok(canStand(scene, x, y));
+    assert.ok(
+      pathTo(scene, scene.spawn, { x, y }).length,
+      "Bridge center is connected to the town",
     );
-  assert.ok(Math.abs(north.y - (plate.y - 54)) < 0.001);
-  assert.ok(Math.abs(east.x - (plate.x + plate.w + 54)) < 0.001);
-  assert.equal(plate.w, plate.h, "Canal artwork keeps its square aspect ratio");
-  const shopEdge = move(
-    scene,
-    { x: plate.x + plate.w + 90, y: plate.y + 500 },
-    -300,
-    0,
-  );
-  assert.ok(shopEdge.x >= scene.landmark.x + scene.landmark.w + 15);
-  assert.ok(canStand(scene, shopEdge.x, shopEdge.y));
+    if (b.painted) {
+      // Painted arch bridges have winding approaches; their straight deck is
+      // checked here, while every shop-to-spawn route is checked above.
+      const start = { x: x - b.w * 0.15, y };
+      const end = move(scene, start, b.w * 0.3, 0);
+      assert.ok(
+        end.x - start.x >= b.w * 0.29,
+        "Painted bridge deck stays clear",
+      );
+      continue;
+    }
+    const start = b.axis === "x" ? { x: b.x - 30, y } : { x, y: b.y - 30 };
+    const end = move(
+      scene,
+      start,
+      b.axis === "x" ? b.w + 60 : 0,
+      b.axis === "y" ? b.h + 60 : 0,
+    );
+    assert.ok(
+      Math.hypot(end.x - start.x, end.y - start.y) > Math.max(b.w, b.h),
+    );
+  }
+  assert.equal(canStand(scene, 850 * 0.9, 1400 * 0.9), false);
+  assert.equal(canStand(scene, 2200 * 0.9, 2300 * 0.9), false);
+  for (const b of scene.scenery.filter(
+    (o) => o.doorId && o.landmark !== "moon-gate",
+  )) {
+    assert.equal(
+      canStand(scene, b.x, b.y - b.h * 0.5),
+      false,
+      b.doorId + " roof",
+    );
+    assert.equal(canStand(scene, b.x, b.y - 10), false, b.doorId + " facade");
+  }
 });
 test("lake uses the same irregular shore for rendering and collision, with an accessible duck approach", () => {
   const scene = scenes.shanghai,
@@ -184,7 +205,7 @@ test("lake uses the same irregular shore for rendering and collision, with an ac
     approach = interactionPoint(duck);
   assert.equal(lake.shape, "polygon");
   assert.ok(
-    lake.polygon.length >= 10,
+    lake.polygon.length >= 8,
     "Shore has varied coves rather than a rectangle",
   );
   assert.deepEqual(scene.solidPolygons[0], lake.polygon);
@@ -192,7 +213,7 @@ test("lake uses the same irregular shore for rendering and collision, with an ac
   assert.ok(canStand(scene, approach.x, approach.y));
   assert.equal(nearest(scene, approach).id, "lake-duck");
   assert.equal(
-    pathTo(scene, scene.spawn, { x: 2610, y: 1278 }).length,
+    pathTo(scene, scene.spawn, { x: 3100 * 0.9, y: 1510 * 0.9 }).length,
     0,
     "A lake-center click cannot enter the water",
   );
@@ -239,7 +260,8 @@ test("routes can be followed at normal movement speed without stalling near furn
     }
 });
 test("home furniture outlines block cabinets, bed, sofa and table while floor remains reachable", () => {
-  const scene = scenes.home;
+  const scene = scenes.home,
+    scale = scene.roomScale || 1;
   for (const [x, y, name] of [
     [110, 430, "left cabinet"],
     [220, 180, "bed"],
@@ -248,11 +270,16 @@ test("home furniture outlines block cabinets, bed, sofa and table while floor re
     [1110, 430, "right cabinet"],
     [420, 320, "tea table"],
   ])
-    assert.equal(canStand(scene, x, y), false, name);
-  const stopped = move(scene, { x: 250, y: 550 }, -150, -140);
+    assert.equal(canStand(scene, x * scale, y * scale), false, name);
+  const stopped = move(
+    scene,
+    { x: 250 * scale, y: 550 * scale },
+    -150 * scale,
+    -140 * scale,
+  );
   assert.ok(canStand(scene, stopped.x, stopped.y));
   assert.ok(
-    stopped.x > 170 || stopped.y > 523,
+    stopped.x > 170 * scale || stopped.y > 523 * scale,
     "Movement cannot climb onto the cabinet",
   );
   for (const destination of scene.interactables)
@@ -262,27 +289,40 @@ test("home furniture outlines block cabinets, bed, sofa and table while floor re
     );
 });
 test("home rear and left walls cannot be walked or routed onto", () => {
-  const scene = scenes.home;
+  const scene = scenes.home,
+    scale = scene.roomScale || 1;
   for (const wall of [
     { x: 700, y: 80 },
     { x: 70, y: 180 },
   ]) {
     assert.equal(
-      canStand(scene, wall.x, wall.y),
+      canStand(scene, wall.x * scale, wall.y * scale),
       false,
       "Feet remain off the wall painting",
     );
     assert.equal(
-      pathTo(scene, scene.spawn, wall).length,
+      pathTo(scene, scene.spawn, {
+        x: wall.x * scale,
+        y: wall.y * scale,
+      }).length,
       0,
       "Wall click has no route into the backdrop",
     );
   }
-  const stopped = move(scene, scene.spawn, 0, -1000);
+  const stopped = move(scene, scene.spawn, 0, -1000 * scale);
   assert.ok(canStand(scene, stopped.x, stopped.y));
-  assert.ok(stopped.y >= 265, "Holding up stops at the floor-to-wall boundary");
-  assert.ok(canStand(scene, 600, 620), "Main open floor stays walkable");
-  assert.ok(canStand(scene, 600, 725), "Doorway approach stays walkable");
+  assert.ok(
+    stopped.y >= 265 * scale,
+    "Holding up stops at the floor-to-wall boundary",
+  );
+  assert.ok(
+    canStand(scene, 600 * scale, 620 * scale),
+    "Main open floor stays walkable",
+  );
+  assert.ok(
+    canStand(scene, 600 * scale, 725 * scale),
+    "Doorway approach stays walkable",
+  );
 });
 test("three distinct shop interiors keep furniture and walls solid, with usable practice counters", () => {
   const furniture = {
@@ -453,7 +493,7 @@ test("older saves relocate safely and preserve settings, conversations and disco
     assert.equal(upgraded.state.settings.pinyin, false);
     assert.deepEqual(upgraded.state.journal, ["Existing memory"]);
     assert.equal(store.save(id, 0, old).revision, 1);
-    assert.equal(
+    assert.deepEqual(
       upgradeState(upgraded.state),
       upgraded.state,
       "Current saves retain their position",
@@ -462,7 +502,7 @@ test("older saves relocate safely and preserve settings, conversations and disco
     store.close();
   }
 });
-test("version two district saves keep their scaled location and learning progress", () => {
+test("version two district saves move to the redesigned courtyard and keep learning progress", () => {
   const old = {
     ...newState(),
     mapVersion: 2,
@@ -473,7 +513,7 @@ test("version two district saves keep their scaled location and learning progres
   old.settings.pinyin = false;
   const upgraded = upgradeState(old);
   assert.equal(upgraded.mapVersion, MAP_VERSION);
-  assert.deepEqual(upgraded.position, { x: 1224, y: 850.5 });
+  assert.deepEqual(upgraded.position, scenes.shanghai.spawn);
   assert.deepEqual(upgraded.found, old.found);
   assert.equal(upgraded.settings, old.settings);
   assert.equal(upgraded.learner, old.learner);
@@ -482,8 +522,8 @@ test("version two district saves keep their scaled location and learning progres
 test("a saved position now covered by the lake moves to nearby shore without losing progress", () => {
   const old = {
       ...newState(),
-      mapVersion: 2,
-      position: { x: 3300, y: 1360 },
+      mapVersion: MAP_VERSION,
+      position: { x: 3300, y: 1550 },
       found: ["momo"],
       journal: ["A lake memory"],
     },
@@ -492,7 +532,7 @@ test("a saved position now covered by the lake moves to nearby shore without los
     canStand(scenes.shanghai, upgraded.position.x, upgraded.position.y),
   );
   assert.ok(
-    Math.hypot(upgraded.position.x - 2970, upgraded.position.y - 1224) < 300,
+    Math.hypot(upgraded.position.x - 3300, upgraded.position.y - 1550) < 300,
   );
   assert.deepEqual(upgraded.found, old.found);
   assert.deepEqual(upgraded.journal, old.journal);

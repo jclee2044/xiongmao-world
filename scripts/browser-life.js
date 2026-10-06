@@ -1,3 +1,11 @@
+import { Store } from "../server/store.js";
+import { createApp } from "../server/index.js";
+const testServer = createApp({
+  store: new Store(":memory:"),
+  providerConfig: { provider: "story" },
+});
+await new Promise((resolve) => testServer.listen(0, "127.0.0.1", resolve));
+const base = `http://127.0.0.1:${testServer.address().port}`;
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -63,7 +71,7 @@ try {
     speechCalls.push(route.request().postDataJSON());
     return route.fulfill({ contentType: "audio/wav", body: wav });
   });
-  await page.goto("http://127.0.0.1:3210");
+  await page.goto(base);
   await enterWorld(page);
   assert.equal(
     await page.locator("#practice").isVisible(),
@@ -92,11 +100,7 @@ try {
     "mei",
   ]) {
     await walkToStop(page, id);
-    await page
-      .getByRole("button", {
-        name: new RegExp(`Say hello to ${npcs[id].name.split(" ")[0]}`),
-      })
-      .click();
+    await page.locator("#interact").click();
     assert.match(
       await page.locator("#npc-zh").textContent(),
       /\p{Script=Han}/u,
@@ -453,6 +457,11 @@ try {
   await closePanel();
   await page.getByRole("button", { name: "Home", exact: true }).click();
   await page.waitForFunction(
+    () => document.querySelector("canvas").dataset.routeLength === "0",
+    null,
+    { timeout: 45000 },
+  );
+  await page.waitForFunction(
     () => document.querySelector("#world").dataset.scene === "home",
   );
   await start("lake-animals");
@@ -482,6 +491,11 @@ try {
   ]) {
     await closePanel();
     await localStop("shanghai", id);
+    const room = {
+      "tiger-hill": "tiger-court",
+      "classical-garden": "lion-grove",
+    }[id];
+    if (room) await localStop(room, `${room}-story`);
     assert.equal(await page.locator("#culture-replay").isVisible(), true);
     assert.ok(
       (await page.locator("#panel-content").textContent()).includes(
@@ -494,7 +508,7 @@ try {
     );
     assert.ok(
       (await page.locator("#panel-content").textContent()).includes(
-        "位置和路线经过了调整",
+        "真的苏州更大",
       ),
     );
     await page.locator("#culture-replay").click();
@@ -504,6 +518,7 @@ try {
         .textContent.includes("Local Mandarin"),
     );
     cultureStops.push(id);
+    if (room) await leaveShop(room);
   }
   await closePanel();
   await openCatalog();
@@ -533,6 +548,13 @@ try {
   );
   await page.screenshot({ path: "test-results/life-completed-errands.png" });
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      ),
+  );
+  await page.waitForTimeout(300);
   const portrait = await page.evaluate(() => {
     const panel = document.querySelector("#panel");
     return {
@@ -545,7 +567,7 @@ try {
   assert.ok(
     portrait.documentWidth <= portrait.width &&
       portrait.panelScroll <= portrait.panelWidth + 1,
-    "Chinese errands fit a phone-width panel",
+    `Chinese errands fit a phone-width panel: ${JSON.stringify(portrait)}`,
   );
   await page.screenshot({
     path: "test-results/life-completed-errands-mobile.png",
@@ -574,4 +596,5 @@ try {
   console.log(JSON.stringify(result));
 } finally {
   await browser.close();
+  await new Promise((resolve) => testServer.close(resolve));
 }

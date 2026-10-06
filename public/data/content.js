@@ -32,3 +32,45 @@ export const lexicon=[
   {id:'again',zh:'再说一遍',pinyin:'zài shuō yí biàn',meaning:'say it one more time',example:'请再说一遍。',why:'A clarification request is useful communication, never a failure.'}
 ];
 export const starters={food:{zh:'我想…',example:'我想吃面。',why:'想 + an action tells Mei what you would like.'},school:{zh:'我喜欢…',example:'我喜欢看书。',why:'Share an activity or ask Lin a question.'},work:{zh:'今天…',example:'今天工作忙吗？',why:'Ask about today; 忙吗 means “are you busy?”'},activities:{zh:'我们一起…',example:'我们一起喝茶吧。',why:'一起 + activity suggests doing something together.'},travel:{zh:'请问，…',example:'请问，书店在哪儿？',why:'请问 is a polite way to begin asking for directions.'},greeting:{zh:'你好，…',example:'你好，我叫…',why:'A greeting and your name are a fine beginning.'}};
+
+export const visitors = [
+ {id:'visitor-0',appearance:'hao',name:'阿明',zh:'今天天气真好！你喜欢晴天还是雨天？',pinyin:'Jīntiān tiānqì zhēn hǎo! Nǐ xǐhuan qíngtiān háishi yǔtiān?',meaning:'Lovely weather today! Do you prefer sunny or rainy days?',bubble:'今天天气真好！',personality:'A neighborhood student who loves sunshine and cycling.',voice:'male'},
+ {id:'visitor-1',appearance:'lan',name:'小雨',zh:'我在找花店。你最喜欢什么花？',pinyin:'Wǒ zài zhǎo huādiàn. Nǐ zuì xǐhuan shénme huā?',meaning:'I am looking for the flower shop. What is your favorite flower?',bubble:'花店的花真香。',personality:'A flower-loving neighbor buying a present for her grandmother.',voice:'female'},
+ {id:'visitor-2',appearance:'wei',name:'大勇',zh:'我刚买了橘子。你喜欢甜的水果吗？',pinyin:'Wǒ gāng mǎile júzi. Nǐ xǐhuan tián de shuǐguǒ ma?',meaning:'I just bought tangerines. Do you like sweet fruit?',bubble:'今天的橘子很甜！',personality:'A cheerful home cook carrying groceries for dinner.',voice:'male'},
+ {id:'visitor-3',appearance:'an',name:'小月',zh:'我想画这座桥。你觉得桥像什么？',pinyin:'Wǒ xiǎng huà zhè zuò qiáo. Nǐ juéde qiáo xiàng shénme?',meaning:'I want to draw this bridge. What does it look like to you?',bubble:'河里的倒影真漂亮。',personality:'A young art student fascinated by reflections and bridge shapes.',voice:'female'},
+ {id:'visitor-4',appearance:'bo',name:'周叔叔',zh:'我每天都来散步。你今天走了多远？',pinyin:'Wǒ měitiān dōu lái sànbù. Nǐ jīntiān zǒule duō yuǎn?',meaning:'I walk here every day. How far have you walked today?',bubble:'慢慢走，看看河。',personality:'A retired teacher on his daily canal walk, interested in books and stories.',voice:'male'},
+ {id:'visitor-5',appearance:'qiao',name:'阿宁',zh:'我想喝一杯热茶。你想喝什么？',pinyin:'Wǒ xiǎng hē yì bēi rè chá. Nǐ xiǎng hē shénme?',meaning:'I would like a cup of hot tea. What would you like?',bubble:'走累了，去喝茶吧。',personality:'A neighbor taking a break from her weaving work.',voice:'female'},
+];
+for(const v of visitors) npcs[v.id]={name:v.name,identity:`苏州的邻居${v.name}`,voice:v.voice,personality:v.personality,topic:'activities',greeting:{chinese:v.zh,pinyin:v.pinyin,meaning:v.meaning,topic:'activities'}};
+Object.assign(npcs,{
+ guide:{name:'小文 · Guide',identity:'苏州博物馆讲解员小文',voice:'female',topic:'activities',personality:'Museum guide. Talks about celadon lotus bowl and Northern Song Pearl Pillar in simple Mandarin; admits uncertainty about dates or exact reproduction details.',greeting:{chinese:'欢迎！你想先看看莲花碗，还是宝幢？',pinyin:'Huānyíng! Nǐ xiǎng xiān kànkan liánhuā wǎn, háishi bǎochuáng?',meaning:'Welcome! Would you like to see the lotus bowl or the Pearl Pillar first?',topic:'activities'}},
+ waiter:{name:'小陈 · Waiter',identity:'苏州河畔餐馆的服务员小陈',voice:'male',topic:'food',personality:'Waiter in a small canal-side restaurant offering Suzhou noodles and a hot-pot practice table. Does not claim to change game state through conversation.',greeting:{chinese:'欢迎！想吃面，还是一起吃火锅？',pinyin:'Huānyíng! Xiǎng chī miàn, háishi yìqǐ chī huǒguō?',meaning:'Welcome! Noodles, or shall we have hot pot?',topic:'food'}},
+});
+for(const id of ['mei','yun','qiao','lan','an'])npcs[id].voice='female';
+npcs.suyin={name:'素音 · Suyin',identity:'山塘街茶肆的主人素音',voice:'female',topic:'activities',personality:'A Shantang teahouse host interested in local storytelling, music and canal life. Explains that Suzhou pingtan combines storytelling and singing, without claiming to perform actual recordings.',greeting:{chinese:'欢迎来到山塘！你喜欢听故事，还是听音乐？',pinyin:'Huānyíng láidào Shāntáng! Nǐ xǐhuan tīng gùshi, háishi tīng yīnyuè?',meaning:'Welcome to Shantang! Do you enjoy stories or music?',topic:'activities'}};
+
+const newNeighbors = [
+ ['lian','莲','lian','female','我有点饿了。你愿意陪我吃火锅吗？','I am a little hungry. Would you have hotpot with me?','A hungry friend who would enjoy being invited to hotpot.'],
+ ['diner','阿乐','hao','male','这锅汤真香！你喜欢吃豆腐吗？','This broth smells wonderful! Do you like tofu?','A friendly restaurant regular chatting about the ingredients.'],
+ ['diner-friend','小桃','qiao','female','我喜欢蘑菇。我们再点一盘吧！','I like mushrooms. Let us order another plate!','A diner sharing hotpot with a friend.'],
+ ['baker','桂姨','qiao','female','桂花糕刚做好。闻一闻，香不香？','The osmanthus cakes are fresh. Do they smell nice?','A Suzhou baker who loves osmanthus cakes.'],
+ ['reader','小书','bo','male','我在读苏州的故事。你喜欢园林吗？','I am reading stories about Suzhou. Do you like gardens?','A reader fascinated by local gardens.'],
+ ['gardener','石伯','wei','male','太湖石的形状很有意思。你看它像什么？','Taihu rocks have interesting shapes. What does this one resemble?','A gardener explaining rocks, lotus and bamboo.'],
+ ['silk-host','绣娘','an','female','这把团扇上绣着一朵花。你喜欢吗？','This round fan has an embroidered flower. Do you like it?','A Suzhou embroidery artisan showing fans.'],
+ ['kid-one','小豆','hao','male','我们在踢毽子！你会数到十吗？','We are playing shuttlecock! Can you count to ten?','A child playing shuttlecock with a friend.'],
+ ['kid-two','小米','lan','female','一、二、三！轮到你了！','One, two, three! Your turn!','A child counting while playing shuttlecock.'],
+ ['snack-host','阿香','qiao','female','来一块桂花糕吧，甜甜的！','Try an osmanthus cake. It is sweet!','A street food seller offering osmanthus cakes.'],
+];
+export const extraNeighbors = newNeighbors;
+for (const [id,name,appearance,voice,chinese,meaning,personality] of newNeighbors) npcs[id]={name,appearance,identity:`苏州的邻居${name}`,voice,personality,topic:'activities',greeting:{chinese,pinyin:'',meaning,topic:'activities'}};
+
+npcs["lian"].greeting.pinyin="wǒ yǒu diǎn è le 。 nǐ yuàn yì péi wǒ chī huǒ guō ma ？";
+npcs["diner"].greeting.pinyin="zhè guō tāng zhēn xiāng ！ nǐ xǐ huan chī dòu fu ma ？";
+npcs["diner-friend"].greeting.pinyin="wǒ xǐ huan mó gu 。 wǒ men zài diǎn yì pán ba ！";
+npcs["baker"].greeting.pinyin="guì huā gāo gāng zuò hǎo 。 wén yī wén ， xiāng bu xiāng ？";
+npcs["reader"].greeting.pinyin="wǒ zài dú sū zhōu de gù shì 。 nǐ xǐ huan yuán lín ma ？";
+npcs["gardener"].greeting.pinyin="tài hú shí de xíng zhuàng hěn yǒu yì sī 。 nǐ kàn tā xiàng shén me ？";
+npcs["silk-host"].greeting.pinyin="zhè bǎ tuán shàn shàng xiù zhe yì duǒ huā 。 nǐ xǐ huan ma ？";
+npcs["kid-one"].greeting.pinyin="wǒ men zài tī jiàn zǐ ！ nǐ huì shù dào shí ma ？";
+npcs["kid-two"].greeting.pinyin="yī 、 èr 、 sān ！ lún dào nǐ le ！";
+npcs["snack-host"].greeting.pinyin="lái yí kuài guì huā gāo ba ， tián tián de ！";

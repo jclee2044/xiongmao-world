@@ -1,14 +1,30 @@
-# Panda’s Little World
+# Xiongmao World 熊猫世界
 
-A self-hosted Chinese exploration game: a painted Suzhou canal district, a cozy home and three explorable shops. Version 0.5.0 adds lantern riddles, a silk color workshop and market budget shopping to the living district, bringing the optional activities to seventeen. The district is 3600 × 3000, about 18% smaller than version 0.3.0 and 8.3 times the original bounding area. [PLAN.md](PLAN.md) contains the materials review and step-by-step plan. [PROGRESS.md](PROGRESS.md) separates completed checks from remaining gates.
+A self-hosted Chinese exploration game in a painted Suzhou-inspired canal town. Version **0.9.0** keeps a cozy, detailed central market with wider connected paths, finished roof edges and traced canal crossings. The district is **3240 × 2700**, with the existing shops around the market outskirts, the southwest tangerine seller restored, and a thicker northeast bamboo grove. Earlier characters, quests and all seventeen practice activities remain available.
+
+All five central-market stalls now open first-person seller views with fixed prices, merchandise conversations and explicit purchases. Matching watercolor canal water extends beyond the market; a curved southern quay, shop entrance paths, planted southern corners and a far-north crossing connect the neighborhood. Home is more compact, and the player’s selected clothing, Lian and seated neighbors keep consistent appearances.
+
+Ask Lin how to find the hotpot restaurant, then enter it; help Hao find the bookshop by giving directions. Both quests appear in Panda’s goals. NPCs and Panda use the [in-game location directory](handoff/references/game-directions.md) and shared map facts.
+
+A lantern-lit Suzhou passenger boat waits in the bottom-right canal, beside the silk workshop. Click the boat to walk to its boarding dock, or press Space nearby. Departures unlock at **500 XP**; below that, the captain shows how much remains. At full XP, Panda adds a boarding goal. The boat currently connects to the existing Shantang next area, with a return trip to this dock.
+
+Sit with Lian for hotpot and receive a sheep keepsake that appears at home with its story. Sit with Qiao at the larger tea table. A compact foreground Panda offers hints and a text box for grammar or translation questions. Local AI answers open questions when available; authored help remains available offline.
+
+Click a person or building to walk over and interact automatically. Walk with WASD/arrows and press **Space** (or E) nearby. The goal cards at the upper left show the next action and can guide you there. Meet five people, help Lan find her flowers, share tea with Qiao, treat Lian to hotpot, and take Panda’s nature walk. Shops sell osmanthus cake, tangerines and an embroidered round fan with fictional in-game coins. Journal keeps words, purchases and quest progress.
+
+Quiet procedural water, duck and bird sounds follow nearby nature, with a separate **Nature sounds** volume in Settings. They fade indoors, while speaking and when the tab is hidden. Museum, garden and home narration uses short beginner-friendly sentences.
+
+Chinese dialogue plays automatically. Full English and pinyin are hidden by default; click a dialogue word (or focus it and press Enter) to see pinyin and its definition above the panel. Only the first explicit click on a word triggers its foreground discovery banner and chime. Settings can reveal full translations or pinyin. The 0.7 map migration resets these two defaults once; later choices persist. Dictionary lookup requires the local server; offline play retains a small authored vocabulary fallback.
+
+[PLAN.md](PLAN.md) and [PROGRESS.md](PROGRESS.md) record prior development; [SUZHOU_RESEARCH.md](SUZHOU_RESEARCH.md) contains the current research and design sources.
 
 ## Play on this PC
 
-Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. Walk with WASD/arrows, on-screen direction buttons, or tap/click on clear ground. Tap-to-walk routes around buildings and canal edges. Open Map and select a destination to walk there. Press E or use the interaction button near a person/object.
+Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. Walk with WASD/arrows, on-screen direction buttons, or tap/click on clear ground. Tap-to-walk routes around buildings and canal edges. Open Map and select a destination to walk there. Press Space/E or use the interaction button near a person/object.
 
-Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Replay/slow replay generates Mandarin on demand. Underlined phrases offer grounded explanations. More help offers a starter, then an optional “You can say…” example. No expected answer is required.
+Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Dialogue speaks on opening and after replies; Replay/slow replay remains available. Every dialogue word supports dictionary lookup. Ask Panda offers a starter, then an optional “You can say…” example, plus a text box for your own language questions. No expected answer is required.
 
-Find Momo near the canal bridge and return home. Meet Mei, Lin and Yun around Canal Lane, and six more neighbors in the outer streets. Explore a lotus lake, bamboo and garden paths, a dumpling counter, flower stall, bakery, teahouse and bookshop. Enter the last three through their doors; use E or the interaction button at the indoor counter, desk or worktable. Home remains available for a quiet break. Journal retains discoveries and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion, voice and music volume. Changes can be undone; unsupported development feedback is visibly pending.
+Find Momo near a canal bridge and bring the toy home. Meet the original neighbors, two additional market vendors and six strolling passersby. Explore the lotus lake, gardens, bakery, teahouse, bookshop and market stalls, then enter the museum, restaurant or your own home. Use E or the interaction button at objects and doors. Journal retains discoveries and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion, voice and music volume. Changes can be undone; unsupported development feedback is visibly pending.
 
 Choose **练习中文** beside Panda or **中文小任务** in a conversation. The nine neighbor activities cover ordering, quantities, gifts, listening, open expression and visits. Eight mini-games add recipes, listening orders, Chinese/object matching, sentence building, animal clue walks, lantern riddles, silk colors and budget shopping. New games vary their rounds on replay and preserve partial progress across reloads. They offer replay, slower speech, optional transcripts and hints. Retries have no penalty; completing an activity does not claim language mastery. Open expression is saved in the neighbor's conversation history, where local AI can continue the conversation.
 
@@ -16,15 +32,28 @@ Visit Tiger Hill Pagoda, a classical garden, Suzhou Museum and Pingjiang canal l
 
 From **Map**, choose **Lantern riddles**, **Silk workshop** or **Market shopping**, walk there and press E. Riddles practice descriptions; the 3 × 3 cloth practices colors and positions with undo and an eraser; shopping practices quantities, measure words, yuan and change. Each game has different replay rounds. The cloth is a simplified language activity, and market prices are fictional practice prices.
 
-Walking uses three alternating painted poses and a smaller Panda. Human sprites use consistent height targets. Cats, a duck, a rabbit, sparrows and six visitors move around the district, with leaves falling beside trees. Furniture and water block walking, and old positions inside newly blocked scenery move to nearby safe ground. Reduced motion keeps poses and scenery steady. Narrow paths and soft scene edges replace the broad tiled extension; entering and leaving rooms uses a short fade. The lake's painted edge and collision boundary share one irregular polygon.
+Moving neighbors, including Lin and the two children, use four painted walking poses each. The children have dedicated sprites. Player idle and seated poses preserve outfit colors, and facing persists when stopping. The rabbit hops between rests. A newly painted, smaller Panda hops faster and follows the player’s route. Six strolling visitors have their own Chinese speech bubbles and conversations. Seven roaming animals and sparrows, falling leaves, moving boats and water add life. White hover outlines identify people; blue dots and outlines identify building interactions. Reduced motion freezes scenery and animated poses.
+
+The central painted canals and outer waterways have clearly connected bridge crossings; shared geometry defines the visible water and blocked floor. Opaque earth, stone lanes and garden beds replace translucent terrain seams. Buildings block their visible footprint. New and migrated saves move to safe ground when necessary, preserving preferences and learning history. Each room exit returns to its real exterior door, including the single home in the northwest.
+
+New things to try:
+
+- Talk to **Lan** outside the flower shop, accept her lost-flower quest, cross the canal to the rockery, then return the bouquet: **60 XP**.
+- Inspect the courtyard tea set, invite **Qiao**, watch her walk over and sit, then share a Chinese response: **60 XP**.
+- Enter the **museum** and inspect the lotus bowl, Pearl Pillar and canal-layout display: **15 XP** per first discovery. These are sourced historical subjects with illustrative art, not exact collection reproductions.
+- Enter the **restaurant**, approach the hot-pot table, and speak or type an order. Review/correct the transcript, confirm the ingredients, add the served food to the pot and eat: **25 XP** per completed meal. Closing the panel discards an unfinished meal; completed XP is saved.
+- Inspect five objects at home for short personal stories. Talk to every neighbor or passerby: each completed conversation turn earns **10 XP**. Completed practice rounds earn **20 XP**.
+- At **500 XP**, the southeast gate opens a playable Shantang quay with another host, canal and lantern activity. XP measures participation, not Chinese proficiency.
+
+Female NPCs request female local Mandarin voices. If no recognized female device voice is available, the server uses eSpeak’s female variant. Hot-pot recognition uses local faster-whisper/base on this PC. Recordings are bounded to 15 seconds, passed through memory and never saved by the game; recognition needs connectivity to this server. A microphone requires localhost or HTTPS. The transcript is always editable and must be reviewed before ordering. Synthetic-speech checks recognize ingredient names but also make errors; natural learner speech remains untested.
 
 Background music is **“Asia” by FSM Team**, a relaxing Asian-inspired lo-fi/chill-hop instrumental bundled locally under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [The artist's track page](https://www.free-stock-music.com/fsm-team-asia.html) permits use in games with credit; the credit appears in Settings and [the bundled attribution](public/assets/audio/ATTRIBUTION.md). It starts after pressing Wander, quiets during Mandarin speech and pauses when the page is hidden. Use **Settings → Music** to switch it on/off or change the volume. An original procedural score remains the fallback if the recording cannot load. No remote music request occurs during play.
 
-Pinyin is **off by default for new worlds**; existing saved preferences stay unchanged. Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations and activities, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
+Pinyin and full English are **off by default**. Version 0.7 migrates these defaults once; later saved preferences stay unchanged. Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations and activities, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
 
-Canal Lane uses a detailed environment plate edited from the supplied reference, with separate painted people and the supplied Panda. Reusable houses, willows and paving extend the district; scenery outside the camera view is skipped. Decorative English remarks have been removed; functional controls and optional translations remain. [art/ASSETS.md](art/ASSETS.md) records saved assets, exact generation prompts and lossless encoding.
+The town reuses painted cutouts with new Panda, walking-neighbor, seated-Qiao, earth, museum and restaurant assets. [art/ASSETS.md](art/ASSETS.md) records saved files, exact built-in generation prompts and provenance. [SUZHOU_RESEARCH.md](SUZHOU_RESEARCH.md) records the primary sources and real photographs used for landscape decisions. Functional controls and optional translations remain in English; repetitive conversational instructions are removed. Panels use cream paper, a double frame, brown text and reduced-motion-aware transitions.
 
-The district has nine conversation neighbors and seventeen optional activities. Five cities, richer NPC daily routines, full directional animation, environmental sound effects, microphone transcription, verified automatic ability assessment and a source-editing agent are future work. Existing saves preserve journals, discoveries and preferences. Version 0.3 outdoor positions scale into the smaller map and move to nearby safe ground if blocked; older layouts use a safe spawn.
+Five cities, full directional animation, richer daily routines, environmental audio, verified automatic ability assessment and a source-editing agent remain future work. The map condenses real Suzhou features into a fictional arrangement.
 
 ## Run, stop and restart
 
@@ -82,16 +111,25 @@ The offline cache contains the exploration shell, art and licensed background re
 
 ## Validation
 
-With services running:
+The maintained browser checks start disposable in-memory servers and isolated Chromium profiles. They never seed the live game database. The actual microphone check requires the installed local speech tools, Whisper model and system `ffmpeg`:
 
 ```sh
 npm test
 npm run check
 npm run test:browser
-node scripts/browser-turns.js
 npm run format
 ```
 
-Behavior tests cover collision, geometry, revisions, pairing, evidence rules, bounded long-use exposure, activity progress and replay rounds, allowlisted settings, provider failure/malformed output, waiting PWA updates and forwarded localhost preview hosts. Browser checks use isolated installed Chromium, not a real phone. Pinyin checks cover the new-world default, existing opt-in, immediate visibility, phrase help and undo. Movement/art checks measure speed, walking frames, collision, sprite sizes, soft edges and camera continuity. All seventeen activities are checked with controlled dialogue/audio mocks, including retries, varied rounds and partial-progress reload. Cultural-game checks verify visible cloth colors, per-square listening, keyboard play and budget arithmetic. Ambient checks inspect actual pixels, moving animals/visitors, lake edges, cold-home loading, reduced motion and all three shop exits. Music checks decode/play the actual recording, exercise looping, offline fallback, saved mute, volume, speech ducking and hidden-page suspension. The slice check uses actual local AI/audio; the delayed-turn check explicitly mocks a provider. Screenshots/evidence live in ignored `test-results/`.
+Unit/API checks cover collision, reachable destinations at normal/low frame rates, old-save migration, revisions, pairing, quest/XP validation, order parsing, settings, learning evidence and provider failures. The maintained browser suite covers the social quests, exact room returns, museum exhibits, first-person hot pot, actual MediaRecorder → local Whisper, hover hit targets, the 500 XP gate, all seventeen activities, pinyin, music and offline/reconnect/conflict recovery. Dialogue in these regression flows is mocked; microphone recognition and music playback are real. Phone-sized Chromium is tested; physical phone installation, performance and microphone behavior remain unverified. Older v0.2–v0.5 art/slice scripts retain historical geometry and are not part of the maintained suite. Screenshots/evidence live in ignored `test-results/`.
 
-Qwen3 4B returned relevant food/hobby/homework replies in **7.1–13.9 seconds**. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin, but eSpeak’s basic robotic voice needs learner feedback. No prerecorded dialogue or remote inference API is used.
+To reproduce local recognition on another PC, create `tools/asr-venv`, install `scripts/requirements-speech.txt`, then use Hugging Face `snapshot_download` for `Systran/faster-whisper-base` at revision `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66` into `tools/whisper-base` (config.json, model.bin, tokenizer.json, vocabulary.txt). Only installation needs network access; runtime forces local files/offline mode. Model files and the virtual environment are ignored by Git.
+
+Earlier Qwen3 4B checks returned food/hobby/homework replies in 7.1–13.9 seconds. The shorter beginner prompt returned a real Lian reply in **26.8 seconds** during this pass; latency varies with local load. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin. The selected WNJ male neural voice is checked with local ASR; subjective voice quality still benefits from learner feedback. No prerecorded dialogue or remote inference API is used.
+
+## Reproducing the male neural voice
+
+Install `scripts/requirements-speech.txt` in the existing project speech virtual environment. Download and extract [the documented WNJ model](https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-zh-hf-fanchen-wnj.tar.bz2) under `tools/vits-zh-hf-fanchen-wnj`. Runtime makes no remote speech requests. `scripts/synthesize-neural.py` generates bounded WAV audio on CPU; repeated question/exclamation marks are normalized before synthesis and trailing silence is trimmed. Female voice selection retains the existing local device/female fallback behavior. If the model is absent, the basic speech engine remains available and is labeled without claiming neural output.
+
+Additional validation: `node scripts/browser-environment.js` measures ambient output/muting and checks that decorative scenery receives no blue hover shadow. `node scripts/browser-xiongmao.js` checks click-to-talk, both retained facing directions, on-demand definitions, Lian’s full meal quest and all new venues in isolated worlds.
+
+`node scripts/browser-refinements.js` checks compact Panda portraits, click-only definitions and first-discovery banners, coaching questions, seated tea/hotpot, the sheep reward and its persistent home display. `node scripts/browser-market-review.js` captures the market boundaries, southwest tangerines and northeast bamboo for visual review.

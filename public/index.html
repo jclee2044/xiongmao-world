@@ -7,11 +7,11 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#7b8f79" />
-    <title>Panda’s Little World</title>
+    <title>Xiongmao World 熊猫世界</title>
     <link rel="icon" href="/assets/panda.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/assets/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles-v9.css" />
   </head>
   <body>
     <main class="welcome" id="welcome">
@@ -20,7 +20,7 @@
         src="/assets/panda.png"
         alt="Panda, your round cream-and-black plush companion"
       />
-      <h1>Panda’s Little World</h1>
+      <h1>Xiongmao World 熊猫世界</h1>
       <button class="primary" id="begin">
         Wander with Panda <span aria-hidden="true">↗</span>
       </button>
@@ -30,6 +30,10 @@
         <div class="place">
           <span class="eyebrow" id="place-cn" lang="zh-CN">苏州 · 河巷</span>
           <h1 id="place">Suzhou · Canal Lane</h1>
+          <div class="xp-meter">
+            <progress id="xp-progress" value="0" max="500"></progress
+            ><span id="xp-text">0 / 500 XP</span>
+          </div>
         </div>
         <nav aria-label="Your world">
           <button id="update" hidden aria-label="Apply update">Update</button
@@ -47,8 +51,15 @@
         <canvas
           id="world"
           tabindex="0"
-          aria-label="Explore the courtyard with WASD or arrow keys. Press E near a person or object. Touch controls are below."
+          aria-label="Explore the courtyard with WASD or arrow keys. Press Space near a person or object. Touch controls are below."
         ></canvas>
+        <aside id="goals" aria-label="Panda’s goals">
+          <details open>
+            <summary>熊猫的小目标 <span>Panda’s goals</span></summary>
+            <ol id="goals-list"></ol>
+          </details>
+        </aside>
+        <div id="discovery" popover="manual" aria-live="polite" hidden></div>
         <div class="scene-note">
           <span class="dot"></span><span id="mode">Suzhou</span>
         </div>
@@ -58,10 +69,7 @@
             <span id="panda-message">帮助</span>
             <details id="panda-help">
               <summary aria-label="Expand Panda’s help">▾</summary>
-              <p id="panda-explanation">
-                Walk over to Mei at the noodle shop. Say hello in any way you
-                like.
-              </p>
+              <p id="panda-explanation">我们一起去河边走走吧。</p>
             </details>
           </div>
         </aside>
@@ -76,13 +84,11 @@
           </button>
         </div>
         <div class="control-note">
-          WASD / arrows · tap to walk<br /><span id="save-status"
+          WASD / arrows · Space to interact<br /><span id="save-status"
             >Loading save…</span
           >
         </div>
-        <button class="primary" id="interact" disabled>
-          Walk closer to say hello
-        </button>
+        <button class="primary" id="interact" disabled>四处走走</button>
       </footer>
     </main>
     <dialog id="conversation" class="conversation">
@@ -96,6 +102,11 @@
           ×
         </button>
       </div>
+      <button id="foreground-panda" aria-label="Ask Panda for help">
+        <img src="/assets/panda.png" alt="" width="60" height="60" /><span
+          >Ask Panda</span
+        >
+      </button>
       <div class="conversation-body">
         <p id="last-user" class="muted"></p>
         <p id="npc-zh" class="chinese" lang="zh-CN">你好！欢迎你。</p>
@@ -135,6 +146,46 @@
         </button>
       </div>
       <div id="panel-content"></div>
+    </dialog>
+    <dialog id="panda-coach" aria-labelledby="coach-title">
+      <button
+        class="close"
+        data-close="panda-coach"
+        aria-label="Close Panda help"
+      >
+        ×
+      </button>
+      <img
+        class="coach-portrait"
+        width="130"
+        height="130"
+        src="/assets/panda.png"
+        alt="Panda"
+      />
+      <div class="coach-bubble">
+        <h2 id="coach-title">熊猫来帮你 · Panda’s here</h2>
+        <p id="coach-zh" class="chinese" lang="zh-CN"></p>
+        <p id="coach-tip"></p>
+        <p id="coach-pinyin" class="pinyin" hidden></p>
+        <div class="small-actions">
+          <button id="coach-listen">听一听</button
+          ><button id="coach-next"></button
+          ><button id="coach-use" hidden>Try this phrase</button
+          ><button data-close="panda-coach">Back to our conversation</button>
+        </div>
+        <form id="coach-form">
+          <label for="coach-question">Ask Panda about Chinese</label>
+          <div class="coach-question-row">
+            <input
+              id="coach-question"
+              maxlength="500"
+              placeholder="How do I say…? Why is 吗 used here?"
+              required
+            /><button id="coach-send" class="primary">Ask</button>
+          </div>
+          <p id="coach-status" role="status"></p>
+        </form>
+      </div>
     </dialog>
     <div id="toast" role="status" hidden></div>
     <script type="module" src="/app.js"></script>

@@ -1,5 +1,5 @@
-import { canStand } from "./world.js";
-const STEP = 32,
+import { canStand, pointInPolygon } from "./world.js";
+const STEP = 24,
   grids = new WeakMap();
 function clearSegment(scene, a, b) {
   const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 2);
@@ -21,7 +21,7 @@ function gridFor(scene) {
   });
   for (let i = 0; i < open.length; i++) {
     const p = point(i);
-    open[i] = Number(canStand(scene, p.x, p.y));
+    open[i] = Number(canStand(scene, p.x, p.y, 19));
   }
   const grid = { cols, rows, open, point, edges: new Map() };
   grids.set(scene, grid);
@@ -64,6 +64,16 @@ export function pathTo(scene, start, destination) {
     !Number.isFinite(destination.x) ||
     !Number.isFinite(destination.y) ||
     !canStand(scene, start.x, start.y)
+  )
+    return [];
+  // A click in open water must not snap across the lake onto a distant bank.
+  if (
+    (scene.groundZones || []).some(
+      (z) =>
+        z.type === "lake" &&
+        z.polygon &&
+        pointInPolygon(destination.x, destination.y, z.polygon),
+    )
   )
     return [];
   const grid = gridFor(scene),

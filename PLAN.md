@@ -77,6 +77,11 @@ The user approved a roughly 20% smaller area if it creates more variety, and con
 
 The lantern, silk-color and budget-shopping candidates are implemented in version 0.5.0 below. A photo journal that asks the learner to describe a discovery remains a future candidate. Check cultural specifics against primary sources before authoring further content.
 
+## Music selections from listening review
+
+- **Indoors:** “Asian Music – Magical Dream” by Sonican, https://pixabay.com/music/china-asian-music-magical-dream-321895/. The user selected this for building interiors, including home. The recording is bundled locally under the Pixabay Content License, credited in Settings, and selected on indoor scene changes.
+- **Later section-completion cue:** “Chinese Music – China Sunrise Hour” by Sonican, https://pixabay.com/music/china-chinese-music-china-sunrise-hour-466690/. Reserve this for the moment the player completes this section of the game; do not use it as the indoor loop.
+
 ## Cultural mini-games — version 0.5.0
 
 1. Preserve the fourteen existing activity IDs. Add a small content module for three games and bounded validation for partial riddle steps, cloth colors and shopping quantities. Keep rounds and progress separate from learner ability evidence.
@@ -85,3 +90,14 @@ The lantern, silk-color and budget-shopping candidates are implemented in versio
 4. Put the activities at a lantern rack, the existing cloth shop and the market. Trace the rack posts beside the road, preserve existing map coordinates and validate all approach routes/collisions.
 5. Check both new and existing games in isolated Chromium. Exercise wrong attempts, two varied rounds per game, real server partial saves/reloads, keyboard/touch-sized play, per-square Mandarin requests, cultural links and unchanged learner evidence. Verify actual computed colors under the unchanged content-security policy.
 6. Cache the new content module for offline exploration, verify reconnect/pairing/conflict behavior, inspect screenshots, document limits, commit and open the finished preview.
+
+## Connected town, character quests and speech — version 0.6.0
+
+1. Preserve v0.5.0, review the user’s screenshots, and verify Suzhou street/canal relationships, garden materials and museum subjects against primary sources and real photographs.
+2. Replace the detached reference plate with one town layout: a central shopping courtyard, continuous waterways, explicit bridges, earthy lanes and garden zones. Derive water collision from rendering geometry and trace full building footprints; migrate old map positions safely.
+3. Add natural walking/breathing, six talkable visitors, hover cues, Chinese speech bubbles and contextual Panda lines. Generate a six-pose Panda, neighbor walk atlas and seated Qiao in the existing illustration style. Preserve facing at rest.
+4. Add one fixed house entrance with inspectable personal objects, museum/restaurant interiors and exact exit return points. Keep historical claims separate from illustrative artwork.
+5. Add bounded persistent flower/tea quest stages and participation XP. Unlock a small playable Shantang quay at 500 XP. Preserve existing practice and learning evidence.
+6. Implement a first-person hot-pot loop with typed and local microphone ordering, explicit transcript review, serving/cooking/eating and completion XP. Select female Mandarin voices for female NPCs, keep audio local and stop microphone tracks on close/visibility changes.
+7. Restyle panels with cream/brown frames, selection feedback and smooth reduced-motion-aware transitions. Cache all new offline assets and preserve mobile touch controls, save conflicts and existing opt-in pinyin.
+8. Run unit/API, all-destination and browser checks on isolated in-memory servers; inspect desktop/mobile screenshots, document real-device/voice limits, commit and restart the game.

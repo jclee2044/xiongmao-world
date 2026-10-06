@@ -14,7 +14,7 @@ test("localhost startup, assets, health and static-root isolation", async (t) =>
   );
   const welcome = await fetch(base);
   assert.equal(welcome.status, 200);
-  assert.match(await welcome.text(), /Panda’s Little World/);
+  assert.match(await welcome.text(), /Xiongmao World 熊猫世界/);
   const png = await fetch(base + "/assets/panda.png");
   assert.equal(png.headers.get("content-type"), "image/png");
   assert.ok((await png.arrayBuffer()).byteLength > 10000);

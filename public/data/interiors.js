@@ -77,3 +77,6 @@ export const interiors = {
     ],
   },
 };
+
+const hosts={bakery:[['baker','qiao',650,470],['diner-friend','qiao',940,520]],teahouse:[['qiao','qiao',740,525],['diner','hao',440,465],['reader','bo',985,520]],bookshop:[['bo','bo',630,460],['reader','bo',295,530]]};
+for(const [room,people]of Object.entries(hosts)) for(const [id,appearance,x,y]of people)interiors[room].interactables.push({id:`${room}-${id}`,type:'npc',dialogueId:id,name:id,appearance,x,y,artHeight:165,bubbles:room==='bakery'?['桂花糕真香！','今天想吃什么？']:room==='teahouse'?['茶还有点热。','坐下来聊聊吧。']:['这本书很有意思。','你喜欢什么故事？']});

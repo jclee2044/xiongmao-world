@@ -39,3 +39,64 @@ test("reduced motion and paused world time keep living actors steady", () => {
   const reduced = position(lifeActors(scene, 2, player, false));
   assert.deepEqual(position(lifeActors(scene, 5, player, false)), reduced);
 });
+
+test("lake cat roams on the clear southern bank", () => {
+  const scene = structuredClone(scenes.shanghai),
+    cat = scene.interactables.find((o) => o.id === "lake-cat"),
+    lake = scene.groundZones.find((o) => o.type === "lake");
+  assert.ok(cat.y > Math.max(...lake.polygon.map(([, y]) => y)) + 100);
+  const origin = { x: cat.x, y: cat.y };
+  for (let i = 0; i < 32; i++) {
+    const angle = (i / 32) * Math.PI * 2;
+    assert.ok(
+      canStand(
+        scene,
+        origin.x + Math.sin(angle) * 48,
+        origin.y + Math.cos(angle) * 18,
+      ),
+      `cat roaming point ${i}`,
+    );
+  }
+});
+
+test("lake cat walks without flickering between idle and walking poses", () => {
+  const scene = structuredClone(scenes.shanghai),
+    player = { x: 100, y: 100 },
+    facing = new Set();
+  let previous,
+    transitions = 0;
+  for (let frame = 0; frame <= 45 * 60; frame++) {
+    const cat = lifeActors(scene, frame / 60, player).find(
+      (o) => o.id === "lake-cat",
+    );
+    if (previous && cat.moving !== previous.moving) transitions++;
+    facing.add(cat.facing);
+    assert.ok(canStand(scene, cat.x, cat.y));
+    previous = cat;
+  }
+  assert.ok(transitions <= 4, `cat changed motion state ${transitions} times`);
+  assert.deepEqual([...facing].sort(), [-1, 1]);
+});
+
+test("ducks glide horizontally and freeze with reduced motion", () => {
+  const scene = structuredClone(scenes.shanghai),
+    lake = scene.groundZones.find((o) => o.type === "lake"),
+    player = { x: 100, y: 100 };
+  const start = lifeActors(scene, 0, player).filter((o) => o.animal === "duck");
+  for (let step = 1; step <= 600; step++) {
+    const ducks = lifeActors(scene, step / 30, player).filter(
+      (o) => o.animal === "duck",
+    );
+    for (let i = 0; i < ducks.length; i++) {
+      assert.equal(ducks[i].y, start[i].y);
+      assert.ok(pointInPolygon(ducks[i].x, ducks[i].y, lake.polygon));
+    }
+  }
+  const still = lifeActors(scene, 21, player, false).filter(
+    (o) => o.animal === "duck",
+  );
+  assert.deepEqual(
+    lifeActors(scene, 25, player, false).filter((o) => o.animal === "duck"),
+    still,
+  );
+});

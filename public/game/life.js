@@ -1,4 +1,5 @@
-import { canStand, interactionPoint, move, pointInPolygon } from "./world.js";
+import { visitors } from "../data/content.js";
+import { canStand, interactionPoint, move } from "./world.js";
 
 const populations = new WeakMap();
 function build(scene) {
@@ -15,6 +16,9 @@ function build(scene) {
           : interactionPoint(o);
       return {
         ...origin,
+        ...(o.animal === "duck"
+          ? { x: origin.x + Math.sin(i * 2.7) * 48 }
+          : {}),
         origin,
         id: o.id,
         type: "animal",
@@ -23,12 +27,15 @@ function build(scene) {
         distance: 0,
         facing: 1,
         speed: o.animal === "rabbit" ? 35 : 23,
+        swimTime: 0,
       };
     });
   // Passersby use clear lane centerlines; conversation neighbors stay available.
-  const walkers = (scene.paths || [])
+  const lanes =
+    scene.strolls ||
+    (scene.paths || []).filter((_, i) => [0, 2, 4, 5, 7, 8].includes(i));
+  const walkers = lanes
     .filter((p) => p.points.length > 1)
-    .filter((_, i) => [0, 2, 4, 5, 7, 8].includes(i))
     .map((p, i) => {
       const a = p.points[0],
         b = p.points[1],
@@ -43,6 +50,9 @@ function build(scene) {
         y: a[1] + (b[1] - a[1]) * fraction,
       };
       return {
+        ...visitors[i],
+        name: visitors[i].name,
+        dialogueId: visitors[i].id,
         ...start,
         origin: start,
         end,
@@ -56,6 +66,13 @@ function build(scene) {
         speed: 38 + i * 3,
       };
     })
+    .map((o) => {
+      if (o.id !== "visitor-2" || scene.id !== "shanghai") return o;
+      const scale = scene.worldScale || 1;
+      const origin = { x: 450 * scale, y: 2640 * scale },
+        end = { x: 630 * scale, y: 2640 * scale };
+      return { ...o, ...origin, origin, end, target: end };
+    })
     .filter((o) => canStand(scene, o.x, o.y));
   const birds = (scene.paths || []).slice(0, 3).map((p, i) => ({
     id: `sparrow-${i}`,
@@ -66,10 +83,38 @@ function build(scene) {
     distance: 0,
     facing: 1,
   }));
-  return { actors: [...animals, ...walkers, ...birds], last: null };
+  return {
+    actors: [
+      ...animals,
+      ...walkers,
+      ...birds,
+      ...scene.interactables
+        .filter((o) => ["kid-one", "kid-two", "lin"].includes(o.id))
+        .map((o, i) => ({
+          ...o,
+          type: "passerby",
+          origin: { x: o.x, y: o.y },
+          end: {
+            x: o.x + (o.id === "lin" ? 105 : 70),
+            y: o.y + (o.id === "lin" ? 0 : 30),
+          },
+          target: {
+            x: o.x + (o.id === "lin" ? 105 : 70),
+            y: o.y + (o.id === "lin" ? 0 : 30),
+          },
+          distance: 0,
+          facing: 1,
+          speed: 48,
+          phase: i,
+          bubble:
+            o.id === "lin" ? "去河边走走吧。" : i ? "接住！" : "一、二、三！",
+        })),
+    ],
+    last: null,
+  };
 }
 export function lifeActors(scene, time, player, motion = true) {
-  if (scene.id !== "shanghai") return [];
+  if (scene.interior || scene.id === "home") return [];
   if (!populations.has(scene)) populations.set(scene, build(scene));
   const population = populations.get(scene),
     dt = Math.max(0, Math.min(0.15, time - (population.last ?? time)));
@@ -85,6 +130,17 @@ export function lifeActors(scene, time, player, motion = true) {
         distance: time * 45,
       };
     }
+    if (o.animal === "duck") {
+      if (motion) o.swimTime += dt;
+      const angle = o.swimTime * 0.35 + o.phase;
+      const previousX = o.x;
+      o.x = o.origin.x + Math.sin(angle) * 48;
+      o.distance += Math.abs(o.x - previousX);
+      o.facing = Math.cos(angle) >= 0 ? 1 : -1;
+      if (dt > 0) o.moving = motion && o.x !== previousX;
+      return { ...o, moving: Boolean(motion && o.moving) };
+    }
+    const before = o.distance;
     if (motion && dt > 0 && Math.hypot(o.x - player.x, o.y - player.y) > 75) {
       let target;
       if (o.type === "passerby") {
@@ -99,30 +155,41 @@ export function lifeActors(scene, time, player, motion = true) {
       const dx = target.x - o.x,
         dy = target.y - o.y,
         d = Math.hypot(dx, dy);
-      if (d > 0.5) {
-        const step = Math.min(d, o.speed * dt),
+      if (d > (o.animal === "cat" ? 0.001 : 0.5)) {
+        const hopPhase = (time * 1.4 + o.phase) % 1;
+        const hopSpeed =
+          o.animal === "rabbit" ? (hopPhase < 0.58 ? 2.1 : 0) : 1;
+        const step = Math.min(d, o.speed * hopSpeed * dt),
           previous = { x: o.x, y: o.y };
-        const next =
-          o.animal === "duck"
-            ? { x: o.x + (dx / d) * step, y: o.y + (dy / d) * step }
-            : move(scene, o, (dx / d) * step, (dy / d) * step);
-        const lake = scene.groundZones?.find((z) => z.type === "lake");
-        if (
-          o.animal !== "duck" ||
-          !lake ||
-          pointInPolygon(next.x, next.y, lake.polygon)
-        ) {
-          o.x = next.x;
-          o.y = next.y;
-        }
+        const next = move(scene, o, (dx / d) * step, (dy / d) * step);
+        o.x = next.x;
+        o.y = next.y;
         o.distance += Math.hypot(o.x - previous.x, o.y - previous.y);
-        if (Math.abs(dx) > 0.5) o.facing = Math.sign(dx);
+        if (o.animal === "cat") {
+          const heading = Math.cos(time * 0.23 + o.phase);
+          if (Math.abs(heading) > 0.15) o.facing = Math.sign(heading);
+        } else if (Math.abs(dx) > 0.5) o.facing = Math.sign(dx);
       }
     }
+    if (o.animal === "cat" && o.distance > before) o.lastMoved = time;
+    if (dt > 0)
+      o.moving =
+        motion &&
+        (o.distance > before ||
+          (o.animal === "cat" && time - (o.lastMoved ?? -Infinity) < 0.3));
     return {
       ...o,
-      moving:
-        motion && dt > 0 && Math.hypot(o.x - player.x, o.y - player.y) > 75,
+      ...(o.type === "passerby" ? { approachX: o.x, approachY: o.y + 30 } : {}),
+      moving: Boolean(motion && o.moving),
+      hop:
+        o.animal === "rabbit" && motion
+          ? Math.max(
+              0,
+              Math.sin(
+                Math.min(1, ((time * 1.4 + o.phase) % 1) / 0.58) * Math.PI,
+              ),
+            )
+          : 0,
     };
   });
 }

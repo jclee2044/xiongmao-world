@@ -1,3 +1,11 @@
+import { Store } from "../server/store.js";
+import { createApp } from "../server/index.js";
+const testServer = createApp({
+  store: new Store(":memory:"),
+  providerConfig: { provider: "story" },
+});
+await new Promise((resolve) => testServer.listen(0, "127.0.0.1", resolve));
+const base = `http://127.0.0.1:${testServer.address().port}`;
 import { enterWorld, walkToStop } from "./browser-helpers.js";
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
@@ -32,20 +40,21 @@ try {
       enabled ? "Hide pinyin" : "Show pinyin",
     );
   };
-  await page.goto("http://127.0.0.1:3210");
+  await page.goto(base);
   await enter();
   await walkToStop(page, "mei");
-  await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await page.locator("#interact").click();
   await shown(false);
   await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
   await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();
   await shown(false);
   await page.getByRole("button", { name: "Explain 吃", exact: true }).click();
-  assert.equal(await page.locator("#panda-message").textContent(), "吃");
+  assert.match(await page.locator("#word-callout").textContent(), /吃.*chī/s);
   assert.ok(
     !(await page.locator("#dialog-status").textContent()).includes("chī"),
   );
+  await page.keyboard.press("Escape");
   await saved();
   assert.equal(
     await page.evaluate(
@@ -56,13 +65,13 @@ try {
   );
   await page.reload();
   await enter();
-  await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await page.locator("#interact").click();
   await shown(false);
   await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
   await page.getByRole("button", { name: "Explain 吃", exact: true }).click();
   assert.ok(
-    (await page.locator("#panda-message").textContent()).includes("chī"),
+    (await page.locator("#word-callout").textContent()).includes("chī"),
   );
   await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();
   await shown(false);
@@ -85,7 +94,7 @@ try {
     "false",
   );
   await page.getByRole("button", { name: "Close panel" }).click();
-  await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await page.locator("#interact").click();
   await shown(false);
   await page.screenshot({ path: "test-results/pinyin-hidden-mobile.png" });
   await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
@@ -94,7 +103,7 @@ try {
   await page.screenshot({ path: "test-results/pinyin-shown-mobile.png" });
   await page.reload();
   await enter();
-  await page.getByRole("button", { name: /Say hello to Mei/ }).click();
+  await page.locator("#interact").click();
   await shown(true);
   assert.deepEqual(errors, []);
   await writeFile(
@@ -118,4 +127,5 @@ try {
   );
 } finally {
   await browser.close();
+  await new Promise((resolve) => testServer.close(resolve));
 }

@@ -36,7 +36,7 @@ function strokePath(ctx, path) {
   ctx.beginPath();
   path.points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
 }
-function paintWater(ctx, zone, time, animate) {
+export function paintWater(ctx, zone, time, animate) {
   ctx.save();
   ctx.lineJoin = "round";
   // The same polygon defines the water and its collider. Broad translucent bank
@@ -131,62 +131,36 @@ export function paintGround(
   scene,
   view,
   paving,
-  { time = 0, animate = false } = {},
+  { time = 0, animate = false, earth = null, water = null } = {},
 ) {
-  ctx.fillStyle = "#d3cfad";
+  // Opaque earth, stone and planted beds: no translucent floor rectangles.
+  ctx.fillStyle = earth || "#c4ac84";
   ctx.fillRect(view.x, view.y, view.w, view.h);
-  // A low-contrast brush texture under gardens keeps the material related to the
-  // painted stones without filling every courtyard with a large paved sheet.
-  ctx.save();
-  ctx.globalAlpha = 0.06;
-  ctx.fillStyle = paving;
-  ctx.fillRect(view.x, view.y, view.w, view.h);
-  ctx.restore();
-  for (const zone of scene.groundZones || []) {
-    if (
-      zone.x + zone.w < view.x ||
-      zone.x > view.x + view.w ||
-      zone.y + zone.h < view.y ||
-      zone.y > view.y + view.h
-    )
-      continue;
-    if (["pond", "lake"].includes(zone.type)) {
-      paintWater(ctx, zone, time, animate);
-    } else if (["garden", "orchard", "bamboo-garden"].includes(zone.type)) {
-      softZone(
-        ctx,
-        zone,
-        zone.type === "orchard" ? "#bec99c" : "#aebd8d",
-        "#bdc59600",
-      );
-      // Small irregular tufts and blossoms are anchored to world coordinates.
-      for (let i = 0; i < 50; i++) {
-        const px = zone.x + ((i * 137.13) % zone.w),
-          py = zone.y + ((i * 87.31) % zone.h);
-        if (
-          ((px - zone.x - zone.w / 2) / (zone.w / 2)) ** 2 +
-            ((py - zone.y - zone.h / 2) / (zone.h / 2)) ** 2 >
-          0.85
-        )
-          continue;
-        ctx.fillStyle = i % 9 === 0 ? "#e9c4ac66" : "#7b9e6b25";
-        ctx.beginPath();
-        ctx.ellipse(px, py, 6 + (i % 4), 2 + (i % 3), i % 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    } else {
+  for (let y = Math.floor(view.y / 30) * 30; y < view.y + view.h; y += 30)
+    for (let x = Math.floor(view.x / 35) * 35; x < view.x + view.w; x += 35) {
+      const n = Math.abs(Math.sin(x * 12.3 + y * 4.5));
+      ctx.fillStyle = n > 0.5 ? "#dfc8a13a" : "#82684120";
+      ctx.fillRect(x + n * 15, y + n * 12, 2 + n * 4, 1 + n * 2);
+    }
+  for (const z of scene.groundZones || []) {
+    if (z.type === "canal" || z.type === "lake") continue;
+    zonePath(ctx, z);
+    ctx.fillStyle = z.type === "courtyard" ? paving : earth || "#c4ac84";
+    ctx.fill();
+    if (z.type !== "courtyard") {
+      ctx.fillStyle = "#8095549c";
+      ctx.fill();
+    }
+    if (z.type !== "courtyard") {
       ctx.save();
-      ctx.fillStyle = paving;
-      for (const [i, alpha] of [0.1, 0.16, 0.24, 0.35, 0.5, 1].entries()) {
-        const inset = i * 4;
-        ctx.globalAlpha = alpha;
-        zonePath(ctx, {
-          ...zone,
-          x: zone.x + inset,
-          y: zone.y + inset,
-          w: zone.w - inset * 2,
-          h: zone.h - inset * 2,
-        });
+      zonePath(ctx, z);
+      ctx.clip();
+      for (let i = 0; i < 160; i++) {
+        const x = z.x + ((i * 133.7) % z.w),
+          y = z.y + ((i * 91.3) % z.h);
+        ctx.fillStyle = i % 7 === 0 ? "#dec49b" : "#798b5f";
+        ctx.beginPath();
+        ctx.ellipse(x, y, 3 + (i % 5), 1.8, i, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -195,43 +169,238 @@ export function paintGround(
   ctx.save();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  for (const path of scene.paths || []) {
-    ctx.strokeStyle = paving;
-    for (const [extra, alpha] of [
-      [30, 0.07],
-      [18, 0.18],
-      [8, 0.25],
-      [0, 0.45],
-      [-6, 1],
-    ]) {
-      strokePath(ctx, path);
-      ctx.globalAlpha = alpha;
-      ctx.lineWidth = path.width + extra;
-      ctx.stroke();
+  for (const p of scene.paths || []) {
+    if (p.painted) continue;
+    strokePath(ctx, p);
+    ctx.strokeStyle = p.material === "pebble" ? "#c3b99e" : paving;
+    ctx.lineWidth = p.width;
+    ctx.stroke();
+    if (p.material === "pebble") {
+      for (let i = 1; i < p.points.length; i++) {
+        const [ax, ay] = p.points[i - 1],
+          [bx, by] = p.points[i];
+        const d = Math.hypot(bx - ax, by - ay);
+        for (let j = 0; j < d; j += 14) {
+          const x = ax + ((bx - ax) * j) / d,
+            y = ay + ((by - ay) * j) / d;
+          ctx.fillStyle = j % 28 ? "#787f69" : "#e1d5b9";
+          ctx.beginPath();
+          ctx.ellipse(x, y, 4, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
   }
   ctx.restore();
-  // The edge apron continues the same walking material underneath the soft
-  // image edge, including the two real exits from the detailed canal painting.
-  if (scene.landmark) {
-    const p = scene.landmark;
-    const unit = p.w / 1254;
+  for (const z of scene.groundZones || [])
+    if (z.type === "lake") paintWater(ctx, z, time, animate);
+  const canals = (scene.canals || []).filter((c) => !c.painted);
+  // Connected canals are painted as one union; there is no internal bank at a junction.
+  if (canals?.length) {
     ctx.save();
-    ctx.lineCap = "round";
-    ctx.strokeStyle = paving;
-    ctx.lineWidth = 190 * unit;
     ctx.beginPath();
-    ctx.moveTo(p.x + 190 * unit, p.y + 100 * unit);
-    ctx.lineTo(p.x + 200 * unit, p.y - 90 * unit);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(p.x + p.w - 160 * unit, p.y + 895 * unit);
-    ctx.lineTo(p.x + p.w + 90 * unit, p.y + 930 * unit);
-    ctx.stroke();
+    for (const z of canals) {
+      if (z.polygon) {
+        z.polygon.forEach(([x, y], i) =>
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y),
+        );
+        ctx.closePath();
+      } else ctx.rect(z.x, z.y, z.w, z.h);
+    }
+    ctx.clip();
+    // Painted ripples use the same turquoise watercolor language as the market.
+    ctx.fillStyle = water || "#438e94";
+    ctx.fillRect(0, 0, scene.width, scene.height);
+    if (animate) {
+      ctx.globalAlpha = 0.08;
+      ctx.strokeStyle = "#f9edc2";
+      ctx.lineWidth = 1.2;
+      for (let y = 20; y < scene.height; y += 85)
+        for (let x = 20; x < scene.width; x += 105) {
+          const shift = Math.sin(time * 0.35 + y + x) * 3;
+          ctx.beginPath();
+          ctx.ellipse(x + shift, y, 13, 2, -0.15, 0.1, Math.PI * 0.8);
+          ctx.stroke();
+        }
+      ctx.globalAlpha = 1;
+    }
+    // Slow wooden boats pass under the bridges, following the canal centerline.
+    for (const z of canals.filter((c) => c.h > c.w))
+      for (let i = 0; i < 2; i++) {
+        const x = z.x + z.w * (i ? 0.67 : 0.33),
+          y = z.y + ((time * 13 + i * 1200 + 320) % (z.h - 180)) + 90;
+        ctx.save();
+        ctx.translate(x, y);
+        if (i) ctx.rotate(Math.PI);
+        ctx.fillStyle = "#385f5b66";
+        ctx.beginPath();
+        ctx.ellipse(4, 4, 30, 64, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#765131";
+        ctx.strokeStyle = "#d1a66b";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, -63);
+        ctx.quadraticCurveTo(43, -24, 23, 49);
+        ctx.quadraticCurveTo(0, 71, -23, 49);
+        ctx.quadraticCurveTo(-43, -24, 0, -63);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = "#c29b63";
+        ctx.lineWidth = 2;
+        for (let yy = -38; yy < 46; yy += 12) {
+          ctx.beginPath();
+          ctx.moveTo(-18, yy);
+          ctx.lineTo(18, yy);
+          ctx.stroke();
+        }
+        const roof = ctx.createLinearGradient(-22, 0, 22, 0);
+        roof.addColorStop(0, "#8b663c");
+        roof.addColorStop(0.5, "#c4a066");
+        roof.addColorStop(1, "#795638");
+        ctx.fillStyle = roof;
+        ctx.fillRect(-22, -20, 44, 48);
+        ctx.strokeStyle = "#ead0a0";
+        for (let yy = -16; yy < 28; yy += 7) {
+          ctx.beginPath();
+          ctx.moveTo(-22, yy);
+          ctx.lineTo(22, yy);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "#af8554";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(15, 40);
+        ctx.lineTo(48 + Math.sin(time * 1.5) * 9, 68);
+        ctx.stroke();
+        ctx.restore();
+      }
     ctx.restore();
+    for (const z of canals) {
+      for (const edge of z.bankEdges
+        ? z.bankEdges.flatMap((points) =>
+            points.slice(1).map((p, i) => [...points[i], ...p]),
+          )
+        : z.w < z.h
+          ? [
+              [z.x, z.y, z.x, z.y + z.h],
+              [z.x + z.w, z.y, z.x + z.w, z.y + z.h],
+            ]
+          : [
+              [z.x, z.y, z.x + z.w, z.y],
+              [z.x, z.y + z.h, z.x + z.w, z.y + z.h],
+            ]) {
+        const [ax, ay, bx, by] = edge,
+          d = Math.hypot(bx - ax, by - ay);
+        for (let j = 0; j < d; j += 32) {
+          const x = ax + ((bx - ax) * j) / d,
+            y = ay + ((by - ay) * j) / d;
+          if (
+            canals.some(
+              (other) =>
+                other !== z &&
+                x > other.x - 1 &&
+                x < other.x + other.w + 1 &&
+                y > other.y - 1 &&
+                y < other.y + other.h + 1,
+            )
+          )
+            continue;
+          if (
+            scene.bridges.some(
+              (b) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h,
+            )
+          )
+            continue;
+          ctx.fillStyle = j % 64 ? "#baaf95" : "#ccc1a4";
+          ctx.strokeStyle = "#837f6c";
+          ctx.lineWidth = 1;
+          const vertical = ax === bx;
+          ctx.beginPath();
+          ctx.roundRect(
+            x - (vertical ? 8 : 0),
+            y - (vertical ? 0 : 8),
+            vertical ? 16 : 31,
+            vertical ? 31 : 16,
+            3,
+          );
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    }
   }
+  ctx.save();
+  if (scene.marketPlate) {
+    const p = scene.marketPlate;
+    ctx.beginPath();
+    ctx.rect(0, 0, scene.width, scene.height);
+    ctx.rect(p.x, p.y, p.w, p.h);
+    ctx.clip("evenodd");
+  }
+  for (const bridge of scene.bridges || []) {
+    if (bridge.painted && !bridge.connector) continue;
+    const b = bridge.connector
+      ? { ...bridge.connector, axis: bridge.axis }
+      : bridge;
+    ctx.fillStyle = "#2d50464d";
+    ctx.fillRect(b.x + 7, b.y + 10, b.w, b.h);
+    ctx.fillStyle = paving;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    if (bridge.connector) continue;
+    ctx.strokeStyle = "#877e69";
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    if (b.axis === "x") {
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(b.x + b.w, b.y);
+      ctx.moveTo(b.x, b.y + b.h);
+      ctx.lineTo(b.x + b.w, b.y + b.h);
+    } else {
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(b.x, b.y + b.h);
+      ctx.moveTo(b.x + b.w, b.y);
+      ctx.lineTo(b.x + b.w, b.y + b.h);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = "#e8d8b6";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.strokeStyle = "#9d947e77";
+    ctx.lineWidth = 1;
+    for (let j = 20; j < (b.axis === "x" ? b.w : b.h); j += 24) {
+      ctx.beginPath();
+      if (b.axis === "x") {
+        ctx.moveTo(b.x + j, b.y + 8);
+        ctx.lineTo(b.x + j, b.y + b.h - 8);
+      } else {
+        ctx.moveTo(b.x + 8, b.y + j);
+        ctx.lineTo(b.x + b.w - 8, b.y + j);
+      }
+      ctx.stroke();
+    }
+    // Granite parapet posts, set outside the traversable bridge center.
+    for (const fraction of [0, 0.33, 0.67, 1]) {
+      for (const side of [0, 1]) {
+        const x = b.x + (b.axis === "x" ? b.w * fraction : b.w * side);
+        const y = b.y + (b.axis === "x" ? b.h * side : b.h * fraction);
+        ctx.fillStyle = "#665e4e3b";
+        ctx.fillRect(x - 6, y - 12, 21, 23);
+        ctx.fillStyle = "#a89d85";
+        ctx.fillRect(x - 9, y - 22, 18, 24);
+        ctx.fillStyle = "#d8ccb0";
+        ctx.strokeStyle = "#a19479";
+        ctx.beginPath();
+        ctx.roundRect(x - 12, y - 27, 24, 11, 3);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
 }
-export function blendedPlate(img) {
+
+export function blendedPlate(img, allEdges = false) {
   if (plates.has(img)) return plates.get(img);
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
@@ -240,7 +409,7 @@ export function blendedPlate(img) {
   ctx.drawImage(img, 0, 0);
   ctx.globalCompositeOperation = "destination-in";
   const right = ctx.createLinearGradient(
-    canvas.width - 145,
+    canvas.width - (allEdges ? 36 : 145),
     0,
     canvas.width,
     0,
@@ -249,11 +418,23 @@ export function blendedPlate(img) {
   right.addColorStop(1, "#0000");
   ctx.fillStyle = right;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const top = ctx.createLinearGradient(0, 0, 0, 140);
+  const top = ctx.createLinearGradient(0, 0, 0, allEdges ? 30 : 140);
   top.addColorStop(0, "#0000");
   top.addColorStop(1, "#000");
   ctx.fillStyle = top;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (allEdges) {
+    for (const coords of [
+      [0, canvas.height - 18, 0, canvas.height],
+      [52, 0, 0, 0],
+    ]) {
+      const edge = ctx.createLinearGradient(...coords);
+      edge.addColorStop(0, "#000");
+      edge.addColorStop(1, "#0000");
+      ctx.fillStyle = edge;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
   plates.set(img, canvas);
   return canvas;
 }

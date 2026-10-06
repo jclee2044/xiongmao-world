@@ -51,16 +51,25 @@ export class Speech {
       this.url = null;
     }
   }
-  async speak(text, slow = false) {
+  async speak(text, slow = false, voice = this.voice || "male") {
     this.stop();
     const settings = this.getSettings();
+    text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
     if (!settings.voice)
       return this.onStatus("Voice is turned off in Settings.");
     const generation = this.generation;
-    if (this.voices.length) {
+    const selected =
+      voice === "female"
+        ? this.voices.find((v) =>
+            /female|xiaoxiao|xiaoyi|huihui|ting.?ting|meijia|sin.?ji|yaoyao|女/i.test(
+              v.name,
+            ),
+          )
+        : null;
+    if (selected) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = this.voices[0];
-      utterance.lang = this.voices[0].lang;
+      utterance.voice = selected;
+      utterance.lang = selected.lang;
       utterance.rate = slow ? 0.65 : 0.9;
       utterance.volume = settings.voiceVolume;
       utterance.onstart = () =>
@@ -86,7 +95,7 @@ export class Speech {
       const response = await fetch("/api/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, slow }),
+        body: JSON.stringify({ text, slow, voice }),
         signal: this.controller.signal,
       });
       if (!response.ok) throw new Error("Speech unavailable");
@@ -105,7 +114,11 @@ export class Speech {
       this.activity(settings.voiceVolume > 0, generation);
       await this.audio.play();
       if (generation === this.generation)
-        this.onStatus("Local Mandarin · basic synthesized voice");
+        this.onStatus(
+          response.headers.get("X-Speech-Engine") === "neural"
+            ? "Local Mandarin · neural voice"
+            : "Local Mandarin voice",
+        );
     } catch (error) {
       if (generation === this.generation && error.name !== "AbortError") {
         this.finish(generation);

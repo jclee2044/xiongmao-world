@@ -1,0 +1,704 @@
+import { museumObjects } from "./adventure.js";
+export const townRooms = {
+  restaurant: {
+    id: "restaurant",
+    title: "Canal restaurant",
+    chinese: "河畔面馆",
+    interior: true,
+    backgroundPath: "/assets/world/restaurant-interior.png",
+    width: 1200,
+    height: 800,
+    spawn: { x: 600, y: 650 },
+    scenery: [],
+    solids: [
+      { x: 190, y: 70, w: 390, h: 190 },
+      { x: 770, y: 105, w: 240, h: 225 },
+    ],
+    walkableFloor: [
+      [140, 285],
+      [600, 260],
+      [740, 270],
+      [1020, 320],
+      [1090, 355],
+      [1090, 690],
+      [760, 690],
+      [760, 760],
+      [440, 760],
+      [440, 690],
+      [110, 690],
+      [110, 350],
+    ],
+    interactables: [
+      {
+        id: "restaurant-exit",
+        type: "door",
+        name: "出门",
+        x: 600,
+        y: 735,
+        target: "shanghai",
+        returnDoor: "dumplings",
+      },
+      {
+        id: "hotpot",
+        type: "hotpot",
+        name: "吃火锅 · Hot pot",
+        x: 865,
+        y: 390,
+      },
+      {
+        id: "restaurant-menu",
+        type: "inspect",
+        name: "今日菜单",
+        x: 560,
+        y: 330,
+        zh: "这里有面，也有火锅。和朋友一起吃，真好！",
+        pinyin:
+          "zhè lǐ yǒu miàn ， yě yǒu huǒ guō 。 hé péng yǒu yì qǐ chī ， zhēn hǎo ！",
+        meaning:
+          "There are noodles and hotpot here. It’s nice to eat with friends!",
+      },
+      {
+        id: "restaurant-waiter",
+        type: "npc",
+        dialogueId: "waiter",
+        name: "小陈 · Waiter",
+        x: 700,
+        y: 390,
+        appearance: "hao",
+        artHeight: 220,
+      },
+    ],
+  },
+  museum: {
+    id: "museum",
+    title: "Suzhou Museum",
+    chinese: "苏州博物馆",
+    interior: true,
+    backgroundPath: "/assets/world/museum-interior.png",
+    width: 1200,
+    height: 800,
+    spawn: { x: 600, y: 650 },
+    scenery: [],
+    solids: [],
+    walkableFloor: [
+      [170, 310],
+      [1040, 310],
+      [1090, 640],
+      [720, 640],
+      [720, 760],
+      [460, 760],
+      [460, 700],
+      [130, 700],
+    ],
+    interactables: [
+      {
+        id: "museum-exit",
+        type: "door",
+        name: "出门",
+        x: 600,
+        y: 730,
+        target: "shanghai",
+        returnDoor: "museum",
+      },
+      ...Object.entries(museumObjects).map(([id, o], i) => ({
+        id,
+        type: "exhibit",
+        ...o,
+        x: [300, 600, 890][i],
+        y: 350,
+      })),
+      {
+        id: "museum-guide",
+        dialogueId: "guide",
+        type: "npc",
+        name: "小文 · Guide",
+        appearance: "an",
+        artHeight: 215,
+        x: 970,
+        y: 485,
+      },
+    ],
+  },
+  shantang: {
+    id: "shantang",
+    title: "Shantang · Lantern Quay",
+    chinese: "山塘 · 灯影水巷",
+    width: 1800,
+    height: 1200,
+    spawn: { x: 450, y: 780 },
+    scenery: [
+      { type: "house", x: 400, y: 550, w: 480, h: 400, label: "评弹小院" },
+      { type: "house", x: 1420, y: 550, w: 480, h: 400, label: "茶肆" },
+      { type: "festival-lanterns", x: 430, y: 1030, w: 330, h: 210 },
+      { type: "tree", x: 1570, y: 950, w: 300, h: 350 },
+    ],
+    solids: [
+      { x: 194, y: 195, w: 412, h: 365 },
+      { x: 1214, y: 195, w: 412, h: 365 },
+    ],
+    canals: [
+      {
+        type: "canal",
+        x: 820,
+        y: 30,
+        w: 180,
+        h: 1140,
+        polygon: [
+          [820, 30],
+          [1000, 30],
+          [1000, 1170],
+          [820, 1170],
+        ],
+      },
+    ],
+    bridges: [{ x: 785, y: 690, w: 250, h: 180, axis: "x" }],
+    groundZones: [],
+    paths: [
+      {
+        points: [
+          [220, 780],
+          [1580, 780],
+        ],
+        width: 190,
+      },
+      {
+        points: [
+          [720, 80],
+          [720, 1080],
+        ],
+        width: 130,
+      },
+      {
+        points: [
+          [1110, 80],
+          [1110, 1080],
+        ],
+        width: 130,
+      },
+    ],
+    interactables: [
+      {
+        id: "back-town",
+        type: "door",
+        name: "回平江河巷",
+        x: 250,
+        y: 800,
+        target: "shanghai",
+        returnPoint: { x: 3360, y: 2640 },
+      },
+      {
+        id: "shantang-story",
+        type: "inspect",
+        name: "山塘故事",
+        x: 440,
+        y: 625,
+        zh: "这是山塘街。河里有船。我们坐下看看吧。",
+        pinyin:
+          "zhè shì shān táng jiē 。 hé lǐ yǒu chuán 。 wǒ men zuò xià kàn kàn ba 。",
+        meaning:
+          "This is Shantang Street. There are boats on the canal. Let’s sit and watch.",
+      },
+      {
+        id: "shantang-host",
+        dialogueId: "suyin",
+        type: "npc",
+        name: "素音 · Suyin",
+        appearance: "qiao",
+        artHeight: 230,
+        x: 1400,
+        y: 650,
+      },
+      {
+        id: "shantang-riddles",
+        type: "practice",
+        name: "灯谜",
+        activity: "lantern-riddles",
+        x: 430,
+        y: 1090,
+      },
+    ],
+  },
+};
+export const homeObjects = [
+  [
+    "home-bed",
+    "床边的小纸条",
+    285,
+    425,
+    "这是我的床。我想早点睡。明天去河边玩！",
+    "zhè shì wǒ de chuáng 。 wǒ xiǎng zǎo diǎn shuì 。 míng tiān qù hé biān wán ！",
+    "This is my bed. I want to sleep early and visit the canal tomorrow.",
+  ],
+  [
+    "home-books",
+    "书和小秘密",
+    580,
+    300,
+    "这是我的故事书。里面有一片小叶子。今天读一页吧。",
+    "zhè shì wǒ de gù shì shū 。 lǐ miàn yǒu yí piàn xiǎo yè zi 。 jīn tiān dú yí yè ba 。",
+    "This is my storybook. There is a little leaf inside. Let’s read one page today.",
+  ],
+  [
+    "home-sofa",
+    "窗边的沙发",
+    910,
+    505,
+    "我和熊猫坐在这里。下雨了，我们听听雨声吧。",
+    "wǒ hé xióng māo zuò zài zhè lǐ 。 xià yǔ le ， wǒ men tīng tīng yǔ shēng ba 。",
+    "Panda and I sit here. It is raining. Let’s listen.",
+  ],
+  [
+    "home-teacup",
+    "第一只茶杯",
+    390,
+    455,
+    "这是我的茶杯。我在苏州买的。喝杯茶吧。",
+    "zhè shì wǒ de chá bēi 。 wǒ zài sū zhōu mǎi de 。 hē bēi chá ba 。",
+    "This is my teacup. I bought it in Suzhou. Let’s have some tea.",
+  ],
+  [
+    "home-cabinet",
+    "旅行柜",
+    205,
+    495,
+    "这里有一张明信片。我想写：今天很开心！",
+    "zhè lǐ yǒu yì zhāng míng xìn piàn 。 wǒ xiǎng xiě ： jīn tiān hěn kāi xīn ！",
+    "There is a postcard here. I want to write: Today was a happy day!",
+  ],
+].map(([id, name, x, y, zh, pinyin, meaning]) => ({
+  id,
+  type: "inspect",
+  name,
+  x,
+  y,
+  zh,
+  pinyin,
+  meaning,
+}));
+
+const roomPerson = (
+  id,
+  dialogueId,
+  appearance,
+  x,
+  y,
+  bubbles,
+  artHeight = 165,
+) => ({
+  id,
+  type: "npc",
+  dialogueId,
+  name: dialogueId,
+  appearance,
+  x,
+  y,
+  artHeight,
+  bubbles,
+});
+townRooms.restaurant.scenery.push(
+  ...[
+    [340, 405],
+    [390, 620],
+  ].map(([x, y], i) => ({
+    type: "hotpot-table",
+    x,
+    y,
+    w: 170,
+    h: 85,
+    id: `table-${i}`,
+  })),
+);
+townRooms.restaurant.solids.push(
+  { x: 255, y: 345, w: 170, h: 65 },
+  { x: 305, y: 560, w: 170, h: 60 },
+);
+townRooms.restaurant.interactables.push(
+  {
+    id: "hotpot-two",
+    type: "hotpot",
+    name: "火锅桌 · Hotpot table",
+    x: 340,
+    y: 460,
+  },
+  {
+    id: "hotpot-three",
+    type: "hotpot",
+    name: "火锅桌 · Hotpot table",
+    x: 390,
+    y: 670,
+  },
+  roomPerson("restaurant-diner", "diner", "hao", 210, 450, [
+    "豆腐煮好了吗？",
+    "这锅汤真香！",
+  ]),
+  roomPerson("restaurant-friend", "diner-friend", "qiao", 500, 480, [
+    "再等一下！",
+    "我还想吃蘑菇。",
+  ]),
+);
+Object.assign(
+  townRooms.restaurant.interactables.find((o) => o.id === "restaurant-waiter"),
+  { x: 690, y: 405, artHeight: 175, bubbles: ["慢慢吃！", "需要加汤吗？"] },
+);
+townRooms.museum.interactables.push(
+  roomPerson("museum-reader", "reader", "bo", 300, 535, [
+    "莲花碗真漂亮。",
+    "这是什么颜色？",
+  ]),
+  roomPerson("museum-artist", "an", "an", 620, 505, [
+    "像一朵花。",
+    "我想画下来。",
+  ]),
+);
+function gardenRoom(id, title, chinese, returnDoor, rocky = false) {
+  return {
+    id,
+    title,
+    chinese,
+    width: 1400,
+    height: 1000,
+    spawn: { x: 700, y: 840 },
+    scenery: [
+      {
+        type: "storefront",
+        storefront: "pavilion",
+        x: 700,
+        y: 380,
+        w: 450,
+        h: 300,
+      },
+      ...[
+        [260, 400],
+        [1150, 470],
+        [310, 680],
+      ].map(([x, y]) => ({
+        type: "nature",
+        nature: rocky ? "rockery" : "bamboo",
+        x,
+        y,
+        w: 230,
+        h: 240,
+      })),
+      { type: "nature", nature: "lotus-bank", x: 1040, y: 760, w: 220, h: 90 },
+    ],
+    groundZones: [{ type: "garden", x: 30, y: 30, w: 1340, h: 900 }],
+    paths: [
+      {
+        points: [
+          [700, 840],
+          [700, 480],
+        ],
+        width: 140,
+      },
+    ],
+    canals: [],
+    bridges: [],
+    solids: [{ x: 500, y: 100, w: 400, h: 285 }],
+    interactables: [
+      {
+        id: `${id}-exit`,
+        type: "door",
+        target: "shanghai",
+        returnDoor,
+        name: "出门 · Outside",
+        x: 700,
+        y: 900,
+      },
+      roomPerson(
+        `${id}-keeper`,
+        "gardener",
+        "wei",
+        460,
+        560,
+        ["慢慢看，别着急。", "石头也有自己的故事。"],
+        185,
+      ),
+      roomPerson(
+        `${id}-visitor`,
+        "an",
+        "an",
+        970,
+        650,
+        ["水里有倒影。", "这里真安静。"],
+        180,
+      ),
+      {
+        id: `${id}-story`,
+        type: "inspect",
+        name: chinese,
+        x: 710,
+        y: 440,
+        zh: rocky
+          ? "这是狮子林。大石头像小山。你觉得像狮子吗？"
+          : "这里有水、有树，还有大石头。我们走走吧。",
+        pinyin: rocky
+          ? "zhè shì shī zi lín 。 dà shí tou xiàng xiǎo shān 。 nǐ jué de xiàng shī zi ma ？"
+          : "zhè lǐ yǒu shuǐ 、 yǒu shù ， hái yǒu dà shí tou 。 wǒ men zǒu zǒu ba 。",
+        meaning: rocky
+          ? "This is Lion Grove. The big rocks look like little mountains. Do they look like lions?"
+          : "There is water, trees and big rocks. Let’s walk around.",
+      },
+    ],
+  };
+}
+townRooms["lion-grove"] = gardenRoom(
+  "lion-grove",
+  "Lion Grove Garden",
+  "狮子林",
+  "classical-garden",
+  true,
+);
+townRooms["humble-garden"] = gardenRoom(
+  "humble-garden",
+  "Humble Administrator’s Garden",
+  "拙政园",
+  "garden",
+);
+townRooms["tiger-court"] = gardenRoom(
+  "tiger-court",
+  "Tiger Hill courtyard",
+  "虎丘",
+  "tiger-hill",
+  true,
+);
+townRooms["tiger-court"].scenery[0] = {
+  type: "landmark",
+  landmark: "pagoda",
+  x: 700,
+  y: 380,
+  w: 300,
+  h: 370,
+};
+Object.assign(townRooms["tiger-court"].interactables.at(-1), {
+  zh: "这是虎丘塔。看，它有一点歪！",
+  pinyin: "zhè shì hǔ qiū tǎ 。 kàn ， tā yǒu yì diǎn wāi ！",
+  meaning: "This is Tiger Hill Pagoda. Look, it leans a little!",
+});
+for (const [id, title, chinese, returnDoor, host] of [
+  ["silk-room", "Embroidery studio", "苏绣坊", "fabric", "silk-host"],
+  ["pingtan-room", "Pingtan courtyard", "评弹小院", "neighbors-south", "suyin"],
+]) {
+  townRooms[id] = gardenRoom(id, title, chinese, returnDoor);
+  townRooms[id].interactables = townRooms[id].interactables
+    .slice(0, 1)
+    .concat([
+      roomPerson(
+        `${id}-host`,
+        host,
+        host === "suyin" ? "qiao" : "an",
+        440,
+        570,
+        ["欢迎进来坐坐。", "你想了解什么？"],
+      ),
+      roomPerson(`${id}-guest`, "reader", "bo", 900, 600, [
+        "慢慢欣赏。",
+        "真有意思！",
+      ]),
+    ]);
+}
+
+townRooms["silk-room"].interactables.push({
+  id: "silk-workbench",
+  type: "practice",
+  activity: "silk-workshop",
+  name: "苏绣配色 · Embroidery colors",
+  x: 680,
+  y: 530,
+});
+
+// Framed water views and asymmetric stone paths distinguish the garden visits.
+const garden = townRooms["humble-garden"];
+const pond = {
+  type: "lake",
+  shape: "polygon",
+  x: 770,
+  y: 350,
+  w: 500,
+  h: 300,
+  polygon: [
+    [790, 370],
+    [1070, 350],
+    [1240, 450],
+    [1190, 590],
+    [970, 620],
+    [770, 510],
+  ],
+};
+garden.groundZones.push(pond);
+garden.solidPolygons = [pond.polygon];
+garden.paths = [
+  {
+    points: [
+      [700, 880],
+      [580, 690],
+      [430, 650],
+      [420, 500],
+      [660, 450],
+    ],
+    width: 95,
+    material: "pebble",
+  },
+  {
+    points: [
+      [580, 690],
+      [830, 760],
+      [1080, 710],
+      [1260, 665],
+    ],
+    width: 90,
+  },
+];
+Object.assign(
+  garden.interactables.find((o) => o.id === "humble-garden-visitor"),
+  { x: 1080, y: 715 },
+);
+garden.scenery.push(
+  { type: "landmark", landmark: "moon-gate", x: 380, y: 810, w: 240, h: 230 },
+  { type: "nature", nature: "lotus-bank", x: 1080, y: 645, w: 260, h: 120 },
+);
+const lion = townRooms["lion-grove"];
+lion.paths = [
+  {
+    points: [
+      [700, 890],
+      [550, 780],
+      [610, 650],
+      [790, 610],
+      [820, 480],
+      [710, 440],
+    ],
+    width: 95,
+    material: "pebble",
+  },
+  {
+    points: [
+      [610, 650],
+      [420, 620],
+      [400, 500],
+    ],
+    width: 100,
+  },
+];
+for (const [x, y, h] of [
+  [400, 810, 180],
+  [880, 840, 225],
+  [1080, 420, 200],
+])
+  lion.scenery.push({
+    type: "nature",
+    nature: "rockery",
+    x,
+    y,
+    w: h * 1.35,
+    h,
+  });
+lion.solids.push(
+  { x: 315, y: 740, w: 155, h: 72 },
+  { x: 790, y: 770, w: 175, h: 70 },
+);
+
+for (const id of [
+  "humble-garden",
+  "lion-grove",
+  "tiger-court",
+  "silk-room",
+  "pingtan-room",
+]) {
+  const room = townRooms[id];
+  room.scenery.push({ type: "garden-wall", x: 700, y: 160, w: 1260, h: 135 });
+  room.solids.push({ x: 70, y: 35, w: 1260, h: 125 });
+}
+
+for (const [room, key] of [
+  ["tiger-court", "tiger-hill"],
+  ["lion-grove", "classical-garden"],
+  ["humble-garden", "classical-garden"],
+])
+  townRooms[room].interactables.find((o) => o.id === `${room}-story`).culture =
+    key;
+
+// All four tables are painted into the room in one consistent perspective.
+const restaurant = townRooms.restaurant;
+restaurant.backgroundPath = "/assets/world/restaurant-interior-v3.png";
+restaurant.scenery = [];
+restaurant.solids = [
+  { x: 190, y: 70, w: 390, h: 190 },
+  { x: 770, y: 105, w: 240, h: 225 },
+  { x: 215, y: 270, w: 320, h: 175 },
+  { x: 170, y: 510, w: 365, h: 190 },
+  { x: 750, y: 410, w: 265, h: 225 },
+];
+const dining = (id, patch) =>
+  Object.assign(
+    restaurant.interactables.find((o) => o.id === id),
+    patch,
+  );
+dining("restaurant-diner", {
+  painted: true,
+  x: 250,
+  y: 410,
+  artHeight: 155,
+  approachX: 180,
+  approachY: 415,
+});
+dining("restaurant-friend", {
+  painted: true,
+  x: 480,
+  y: 410,
+  artHeight: 155,
+  approachX: 565,
+  approachY: 415,
+});
+restaurant.interactables.push(
+  {
+    ...roomPerson("restaurant-reader", "reader", "bo", 218, 620, [
+      "这锅汤真好喝。",
+      "我们慢慢吃吧。",
+    ]),
+    painted: true,
+    artHeight: 158,
+    approachX: 135,
+    approachY: 610,
+  },
+  {
+    ...roomPerson("restaurant-artist", "an", "an", 480, 620, [
+      "我喜欢吃青菜。",
+      "再吃一点吧。",
+    ]),
+    painted: true,
+    artHeight: 155,
+    approachX: 565,
+    approachY: 615,
+  },
+);
+dining("hotpot", {
+  x: 875,
+  y: 230,
+  approachX: 865,
+  approachY: 370,
+  hitRect: { x: 785, y: 165, w: 205, h: 100 },
+});
+dining("hotpot-two", {
+  x: 360,
+  y: 350,
+  approachX: 565,
+  approachY: 450,
+  hitRect: { x: 275, y: 290, w: 175, h: 110 },
+});
+dining("hotpot-three", {
+  x: 345,
+  y: 555,
+  approachX: 565,
+  approachY: 655,
+  hitRect: { x: 250, y: 485, w: 190, h: 120 },
+});
+restaurant.interactables.push({
+  id: "hotpot-four",
+  type: "hotpot",
+  name: "空桌 · An empty table",
+  x: 880,
+  y: 490,
+  approachX: 900,
+  approachY: 660,
+  hitRect: { x: 765, y: 420, w: 235, h: 120 },
+});

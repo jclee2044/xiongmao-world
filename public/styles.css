@@ -946,10 +946,15 @@ input[type="range"] {
   .place {
     padding: 9px 12px;
     border-radius: 18px;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: calc(100vw - 190px);
   }
   .place h1 {
     font-size: 14px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .place .eyebrow {
     font-size: 9px;
@@ -1005,4 +1010,810 @@ input[type="range"] {
     width: 33px;
     height: 40px;
   }
+}
+
+/* Town storybook panels: warm paper, double frame and restrained motion. */
+:root {
+  --ink: #6b4e38;
+  --cream: #fff3d9;
+  --line: #d5b88d;
+  color: #6b4e38;
+}
+dialog {
+  background: linear-gradient(140deg, #fff8e8, #f8e9ca);
+  border: 5px double #bc9667;
+  box-shadow:
+    0 22px 70px #4e352649,
+    inset 0 0 0 5px #fff9e977;
+  color: #6b4e38;
+  border-radius: 24px;
+}
+dialog::backdrop {
+  background: #48382066;
+  backdrop-filter: blur(3px);
+}
+.dialog-heading {
+  border-bottom: 1px solid #d2b789;
+  padding-bottom: 12px;
+  color: #715037;
+}
+dialog input,
+dialog textarea,
+dialog select {
+  background: #fff9eb;
+  color: #684c36;
+  border-color: #c9ac7f;
+}
+dialog button {
+  border-color: #c6a575;
+  color: #6a4b32;
+  box-shadow: 0 2px 0 #c9aa7930;
+}
+dialog .primary {
+  background: #a77b50;
+  color: #fff9ec;
+  border-color: #946b45;
+}
+.meaning,
+.muted,
+.notice {
+  color: #897058;
+}
+.panel-section {
+  border-color: #dac4a0;
+}
+.xp-meter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: #896544;
+  margin-top: 5px;
+}
+.xp-meter progress {
+  width: 95px;
+  height: 6px;
+  accent-color: #b88b55;
+}
+.quest-invitation {
+  background: #f2dcae !important;
+  border: 2px solid #b89059 !important;
+}
+.xp-award {
+  color: #8d6b3f;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+.ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+.ingredients button {
+  flex: 1;
+  min-width: 82px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.ingredients button[aria-pressed="true"] {
+  background: #d8e1bb;
+  border-color: #788957;
+}
+.ingredients small {
+  font-size: 0.75rem;
+  color: #856d53;
+}
+.hotpot-view {
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(#e0ca9a 0 32%, #a87c54 33% 37%, #ceab77 38%);
+  border: 3px double #ab8153;
+  border-radius: 16px;
+  margin: 12px 0;
+  perspective: 500px;
+}
+.restaurant-window {
+  text-align: center;
+  letter-spacing: 0.4em;
+  color: #806443;
+  padding: 18px;
+  border-bottom: 4px solid #936943;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 60px,
+    #a47e5460 61px 65px
+  );
+}
+.hotpot-pot {
+  position: absolute;
+  left: 17%;
+  top: 100px;
+  width: 66%;
+  height: 130px;
+  border: 12px solid #746958;
+  border-bottom-width: 19px;
+  border-radius: 50%;
+  background: #dcc28e;
+  box-shadow:
+    0 12px 0 #595442,
+    0 18px 15px #60442660;
+}
+.broth {
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 35% 30%, #f7d997, #b18d46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.broth.spicy {
+  background: radial-gradient(ellipse at 35% 30%, #cb793d, #983f26);
+}
+.food-piece {
+  padding: 5px !important;
+  min-height: 35px !important;
+  border-radius: 45% !important;
+  background: #f6e4ad !important;
+  font-size: 12px !important;
+  animation: simmer 2s ease-in-out infinite alternate;
+}
+.food-greens {
+  background: #99ae67 !important;
+}
+.food-beef {
+  background: #bd7770 !important;
+}
+.food-mushrooms {
+  background: #c6ad92 !important;
+}
+.hotpot-bowl {
+  position: absolute;
+  bottom: 12px;
+  left: 38%;
+  width: 24%;
+  height: 40px;
+  background: #fff2d6;
+  border: 4px solid #9aafb0;
+  border-radius: 20% 20% 50% 50%;
+  font-size: 12px;
+  text-align: center;
+  padding: 5px;
+}
+.hotpot-steam {
+  position: absolute;
+  top: 76px;
+  left: 37%;
+  font-size: 36px;
+  color: #fff9e6b0;
+  animation: steam 2s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+.serving-tray {
+  animation: tray-arrive 0.4s ease-out;
+}
+#hotpot-order {
+  width: 100%;
+}
+@keyframes steam {
+  from {
+    transform: translateY(4px);
+    opacity: 0.3;
+  }
+  to {
+    transform: translateY(-16px);
+    opacity: 0.8;
+  }
+}
+@keyframes simmer {
+  to {
+    transform: translateY(-2px) rotate(2deg);
+  }
+}
+@keyframes tray-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@media (max-width: 600px) {
+  .xp-meter progress {
+    width: 60px;
+  }
+  .xp-meter {
+    font-size: 9px;
+    gap: 4px;
+  }
+  .hotpot-view {
+    height: 240px;
+  }
+  .hotpot-pot {
+    top: 80px;
+    height: 110px;
+  }
+  .hotpot-steam {
+    top: 50px;
+  }
+  .food-piece {
+    font-size: 10px !important;
+    padding: 2px !important;
+  }
+  .panda-bubble {
+    max-width: 250px;
+  }
+  .panda-bubble #panda-message {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+:root[data-motion="false"] *,
+:root[data-motion="false"] *::before {
+  animation: none !important;
+  transition: none !important;
+}
+.food-piece {
+  animation: none !important;
+  min-height: 44px !important;
+  min-width: 44px;
+  font-size: 12px !important;
+}
+.broth {
+  flex-wrap: wrap;
+  align-content: center;
+  padding: 0 12px;
+}
+@media (max-width: 600px) {
+  .hotpot-pot {
+    left: 7%;
+    width: 86%;
+    height: 135px;
+    top: 68px;
+  }
+  .food-piece {
+    padding: 4px !important;
+  }
+}
+
+/* Quiet, persistent objectives and a word callout in the browser top layer. */
+#goals {
+  position: absolute;
+  z-index: 4;
+  top: 18px;
+  left: 18px;
+  width: 245px;
+  max-height: 46%;
+  overflow: auto;
+  background: #fff9e9ed;
+  border: 1px solid #ac9873;
+  border-radius: 12px;
+  box-shadow: 0 5px 22px #46372124;
+  padding: 12px;
+}
+#goals summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #3e5849;
+}
+#goals summary span {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  margin: 3px 0 6px 16px;
+}
+#goals ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.goal-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid #d7ccb5;
+  border-radius: 0;
+  padding: 10px 2px;
+  background: transparent;
+}
+.goal-card strong,
+.goal-card span,
+.goal-card small {
+  display: block;
+}
+.goal-card strong {
+  font-size: 13px;
+}
+.goal-card span {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 4px 0;
+}
+.goal-card small {
+  font-size: 10px;
+  color: #517465;
+}
+#discovery {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 14%;
+  transform: translateX(-50%);
+  width: min(460px, 75%);
+  padding: 22px;
+  text-align: center;
+  color: #fffdf2;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #253f42eb 17%,
+    #253f42eb 83%,
+    transparent
+  );
+  pointer-events: none;
+  text-shadow: 0 2px 5px #0008;
+  animation: word-arrives 0.7s ease-out;
+}
+#discovery > * {
+  display: block;
+}
+#discovery small {
+  letter-spacing: 0.24em;
+  font-size: 11px;
+}
+#discovery strong {
+  font-family: serif;
+  font-size: 44px;
+  letter-spacing: 0.15em;
+  margin: 6px 0;
+}
+#discovery span {
+  font-size: 15px;
+  margin: 5px;
+}
+@keyframes word-arrives {
+  from {
+    opacity: 0;
+    filter: none;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, 0);
+  }
+}
+#word-callout {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: max-content;
+  min-width: 185px;
+  max-width: min(360px, 90vw);
+  max-height: 45vh;
+  overflow: auto;
+  padding: 16px 20px;
+  background: #fffcf0;
+  color: #453728;
+  border: 1px solid #967e56;
+  border-radius: 12px;
+  box-shadow: 0 8px 35px #201a1650;
+}
+#word-callout strong,
+#word-callout em,
+#word-callout span {
+  display: block;
+}
+#word-callout strong {
+  font-size: 24px;
+}
+#word-callout em {
+  color: #777341;
+  font-style: normal;
+  font-size: 15px;
+  margin: 3px 0 7px;
+}
+#word-callout span {
+  font-size: 14px;
+  line-height: 1.5;
+}
+#word-callout button {
+  font-size: 12px;
+  margin: 9px 8px 0 0;
+}
+.help-word {
+  border: 0 !important;
+  border-radius: 3px !important;
+  padding: 0 1px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: #93836270;
+  text-underline-offset: 5px;
+  user-select: text;
+}
+.help-word:hover,
+.help-word:focus-visible {
+  background: #d4e6e4 !important;
+  outline: 1px solid #6e9ea2 !important;
+}
+@media (max-width: 650px) {
+  #goals {
+    top: 8px;
+    left: 8px;
+    width: 185px;
+    max-height: 30%;
+    padding: 8px;
+  }
+  .goal-card span {
+    font-size: 11px;
+  }
+  #discovery {
+    top: 35%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #discovery {
+    animation: none;
+  }
+}
+
+#goals {
+  top: 150px;
+  max-height: 43%;
+  width: 235px;
+}
+@media (max-width: 650px) {
+  #goals {
+    top: 110px;
+    width: 180px;
+    max-height: 27%;
+  }
+}
+/* The seated view keeps ingredient controls over the painted tabletop. */
+.hotpot-view {
+  background:
+    url("/assets/world/hotpot-view.png") center / 100% 100% no-repeat,
+    linear-gradient(#b69b75, #754e35);
+}
+.hotpot-pot {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.hotpot-pot .broth {
+  background: transparent;
+}
+.hotpot-bowl {
+  background: #fff4daed;
+}
+.restaurant-window {
+  position: relative;
+  z-index: 1;
+  background: #fff3dfdd;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.hotpot-view {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+.hotpot-view .restaurant-window,
+.hotpot-view .hotpot-bowl {
+  display: none;
+}
+.hotpot-view .hotpot-pot {
+  left: 27%;
+  top: 18%;
+  width: 44%;
+  height: 49%;
+  pointer-events: none;
+}
+.hotpot-view .food-piece {
+  pointer-events: auto;
+}
+.ingredient-hotspot {
+  position: absolute;
+  width: 21%;
+  height: 27%;
+  background: transparent;
+  border: 2px solid transparent;
+  box-shadow: none;
+  border-radius: 40%;
+  z-index: 2;
+  padding: 0;
+}
+.ingredient-hotspot span {
+  opacity: 0;
+  background: #fff2d9ed;
+  padding: 4px 8px;
+  border-radius: 9px;
+}
+.ingredient-hotspot:hover,
+.ingredient-hotspot:focus-visible {
+  background: #fff5d61c;
+  border-color: #fff3cf;
+}
+.ingredient-hotspot:hover span,
+.ingredient-hotspot:focus-visible span {
+  opacity: 1;
+}
+.hotspot-greens {
+  left: 2%;
+  top: 2%;
+}
+.hotspot-tofu {
+  left: 1%;
+  top: 34%;
+}
+.hotspot-mushrooms {
+  right: 5%;
+  top: 2%;
+}
+.hotspot-beef {
+  right: 0;
+  top: 33%;
+}
+.hotspot-noodles {
+  right: 4%;
+  bottom: 5%;
+}
+#food-name:not(:empty) {
+  position: absolute;
+  bottom: 4%;
+  left: 24%;
+  right: 26%;
+  background: #fff3dfed;
+  border-radius: 12px;
+  padding: 7px;
+  z-index: 3;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Learning overlays live in the top layer with their active dialogue. */
+#discovery {
+  inset: auto;
+  top: 20px;
+  left: 50%;
+  margin: 0;
+  width: min(420px, 85vw);
+  pointer-events: none;
+  border: 0;
+  z-index: 1000;
+  padding: 14px 24px;
+}
+#discovery strong {
+  font-size: 36px;
+}
+#discovery::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+#panda-coach {
+  width: min(690px, calc(100vw - 32px));
+  padding: 28px;
+  overflow: visible;
+}
+#panda-coach::backdrop {
+  background: #49382433;
+  backdrop-filter: none;
+}
+.coach-portrait {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  left: -28px;
+  top: -82px;
+  filter: drop-shadow(0 7px 5px #422f342a);
+}
+.coach-bubble {
+  padding-top: 10px;
+}
+#coach-title {
+  padding-left: 66px;
+  font-size: 20px;
+}
+#coach-zh {
+  margin-top: 24px;
+}
+#coach-tip {
+  line-height: 1.65;
+}
+@media (max-width: 600px) {
+  .coach-portrait {
+    width: 95px;
+    height: 95px;
+    left: 5px;
+    top: -61px;
+  }
+  #panda-coach {
+    padding: 22px;
+  }
+  #coach-title {
+    padding-left: 55px;
+    font-size: 17px;
+  }
+  #discovery {
+    top: 12px;
+    width: min(340px, 85vw);
+  }
+}
+
+#discovery {
+  position: fixed;
+  animation: word-arrives 0.35s ease-out;
+}
+
+/* Panda remains in the dialogue foreground; the coach opens above it. */
+#foreground-panda {
+  float: right;
+  border: 0;
+  background: #fff3da;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 12px;
+  border-radius: 30px;
+  padding: 5px 12px 5px 4px;
+}
+#foreground-panda img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+#coach-form {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #d9c5a6;
+}
+.coach-question-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+#coach-question {
+  min-width: 0;
+  flex: 1;
+}
+#coach-status {
+  font-size: 13px;
+  color: #76634f;
+  min-height: 1em;
+}
+#panel.seated-panel::backdrop,
+#panel:has(.hotpot-view)::backdrop {
+  backdrop-filter: none;
+  background: #3f312433;
+}
+.meal-friend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  height: 125px;
+}
+.seated-lian {
+  display: block;
+  width: 96px;
+  height: 125px;
+  background: url("/assets/characters/lian-poses.png") right bottom / 300% 200%
+    no-repeat;
+}
+
+#conversation.shop-conversation {
+  width: min(900px, 96vw);
+  max-width: min(900px, 96vw);
+  max-height: 90dvh;
+}
+#shop-view {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: min(32vh, 320px);
+  flex: 0 0 auto;
+  align-self: center;
+  object-fit: contain;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+#shop-purchases {
+  border-top: 1px solid #d2b995;
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#shop-purchases p {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 14px;
+}
+.direction-choices {
+  display: grid;
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  #shop-view {
+    height: 26vh;
+  }
+}
+.gift-reward {
+  text-align: center;
+}
+.gift-reward img {
+  width: 145px;
+  height: 160px;
+  object-fit: contain;
+  float: left;
+  margin: 0 18px 12px 0;
+}
+
+#panda-coach > .close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+@media (min-width: 1050px) {
+  #panel.seated-panel,
+  #panel:has(.hotpot-view) {
+    margin: 0;
+    left: 20px;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 540px;
+  }
+}
+
+.keepsake-portrait {
+  object-fit: contain;
+  float: left;
+  margin-right: 20px;
+}
+
+.coach-bubble {
+  max-height: calc(100dvh - 160px);
+  overflow: auto;
+}
+
+.departure-portrait {
+  display: block;
+  width: min(100%, 440px);
+  height: 190px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+}
+.departure-progress {
+  text-align: center;
+  font-weight: bold;
+}
+.departure-meter {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: #5b9eaa;
+  margin-bottom: 20px;
 }

@@ -1,0 +1,7 @@
+{
+  "mode": "built-in image_gen",
+  "prompt": "Use case: stylized-concept. Asset: isolated transparent game sprite of a medium-large Suzhou/Jiangnan canal passenger boat. Supporting reference image: match its warm hand-painted watercolor storybook style exactly, especially the wood, red lanterns, pale warm highlights and delicate brushwork. Draw ONE complete elegant traditional wooden passenger boat, viewed from an elevated three-quarter game perspective, long axis nearly horizontal left-to-right, bow pointing right. Rich honey-brown wooden hull, gracefully upswept prow and stern, dark brown arched canopy over an enclosed passenger cabin with carved wooden lattice windows, open front deck, two small red paper lanterns, subtle cream fabric curtains. Spacious enough for a small group of travelers, larger and more substantial than a little rowboat. No people or text. Full silhouette visible with generous transparent padding, no cropping. Waterline runs horizontally; no surrounding water, wake, landscape, pier, background, ground shadow, panel or border. Actual transparent background. Landscape composition.",
+  "reference": "public/assets/world/market-lane-v3.png",
+  "output": "public/assets/world/suzhou-passenger-boat.png",
+  "source": "exec-212ce8ea-8720-48d2-99dd-1952766cdf66.png"
+}

@@ -1,3 +1,11 @@
+import { Store } from "../server/store.js";
+import { createApp } from "../server/index.js";
+const testServer = createApp({
+  store: new Store(":memory:"),
+  providerConfig: { provider: "story" },
+});
+await new Promise((resolve) => testServer.listen(0, "127.0.0.1", resolve));
+const base = `http://127.0.0.1:${testServer.address().port}`;
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -106,12 +114,22 @@ try {
   }
   async function worldStart(stop, activity) {
     await closePanel();
+    if (
+      (await page.locator("#world").getAttribute("data-scene")) === "silk-room"
+    ) {
+      await walkToStop(page, "silk-room-exit");
+      await page.locator("#interact").click();
+    }
     await walkToStop(page, stop);
     await page.waitForTimeout(250);
     await page.screenshot({
       path: `test-results/culture-${stop}-world.png`,
     });
     await page.locator("#interact").click();
+    if (stop === "fabric") {
+      await walkToStop(page, "silk-workbench");
+      await page.locator("#interact").click();
+    }
     await page.locator("#practice-replay").waitFor();
     assert.equal(
       (await progress()).active.id,
@@ -124,6 +142,7 @@ try {
     await page.keyboard.press("Enter");
   }
   async function assertPortrait(name) {
+    await page.waitForTimeout(300);
     const size = await page.evaluate(() => {
       const panel = document.querySelector("#panel");
       return {
@@ -136,7 +155,7 @@ try {
     assert.ok(
       size.documentWidth <= size.width &&
         size.panelScroll <= size.panelWidth + 1,
-      `${name} fits a phone-width panel without horizontal scrolling`,
+      `${name} fits a phone-width panel without horizontal scrolling: ${JSON.stringify(size)}`,
     );
     await page.screenshot({ path: `test-results/culture-${name}-mobile.png` });
     return size;
@@ -163,12 +182,15 @@ try {
         .textContent.includes("Local Mandarin"),
     );
     assert.ok(speechCalls.length > callCount);
-    assert.equal(speechCalls.at(-1).text, fact.zh);
+    assert.equal(
+      speechCalls.at(-1).text,
+      fact.zh.replace(/[?？!！]+/g, "。").replace(/。+/g, "。"),
+    );
     await page.locator("#practice-stop").click();
     sources.push({ id, source: fact.source });
   }
 
-  await page.goto("http://127.0.0.1:3210");
+  await page.goto(base);
   await enterWorld(page);
   const initialLearner = structuredClone((await cache()).learner);
   assert.equal((await cache()).settings.pinyin, false);
@@ -180,7 +202,7 @@ try {
 
   await worldStart("lanterns", "lantern-riddles");
   assert.equal(await page.locator("#panel-content .pinyin").count(), 0);
-  assert.ok(await page.locator("#panel-content .meaning").count());
+  assert.equal(await page.locator("#panel-content .meaning").count(), 0);
   await checkFact("lantern-festival");
   const firstRiddles = (await game()).steps.map((step) => step.clue.zh);
   const firstStep = (await game()).steps[0];
@@ -212,7 +234,10 @@ try {
       .textContent.includes("Local Mandarin"),
   );
   assert.ok(speechCalls.length > audioCount);
-  assert.equal(speechCalls.at(-1).text, firstStep.clue.zh);
+  assert.equal(
+    speechCalls.at(-1).text,
+    firstStep.clue.zh.replace(/[?？!！]+/g, "。").replace(/。+/g, "。"),
+  );
   assert.equal(speechCalls.at(-1).slow, true);
   await page.locator("#practice-stop").click();
   await keyboardClick(`[data-practice-riddle="${firstStep.answer}"]`);
@@ -541,4 +566,5 @@ try {
   console.log(JSON.stringify(result));
 } finally {
   await browser.close();
+  await new Promise((resolve) => testServer.close(resolve));
 }

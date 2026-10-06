@@ -1,3 +1,8 @@
+import {
+  newAdventure,
+  validateAdventure,
+  mergeAdventure,
+} from "../data/adventure.js";
 import { defaultSettings } from "../data/settings.js";
 import { newLearner } from "../data/learner.js";
 import { newPractice, validatePractice } from "../data/activities.js";
@@ -17,6 +22,7 @@ export const initialState = () => ({
   history: [],
   journal: [],
   practice: newPractice(),
+  adventure: newAdventure(),
 });
 export async function api(path, body, signal) {
   const response = await fetch(path, {
@@ -156,6 +162,10 @@ export class Persistence {
       this.generation = 0;
       this.persisted = 0;
     } else {
+      this.state.adventure = mergeAdventure(
+        this.state.adventure,
+        remote.state.adventure,
+      );
       this.state.found = [
         ...new Set([...this.state.found, ...remote.state.found]),
       ];

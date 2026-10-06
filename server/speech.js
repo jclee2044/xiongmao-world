@@ -2,25 +2,39 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 const speechRoot = resolve("tools/speech/usr");
+export const neuralAvailable = () =>
+  existsSync(
+    resolve("tools/vits-zh-hf-fanchen-wnj/vits-zh-hf-fanchen-wnj.onnx"),
+  ) && existsSync(resolve("tools/asr-venv/bin/python"));
 export const speechAvailable = () =>
   existsSync(resolve(speechRoot, "bin/espeak-ng"));
-export function synthesize(text, slow = false) {
+export function synthesize(text, slow = false, voice = "male") {
   if (typeof text !== "string" || !text.trim() || text.length > 180)
     throw new Error("Please use a short phrase.");
   if (!speechAvailable())
     throw new Error("No local Mandarin speech engine installed.");
+  // Punctuation supplies a pause; never send repeated marks to the phoneme engine.
+  text = text
+    .replace(/[?？!！]+/g, "。")
+    .replace(/。+/g, "。")
+    .trim();
+  const neural = voice === "male" && neuralAvailable();
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
-      resolve(speechRoot, "bin/espeak-ng"),
-      [
-        `--path=${speechRoot}/share`,
-        "--stdout",
-        "-v",
-        "cmn",
-        "-s",
-        slow ? "115" : "155",
-        "--stdin",
-      ],
+      neural
+        ? resolve("tools/asr-venv/bin/python")
+        : resolve(speechRoot, "bin/espeak-ng"),
+      neural
+        ? [resolve("scripts/synthesize-neural.py")]
+        : [
+            `--path=${speechRoot}/share`,
+            "--stdout",
+            "-v",
+            voice === "female" ? "cmn+f3" : "cmn",
+            "-s",
+            slow ? "115" : "155",
+            "--stdin",
+          ],
       {
         env: { ...process.env, LD_LIBRARY_PATH: `${speechRoot}/lib` },
         stdio: ["pipe", "pipe", "pipe"],
@@ -28,10 +42,13 @@ export function synthesize(text, slow = false) {
     );
     const chunks = [];
     let size = 0;
-    const timeout = setTimeout(() => {
-      child.kill();
-      reject(new Error("Speech timed out."));
-    }, 12000);
+    const timeout = setTimeout(
+      () => {
+        child.kill();
+        reject(new Error("Speech timed out."));
+      },
+      neural ? 30000 : 12000,
+    );
     child.stdout.on("data", (chunk) => {
       size += chunk.length;
       if (size > 6 * 1024 * 1024) {
@@ -57,6 +74,6 @@ export function synthesize(text, slow = false) {
       resolvePromise(audio);
     });
     child.stdin.on("error", () => {});
-    child.stdin.end(text);
+    child.stdin.end(neural ? JSON.stringify({ text, slow }) : text);
   });
 }

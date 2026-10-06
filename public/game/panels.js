@@ -1,7 +1,7 @@
 import { api } from "./persistence.js";
 import { npcs } from "../data/content.js";
 import { validatePatch, parseCustomization } from "../data/settings.js";
-import { backgroundTrack } from "./music.js";
+import { backgroundTrack, indoorTrack } from "./music.js";
 const $ = (id) => document.getElementById(id);
 const escape = (text) =>
   String(text).replace(
@@ -33,14 +33,16 @@ export function createPanels({
   function map() {
     const world = getWorld(),
       scene = world.scene;
-    const stops = scene.interactables.filter(
-      (o) =>
-        !(o.id === "momo" && persistence.state.found.includes("momo")) &&
-        !(o.id === "momo-home" && !persistence.state.found.includes("momo")),
-    );
+    const stops = world
+      .destinations()
+      .filter(
+        (o) =>
+          !(o.id === "momo" && persistence.state.found.includes("momo")) &&
+          !(o.id === "momo-home" && !persistence.state.found.includes("momo")),
+      );
     openPanel(
       "Map",
-      `<svg class="district-map" viewBox="0 0 ${scene.width} ${scene.height}" role="img" aria-label="District map and your current position"><rect width="100%" height="100%" fill="#eee1c4"/>${(scene.districts || []).map((d) => `<rect x="${d.x + 8}" y="${d.y + 8}" width="${d.w - 16}" height="${d.h - 16}" rx="70" fill="#ded2b3"/><text x="${d.x + d.w / 2}" y="${d.y + d.h / 2}" text-anchor="middle" fill="#64543b" font-size="110">${d.zh}</text>`).join("")}${scene.landmark ? `<image href="/assets/world/canal-lane.webp" x="${scene.landmark.x}" y="${scene.landmark.y}" width="${scene.landmark.w}" height="${scene.landmark.h}"/>` : ""}<circle cx="${world.player.x}" cy="${world.player.y}" r="70" fill="#986748" stroke="#fff8eb" stroke-width="24"/></svg><p>Choose a place to walk there.</p><div class="map-stops">${stops.map((o) => `<button data-map-stop="${o.id}">${escape(o.name)}</button>`).join("")}</div>`,
+      `<svg class="district-map" viewBox="0 0 ${scene.width} ${scene.height}" role="img" aria-label="District map and your current position"><rect width="100%" height="100%" fill="#eee1c4"/>${(scene.districts || []).map((d) => `<rect x="${d.x + 8}" y="${d.y + 8}" width="${d.w - 16}" height="${d.h - 16}" rx="70" fill="#ded2b3"/><text x="${d.x + d.w / 2}" y="${d.y + d.h / 2}" text-anchor="middle" fill="#64543b" font-size="110">${d.zh}</text>`).join("")}${(scene.canals || []).map((z) => `<polygon points="${z.polygon.map((p) => p.join(",")).join(" ")}" fill="#659b96"/>`).join("")}${(scene.bridges || []).map((b) => `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#ead9b6"/>`).join("")}${scene.landmark ? `<image href="/assets/world/canal-lane.webp" x="${scene.landmark.x}" y="${scene.landmark.y}" width="${scene.landmark.w}" height="${scene.landmark.h}"/>` : ""}<circle cx="${world.player.x}" cy="${world.player.y}" r="70" fill="#986748" stroke="#fff8eb" stroke-width="24"/></svg><p lang="zh-CN">想去哪里？</p><div class="map-stops">${stops.map((o) => `<button data-map-stop="${o.id}">${escape(o.name)}</button>`).join("")}</div>`,
     );
     for (const button of document.querySelectorAll("[data-map-stop]"))
       button.onclick = () =>
@@ -91,7 +93,11 @@ export function createPanels({
       .join("");
     openPanel(
       "A page for today",
-      `<div class="panel-section"><h3>Memories</h3>${s.journal.length ? "<ul>" + s.journal.map((x) => `<li>${escape(x)}</li>`).join("") + "</ul>" : "<p>No memories yet. Meet Mei and explore the canal lane.</p>"}${memories ? `<ul>${memories}</ul>` : ""}</div><div class="panel-section"><h3>Chinese phrases</h3><p lang="zh-CN">你今天忙吗？ · 我们一起喝茶吧。</p><p>Ask someone how their day is going, or invite them for tea.</p><p>Panda remembers where you meet familiar words. These visits are practice, not a score. Choose the Chinese challenge in Settings; help requests never count against you.</p></div><div class="panel-section"><h3>Your progress</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry sync</button><button id="export-save">Download this device’s save</button></div>${persistence.conflict ? '<p class="notice">Another device or session has newer progress. Your local copy is preserved. Choose explicitly; keeping this device also preserves discoveries from the server.</p><div class="small-actions"><button id="use-server">Use server progress</button><button id="use-local">Keep this device’s progress</button></div>' : ""}</div><div class="panel-section"><h3>Connect another device</h3><p>Open the same private HTTPS game URL on your phone. Pairing shares this world and its journal. Codes last five minutes and work once.</p><button id="pair-code">Create pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from your other device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Pair</button></div></div>`,
+      `<div class="panel-section"><h3>河巷日记</h3><p>${s.adventure.xp} / 500 XP</p><p lang="zh-CN">兰的花：${{ new: "还没问过兰", accepted: "去河对岸的假山找花", found: "把花还给兰", done: "已经还给兰了" }[s.adventure.flowers]}<br>和乔喝茶：${{ new: "邀请乔喝茶", invited: "乔正在去茶桌的路上", seated: "乔在茶桌等你", done: "一起喝过茶了" }[s.adventure.tea]}</p></div><div class="panel-section"><h3>Memories</h3>${s.journal.length ? "<ul>" + s.journal.map((x) => `<li>${escape(x)}</li>`).join("") + "</ul>" : "<p>No memories yet. Meet Mei and explore the canal lane.</p>"}${memories ? `<ul>${memories}</ul>` : ""}</div><div class="panel-section"><h3>Chinese phrases</h3><p lang="zh-CN">你今天忙吗？ · 我们一起喝茶吧。</p><p>Ask someone how their day is going, or invite them for tea.</p><p>Panda remembers where you meet familiar words. These visits are practice, not a score. Choose the Chinese challenge in Settings; help requests never count against you.</p></div><div class="panel-section"><h3>Your progress</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry sync</button><button id="export-save">Download this device’s save</button></div>${persistence.conflict ? '<p class="notice">Another device or session has newer progress. Your local copy is preserved. Choose explicitly; keeping this device also preserves discoveries from the server.</p><div class="small-actions"><button id="use-server">Use server progress</button><button id="use-local">Keep this device’s progress</button></div>' : ""}</div><div class="panel-section"><h3>Connect another device</h3><p>Open the same private HTTPS game URL on your phone. Pairing shares this world and its journal. Codes last five minutes and work once.</p><button id="pair-code">Create pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from your other device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Pair</button></div></div>`,
+    );
+    $("panel-content").insertAdjacentHTML(
+      "afterbegin",
+      `<div class="panel-section"><h3>New words · 新词</h3><p class="chinese">${s.adventure.vocabulary.map(escape).join(" · ") || "还没有新词"}</p><h3>Travel bag · 旅行袋</h3><p>${s.adventure.purchases.map((id) => ({ "buy-cake": "桂花糕", "buy-fan": "苏绣团扇", "buy-oranges": "橘子" })[id] || escape(id)).join(" · ") || "Your bag is empty."} · ¥${s.adventure.coins}</p><p>Hotpot with Lian: ${s.adventure.hungry === "done" ? "✓ Shared a meal" : s.adventure.hungry === "new" ? "Meet Lian at the market" : "Bring Lian to the restaurant and share hotpot."}</p></div>`,
     );
     $("retry-save").onclick = () => persistence.flush();
     $("export-save").onclick = () => {
@@ -186,7 +192,7 @@ export function createPanels({
       ])}${select("voice", "Mandarin voice", [
         [true, "On"],
         [false, "Off"],
-      ])}</div><label for="voice-volume">Voice volume</label><input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"><label for="music-toggle">Background music</label><select id="music-toggle"><option value="on" ${s.music > 0 ? "selected" : ""}>On</option><option value="off" ${s.music === 0 ? "selected" : ""}>Off</option></select><label for="music-volume">Music volume</label><input id="music-volume" type="range" min="0.05" max="1" step="0.05" value="${s.music || musicVolume}" ${s.music === 0 ? "disabled" : ""}><p class="notice">Music becomes quieter while Mandarin plays. Microphone input is not enabled yet.</p><div class="panel-section"><h3>Describe a small change</h3><p>Supported now: lavender/sage/peach/teal outfit, short hair or bun, slower walking, help and challenge. This changes a simple avatar; unrestricted prompt-to-art is a later feature.</p><form id="custom-form"><label for="custom-prompt">Appearance or game feedback</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="Sage outfit and short hair"></textarea><div class="small-actions"><button class="primary">Apply supported change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo last change</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Change history</h3><ul id="settings-history">${
+      ])}</div><label for="voice-volume">Voice volume</label><input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"><label for="music-toggle">Background music</label><select id="music-toggle"><option value="on" ${s.music > 0 ? "selected" : ""}>On</option><option value="off" ${s.music === 0 ? "selected" : ""}>Off</option></select><label for="music-volume">Music volume</label><input id="music-volume" type="range" min="0.05" max="1" step="0.05" value="${s.music || musicVolume}" ${s.music === 0 ? "disabled" : ""}><label for="ambience-volume">Nature sounds</label><input id="ambience-volume" type="range" min="0" max="1" step="0.05" value="${s.ambience}"><p class="notice">Music becomes quieter while Mandarin plays. Local microphone ordering is available at the restaurant.</p><div class="panel-section"><h3>Describe a small change</h3><p>Supported now: lavender/sage/peach/teal outfit, short hair or bun, slower walking, help and challenge. This changes a simple avatar; unrestricted prompt-to-art is a later feature.</p><form id="custom-form"><label for="custom-prompt">Appearance or game feedback</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="Sage outfit and short hair"></textarea><div class="small-actions"><button class="primary">Apply supported change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo last change</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Change history</h3><ul id="settings-history">${
         persistence.state.settingsHistory
           .slice(-5)
           .reverse()
@@ -202,7 +208,7 @@ export function createPanels({
     );
     const credit = document.createElement("p");
     credit.className = "muted";
-    credit.innerHTML = `Music: <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Local copy compressed for this game.`;
+    credit.innerHTML = `Outdoors: <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Indoors: <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor track).`;
     $("music-volume").after(credit);
     for (const select of document.querySelectorAll("[data-setting]"))
       select.onchange = () => {
@@ -223,6 +229,11 @@ export function createPanels({
       applyPatch(
         { music: Number(e.target.value) },
         `Music volume: ${e.target.value}`,
+      );
+    $("ambience-volume").onchange = (e) =>
+      applyPatch(
+        { ambience: Number(e.target.value) },
+        `Nature sounds: ${e.target.value}`,
       );
     $("voice-volume").onchange = (e) =>
       applyPatch(

@@ -35,7 +35,7 @@ test("save revisions reject overwrites; pairing is single-use and shares identit
 });
 test("save refuses invalid geometry, settings and duplicate discoveries", () => {
   assert.throws(() =>
-    validateState({ ...newState(), position: { x: 100, y: 2646 } }),
+    validateState({ ...newState(), position: { x: 850*.9, y: 1400*.9 } }),
   );
   assert.throws(() =>
     validateState({ ...newState(), found: ["momo", "momo"] }),

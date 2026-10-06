@@ -1,10 +1,13 @@
+import { defineText } from "./dictionary.js";
+import { transcribe, transcriptionAvailable } from "./transcription.js";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
 import { Store } from "./store.js";
+import { coachReply } from "./coach.js";
 import { reply } from "./dialogue.js";
-import { speechAvailable, synthesize } from "./speech.js";
+import { speechAvailable, neuralAvailable, synthesize } from "./speech.js";
 
 const root = resolve(fileURLToPath(new URL("../public/", import.meta.url)));
 const types = {
@@ -24,7 +27,9 @@ export function createApp({
   providerConfig = {},
 } = {}) {
   let modelBusy = false,
-    speechBusy = false;
+    speechQueue = Promise.resolve(),
+    speechPending = 0,
+    transcriptionBusy = false;
   const rates = new Map();
   const server = createServer(async (req, res) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -66,9 +71,14 @@ export function createApp({
       if (pathname === "/api/health") {
         return json(200, {
           ok: true,
-          version: "0.5.0",
+          version: "0.9.0",
           provider: providerConfig.provider || process.env.PROVIDER || "story",
-          speech: speechAvailable() ? "espeak-cmn" : "unavailable",
+          microphone: transcriptionAvailable(),
+          speech: neuralAvailable()
+            ? "vits-wnj-neural-male"
+            : speechAvailable()
+              ? "espeak-cmn"
+              : "unavailable",
         });
       }
       if (pathname.startsWith("/api/")) {
@@ -108,7 +118,7 @@ export function createApp({
           old.count >
           (pathname === "/api/pair"
             ? 8
-            : pathname === "/api/dialogue"
+            : ["/api/dialogue", "/api/coach"].includes(pathname)
               ? 16
               : 80)
         )
@@ -117,10 +127,12 @@ export function createApp({
         let size = 0;
         for await (const chunk of req) {
           size += chunk.length;
-          if (size > 64000) return json(413, { error: "Request too large." });
+          if (size > (pathname === "/api/transcribe" ? 2700100 : 64000))
+            return json(413, { error: "Request too large." });
           chunks.push(chunk);
         }
         const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        if (pathname === "/api/define") return json(200, defineText(body.text));
         if (pathname === "/api/state") {
           if (!Number.isSafeInteger(body.revision) || body.revision < 0)
             return json(400, { error: "Invalid save version." });
@@ -143,7 +155,7 @@ export function createApp({
           cookie(next);
           return json(200, { ok: true });
         }
-        if (pathname === "/api/dialogue") {
+        if (pathname === "/api/dialogue" || pathname === "/api/coach") {
           if (modelBusy)
             return json(429, {
               error:
@@ -157,37 +169,69 @@ export function createApp({
           try {
             return json(
               200,
-              await reply(
-                body.npcId,
-                body.text,
-                body.history || [],
-                store.read(identity).state,
-                {
-                  ...providerConfig,
-                  signal: AbortSignal.any([
-                    controller.signal,
-                    AbortSignal.timeout(60000),
-                  ]),
-                },
-              ),
+              pathname === "/api/coach"
+                ? await coachReply(body, {
+                    ...providerConfig,
+                    state: store.read(identity).state,
+                    signal: AbortSignal.any([
+                      controller.signal,
+                      AbortSignal.timeout(60000),
+                    ]),
+                  })
+                : await reply(
+                    body.npcId,
+                    body.text,
+                    body.history || [],
+                    store.read(identity).state,
+                    {
+                      ...providerConfig,
+                      shopId: body.shopId,
+                      signal: AbortSignal.any([
+                        controller.signal,
+                        AbortSignal.timeout(60000),
+                      ]),
+                    },
+                  ),
             );
           } finally {
             modelBusy = false;
           }
         }
-        if (pathname === "/api/speech") {
-          if (speechBusy)
-            return json(429, { error: "Speech is busy. Please try again." });
-          speechBusy = true;
+        if (pathname === "/api/transcribe") {
+          if (transcriptionBusy)
+            return json(429, {
+              error: "Local recognition is busy. Try again shortly.",
+            });
+          transcriptionBusy = true;
           try {
-            const wav = await synthesize(body.text, body.slow === true);
+            return json(200, await transcribe(body.audio));
+          } finally {
+            transcriptionBusy = false;
+          }
+        }
+        if (pathname === "/api/speech") {
+          if (speechPending >= 4)
+            return json(429, { error: "Speech is busy. Please try again." });
+          speechPending++;
+          const previous = speechQueue;
+          let release;
+          speechQueue = new Promise((resolve) => (release = resolve));
+          await previous;
+          try {
+            if (res.destroyed) return;
+            const voice = body.voice === "female" ? "female" : "male";
+            const wav = await synthesize(body.text, body.slow === true, voice);
+            if (res.destroyed) return;
             res.writeHead(200, {
               "Content-Type": "audio/wav",
               "Cache-Control": "no-store",
+              "X-Speech-Engine":
+                voice === "male" && neuralAvailable() ? "neural" : "basic",
             });
             return res.end(wav);
           } finally {
-            speechBusy = false;
+            speechPending--;
+            release();
           }
         }
         return json(404, { error: "Not available." });
@@ -198,7 +242,12 @@ export function createApp({
       }
       const path = resolve(
         root,
-        "." + (pathname === "/" ? "/index.html" : pathname),
+        "." +
+          (pathname === "/"
+            ? "/index.html"
+            : ["/styles-v8.css", "/styles-v9.css"].includes(pathname)
+              ? "/styles.css"
+              : pathname),
       );
       if (!path.startsWith(root + sep)) {
         res.writeHead(403);

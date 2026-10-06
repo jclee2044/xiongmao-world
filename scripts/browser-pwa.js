@@ -1,3 +1,12 @@
+import { Store } from "../server/store.js";
+import { createApp } from "../server/index.js";
+const testStore = new Store(":memory:");
+const testServer = createApp({
+  store: testStore,
+  providerConfig: { provider: "story" },
+});
+await new Promise((resolve) => testServer.listen(0, "127.0.0.1", resolve));
+const base = `http://127.0.0.1:${testServer.address().port}`;
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
@@ -30,7 +39,7 @@ try {
     }),
     page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("http://127.0.0.1:3210");
+  await page.goto(base);
   await page.getByRole("button", { name: "Wander with Panda" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
@@ -38,14 +47,21 @@ try {
     () =>
       document.getElementById("save-status").textContent === "Saved on this PC",
   );
-  const cache = await page.evaluate(async () => ({
-    keys: await caches.keys(),
-    requests: (await (await caches.open("panda-shell-0.5.0-1")).keys()).map(
-      (x) => new URL(x.url).pathname,
-    ),
-  }));
+  const cache = await page.evaluate(async () => {
+    const keys = await caches.keys();
+    const shell = keys.find((key) => key.startsWith("xiongmao-shell-"));
+    return {
+      keys,
+      requests: (await (await caches.open(shell)).keys()).map(
+        (x) => new URL(x.url).pathname,
+      ),
+    };
+  });
   assert.ok(cache.requests.includes("/assets/panda.png"));
   assert.ok(cache.requests.includes("/data/cultural-activities.js"));
+  assert.ok(cache.requests.includes("/data/adventure.js"));
+  assert.ok(cache.requests.includes("/assets/world/museum-interior.png"));
+  assert.ok(cache.requests.includes("/assets/audio/sonican-asian-music-magical-dream.mp3"));
   assert.ok(!cache.requests.some((x) => x.startsWith("/api")));
   results.cache = cache;
   await context.setOffline(true);
@@ -56,6 +72,11 @@ try {
   assert.equal(await page.locator("[data-activity]").count(), 17);
   await page.getByRole("button", { name: "Close panel" }).click();
   await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.waitForFunction(
+    () => document.querySelector("canvas").dataset.routeLength === "0",
+    null,
+    { timeout: 45000 },
+  );
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
   );
@@ -94,16 +115,20 @@ try {
       viewport: { width: 1280, height: 800 },
     }),
     second = await other.newPage();
-  await second.goto("http://127.0.0.1:3210");
+  await second.goto(base);
   await second.getByRole("button", { name: "Wander with Panda" }).click();
   await second.locator("canvas").waitFor({ state: "visible" });
   await second.waitForFunction(
     () =>
       document.getElementById("save-status").textContent === "Saved on this PC",
   );
+  await second.waitForFunction(() => !!navigator.serviceWorker.controller);
   await second.getByRole("button", { name: "Journal", exact: true }).click();
   await second.locator("#pair-input").fill(code);
-  await second.getByRole("button", { name: "Pair", exact: true }).click();
+  await Promise.all([
+    second.waitForEvent("framenavigated"),
+    second.getByRole("button", { name: "Pair", exact: true }).click(),
+  ]);
   await second.waitForLoadState("load");
   await second.getByRole("button", { name: "Wander with Panda" }).click();
   await second.locator("canvas").waitFor({ state: "visible" });
@@ -141,7 +166,7 @@ try {
   const interruptedContext = await browser.newContext(),
     interrupted = await interruptedContext.newPage();
   interrupted.on("pageerror", (error) => errors.push(error.message));
-  await interrupted.goto("http://127.0.0.1:3210");
+  await interrupted.goto(base);
   await interrupted.getByRole("button", { name: "Wander with Panda" }).click();
   await interrupted.locator("canvas").waitFor({ state: "visible" });
   await interrupted.waitForFunction(() => !!navigator.serviceWorker.controller);
@@ -153,6 +178,8 @@ try {
   await interrupted.getByRole("button", { name: "Home", exact: true }).click();
   await interrupted.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
+    null,
+    { timeout: 45000 },
   );
   const pendingLocal = await saveMetadata(interrupted);
   let committedPost,
@@ -222,4 +249,5 @@ try {
   console.log(JSON.stringify(results));
 } finally {
   await browser.close();
+  await new Promise((resolve) => testServer.close(resolve));
 }

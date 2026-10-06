@@ -1,0 +1,7 @@
+{
+  "mode": "built-in image_gen",
+  "prompt": "Use case: stylized-concept. Asset: seamless square watercolor canal water tile for the attached Suzhou game map. Reference image is style/palette only. Create a close-up patch consisting ONLY of the WATER seen in this reference, ignoring all buildings/bridges/plants. Match the exact calm dusty turquoise/teal river palette, muted jade shaded areas, translucent blue-green, softly painted scattered short horizontal ripples. This must be flat painted tranquil river water, not ocean, swimming pool or waves. Keep 85 percent as broad quiet low-contrast water washes; use only sparse tiny pale aqua ripples. NO white foam, no strong glare, no yellow or cream streaks. No objects, fish, lily pads, land, horizon, perspective or border. Tileable seamless 1024x1024. In particular avoid high-frequency busy mosaic highlights; calm water matching the attached illustration's left canal.",
+  "reference": "public/assets/world/market-lane-v3.png",
+  "output": "public/assets/world/canal-water-v2.png",
+  "source": "exec-0831ebbe-6c37-49e1-9fc3-32fdc0c0cbab.png"
+}
