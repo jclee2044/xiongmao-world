@@ -146,6 +146,17 @@ export function expandTown(scene) {
     width: 170,
   });
   addEnclosures(scene);
+  // Two neighboring homes finish the southern edge without extending the map.
+  for (const [id, x, h, flip] of [
+    ["south-home-west", 1640, 330, false],
+    ["south-home-east", 2160, 310, true],
+  ]) {
+    scene.scenery.push({ id: `building-${id}`, type: "house", x, y: 3590,
+      w: h * 1.25, h, flip });
+    scene.groundZones.push({ type: "courtyard", x: x - h * .625 - 25,
+      y: 3550, w: h * 1.25 + 50, h: 110 });
+  }
+  scene.paths.push({ points: [[1420, 3650], [2410, 3650]], width: 120 });
   const relocate = (id, x, y) => {
     const o = scene.interactables.find((o) => o.id === id);
     Object.assign(o, { x, y });
@@ -161,6 +172,10 @@ export function expandTown(scene) {
   relocate("pingjiang", 710, 1390);
   relocate("garden-rabbit",600,2250);
   relocate("lost-flowers",660,2280);
+  // This public learning stop must remain outside the gated Tiger Hill scene.
+  relocate("rock-study",110,2365);
+  scene.scenery.push({ id: "public-taihu-rock", type: "nature", nature: "rockery",
+    x: 110, y: 2305, w: 150, h: 140 });
   const boat = scene.interactables.find((o) => o.id === "next-area");
   boat.y = south.y + 235;
   boat.approachY = boat.y;
@@ -196,10 +211,13 @@ export function expandTown(scene) {
       h: o.h * 0.68,
     });
   scene.solids.push(...scene.enclosures.flatMap((e) => e.walls));
-  // This view shows the grove from outside. Its gate is an interaction, not
-  // a passage into a second walkable copy of the interior.
-  const grove = scene.enclosures.find((e) => e.id === "garden");
-  scene.solids.push({ x: grove.x, y: grove.y, w: grove.w, h: grove.h });
+  // Separate scenes are entered by interacting with their gate, never by
+  // walking into a second copy of their grounds in the main town.
+  for (const e of scene.enclosures) {
+    const door = scene.interactables.find((o) => o.id === e.id);
+    if (door?.type === "door" && door.target)
+      scene.solids.push({ x: e.x, y: e.y, w: e.w, h: e.h });
+  }
   scene.solidCircles = scene.interactables
     .filter(
       (o) =>
@@ -207,6 +225,8 @@ export function expandTown(scene) {
         !["qiao", "lin", "kid-one", "kid-two"].includes(o.id),
     )
     .map((o) => ({ x: o.x, y: o.y, r: 17 }));
+  const fountain = scene.scenery.find((o) => o.type === "fountain");
+  scene.solidCircles.push({ x: fountain.x, y: fountain.y - 22, r: 106 });
   return scene;
 }
 function addEnclosures(scene) {
@@ -260,7 +280,12 @@ function addEnclosures(scene) {
     });
     if (e.kind === "square") {
       scene.scenery = scene.scenery.filter((o) => o.id !== `building-${e.id}`);
-      move(e.id, gateX, e.y + e.h / 2);
+      const fountainY = e.y + e.h / 2;
+      move(e.id, gateX, fountainY + 165);
+      scene.scenery.push({ id: "square-fountain", type: "fountain", x: gateX,
+        y: fountainY + 20, w: 260, h: 210 });
+      scene.scenery.push({ id: "square-birds", type: "fountain-birds", x: gateX,
+        y: fountainY + 20, w: 500, h: 340 });
       const square = stop(e.id);
       Object.assign(square, {
         type: "inspect", name: "河畔广场",
@@ -372,4 +397,10 @@ function addEnclosures(scene) {
     ],
     width: 170,
   };
+  // Remove the complete tree when its canopy covers a moon gate or approach.
+  scene.scenery = scene.scenery.filter((o) =>
+    !["tree", "fruit-tree"].includes(o.type) ||
+    !scene.enclosures.some((e) =>
+      o.x + o.w / 2 > e.gateX - 150 && o.x - o.w / 2 < e.gateX + 150 &&
+      o.y > e.gateY - 180 && o.y - o.h < e.gateY + 120));
 }

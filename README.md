@@ -18,6 +18,8 @@ Click a person or building to walk over and interact automatically. Walk with WA
 
 Quiet procedural water, duck and bird sounds follow nearby nature, with a separate **Nature sounds** volume in Settings. They fade indoors, while speaking and when the tab is hidden. Museum, garden and home narration uses short beginner-friendly sentences.
 
+Gated grounds with a separate interior are entered only by interacting with their moon gate; their town-view footprints are solid and entrance trees are cleared. Two homes sit at the far south center. The open southern square has a small limestone fountain with flowing water and four circling birds; reduced motion freezes its animation.
+
 Music begins after the saved scene is ready and reuses one player when changing rooms. Reinitializing the game releases the prior audio graph. Online local previews share soundtrack ownership across separate browser contexts and preview ports; a handoff waits for the prior player to stop, and Music Off also silences another active preview. Saved mute, speech ducking and offline playback remain supported. Browser regressions mute hardware output while still testing the audio graph.
 
 Chinese dialogue plays automatically. Full English and pinyin are hidden by default; click a dialogue word (or focus it and press Enter) to see pinyin and its definition above the panel. Only the first explicit click on a word triggers its foreground discovery banner and chime. Settings can reveal full translations or pinyin. The 0.7 map migration resets these two defaults once; later choices persist. Dictionary lookup requires the local server; offline play retains a small authored vocabulary fallback.

@@ -1,4 +1,4 @@
-const CACHE = "xiongmao-shell-0.9.3-music-ownership-12";
+const CACHE = "xiongmao-shell-0.9.3-square-fountain-13";
 const SHELL = [
   "/data/ponds.js",
   "/game/bridges.js",
@@ -66,6 +66,7 @@ const SHELL = [
   "/game/terrain.js",
   "/game/music.js",
   "/game/music-ownership.js",
+  "/game/fountain.js",
   "/game/practice.js",
   "/game/life.js",
   "/data/culture.js",

@@ -712,7 +712,10 @@ test("the southeast courtyard is an open square and old indoor saves return ther
   );
   for (let x = square.x; x <= square.x + square.w; x += square.w / 4)
     for (let y = square.y; y <= square.y + square.h; y += square.h / 4)
-      assert.ok(canStand(scene, x, y), `Open paving at ${x},${y}`);
+      if (
+        !scene.solidCircles.some((o) => Math.hypot(x - o.x, y - o.y) < o.r + 15)
+      )
+        assert.ok(canStand(scene, x, y), `Open paving at ${x},${y}`);
   const saved = {
     ...newState(),
     scene: "pingtan-room",
@@ -776,4 +779,57 @@ test("market edges use complete bridges, one connected canal and full freestandi
     !s.canals.some((c) => pointInPolygon(tree.x, tree.y, c.polygon)),
     "Willow trunk is rooted on the bank",
   );
+});
+
+test("all gated interior scenes block town entry and keep their entrance trees clear", () => {
+  const town = scenes.shanghai;
+  for (const yard of town.enclosures) {
+    const door = town.interactables.find((o) => o.id === yard.id);
+    assert.ok(canStand(town, ...Object.values(interactionPoint(door))));
+    if (door.type === "door" && door.target) {
+      assert.ok(scenes[door.target]);
+      const stopped = move(town, interactionPoint(door), 0, -yard.h);
+      assert.ok(stopped.y >= yard.gateY + 15, yard.id);
+      for (const x of [yard.x + 40, yard.gateX, yard.x + yard.w - 40])
+        for (const y of [yard.y + 40, yard.y + yard.h / 2, yard.gateY - 40])
+          assert.equal(canStand(town, x, y), false, yard.id);
+    }
+    assert.ok(
+      !town.scenery.some(
+        (o) =>
+          ["tree", "fruit-tree"].includes(o.type) &&
+          o.x + o.w / 2 > yard.gateX - 135 &&
+          o.x - o.w / 2 < yard.gateX + 135 &&
+          o.y > yard.gateY - 162 &&
+          o.y - o.h < yard.gateY + 108,
+      ),
+      yard.id,
+    );
+  }
+});
+
+test("south homes have solid footprints and the square fountain leaves a walking ring", () => {
+  const town = scenes.shanghai;
+  const homes = town.scenery.filter((o) =>
+    o.id?.startsWith("building-south-home-"),
+  );
+  assert.equal(homes.length, 2);
+  for (const house of homes) {
+    assert.ok(house.y > town.height * 0.95);
+    assert.equal(canStand(town, house.x, house.y - house.h / 2), false);
+    assert.ok(canStand(town, house.x, house.y + 45));
+  }
+  assert.ok(canStand(town, (homes[0].x + homes[1].x) / 2, homes[0].y - 50));
+  const fountain = town.scenery.find((o) => o.type === "fountain");
+  const square = town.groundZones.find((o) => o.id === "southeast-square");
+  assert.ok(Math.abs(fountain.x - square.x - square.w / 2) < 1);
+  assert.equal(canStand(town, fountain.x, fountain.y - 20), false);
+  for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8)
+    assert.ok(
+      canStand(
+        town,
+        fountain.x + Math.cos(angle) * 165,
+        fountain.y - 20 + Math.sin(angle) * 165,
+      ),
+    );
 });

@@ -1,3 +1,4 @@
+import { drawFountain, drawFountainBirds } from "./fountain.js";
 import { AREA_XP } from "../data/adventure.js";
 import bounds from "../data/art-bounds.js";
 import {
@@ -599,7 +600,11 @@ export function draw(
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
   for (const o of entities) {
-    if (o.type === "pond-rock" || o.type === "pond-waterfall") {
+    if (o.type === "fountain") {
+      drawFountain(ctx, o, time, animate);
+    } else if (o.type === "fountain-birds") {
+      drawFountainBirds(ctx, o, time, animate);
+    } else if (o.type === "pond-rock" || o.type === "pond-waterfall") {
       pondDecor(ctx, o, time, animate);
     } else if (o.type === "canal-boat") {
       sprite(
