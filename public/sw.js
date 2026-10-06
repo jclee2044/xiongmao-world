@@ -1,4 +1,4 @@
-const CACHE = "xiongmao-shell-0.9.3-ponds-grove-audio-9";
+const CACHE = "xiongmao-shell-0.9.3-southeast-square-10";
 const SHELL = [
   "/data/ponds.js",
   "/game/bridges.js",

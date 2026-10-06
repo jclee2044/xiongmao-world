@@ -58,8 +58,8 @@ export const locationNotes = {
     "Southeast, south of the southern canal.",
   ],
   "neighbors-south": [
-    "评弹小院",
-    "Storytelling courtyard",
+    "河畔广场",
+    "Canal square",
     "南边河的下面，书店和刺绣坊中间。",
     "South of the canal, between the bookshop and silk workshop.",
   ],

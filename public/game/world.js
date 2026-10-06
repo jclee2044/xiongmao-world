@@ -1197,6 +1197,16 @@ export function districtAt(scene, position) {
   );
 }
 export function upgradeState(state) {
+  // A save made inside the removed courtyard returns to its new open square.
+  if (state.scene === "pingtan-room")
+    state = {
+      ...state,
+      scene: "shanghai",
+      mapVersion: MAP_VERSION,
+      position: interactionPoint(
+        scenes.shanghai.interactables.find((o) => o.id === "neighbors-south"),
+      ),
+    };
   if (state.mapVersion === 12)
     state = {
       ...state,

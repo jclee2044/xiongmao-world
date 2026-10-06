@@ -234,7 +234,7 @@ function addEnclosures(scene) {
     { id: "classical-garden", x: 2470, y: 40, w: 700, h: 600, kind: "rockery" },
     { id: "garden", x: 3250, y: 40, w: 710, h: 600, kind: "bamboo" },
     { id: "tiger-hill", x: 60, y: 1440, w: 620 - WEST_CANAL_WIDENING, h: 740, kind: "pagoda" },
-    { id: "neighbors-south", x: 2660, y: 2980, w: 620, h: 570, kind: "court" },
+    { id: "neighbors-south", x: 2660, y: 2980, w: 620, h: 570, kind: "square" },
     { id: "fabric", x: 3370, y: 2980, w: 590, h: 570, kind: "court" },
   ];
   scene.enclosures = [];
@@ -251,12 +251,27 @@ function addEnclosures(scene) {
         !(o.x > e.x && o.x < e.x + e.w && o.y > e.y && o.y < gateY),
     );
     scene.groundZones.push({
-      type: e.kind === "court" ? "courtyard" : "garden",
+      ...(e.kind === "square" ? { id: "southeast-square" } : {}),
+      type: ["court", "square"].includes(e.kind) ? "courtyard" : "garden",
       x: e.x,
       y: e.y,
       w: e.w,
       h: e.h,
     });
+    if (e.kind === "square") {
+      scene.scenery = scene.scenery.filter((o) => o.id !== `building-${e.id}`);
+      move(e.id, gateX, e.y + e.h / 2);
+      const square = stop(e.id);
+      Object.assign(square, {
+        type: "inspect", name: "河畔广场",
+        zh: "这里是河畔广场。我们可以在这里散步、休息。",
+        pinyin: "Zhèlǐ shì hépàn guǎngchǎng. Wǒmen kěyǐ zài zhèlǐ sànbù, xiūxi.",
+        meaning: "This is the canal square. We can walk and rest here.",
+      });
+      delete square.target;
+      scene.paths.push({ points: [[gateX, e.y - 85], [gateX, gateY + 110], [3665, gateY + 110]], width: 170 });
+      continue;
+    }
     const walls = [
       { x: e.x, y: e.y, w: e.w, h: thick },
       { x: e.x, y: e.y, w: thick, h: e.h },

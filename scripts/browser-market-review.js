@@ -68,12 +68,14 @@ try {
     "classical-garden",
     "neighbors-south",
   ]) {
-    if (process.env.REVIEW_ONLY) continue;
+    if (process.env.REVIEW_ONLY && process.env.REVIEW_ONLY !== id) continue;
     await seed(
       "shanghai",
       interactionPoint(scenes.shanghai.interactables.find((o) => o.id === id)),
     );
-    await page.screenshot({ path: `test-results/enclosure-${id}.png` });
+    await page.screenshot({
+      path: `test-results/${id === "neighbors-south" ? "southeast-square" : `enclosure-${id}`}.png`,
+    });
   }
   const atlas = await page.evaluate(async () => {
     const img = new Image();

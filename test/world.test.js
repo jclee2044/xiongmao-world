@@ -627,7 +627,7 @@ test("market street keeps its painting undistorted and its waterfront walking ci
 
 test("yards occupy visible walled grounds with clear gate approaches, and bamboo is on land", () => {
   const scene = scenes.shanghai;
-  assert.equal(scene.enclosures.length, 6);
+  assert.equal(scene.enclosures.length, 5);
   for (const e of scene.enclosures) {
     const fraction = (e.w * e.h) / (scene.width * scene.height);
     assert.ok(fraction > 0.019 && fraction < 0.035, `${e.id}: ${fraction}`);
@@ -695,6 +695,33 @@ test("bamboo courtyard is entered through its door and has matching dense planti
     );
     assert.ok(scene.scenery.filter((o) => o.type === "pond-rock").length >= 2);
   }
+});
+
+test("the southeast courtyard is an open square and old indoor saves return there", () => {
+  const scene = scenes.shanghai;
+  const square = scene.groundZones.find((o) => o.id === "southeast-square");
+  const stop = scene.interactables.find((o) => o.id === "neighbors-south");
+  assert.equal(stop.type, "inspect");
+  assert.equal(stop.target, undefined);
+  assert.ok(!scenes["pingtan-room"]);
+  assert.ok(!scene.enclosures.some((o) => o.id === stop.id));
+  assert.ok(
+    !scene.scenery.some(
+      (o) => o.id === "building-neighbors-south" || o.doorId === stop.id,
+    ),
+  );
+  for (let x = square.x; x <= square.x + square.w; x += square.w / 4)
+    for (let y = square.y; y <= square.y + square.h; y += square.h / 4)
+      assert.ok(canStand(scene, x, y), `Open paving at ${x},${y}`);
+  const saved = {
+    ...newState(),
+    scene: "pingtan-room",
+    position: { x: 700, y: 840 },
+  };
+  const migrated = upgradeState(saved);
+  assert.equal(migrated.scene, "shanghai");
+  assert.deepEqual(migrated.position, interactionPoint(stop));
+  assert.deepEqual(migrated.adventure, saved.adventure);
 });
 
 test("market edges use complete bridges, one connected canal and full freestanding scenery", () => {

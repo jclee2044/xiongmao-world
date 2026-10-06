@@ -140,7 +140,6 @@ for (const id of [
   "humble-garden",
   "tiger-court",
   "silk-room",
-  "pingtan-room",
   "bakery",
   "bookshop",
   "teahouse",

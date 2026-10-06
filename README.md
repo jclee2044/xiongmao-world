@@ -6,6 +6,8 @@ The gardens, courtyards and northwest bamboo grove have visible walled grounds, 
 
 Help **Xiaoyu (小雨)** on the north lane find the flower shop with a two-step directions quest (+40 XP), including hints, retries and saved partial progress. **Uncle Zhou (周叔叔)** on the southern canal walk introduces 常在河边站，哪有不湿鞋 and explains the meaning in basic Chinese. All five market stalls retain their first-person seller views, fixed prices and purchases.
 
+The southeastern **河畔广场**, west of the silk workshop, is an open paved square connected to the canal promenade. It replaces the former storytelling courtyard; saves from that room return safely to the square.
+
 Ask Lin how to find the hotpot restaurant, then enter it; help Hao find the bookshop by giving directions. Both quests appear in Panda’s goals. NPCs and Panda use the [in-game location directory](handoff/references/game-directions.md) and shared map facts.
 
 A lantern-lit Suzhou passenger boat waits in the bottom-right canal, beside the silk workshop. Click the boat to walk to its boarding dock, or press Space nearby. Departures unlock at **500 XP**; below that, the captain shows how much remains. At full XP, Panda adds a boarding goal. The boat currently connects to the existing Shantang next area, with a return trip to this dock.

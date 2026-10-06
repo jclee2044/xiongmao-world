@@ -478,7 +478,6 @@ Object.assign(townRooms["tiger-court"].interactables.at(-1), {
 });
 for (const [id, title, chinese, returnDoor, host] of [
   ["silk-room", "Embroidery studio", "苏绣坊", "fabric", "silk-host"],
-  ["pingtan-room", "Pingtan courtyard", "评弹小院", "neighbors-south", "suyin"],
 ]) {
   townRooms[id] = gardenRoom(id, title, chinese, returnDoor);
   townRooms[id].interactables = townRooms[id].interactables
@@ -631,7 +630,6 @@ for (const id of [
   "lion-grove",
   "tiger-court",
   "silk-room",
-  "pingtan-room",
 ]) {
   const room = townRooms[id];
   room.scenery.push({ type: "garden-wall", x: 700, y: 160, w: 1260, h: 135 });

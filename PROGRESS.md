@@ -204,3 +204,9 @@ The former garden is now 竹林小院. Its entire town-view enclosure is solid a
 Validation: all 74 unit/API tests pass, including reachable destinations, traversable routes, duck motion, solid courtyard entry and bamboo placement. The dedicated browser lifecycle/entry/return regression passes; screenshots of the widened bank, orchard, both ponds and courtyard boundaries were reviewed. Syntax and diff checks pass. Offline cache version: ponds-grove-audio-9.
 
 The offline browser regression also passes with the new pond module precached: exploration/local saves, reconnect, independent-device pairing, conflict preservation and interrupted-save recovery, with no browser errors.
+
+## 2026-10-06 — Open southeast square
+
+Replaced the southeastern 评弹小院 compound (second from the right) with an open paved 河畔广场. Removed its building, perimeter walls, moon gate and interior planting; the paving joins the northern promenade and southern silk-workshop approach. Updated map directions and removed the former smaller room. Saves made inside that room migrate to the square without losing progress.
+
+Validation: world/navigation/adventure/venue regression files pass, including a sweep across the former wall and building footprints and old-room save migration. Reviewed the targeted in-game square screenshot. Syntax and diff checks pass. Offline shell: southeast-square-10.
