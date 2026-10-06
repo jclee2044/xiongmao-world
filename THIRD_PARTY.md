@@ -12,7 +12,7 @@
 - Playwright 1.63.0: Apache-2.0; development-only automated browser tests against system Chromium.
 - Piper Huayan was inspected but not installed: its specific model card lists an unknown dataset license. https://huggingface.co/rhasspy/piper-voices/blob/main/zh/zh_CN/huayan/medium/MODEL_CARD.
 
-No remote inference API, external font, analytics or third-party browser CDN is used. Package/model installation requires network access; actual conversations use loopback services.
+With `PROVIDER=gemini`, NPC dialogue and Panda coaching use Google's Gemini API (`gemini-3.5-flash-lite`) through the server. The API key remains in the local `.env` and is not sent to the browser. Ollama remains an optional local provider. No external font, analytics or third-party browser CDN is used.
 
 ## Version 0.6.0 additions
 

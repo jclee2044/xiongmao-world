@@ -91,7 +91,7 @@ systemctl --user stop panda-world.service panda-local-ai.service
 systemctl --user disable panda-world.service panda-local-ai.service
 ```
 
-On a fresh source checkout, `npm ci` installs npm dependencies; copy `.env.example` to `.env`. Use `PROVIDER=story` without a configured local model. Current `.env` selects Qwen3 4B through Ollama. Ollama binds loopback with cloud inference disabled. Dialogue, models, generated speech and SQLite data stay on this PC. API failures use explicitly labeled limited story replies.
+On a fresh source checkout, `npm ci` installs npm dependencies; copy `.env.example` to `.env`. Set `PROVIDER=gemini`, `GEMINI_MODEL=gemini-3.5-flash-lite`, and `GEMINI_API_KEY` for Gemini dialogue and Panda coaching. The key stays on the server; dialogue and coaching requests are sent to Google's Gemini API. Use `PROVIDER=ollama` for local Qwen3 4B or `PROVIDER=story` for authored replies. API failures use explicitly labeled limited story replies. Speech and SQLite saves remain local.
 
 Service files use absolute project/Node paths. If those move, run `node scripts/install-services.js --install`, then `systemctl --user daemon-reload` and restart. The installer refuses to replace unrelated service files.
 
