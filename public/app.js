@@ -35,10 +35,7 @@ let world,
   controller;
 const persistence = new Persistence(
   (text) => ($("save-status").textContent = text),
-  () =>
-    toast(
-      "Another device has newer progress. Choose which to keep in Journal.",
-    ),
+  () => toast("另一台设备有新的日记。请在日记里选择要用哪一本。"),
 );
 // Unlock audio in the first gesture, but wait for saved preferences before sound.
 const music = new Music({ ...persistence.state.settings, music: 0 });
@@ -69,8 +66,8 @@ function toast(text) {
 function updatePlace() {
   const district = districtAt(world.scene, world.player);
   $("place").textContent = district
-    ? `Suzhou · ${district.name}`
-    : world.scene.title;
+    ? `苏州 · ${district.zh}`
+    : world.scene.chinese;
   $("place-cn").textContent = district
     ? `苏州 · ${district.zh}`
     : world.scene.chinese;
@@ -120,12 +117,10 @@ function updateXP() {
   if (!$("xp-progress")) return;
   const xp = persistence.state.adventure.xp;
   $("xp-progress").value = Math.min(AREA_XP, xp);
-  $("xp-text").textContent = `${xp} / ${AREA_XP} XP`;
+  $("xp-text").textContent = `${xp} / ${AREA_XP} 经验`;
   $("xp-progress").setAttribute(
     "aria-label",
-    xp >= AREA_XP
-      ? "Next neighborhood unlocked"
-      : `${xp} of ${AREA_XP} experience`,
+    xp >= AREA_XP ? "可以去下一站了" : `${xp} / ${AREA_XP} 经验`,
   );
 }
 const goals = createGoals({ persistence, world: () => world, panda, speech });
@@ -161,7 +156,7 @@ const panels = createPanels({
     $("panel").close();
     world.pause(false);
     $("world").focus();
-    if (!world.walkTo(position)) toast("No walkable route to this point.");
+    if (!world.walkTo(position)) toast("这里走不过去，换个地方吧。");
   },
 });
 const practice = createPractice({
@@ -234,9 +229,7 @@ registerPwa({
         persistence.conflict ||
         persistence.generation !== persistence.persisted
       )
-        return toast(
-          "Sync or export your progress in Journal before updating.",
-        );
+        return toast("更新前，请先在日记里保存或下载你的日记。");
       activate();
     };
   },
@@ -307,8 +300,8 @@ function interact(n) {
   if (n.shopId) return openConversation(shops[n.shopId].seller, n.shopId);
   if (n.id === "sheep-keepsake") {
     openPanel(
-      "小羊 · A gift from Lian",
-      `<img src="/assets/world/sheep-gift.png" alt="Your stuffed sheep" width="130" height="145" class="keepsake-portrait"/><p class="chinese" lang="zh-CN">${escape(n.zh)}</p><p class="notice">Earned by treating Lian to hotpot at the canal restaurant.</p>`,
+      "莲送的小羊",
+      `<img src="/assets/world/sheep-gift.png" alt="你的小羊" width="130" height="145" class="keepsake-portrait"/><p class="chinese" lang="zh-CN">${escape(n.zh)}</p><p class="notice">这是和莲一起吃火锅后，她送给你的。</p>`,
     );
     speech.speak(n.zh, false, "female");
     return;
@@ -336,22 +329,22 @@ function interact(n) {
     if (!persistence.state.found.includes("momo"))
       persistence.change((s) => {
         s.found.push("momo");
-        s.journal.push("Met Momo beside the canal and brought Momo home.");
+        s.journal.push("在河边认识了桃桃，带桃桃回家了。");
         s.journal = s.journal.slice(-50);
       });
     openPanel(
-      "Momo · 桃桃",
-      `<p class="chinese" lang="zh-CN">我们一起回家吧。</p>${persistence.state.settings.translation ? "<p>Let’s go home together.</p>" : ""}<button class="primary" id="bring-home">Take Momo home ↗</button>`,
+      "桃桃",
+      `<p class="chinese" lang="zh-CN">我们一起回家吧。</p>${persistence.state.settings.translation ? "<p>Let’s go home together.</p>" : ""}<button class="primary" id="bring-home">带桃桃回家 ↗</button>`,
     );
     $("bring-home").onclick = () => {
       $("panel").close();
       world.changeScene("home");
       updatePlace();
-      toast("Momo is home.");
+      toast("桃桃到家了。");
     };
   } else if (n.type === "friend")
     openPanel(
-      "Momo · 桃桃",
+      "桃桃",
       `<p class="chinese" lang="zh-CN">和你在一起，真好。</p>${persistence.state.settings.translation ? "<p>It’s good to be with you.</p>" : ""}`,
     );
   else if (n.type === "animal") {
@@ -387,7 +380,7 @@ function interact(n) {
       : "";
     openPanel(
       n.name,
-      `<p class="chinese" lang="zh-CN">${escape(n.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(n.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(n.meaning)}</p>` : ""}<button id="place-replay">Replay</button>${factHtml}<p id="panel-audio-status" role="status" class="muted"></p>`,
+      `<p class="chinese" lang="zh-CN">${escape(n.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(n.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(n.meaning)}</p>` : ""}<button id="place-replay">再听一次</button>${factHtml}<p id="panel-audio-status" role="status" class="muted"></p>`,
     );
     if (fact) $("culture-replay").onclick = () => speech.speak(fact.zh);
     $("place-replay").onclick = () => speech.speak(n.zh);
@@ -430,7 +423,7 @@ function openConversation(id, shopId = null) {
   $("send").disabled = false;
   const last = persistence.state.history.filter((h) => h.npc === id).at(-1);
   displayReply(
-    last?.reply || {
+    (id === "visitor-4" ? null : last?.reply) || {
       ...npcs[id].greeting,
       mode: "authored",
       notice: "",
@@ -439,14 +432,23 @@ function openConversation(id, shopId = null) {
   $("dialog-status").textContent = "";
   $("npc-quest")?.remove();
   $("directions-quest")?.remove();
-  if (["lin", "hao"].includes(id) && !shopId) {
+  if (["lin", "hao", "visitor-1"].includes(id) && !shopId) {
     const button = document.createElement("button");
     button.id = "directions-quest";
     button.className = "quest-invitation";
-    button.textContent = id === "lin" ? "火锅店怎么走？" : "我来帮你找书店。";
+    button.textContent =
+      id === "lin"
+        ? "火锅店怎么走？"
+        : id === "visitor-1"
+          ? "我来告诉你花店怎么走。"
+          : "我来帮你找书店。";
     button.onclick = () => {
       $("conversation").close();
-      id === "lin" ? directions.find() : directions.give();
+      id === "lin"
+        ? directions.find()
+        : id === "visitor-1"
+          ? directions.flowers()
+          : directions.give();
     };
     $("speech-controls").append(button);
   }
@@ -507,7 +509,7 @@ function renderShopPurchases() {
   box.id = "shop-purchases";
   const a = persistence.state.adventure;
   const money = document.createElement("p");
-  money.textContent = `零钱 ¥${a.coins} · Game coins`;
+  money.textContent = `零钱 ${a.coins} 元`;
   box.append(money);
   for (const item of shops[currentShop].items) {
     const b = document.createElement("button");
@@ -525,7 +527,7 @@ function renderShopPurchases() {
         a.purchases.push(item.id);
         award(a, 10);
         s.journal.push(
-          `Bought ${item.zh} at ${shops[currentShop].name} for ¥${item.price}.`,
+          `在${shops[currentShop].name}买了${item.zh}，花了${item.price}元。`,
         );
         s.journal = s.journal.slice(-50);
       });
@@ -562,19 +564,18 @@ function displayReply(reply) {
   wordHelp.annotate($("npc-zh"));
   $("npc-pinyin").textContent = reply.pinyin;
   $("npc-pinyin").hidden = !settings.pinyin;
-  $("toggle-pinyin").textContent = settings.pinyin
-    ? "Hide pinyin"
-    : "Show pinyin";
+  $("toggle-pinyin").textContent = settings.pinyin ? "不看拼音" : "看拼音";
   $("toggle-pinyin").setAttribute("aria-pressed", String(settings.pinyin));
   $("npc-meaning").textContent = reply.meaning;
   $("npc-meaning").hidden = !settings.translation;
   $("mode").textContent =
     reply.mode === "local"
-      ? "Local AI · on your PC"
+      ? "聊聊天"
       : reply.mode === "story"
-        ? "Limited story mode"
-        : "Suzhou";
-  $("reply-notice").textContent = reply.notice || "";
+        ? "聊聊日常"
+        : "苏州";
+  $("reply-notice").textContent =
+    reply.mode === "story" ? "先聊聊日常吧。" : "";
   updateHelp();
 }
 function explain(word) {
@@ -590,10 +591,13 @@ function explain(word) {
   $("panda-message").textContent = pronunciation
     ? `${word.zh} · ${pronunciation}`
     : word.zh;
-  $("panda-explanation").textContent =
-    `${word.meaning}. ${word.why} Example: ${word.example}`;
+  $("panda-explanation").textContent = persistence.state.settings.translation
+    ? `${word.meaning}. ${word.why} 例句：${word.example}`
+    : `例句：${word.example}`;
   $("panda-help").open = true;
-  $("dialog-status").textContent = `${word.zh}: ${word.meaning}. ${word.why}`;
+  $("dialog-status").textContent = persistence.state.settings.translation
+    ? `${word.zh}: ${word.meaning}. ${word.why}`
+    : `例句：${word.example}`;
 }
 function updateHelp() {
   const starter =
@@ -602,21 +606,21 @@ function updateHelp() {
     starters[currentReply?.topic || "greeting"];
   $("panda-message").textContent =
     helpLevel >= 3
-      ? `You can say… ${starter.example}`
+      ? `你可以说：${starter.example}`
       : helpLevel >= 2
         ? starter.zh
         : "帮助";
   $("panda-explanation").textContent =
     helpLevel >= 2
-      ? starter.why
-      : "Replay the voice, tap an underlined phrase, or ask for a sentence starter. Help never lowers your ability.";
+      ? starter.tip
+      : "可以再听一次，点点下面有线的词，或问熊猫怎么说。";
   $("help-inline").textContent =
     helpLevel >= 3
-      ? `You can say… ${starter.example} ${starter.why}`
+      ? `你可以说：${starter.example} ${starter.tip}`
       : helpLevel >= 2
-        ? `A starter: ${starter.zh} · ${starter.why}`
+        ? `可以这样说：${starter.zh} · ${starter.tip}`
         : helpLevel >= 1
-          ? "Tap an underlined word for its meaning, or replay more slowly."
+          ? "点点下面有线的词，或慢慢听一次。"
           : "";
   if (helpLevel >= 2) $("panda-help").open = true;
 }
@@ -640,9 +644,8 @@ function showPandaCoach() {
         : "别着急，我们一起想。";
   $("coach-zh").textContent = message;
   $("coach-tip").textContent =
-    helpLevel >= 2 ? starter.why : `They said: ${currentReply.meaning}`;
-  $("coach-next").textContent =
-    helpLevel >= 2 ? "Show an example" : "Give me a sentence starter";
+    helpLevel >= 2 ? starter.tip : `对方说：${currentReply.chinese}`;
+  $("coach-next").textContent = helpLevel >= 2 ? "看看例句" : "帮我开个头";
   $("coach-next").hidden = helpLevel >= 3;
   $("coach-use").hidden = helpLevel < 3;
   $("coach-next").onclick = () => {
@@ -672,7 +675,7 @@ $("coach-form").onsubmit = async (event) => {
   coachController = new AbortController();
   const token = ++coachGeneration;
   $("coach-send").disabled = true;
-  $("coach-status").textContent = "Panda is thinking…";
+  $("coach-status").textContent = "熊猫想一想…";
   speech.stop();
   try {
     const answer = await api(
@@ -688,10 +691,7 @@ $("coach-form").onsubmit = async (event) => {
     $("coach-tip").textContent = answer.explanation;
     $("coach-pinyin").textContent = answer.pinyin;
     $("coach-pinyin").hidden = !persistence.state.settings.pinyin;
-    $("coach-status").textContent =
-      answer.mode === "local"
-        ? "Panda’s language tutor"
-        : "Panda’s offline language guide";
+    $("coach-status").textContent = "熊猫来帮你";
     $("coach-listen").onclick = () =>
       speech.speak(answer.chinese, false, "male");
     $("coach-use").hidden = false;
@@ -705,7 +705,7 @@ $("coach-form").onsubmit = async (event) => {
   } catch (error) {
     if (token === coachGeneration && $("panda-coach").open)
       $("coach-status").textContent =
-        "I couldn’t finish that answer. Try again, or use a sentence starter.";
+        "现在回答不了。再问一次，或看看怎么开头吧。";
   } finally {
     if (token === coachGeneration) $("coach-send").disabled = false;
   }
@@ -714,15 +714,14 @@ $("begin").onclick = async () => {
   music.enable().catch(() => {});
   ambience.enable();
   $("begin").disabled = true;
-  $("begin").textContent = "Loading…";
+  $("begin").textContent = "等一下…";
   await persistence.load();
-  applySettings();
   try {
     await prepareArt(scenes[persistence.state.scene]);
   } catch {
     $("begin").disabled = false;
-    $("begin").textContent = "Retry loading";
-    toast("Artwork could not load. Check the connection and retry.");
+    $("begin").textContent = "再试一次";
+    toast("图片还没打开。看看网络，再试一次。");
     return;
   }
   $("welcome").hidden = true;
@@ -733,11 +732,9 @@ $("begin").onclick = async () => {
   try {
     const health = await api("/api/health");
     $("mode").textContent =
-      health.provider === "ollama"
-        ? "Local AI · on your PC"
-        : "Limited story mode";
+      health.provider === "ollama" ? "聊聊天" : "聊聊日常";
   } catch {
-    $("mode").textContent = "Offline exploration";
+    $("mode").textContent = "四处走走";
   }
 };
 $("interact").onclick = () => world.interact();
@@ -801,7 +798,7 @@ $("slow-replay").onclick = () =>
 $("stop-speech").onclick = () => speech.stop();
 $("toggle-pinyin").onclick = () => {
   const pinyin = !persistence.state.settings.pinyin;
-  panels.setSettings({ pinyin }, `Pinyin: ${pinyin ? "shown" : "hidden"}`);
+  panels.setSettings({ pinyin }, `拼音：${pinyin ? "看" : "不看"}`);
 };
 $("more-help").onclick = () => {
   helpLevel = Math.min(3, helpLevel + 1);
@@ -820,7 +817,7 @@ $("reply-form").onsubmit = async (e) => {
     generation = ++requestGeneration;
   controller = new AbortController();
   $("send").disabled = true;
-  $("dialog-status").textContent = "Thinking of a reply on your PC…";
+  $("dialog-status").textContent = "想一想怎么说…";
   speech.stop();
   try {
     const result = await api(
@@ -860,7 +857,7 @@ $("reply-form").onsubmit = async (e) => {
     $("reply").value = "";
     displayReply(result);
     speech.speak(result.chinese, false, npcs[id]?.voice || "male");
-    $("dialog-status").textContent = "+10 XP";
+    $("dialog-status").textContent = "+10 经验";
   } catch (error) {
     if (generation === requestGeneration && error.name !== "AbortError")
       $("dialog-status").textContent = error.message;

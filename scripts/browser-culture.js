@@ -179,7 +179,7 @@ try {
     await page.waitForFunction(() =>
       document
         .querySelector("#practice-audio-status")
-        .textContent.includes("Local Mandarin"),
+        .textContent.includes("正在说话"),
     );
     assert.ok(speechCalls.length > callCount);
     assert.equal(
@@ -231,7 +231,7 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("#practice-audio-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   assert.ok(speechCalls.length > audioCount);
   assert.equal(
@@ -250,14 +250,14 @@ try {
   await reloadAndResume("lantern-after-first-riddle");
 
   await closePanel();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("true");
   await page.locator('[data-setting="translation"]').selectOption("false");
   await resume();
   assert.ok(await page.locator("#panel-content .pinyin").count());
   assert.equal(await page.locator("#panel-content .meaning").count(), 0);
   await closePanel();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.locator('[data-setting="translation"]').selectOption("true");
   await resume();
@@ -315,7 +315,7 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("#practice-audio-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   assert.equal(speechCalls.at(-1).text, firstInstruction.clue.zh);
   assert.equal(
@@ -338,7 +338,7 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("#practice-audio-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   assert.equal(speechCalls.at(-1).text, firstInstruction.clue.zh);
   assert.equal(speechCalls.at(-1).slow, true);

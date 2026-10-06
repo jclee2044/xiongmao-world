@@ -1,10 +1,12 @@
 import { townRooms, homeObjects } from "../data/town-rooms.js";
 import { validateAdventure } from "../data/adventure.js";
+import { integrateMarket } from "../data/market-integration.js";
+import { expandTown, widenWestBank, westBankX } from "../data/town-layout.js";
 import { refineMarket } from "../data/market.js";
 import { buildTown } from "../data/town.js";
 import artBounds from "../data/art-bounds.js";
 import { interiors } from "../data/interiors.js";
-export const MAP_VERSION = 8;
+export const MAP_VERSION = 13;
 const OUTDOOR_SCALE = 0.9;
 export const landmark = { x: 0, y: 2046, w: 1254, h: 1254 };
 const lane = [
@@ -364,12 +366,12 @@ const smallScenery = [
   return { ...o, w: Math.round((o.h * source.w) / source.h) };
 });
 const newNeighbors = [
-  ["qiao", "Qiao · 乔", 1360, 900, "tea"],
-  ["bo", "Bo · 博", 2330, 900, "books"],
-  ["lan", "Lan · 兰", 3380, 900, "flowers"],
-  ["wei", "Wei · 伟", 1540, 1880, "fruit"],
-  ["an", "An · 安", 2750, 2200, "art"],
-  ["hao", "Hao · 浩", 2940, 2930, "directions"],
+  ["qiao", "乔", 1360, 900, "tea"],
+  ["bo", "博", 2330, 900, "books"],
+  ["lan", "兰", 3380, 900, "flowers"],
+  ["wei", "伟", 1540, 1880, "fruit"],
+  ["an", "安", 2750, 2200, "art"],
+  ["hao", "浩", 2940, 2930, "directions"],
 ].map(([id, name, x, y, topic]) => ({
   id,
   name,
@@ -474,7 +476,7 @@ export const scenes = {
       {
         id: "mei",
         type: "npc",
-        name: "Mei · 梅",
+        name: "梅",
         x: 1010,
         y: landmark.y + 685,
         artX: 1070,
@@ -485,7 +487,7 @@ export const scenes = {
       {
         id: "lin",
         type: "npc",
-        name: "Lin · 林",
+        name: "林",
         x: 1155,
         y: landmark.y + 932,
         artHeight: 260,
@@ -496,7 +498,7 @@ export const scenes = {
       {
         id: "yun",
         type: "npc",
-        name: "Yun · 云奶奶",
+        name: "云奶奶",
         x: 387,
         y: landmark.y + 346,
         artHeight: 230,
@@ -507,7 +509,7 @@ export const scenes = {
       {
         id: "home-door",
         type: "door",
-        name: "Home · 小家",
+        name: "小家",
         x: 342,
         y: landmark.y + 255,
         target: "home",
@@ -515,14 +517,14 @@ export const scenes = {
       {
         id: "momo",
         type: "stuffy",
-        name: "Momo · 桃桃",
+        name: "桃桃",
         x: 756,
         y: landmark.y + 825,
       },
       {
         id: "home-north",
         type: "door",
-        name: "Home · 小家",
+        name: "小家",
         x: 460,
         y: 865,
         target: "home",
@@ -531,7 +533,7 @@ export const scenes = {
         id: "tea",
         type: "door",
         target: "teahouse",
-        name: "Tea house · 茶馆",
+        name: "茶馆",
         x: 1320,
         y: 875,
         zh: "我们一起喝茶吧。",
@@ -542,7 +544,7 @@ export const scenes = {
         id: "books",
         type: "door",
         target: "bookshop",
-        name: "Bookshop · 书店",
+        name: "书店",
         x: 2300,
         y: 850,
         zh: "你喜欢看什么书？",
@@ -552,7 +554,7 @@ export const scenes = {
       {
         id: "flowers",
         type: "inspect",
-        name: "Flower shop · 花店",
+        name: "花店",
         x: 3350,
         y: 870,
         zh: "这些花真漂亮。",
@@ -563,7 +565,7 @@ export const scenes = {
         id: "bakery",
         type: "door",
         target: "bakery",
-        name: "Bakery · 糕点",
+        name: "糕点",
         x: 590,
         y: 1725,
         zh: "我想买一点糕点。",
@@ -573,7 +575,7 @@ export const scenes = {
       {
         id: "garden",
         type: "inspect",
-        name: "Garden · 花园",
+        name: "花园",
         x: 3190,
         y: 2210,
         zh: "我们去花园散步吧。",
@@ -584,7 +586,7 @@ export const scenes = {
         id: "fabric",
         type: "practice",
         activity: "silk-workshop",
-        name: "Silk workshop · 刺绣坊",
+        name: "刺绣坊",
         x: 2040,
         y: 2855,
         zh: "我喜欢这个颜色。",
@@ -595,7 +597,7 @@ export const scenes = {
         id: "lanterns",
         type: "practice",
         activity: "lantern-riddles",
-        name: "Lantern riddles · 猜灯谜",
+        name: "猜灯谜",
         x: 2800,
         y: 3000,
       },
@@ -603,14 +605,14 @@ export const scenes = {
         id: "market-budget",
         type: "practice",
         activity: "market-budget",
-        name: "Market shopping · 集市买东西",
+        name: "集市买东西",
         x: 1460,
         y: 1875,
       },
       {
         id: "inn",
         type: "inspect",
-        name: "Inn · 客栈",
+        name: "客栈",
         x: 3550,
         y: 2860,
         zh: "请问，还有房间吗？",
@@ -620,7 +622,7 @@ export const scenes = {
       {
         id: "tea-table",
         type: "inspect",
-        name: "Tea courtyard · 茶院",
+        name: "茶院",
         x: 1760,
         y: 1180,
         zh: "我们坐下来喝茶吧。",
@@ -630,7 +632,7 @@ export const scenes = {
       {
         id: "well",
         type: "inspect",
-        name: "Old well · 水井",
+        name: "水井",
         x: 1850,
         y: 1325,
         zh: "这是一个很老的水井。",
@@ -640,7 +642,7 @@ export const scenes = {
       {
         id: "garden-bench",
         type: "inspect",
-        name: "Garden bench · 长椅",
+        name: "长椅",
         x: 3330,
         y: 2330,
         zh: "我们坐一会儿，再去散步。",
@@ -650,7 +652,7 @@ export const scenes = {
       {
         id: "dumplings",
         type: "inspect",
-        name: "Dumpling stand · 饺子摊",
+        name: "饺子摊",
         x: 1660,
         y: 1775,
         zh: "我想吃一盘饺子。",
@@ -660,7 +662,7 @@ export const scenes = {
       {
         id: "lake",
         type: "inspect",
-        name: "Lake walk · 湖边",
+        name: "湖边",
         x: 2320,
         y: 1720,
         zh: "我们沿着湖边慢慢走。",
@@ -671,7 +673,7 @@ export const scenes = {
         id: "tiger-hill",
         type: "inspect",
         culture: "tiger-hill",
-        name: "Tiger Hill corner · 虎丘",
+        name: "虎丘",
         x: 1710,
         y: 2440,
         zh: "这座塔让我想起虎丘。",
@@ -682,7 +684,7 @@ export const scenes = {
         id: "classical-garden",
         type: "inspect",
         culture: "classical-garden",
-        name: "Classical garden · 园林",
+        name: "园林",
         x: 3080,
         y: 2160,
         zh: "我们从月洞门走进花园吧。",
@@ -693,7 +695,7 @@ export const scenes = {
         id: "suzhou-museum",
         type: "inspect",
         culture: "suzhou-museum",
-        name: "Museum reading corner · 苏州博物馆",
+        name: "苏州博物馆",
         x: 3200,
         y: 2915,
         zh: "我们一起看看苏州的故事吧。",
@@ -704,7 +706,7 @@ export const scenes = {
         id: "pingjiang",
         type: "inspect",
         culture: "pingjiang",
-        name: "Pingjiang canal walk · 平江河巷",
+        name: "平江河巷",
         x: 515,
         y: landmark.y + 650,
         zh: "我们沿着河边走一走。",
@@ -715,7 +717,7 @@ export const scenes = {
         id: "lake-cat",
         type: "animal",
         animal: "cat",
-        name: "Cat · 小猫",
+        name: "小猫",
         x: 2320,
         y: 1740,
         zh: "小猫在湖边休息。",
@@ -726,7 +728,7 @@ export const scenes = {
         id: "lake-duck",
         type: "animal",
         animal: "duck",
-        name: "Duck · 小鸭",
+        name: "小鸭",
         x: 3550,
         y: 1470,
         approachX: 3590,
@@ -739,7 +741,7 @@ export const scenes = {
         id: "garden-rabbit",
         type: "animal",
         animal: "rabbit",
-        name: "Rabbit · 小兔",
+        name: "小兔",
         x: 1650,
         y: 2190,
         zh: "小兔在竹林旁边。",
@@ -885,7 +887,7 @@ export const scenes = {
       {
         id: "outside-door",
         type: "door",
-        name: "Canal Lane · 河巷",
+        name: "河巷",
         x: 600,
         y: 725,
         target: "shanghai",
@@ -893,11 +895,11 @@ export const scenes = {
       {
         id: "journal",
         type: "journal",
-        name: "Journal · 旅行日记",
+        name: "旅行日记",
         x: 596,
         y: 418,
       },
-      { id: "momo-home", type: "friend", name: "Momo · 桃桃", x: 940, y: 520 },
+      { id: "momo-home", type: "friend", name: "桃桃", x: 940, y: 520 },
     ],
   },
   ...interiors,
@@ -954,7 +956,9 @@ function compactOutdoor(scene) {
   }));
 }
 compactOutdoor(scenes.shanghai);
-scenes.shanghai = refineMarket(buildTown(scenes.shanghai));
+scenes.shanghai = widenWestBank(
+  integrateMarket(expandTown(refineMarket(buildTown(scenes.shanghai)))),
+);
 // A shared transform gives the wider market room while keeping art and collision aligned.
 const townScale = 0.9;
 function scaleGeometry(value, key = "") {
@@ -972,6 +976,9 @@ function scaleGeometry(value, key = "") {
       "approachX",
       "approachY",
       "artHeight",
+      "gateX",
+      "gateY",
+      "wallHeight",
     ].includes(key)
       ? value * townScale
       : value;
@@ -1009,7 +1016,7 @@ scenes.home.interactables.push(...homeObjects, {
   id: "sheep-keepsake",
   hitRect: { x: 775, y: 408, w: 65, h: 70 },
   type: "inspect",
-  name: "小羊 · Lian’s gift",
+  name: "小羊",
   x: 805,
   y: 475,
   approachX: 800,
@@ -1190,6 +1197,18 @@ export function districtAt(scene, position) {
   );
 }
 export function upgradeState(state) {
+  if (state.mapVersion === 12)
+    state = {
+      ...state,
+      mapVersion: MAP_VERSION,
+      position:
+        state.scene === "shanghai"
+          ? {
+              ...state.position,
+              x: westBankX(state.position.x / townScale) * townScale,
+            }
+          : { ...state.position },
+    };
   state = { ...state, adventure: validateAdventure(state.adventure) };
   if (state.mapVersion < 5)
     state = {

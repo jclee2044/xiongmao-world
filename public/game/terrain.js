@@ -1,3 +1,5 @@
+import { bridgeArt } from "./bridges.js";
+import { pointInPolygon } from "./world.js";
 const plates = new WeakMap();
 function zonePath(ctx, zone) {
   ctx.beginPath();
@@ -131,7 +133,14 @@ export function paintGround(
   scene,
   view,
   paving,
-  { time = 0, animate = false, earth = null, water = null } = {},
+  {
+    time = 0,
+    animate = false,
+    earth = null,
+    water = null,
+    bridges = null,
+    market = null,
+  } = {},
 ) {
   // Opaque earth, stone and planted beds: no translucent floor rectangles.
   ctx.fillStyle = earth || "#c4ac84";
@@ -194,7 +203,7 @@ export function paintGround(
   ctx.restore();
   for (const z of scene.groundZones || [])
     if (z.type === "lake") paintWater(ctx, z, time, animate);
-  const canals = (scene.canals || []).filter((c) => !c.painted);
+  const canals = scene.canals || [];
   // Connected canals are painted as one union; there is no internal bank at a junction.
   if (canals?.length) {
     ctx.save();
@@ -225,7 +234,7 @@ export function paintGround(
       ctx.globalAlpha = 1;
     }
     // Slow wooden boats pass under the bridges, following the canal centerline.
-    for (const z of canals.filter((c) => c.h > c.w))
+    for (const z of canals.filter((c) => c.h > c.w && !c.winding))
       for (let i = 0; i < 2; i++) {
         const x = z.x + z.w * (i ? 0.67 : 0.33),
           y = z.y + ((time * 13 + i * 1200 + 320) % (z.h - 180)) + 90;
@@ -276,78 +285,85 @@ export function paintGround(
         ctx.restore();
       }
     ctx.restore();
+    const inWater = (x, y) =>
+      canals.some((c) => pointInPolygon(x, y, c.polygon));
     for (const z of canals) {
-      for (const edge of z.bankEdges
-        ? z.bankEdges.flatMap((points) =>
-            points.slice(1).map((p, i) => [...points[i], ...p]),
-          )
-        : z.w < z.h
-          ? [
-              [z.x, z.y, z.x, z.y + z.h],
-              [z.x + z.w, z.y, z.x + z.w, z.y + z.h],
-            ]
-          : [
-              [z.x, z.y, z.x + z.w, z.y],
-              [z.x, z.y + z.h, z.x + z.w, z.y + z.h],
-            ]) {
-        const [ax, ay, bx, by] = edge,
-          d = Math.hypot(bx - ax, by - ay);
-        for (let j = 0; j < d; j += 32) {
-          const x = ax + ((bx - ax) * j) / d,
-            y = ay + ((by - ay) * j) / d;
+      if (z.paintedBank) continue;
+      const edges = z.polygon.map((a, i) => [
+        ...a,
+        ...z.polygon[(i + 1) % z.polygon.length],
+      ]);
+      for (const [ax, ay, bx, by] of edges) {
+        const d = Math.hypot(bx - ax, by - ay),
+          n = Math.ceil(d / 30);
+        if (!d) continue;
+        const nx = -(by - ay) / d,
+          ny = (bx - ax) / d;
+        for (let j = 0; j < n; j++) {
+          const t = (j + 0.5) / n,
+            x = ax + (bx - ax) * t,
+            y = ay + (by - ay) * t;
+          const marketPlate = scene.marketPlate;
           if (
-            canals.some(
-              (other) =>
-                other !== z &&
-                x > other.x - 1 &&
-                x < other.x + other.w + 1 &&
-                y > other.y - 1 &&
-                y < other.y + other.h + 1,
-            )
+            z.marketWest &&
+            marketPlate &&
+            x > marketPlate.x + 50 &&
+            y >= marketPlate.y &&
+            y <= marketPlate.y + marketPlate.h
+          )
+            continue;
+          // Only the exposed boundary of the canal union gets a quay wall.
+          // This removes internal banks at all rectangle/polygon junctions.
+          if (
+            inWater(x + nx * 3, y + ny * 3) === inWater(x - nx * 3, y - ny * 3)
           )
             continue;
           if (
             scene.bridges.some(
-              (b) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h,
+              (b) =>
+                x >= b.x - 8 &&
+                x <= b.x + b.w + 8 &&
+                y >= b.y - 8 &&
+                y <= b.y + b.h + 8,
             )
           )
             continue;
-          ctx.fillStyle = j % 64 ? "#baaf95" : "#ccc1a4";
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(Math.atan2(by - ay, bx - ax));
+          ctx.fillStyle = j % 2 ? "#baaf95" : "#ccc1a4";
           ctx.strokeStyle = "#837f6c";
           ctx.lineWidth = 1;
-          const vertical = ax === bx;
           ctx.beginPath();
-          ctx.roundRect(
-            x - (vertical ? 8 : 0),
-            y - (vertical ? 0 : 8),
-            vertical ? 16 : 31,
-            vertical ? 31 : 16,
-            3,
-          );
+          ctx.roundRect(-d / n / 2, -8, d / n, 16, 3);
           ctx.fill();
           ctx.stroke();
+          ctx.restore();
         }
       }
     }
   }
-  ctx.save();
-  if (scene.marketPlate) {
+  if (scene.marketPlate && market?.complete && market.naturalWidth) {
     const p = scene.marketPlate;
-    ctx.beginPath();
-    ctx.rect(0, 0, scene.width, scene.height);
-    ctx.rect(p.x, p.y, p.w, p.h);
-    ctx.clip("evenodd");
+    ctx.drawImage(market, p.x, p.y, p.w, p.h);
   }
+  ctx.save();
   for (const bridge of scene.bridges || []) {
-    if (bridge.painted && !bridge.connector) continue;
-    const b = bridge.connector
-      ? { ...bridge.connector, axis: bridge.axis }
-      : bridge;
+    const b = bridge;
+    if (bridges?.complete && bridges.naturalWidth) {
+      const plate = scene.marketPlate;
+      const deck =
+        b.id === "market-west-bridge" && plate
+          ? { image: market, y: plate.y, scale: plate.w / 1536 }
+          : null;
+      const art = bridgeArt(bridges, b, deck);
+      ctx.drawImage(art.canvas, b.x - art.pad, b.y - art.pad);
+      continue;
+    }
     ctx.fillStyle = "#2d50464d";
     ctx.fillRect(b.x + 7, b.y + 10, b.w, b.h);
     ctx.fillStyle = paving;
     ctx.fillRect(b.x, b.y, b.w, b.h);
-    if (bridge.connector) continue;
     ctx.strokeStyle = "#877e69";
     ctx.lineWidth = 9;
     ctx.beginPath();
@@ -379,6 +395,39 @@ export function paintGround(
       }
       ctx.stroke();
     }
+    // Continuous masonry parapets share one material from landing to landing.
+    // Each bridge is a single object, so there is no plate-edge clipping here.
+    for (const side of [0, 1]) {
+      if (b.axis === "x") {
+        const y = b.y + b.h * side;
+        ctx.fillStyle = "#a69a82";
+        ctx.fillRect(b.x, y - 23, b.w, 23);
+        ctx.fillStyle = "#d8ccb0";
+        ctx.fillRect(b.x, y - 29, b.w, 8);
+        ctx.strokeStyle = "#837863";
+        ctx.lineWidth = 1;
+        for (let x = b.x + 30; x < b.x + b.w; x += 30) {
+          ctx.beginPath();
+          ctx.moveTo(x, y - 21);
+          ctx.lineTo(x, y - 2);
+          ctx.stroke();
+        }
+      } else {
+        const x = b.x + b.w * side;
+        ctx.fillStyle = "#a69a82";
+        ctx.fillRect(x - 8, b.y - 23, 16, b.h + 23);
+        ctx.fillStyle = "#d8ccb0";
+        ctx.fillRect(x - 8, b.y - 29, 8, b.h + 29);
+        ctx.strokeStyle = "#837863";
+        ctx.lineWidth = 1;
+        for (let y = b.y; y < b.y + b.h; y += 30) {
+          ctx.beginPath();
+          ctx.moveTo(x - 8, y);
+          ctx.lineTo(x + 8, y);
+          ctx.stroke();
+        }
+      }
+    }
     // Granite parapet posts, set outside the traversable bridge center.
     for (const fraction of [0, 0.33, 0.67, 1]) {
       for (const side of [0, 1]) {
@@ -387,11 +436,11 @@ export function paintGround(
         ctx.fillStyle = "#665e4e3b";
         ctx.fillRect(x - 6, y - 12, 21, 23);
         ctx.fillStyle = "#a89d85";
-        ctx.fillRect(x - 9, y - 22, 18, 24);
+        ctx.fillRect(x - 9, y - 34, 18, 36);
         ctx.fillStyle = "#d8ccb0";
         ctx.strokeStyle = "#a19479";
         ctx.beginPath();
-        ctx.roundRect(x - 12, y - 27, 24, 11, 3);
+        ctx.roundRect(x - 12, y - 39, 24, 11, 3);
         ctx.fill();
         ctx.stroke();
       }
@@ -400,7 +449,7 @@ export function paintGround(
   ctx.restore();
 }
 
-export function blendedPlate(img, allEdges = false) {
+export function blendedPlate(img) {
   if (plates.has(img)) return plates.get(img);
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
@@ -409,7 +458,7 @@ export function blendedPlate(img, allEdges = false) {
   ctx.drawImage(img, 0, 0);
   ctx.globalCompositeOperation = "destination-in";
   const right = ctx.createLinearGradient(
-    canvas.width - (allEdges ? 36 : 145),
+    canvas.width - 145,
     0,
     canvas.width,
     0,
@@ -418,23 +467,11 @@ export function blendedPlate(img, allEdges = false) {
   right.addColorStop(1, "#0000");
   ctx.fillStyle = right;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const top = ctx.createLinearGradient(0, 0, 0, allEdges ? 30 : 140);
+  const top = ctx.createLinearGradient(0, 0, 0, 140);
   top.addColorStop(0, "#0000");
   top.addColorStop(1, "#000");
   ctx.fillStyle = top;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  if (allEdges) {
-    for (const coords of [
-      [0, canvas.height - 18, 0, canvas.height],
-      [52, 0, 0, 0],
-    ]) {
-      const edge = ctx.createLinearGradient(...coords);
-      edge.addColorStop(0, "#000");
-      edge.addColorStop(1, "#0000");
-      ctx.fillStyle = edge;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-  }
   plates.set(img, canvas);
   return canvas;
 }

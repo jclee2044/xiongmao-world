@@ -8,7 +8,7 @@ export function createWordHelp({ discover, speech }) {
   callout.id = "word-callout";
   callout.setAttribute("popover", "manual");
   callout.setAttribute("role", "dialog");
-  callout.setAttribute("aria-label", "Word meaning");
+  callout.setAttribute("aria-label", "词的意思");
   document.body.append(callout);
   async function tokens(text) {
     if (!cache.has(text))
@@ -69,7 +69,7 @@ export function createWordHelp({ discover, speech }) {
     listen.textContent = "听一听";
     listen.onclick = () => speech.speak(word.zh);
     close.textContent = "×";
-    close.setAttribute("aria-label", "Close word meaning");
+    close.setAttribute("aria-label", "关闭");
     close.onclick = hide;
     actions.append(listen, close);
     callout.append(actions);
@@ -103,7 +103,7 @@ export function createWordHelp({ discover, speech }) {
         b.type = "button";
         b.className = "help-word";
         b.textContent = w.zh;
-        b.setAttribute("aria-label", `Explain ${w.zh}`);
+        b.setAttribute("aria-label", `看看“${w.zh}”的意思`);
         b.onclick = () => show(w, b);
         return b;
       }),

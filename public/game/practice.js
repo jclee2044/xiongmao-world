@@ -46,8 +46,8 @@ export function createPractice({
   function line(text, className = "chinese") {
     return `<p class="${className}" lang="zh-CN">${escape(text.zh)}</p>${settings().pinyin ? `<p class="pinyin">${escape(text.pinyin)}</p>` : ""}${settings().translation ? `<p class="meaning">${escape(text.meaning)}</p>` : ""}`;
   }
-  function label(zh, en) {
-    return settings().translation ? `${zh} · ${en}` : zh;
+  function label(zh) {
+    return zh;
   }
   function cardText(text) {
     return `<span lang="zh-CN">${escape(text.zh)}</span>${settings().pinyin ? `<small class="pinyin">${escape(text.pinyin)}</small>` : ""}${settings().translation ? `<small class="meaning">${escape(text.meaning)}</small>` : ""}`;
@@ -78,7 +78,7 @@ export function createPractice({
       choices = npc ? activities.filter((a) => a.npc === npc) : activities;
     openPanel(
       label("中文小任务", "Chinese errands"),
-      `<p lang="zh-CN">听一听，说一说，去找邻居。随时可以停下来。</p>${settings().translation ? '<p class="muted">Listen, share an idea, and meet your neighbors. Replay and hints are always welcome.</p>' : ""}${progress.active ? `<p><button id="practice-resume">${escape(label("继续", "Continue"))}：${escape(activityById[progress.active.id].title)}</button></p>` : ""}<div class="map-stops">${choices.map((a) => `<button data-activity="${a.id}">${progress.completed.includes(a.id) ? "✓ " : ""}${escape(a.title)}${settings().translation ? `<small> · ${escape(a.english)}</small>` : ""}</button>`).join("")}</div>${npc ? `<p><button id="practice-all">${escape(label("所有小任务", "All errands"))}</button></p>` : ""}`,
+      `<p lang="zh-CN">听一听，说一说，去找邻居。随时可以停下来。</p>${settings().translation ? '<p class="muted">Listen, share an idea, and meet your neighbors. Replay and hints are always welcome.</p>' : ""}${progress.active ? `<p><button id="practice-resume">${escape(label("继续", "Continue"))}：${escape(activityById[progress.active.id].title)}</button></p>` : ""}<div class="map-stops">${choices.map((a) => `<button data-activity="${a.id}">${progress.completed.includes(a.id) ? "✓ " : ""}${escape(a.title)}</button>`).join("")}</div>${npc ? `<p><button id="practice-all">${escape(label("所有小任务", "All errands"))}</button></p>` : ""}`,
     );
     for (const button of document.querySelectorAll("[data-activity]"))
       button.onclick = () => start(button.dataset.activity);

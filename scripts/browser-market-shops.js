@@ -56,7 +56,7 @@ async function clickWorld(x, y) {
   );
 }
 async function worldStop(id) {
-  await page.getByRole("button", { name: "Map", exact: true }).click();
+  await page.getByRole("button", { name: "地图", exact: true }).click();
   await page.locator(`[data-map-stop="${id}"]`).click();
 }
 const cached = () =>

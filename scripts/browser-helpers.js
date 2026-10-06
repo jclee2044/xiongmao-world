@@ -1,6 +1,6 @@
 import { scenes, interactionPoint } from "../public/game/world.js";
 export async function enterWorld(page) {
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.locator("#begin").click();
   await page.locator("#world").waitFor({ state: "visible" });
   await page.waitForFunction(
     () => document.getElementById("world").dataset.artReady === "true",
@@ -18,7 +18,7 @@ export async function walkToStop(page, id) {
   const destination = interactionPoint(
     scene.interactables.find((o) => o.id === id),
   );
-  await page.getByRole("button", { name: "Map", exact: true }).click();
+  await page.getByRole("button", { name: "地图", exact: true }).click();
   await page.locator(`[data-map-stop="${id}"]`).click();
   await page.waitForFunction(
     ({ x, y }) => {

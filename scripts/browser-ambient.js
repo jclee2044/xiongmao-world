@@ -366,7 +366,7 @@ try {
   home.game.on("request", (request) => {
     if (new URL(request.url()).pathname.startsWith("/assets/")) assetsOnExit++;
   });
-  await home.game.getByRole("button", { name: "Home", exact: true }).click();
+  await home.game.getByRole("button", { name: "回家", exact: true }).click();
   await home.game.waitForFunction(
     () => document.querySelector("#world").dataset.scene === "shanghai",
   );
@@ -430,7 +430,7 @@ try {
     const exit = room.interactables.find(
       (o) => o.type === "door" && o.target === "shanghai",
     );
-    await game.getByRole("button", { name: "Map", exact: true }).click();
+    await game.getByRole("button", { name: "地图", exact: true }).click();
     await game.locator(`[data-map-stop="${exit.id}"]`).click();
     await game.waitForFunction((point) => {
       const d = document.querySelector("#world").dataset;

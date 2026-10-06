@@ -116,7 +116,7 @@ try {
     greeted.push(id);
     if (id === "qiao")
       await page.screenshot({ path: "test-results/life-tea-conversation.png" });
-    await page.getByRole("button", { name: "Close conversation" }).click();
+    await page.getByRole("button", { name: "结束聊天" }).click();
   }
   assert.deepEqual(
     dialogueCalls,
@@ -181,7 +181,7 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("#practice-audio-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   assert.ok(speechCalls.at(-1).slow, "Listening practice can replay slowly");
   await page.locator("#practice-stop").click();
@@ -202,7 +202,7 @@ try {
   await page.screenshot({ path: "test-results/life-listening.png" });
   await page.locator('[data-practice-choice="1"]').click();
   await page.locator('[data-close="panel"]').click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.locator('[data-setting="translation"]').selectOption("false");
   await page.locator('[data-close="panel"]').click();
@@ -220,7 +220,7 @@ try {
   );
   await page.locator("#practice-share button").click();
   await page.locator('[data-close="panel"]').click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("true");
   await page.locator('[data-setting="translation"]').selectOption("true");
   await page.locator('[data-close="panel"]').click();
@@ -274,7 +274,7 @@ try {
       await page.locator('[data-close="panel"]').click();
   }
   async function localStop(sceneId, id) {
-    await page.getByRole("button", { name: "Map", exact: true }).click();
+    await page.getByRole("button", { name: "地图", exact: true }).click();
     await page.locator(`[data-map-stop="${id}"]`).click();
     const target = interactionPoint(
       scenes[sceneId].interactables.find((o) => o.id === id),
@@ -376,7 +376,7 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("#practice-audio-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   await page.locator("#practice-stop").click();
   await page.locator("#practice-basket button").click();
@@ -455,7 +455,7 @@ try {
   );
   for (const step of (await game()).steps) await visit(step.target);
   await closePanel();
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.routeLength === "0",
     null,
@@ -515,7 +515,7 @@ try {
     await page.waitForFunction(() =>
       document
         .querySelector("#panel-audio-status")
-        .textContent.includes("Local Mandarin"),
+        .textContent.includes("正在说话"),
     );
     cultureStops.push(id);
     if (room) await leaveShop(room);

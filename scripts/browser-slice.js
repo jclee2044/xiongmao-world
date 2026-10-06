@@ -45,7 +45,7 @@ try {
   await page.waitForFunction(() =>
     document
       .getElementById("dialog-status")
-      .textContent.includes("Local Mandarin"),
+      .textContent.includes("正在说话"),
   );
   results.decodedAudio = await page.evaluate(async () => {
     const context = new AudioContext();
@@ -74,20 +74,20 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "test-results/conversation-mobile.png" });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.getByRole("button", { name: "Close conversation" }).click();
+  await page.getByRole("button", { name: "结束聊天" }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.paused === "false",
   );
   await page.locator("#world").focus();
   await walkToStop(page, "momo");
   await page.locator("#interact").click();
-  await page.getByRole("button", { name: "Take Momo home" }).click();
+  await page.getByRole("button", { name: "带桃桃回家" }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
   );
   await page.waitForFunction(
     () =>
-      document.getElementById("save-status").textContent === "Saved on this PC",
+      document.getElementById("save-status").textContent === "日记存好了",
   );
   let saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("panda-world-v1")),
@@ -95,7 +95,7 @@ try {
   assert.deepEqual(saved.state.found, ["momo"]);
   await page.screenshot({ path: "test-results/home.png" });
   await page.reload();
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
   );
@@ -105,7 +105,7 @@ try {
   assert.deepEqual(saved.state.found, ["momo"]);
   assert.equal(saved.state.journal.length, 1);
   results.reload = "pass";
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator("#custom-prompt").fill("sage outfit and short hair");
   await page.getByRole("button", { name: "Apply supported change" }).click();
   await page.waitForFunction(
@@ -113,7 +113,7 @@ try {
       JSON.parse(localStorage.getItem("panda-world-v1")).state.settings
         .outfit === "#899b7c",
   );
-  await page.getByRole("button", { name: "Undo last change" }).click();
+  await page.getByRole("button", { name: "改回去" }).click();
   saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("panda-world-v1")),
   );

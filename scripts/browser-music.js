@@ -111,7 +111,7 @@ try {
   assert.equal(await page.evaluate(() => check.music.audio.loop), true);
   assert.equal(await page.evaluate(() => check.music.audio.paused), false);
   const recording = await page.request.get(
-    "http://127.0.0.1:3210/assets/audio/asia-fsm-team.mp3",
+    base + "/assets/audio/asia-fsm-team.mp3",
   );
   assert.equal(recording.status(), 200);
   assert.match(recording.headers()["content-type"], /audio\/mpeg/);
@@ -154,19 +154,30 @@ try {
   await page.evaluate(() => check.music.setScene({ id: "home" }));
   await page.waitForFunction(
     () =>
-      check.music.audio?.src.endsWith("sonican-asian-music-magical-dream.mp3") &&
-      check.music.audio.currentTime > 0.1,
+      check.music.audio?.src.endsWith(
+        "sonican-asian-music-magical-dream.mp3",
+      ) && check.music.audio.currentTime > 0.1,
   );
   const indoor = await page.evaluate(async () => {
-    const response = await fetch("/assets/audio/sonican-asian-music-magical-dream.mp3");
-    const buffer = await check.music.context.decodeAudioData(await response.arrayBuffer());
+    const response = await fetch(
+      "/assets/audio/sonican-asian-music-magical-dream.mp3",
+    );
+    const buffer = await check.music.context.decodeAudioData(
+      await response.arrayBuffer(),
+    );
     return { duration: buffer.duration, channels: buffer.numberOfChannels };
   });
   assert.ok(indoor.duration > 78 && indoor.duration < 80);
   assert.equal(indoor.channels, 2);
   assert.equal(await page.evaluate(() => check.music.audio.loop), true);
-  await page.evaluate(() => check.music.setScene({ id: "bakery", interior: true }));
-  assert.ok(await page.evaluate(() => check.music.audio.src.endsWith("sonican-asian-music-magical-dream.mp3")));
+  await page.evaluate(() =>
+    check.music.setScene({ id: "bakery", interior: true }),
+  );
+  assert.ok(
+    await page.evaluate(() =>
+      check.music.audio.src.endsWith("sonican-asian-music-magical-dream.mp3"),
+    ),
+  );
   await page.evaluate(() => check.music.setScene({ id: "shanghai" }));
   await page.waitForFunction(
     () =>
@@ -216,7 +227,7 @@ try {
   });
   assert.equal(await page.evaluate(() => check.music.ducked), false);
   assert.ok(
-    await page.evaluate(() => check.statuses.at(-1).includes("unavailable")),
+    await page.evaluate(() => check.statuses.at(-1).includes("现在没有声音")),
   );
 
   await page.evaluate(async () => {
@@ -244,17 +255,17 @@ try {
   assert.equal(await page.evaluate(() => check.music.ducked), false);
 
   await page.evaluate(() => check.panels.settings());
-  await page.getByLabel("Background music").selectOption("off");
+  await page.getByLabel("音乐", { exact: true }).selectOption("off");
   await page.waitForFunction(() => check.music.context.state === "suspended");
   assert.equal(await page.evaluate(() => check.music.audio.paused), true);
   assert.equal(await page.evaluate(() => check.music.master.gain.value), 0);
-  assert.equal(await page.getByLabel("Music volume").isDisabled(), true);
+  assert.equal(await page.getByLabel("音乐声音大小").isDisabled(), true);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0);
-  await page.getByLabel("Background music").selectOption("on");
+  await page.getByLabel("音乐", { exact: true }).selectOption("on");
   await page.waitForFunction(() => check.music.context.state === "running");
   await page.waitForFunction(() => !check.music.audio.paused);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0.2);
-  await page.getByLabel("Music volume").evaluate((input) => {
+  await page.getByLabel("音乐声音大小").evaluate((input) => {
     input.value = "0.35";
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
@@ -420,7 +431,7 @@ try {
   });
   await game.goto(base);
   assert.equal(await game.evaluate(() => musicGraphs.length), 0);
-  await game.getByRole("button", { name: "Wander with Panda" }).click();
+  await game.getByRole("button", { name: "和熊猫一起走走" }).click();
   await game.locator("#world").waitFor({ state: "visible" });
   await game.waitForFunction(
     () =>
@@ -428,8 +439,8 @@ try {
       musicGraphs[0]?.musicMaster.gain.value > 0.1 &&
       musicGraphs[0]?.musicTracks[0]?.currentTime > 0.1,
   );
-  await game.getByRole("button", { name: "Settings", exact: true }).click();
-  await game.getByLabel("Background music").selectOption("off");
+  await game.getByRole("button", { name: "设置", exact: true }).click();
+  await game.getByLabel("音乐", { exact: true }).selectOption("off");
   await game.waitForFunction(() => musicGraphs[0]?.state === "suspended");
   await game.waitForFunction(
     () => !JSON.parse(localStorage.getItem("panda-world-v1")).dirty,
@@ -456,7 +467,7 @@ try {
   });
   await game.reload();
   assert.equal(await game.evaluate(() => musicGraphs.length), 0);
-  await game.getByRole("button", { name: "Wander with Panda" }).click();
+  await game.getByRole("button", { name: "和熊猫一起走走" }).click();
   await requestedState;
   await game.waitForFunction(() => musicGraphs[0]?.musicMaster);
   await game.waitForTimeout(400);
@@ -498,9 +509,12 @@ try {
     0,
   );
   assert.equal(await game.evaluate(() => musicGraphs[0].state), "suspended");
-  await game.getByRole("button", { name: "Settings", exact: true }).click();
-  assert.equal(await game.getByLabel("Background music").inputValue(), "off");
-  assert.equal(await game.getByLabel("Music volume").isDisabled(), true);
+  await game.getByRole("button", { name: "设置", exact: true }).click();
+  assert.equal(
+    await game.getByLabel("音乐", { exact: true }).inputValue(),
+    "off",
+  );
+  assert.equal(await game.getByLabel("音乐声音大小").isDisabled(), true);
   assert.equal(
     await game.evaluate(
       async () =>

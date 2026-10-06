@@ -81,3 +81,28 @@ test("directions progress survives validation and conflict merges without accept
   ])
     assert.throws(() => validateAdventure({ ...a, ...patch }));
 });
+
+test("flower directions migrate, merge and validate independently of Hao's quest", () => {
+  const old = validateAdventure({ xp: 12 });
+  assert.equal(old.flowerDirections, "new");
+  const partial = {
+    ...newAdventure(),
+    flowerDirections: "accepted",
+    flowerDirectionsStep: 1,
+  };
+  const done = {
+    ...newAdventure(),
+    flowerDirections: "done",
+    flowerDirectionsStep: 2,
+  };
+  assert.equal(mergeAdventure(partial, done).flowerDirections, "done");
+  assert.equal(mergeAdventure(done, partial).flowerDirectionsStep, 2);
+  assert.equal(mergeAdventure(done, partial).directionsGive, "new");
+  for (const bad of [
+    { flowerDirections: "found" },
+    { flowerDirectionsStep: 3 },
+    { flowerDirectionsStep: -1 },
+    { flowerDirectionsStep: 0.5 },
+  ])
+    assert.throws(() => validateAdventure({ ...partial, ...bad }));
+});

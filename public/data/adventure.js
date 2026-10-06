@@ -10,6 +10,8 @@ export const newAdventure = () => ({
   directionsFind: "new",
   directionsGive: "new",
   directionsStep: 0,
+  flowerDirections: "new",
+  flowerDirectionsStep: 0,
   met: [],
   vocabulary: [],
   clickedWords: [],
@@ -22,9 +24,15 @@ export function validateAdventure(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw Error("Invalid adventure.");
   const a = { ...newAdventure(), ...value };
-  for (const key of ["directionsFind", "directionsGive"])
+  for (const key of ["directionsFind", "directionsGive", "flowerDirections"])
     if (!["new", "accepted", "done"].includes(a[key]))
       throw Error("Invalid directions quest.");
+  if (
+    !Number.isInteger(a.flowerDirectionsStep) ||
+    a.flowerDirectionsStep < 0 ||
+    a.flowerDirectionsStep > 2
+  )
+    throw Error("Invalid flower directions step.");
   if (
     !Number.isInteger(a.directionsStep) ||
     a.directionsStep < 0 ||
@@ -68,6 +76,8 @@ export function validateAdventure(value) {
     directionsFind: a.directionsFind,
     directionsGive: a.directionsGive,
     directionsStep: a.directionsStep,
+    flowerDirections: a.flowerDirections,
+    flowerDirectionsStep: a.flowerDirectionsStep,
     met: [...a.met],
     vocabulary: [...a.vocabulary],
     clickedWords: [...a.clickedWords],
@@ -161,6 +171,11 @@ export function mergeAdventure(local, remote) {
     directionsFind: later("directionsFind", ["new", "accepted", "done"]),
     directionsGive: later("directionsGive", ["new", "accepted", "done"]),
     directionsStep: Math.max(a.directionsStep, b.directionsStep),
+    flowerDirections: later("flowerDirections", ["new", "accepted", "done"]),
+    flowerDirectionsStep: Math.max(
+      a.flowerDirectionsStep,
+      b.flowerDirectionsStep,
+    ),
     met: [...new Set([...a.met, ...b.met])],
     vocabulary: [...new Set([...a.vocabulary, ...b.vocabulary])],
     clickedWords: [...new Set([...a.clickedWords, ...b.clickedWords])],

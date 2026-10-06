@@ -2,9 +2,9 @@
 // Shop interiors retain their original designs around this irregular canal island.
 export function refineMarket(scene) {
   const plate = {
-    path: "/assets/world/market-lane-v3.png",
+    path: "/assets/world/market-rows.png",
     x: 760,
-    y: 1000,
+    y: 1050,
     w: 2040,
     h: 1200,
   };
@@ -87,8 +87,8 @@ export function refineMarket(scene) {
       id: "market-baker",
       type: "npc",
       dialogueId: "baker",
-      name: "阿香 · Breakfast",
-      appearance: "qiao",
+      name: "阿香",
+      appearance: "baker",
       x: 1470,
       y: 1400,
       approachX: 1470,
@@ -100,8 +100,8 @@ export function refineMarket(scene) {
       id: "market-cook",
       type: "npc",
       dialogueId: "waiter",
-      name: "小陈 · Street food",
-      appearance: "hao",
+      name: "小陈",
+      appearance: "waiter",
       x: 2510,
       y: 2130,
       approachX: 2510,
@@ -119,19 +119,23 @@ export function refineMarket(scene) {
       Object.assign(o, { approachX: a, approachY: b });
     }
   };
-  native("wei", 1075, 641, 1015, 650);
+  native("wei", 1110, 465, 1060, 470);
   position("buy-oranges", 480, 2700);
-  native("market-budget", 1520, 580);
-  native("silk-host", 1435, 366, 1485, 380);
-  native("buy-fan", 1468, 433);
-  native("market-baker", 775, 287, 805, 315);
-  native("courtyard-cat", 620, 740);
+  native("market-budget", 810, 940);
+  native("silk-host", 960, 470, 940, 510);
+  native("buy-fan", 1100, 485);
+  native("market-baker", 480, 445, 510, 485);
+  native("courtyard-cat", 400, 960);
+  native("snack-host", 650, 910, 705, 935);
+  native("buy-cake", 600, 970);
+  native("market-cook", 1240, 910, 1270, 935);
+  native("lian", 750, 435, 800, 445);
   for (const [id, shopId, area] of [
-    ["market-baker", "breakfast", [275, 40, 495, 280]],
-    ["snack-host", "snacks", [375, 335, 370, 330]],
-    ["silk-host", "souvenirs", [1005, 40, 470, 340]],
-    ["wei", "produce", [1040, 390, 405, 290]],
-    ["market-cook", "streetfood", [1000, 680, 435, 255]],
+    ["market-baker", "breakfast", [210, 20, 520, 405]],
+    ["snack-host", "snacks", [265, 510, 560, 410]],
+    ["silk-host", "souvenirs", [820, 30, 565, 395]],
+    ["wei", "produce", [1140, 290, 340, 325]],
+    ["market-cook", "streetfood", [920, 540, 485, 385]],
   ])
     Object.assign(stop(id), { shopId, hitRect: rect(...area) });
   for (const [id, shopId] of [
@@ -196,15 +200,15 @@ export function refineMarket(scene) {
     },
     {
       points: [
-        [450, 2640],
-        [630, 2640],
+        [450, 2670],
+        [630, 2670],
       ],
       width: 100,
     },
     {
       points: polygon([
-        [440, 716],
-        [615, 757],
+        [870, 460],
+        [840, 750],
       ]),
       width: 90,
     },
@@ -225,49 +229,12 @@ export function refineMarket(scene) {
   ];
   scene.marketPlate = plate;
   const stalls = [
-    [
-      [260, 35],
-      [705, 35],
-      [770, 140],
-      [747, 284],
-      [630, 320],
-      [334, 292],
-      [274, 180],
-    ],
-    [
-      [1040, 35],
-      [1410, 66],
-      [1480, 200],
-      [1430, 314],
-      [1290, 373],
-      [1055, 310],
-      [992, 173],
-    ],
-    [
-      [390, 332],
-      [675, 350],
-      [747, 462],
-      [716, 613],
-      [612, 660],
-      [415, 564],
-      [371, 442],
-    ],
-    [
-      [1110, 390],
-      [1405, 446],
-      [1440, 575],
-      [1270, 677],
-      [1050, 602],
-      [1070, 500],
-    ],
-    [
-      [1040, 690],
-      [1375, 660],
-      [1430, 810],
-      [1310, 931],
-      [1060, 898],
-      [1000, 800],
-    ],
+    // Building silhouettes match the five facades and their joined L returns.
+    [[220, 45], [425, 10], [680, 40], [730, 190], [675, 265], [575, 275], [580, 360], [505, 415], [245, 420], [210, 275]],
+    [[825, 80], [905, 10], [1260, 60], [1360, 115], [1380, 255], [1145, 385], [1010, 415], [870, 395], [795, 335]],
+    [[260, 540], [445, 550], [650, 490], [820, 565], [825, 675], [755, 705], [760, 785], [655, 805], [630, 875], [555, 920], [375, 890], [285, 735]],
+    [[1140, 285], [1290, 255], [1470, 370], [1455, 530], [1410, 605], [1275, 610], [1160, 550], [1135, 405]],
+    [[1050, 500], [1270, 580], [1375, 665], [1400, 785], [1335, 840], [1110, 930], [995, 925], [915, 870], [905, 725], [965, 690], [950, 590]],
   ];
   scene.solidPolygons.push(...stalls.map(polygon));
   const canal = (x, y, w, h) => ({
@@ -284,81 +251,36 @@ export function refineMarket(scene) {
     ],
   });
   const north = canal(940, 880, 1940, 120);
-  const west = {
-    ...rect(0, 0, 465, 1024),
-    type: "canal",
-    painted: true,
-    polygon: polygon([
-      [0, 0],
-      [150, 0],
-      [190, 230],
-      [232, 440],
-      [298, 650],
-      [363, 810],
-      [440, 854],
-      [335, 912],
-      [215, 835],
-      [100, 790],
-      [0, 760],
-    ]),
-  };
-  const center = {
-    ...rect(300, 0, 740, 1024),
-    type: "canal",
-    painted: true,
-    polygon: polygon([
-      [975, 90],
-      [1025, 90],
-      [1000, 130],
-      [956, 260],
-      [956, 360],
-      [985, 475],
-      [983, 590],
-      [932, 714],
-      [907, 800],
-      [840, 917],
-      [744, 937],
-      [635, 960],
-      [480, 930],
-      [350, 870],
-      [315, 854],
-      [500, 879],
-      [690, 819],
-      [770, 710],
-      [852, 623],
-      [850, 541],
-      [817, 471],
-      [829, 385],
-      [873, 285],
-      [881, 209],
-      [940, 165],
-    ]),
-  };
-  // The painted canal replaces this section of the old straight canal.
-  // Outside it, water stops at the same north/south perimeter as the artwork.
+  // The street has an exterior canal only. Its continuous west bank is joined
+  // to the northern and southern town channels after the layout transform.
   scene.canals = scene.canals.filter((c) => c.w > c.h);
-  scene.canals.push(
-    canal(760, 35, 180, 965),
-    canal(760, 2220, 180, 745),
-    north,
-    west,
-    center,
-  );
+  scene.canals.push(canal(760, 35, 180, 965), canal(760, 2280, 180, 685), north);
   // Follow the painted quay with a gently bowed outer bank and a paved apron.
   const southernCanal = scene.canals.find((c) => c.w > 2000 && !c.painted);
   if (southernCanal) {
     const top = Array.from({ length: 45 }, (_, i) => {
-      const x = southernCanal.x + southernCanal.w * i / 44;
-      const t = Math.max(0, Math.min(1, (x - 940) / 1900));
-      return [x, 2220 + Math.sin(t * Math.PI) * 50];
+      const x = southernCanal.x + (southernCanal.w * i) / 44;
+      return [x, 2290];
     });
     const bottom = top.map(([x, y]) => [x, y + 170]);
     southernCanal.polygon = [...top, ...bottom.toReversed()];
     southernCanal.bankEdges = [top, bottom];
-    southernCanal.h = 220;
-    scene.groundZones.push({ type: "courtyard", x: 940, y: 2160, w: 1860, h: 110,
-      polygon: [[940, 2160], [2800, 2160], ...top.filter(([x]) => x <= 2800).toReversed()] });
-    for (const b of scene.bridges.filter((b) => b.axis === "y" && b.y > 2000)) b.h += 50;
+    southernCanal.y = 2290;
+    southernCanal.h = 170;
+    scene.groundZones.push({
+      type: "courtyard",
+      x: 940,
+      y: 2160,
+      w: 1860,
+      h: 110,
+      polygon: [
+        [940, 2160],
+        [2800, 2160],
+        ...top.filter(([x]) => x <= 2800).toReversed(),
+      ],
+    });
+    for (const b of scene.bridges.filter((b) => b.axis === "y" && b.y > 2000))
+      b.h += 90;
   }
   scene.groundZones = scene.groundZones.filter((z) => z.type !== "canal");
   scene.groundZones.push(...scene.canals);
@@ -366,16 +288,14 @@ export function refineMarket(scene) {
   const southBridge = scene.bridges.find((b) => b.axis === "y" && b.x < 1500);
   if (southBridge) southBridge.x = 1840;
   scene.bridges.push(
-    { x: 700, y: 175, w: 300, h: 155, axis: "x" },
+    { x: 735, y: 175, w: 265, h: 155, axis: "x" },
     {
-      ...rect(-85, 110, 345, 85),
+      ...rect(-85, 390, 350, 105),
       axis: "x",
       painted: true,
-      connector: { ...rect(-85, 110, 110, 85) },
+      connector: { ...rect(-85, 390, 110, 105) },
     },
-    { ...rect(750, 365, 290, 90), axis: "x", painted: true },
-    { ...rect(690, 658, 360, 110), axis: "x", painted: true },
-    ...[1810, 2840].map((x) => ({
+    ...[1580, 2840].map((x) => ({
       x,
       y: 840,
       w: 170,
@@ -412,7 +332,8 @@ export function refineMarket(scene) {
         !["qiao", "lin", "kid-one", "kid-two"].includes(o.id),
     )
     .map((o) => ({ x: o.x, y: o.y, r: 17 }));
-  scene.spawn = { x: 1690, y: 1875 };
+  const [spawnX, spawnY] = point([855, 500]);
+  scene.spawn = { x: spawnX, y: spawnY };
   scene.paths = scene.paths.filter(
     (p) =>
       !p.points.some(([x, y]) => x > 940 && x < 2800 && y > 1000 && y < 2220),
@@ -543,15 +464,34 @@ export function refineMarket(scene) {
   }
   // A moored passenger boat replaces the invisible southeast departure gate.
   Object.assign(stop("next-area"), {
-    name: "游船码头 · Departure boat", x: 3420, y: 2445,
-    approachX: 3420, approachY: 2445,
+    name: "游船码头",
+    x: 3420,
+    y: 2445,
+    approachX: 3420,
+    approachY: 2445,
     hitRect: { x: 2980, y: 2135, w: 570, h: 265 },
     transport: "boat",
   });
   scene.scenery.push(
-    { type: "passenger-boat", x: 3260, y: 2370, w: 535, h: 250, interactionId: "next-area" },
+    {
+      type: "passenger-boat",
+      x: 3260,
+      y: 2370,
+      w: 535,
+      h: 250,
+      interactionId: "next-area",
+    },
     { type: "boat-dock", x: 3420, y: 2440, w: 105, h: 85 },
   );
-  scene.paths.push({points: [[3420, 2520], [3420, 2440]], width: 105});
+  scene.paths.push({
+    points: [
+      [3420, 2520],
+      [3420, 2440],
+    ],
+    width: 105,
+  });
+  scene.scenery = scene.scenery.filter(
+    (o) => o.nature !== "bamboo" || o.y < 780,
+  );
   return scene;
 }

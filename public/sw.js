@@ -1,5 +1,11 @@
-const CACHE = "xiongmao-shell-0.9.0-4";
+const CACHE = "xiongmao-shell-0.9.3-ponds-grove-audio-9";
 const SHELL = [
+  "/data/ponds.js",
+  "/game/bridges.js",
+  "/assets/world/stone-bridges.png",
+  "/assets/characters/market-npcs.png",
+  "/assets/characters/visitors-walk.png",
+  "/assets/characters/indoor-npcs.png",
   "/assets/world/suzhou-passenger-boat.png",
   "/assets/world/canal-water-v2.png",
   "/assets/world/shop-breakfast.png",
@@ -17,7 +23,9 @@ const SHELL = [
   "/assets/characters/lin-walk.png",
   "/assets/characters/seated-friends.png",
   "/data/market.js",
-  "/assets/world/market-lane-v3.png",
+  "/data/town-layout.js",
+  "/data/market-integration.js",
+  "/assets/world/market-rows.png",
   "/assets/world/restaurant-interior-v3.png",
   "/assets/characters/neighbors-walk-v2.png",
   "/assets/characters/children-walk.png",

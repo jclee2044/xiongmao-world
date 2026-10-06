@@ -1,14 +1,14 @@
 {
   "id": "/",
-  "name": "Xiongmao World 熊猫世界",
+  "name": "熊猫世界",
   "short_name": "熊猫世界",
-  "description": "Explore Suzhou and practice Chinese conversation.",
+  "description": "和熊猫一起逛苏州，说中文。",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f5efdf",
   "theme_color": "#7b8f79",
-  "lang": "en",
+  "lang": "zh-CN",
   "icons": [
     {
       "src": "/assets/icon-192.png",

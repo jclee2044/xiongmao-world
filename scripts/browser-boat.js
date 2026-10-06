@@ -55,7 +55,7 @@ async function clickWorld(x, y) {
   );
 }
 async function worldStop(id) {
-  await page.getByRole("button", { name: "Map", exact: true }).click();
+  await page.getByRole("button", { name: "地图", exact: true }).click();
   await page.locator(`[data-map-stop="${id}"]`).click();
 }
 const cached = () =>
@@ -94,10 +94,7 @@ try {
     await page.locator("#panel").waitFor({ state: "visible" });
     assert.equal(await page.locator("#enter-next").count(), xp >= 500 ? 1 : 0);
     if (xp === 500) {
-      assert.match(
-        await page.locator("#goals-list").innerText(),
-        /Your boat is ready/,
-      );
+      assert.match(await page.locator("#goals-list").innerText(), /可以上船了/);
       await page.click("#enter-next");
       await page.waitForFunction(
         () => document.querySelector("#world").dataset.scene === "shantang",

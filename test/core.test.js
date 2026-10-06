@@ -11,6 +11,7 @@ import {
 import { parseCustomization, validatePatch } from "../public/data/settings.js";
 import { reply, validateReply } from "../server/dialogue.js";
 import { lexicon, npcs, topics } from "../public/data/content.js";
+import { scenes } from "../public/game/world.js";
 
 test("save revisions reject overwrites; pairing is single-use and shares identity", () => {
   const store = new Store(":memory:");
@@ -35,7 +36,10 @@ test("save revisions reject overwrites; pairing is single-use and shares identit
 });
 test("save refuses invalid geometry, settings and duplicate discoveries", () => {
   assert.throws(() =>
-    validateState({ ...newState(), position: { x: 850*.9, y: 1400*.9 } }),
+    validateState({
+      ...newState(),
+      position: { x: scenes.shanghai.marketPlate.x + 45, y: 1400 * 0.9 },
+    }),
   );
   assert.throws(() =>
     validateState({ ...newState(), found: ["momo", "momo"] }),

@@ -581,6 +581,7 @@ export class World {
           seat: this.seat,
           adventure: this.getAdventure(),
           route: this.route,
+          interactionTarget: this.pendingInteraction,
           pandaMoving,
           settings,
           found,

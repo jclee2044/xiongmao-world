@@ -171,3 +171,36 @@ Added a medium-large lantern-lit wooden passenger boat in the bottom-right canal
 The watercolor sprite was generated with the built-in image tool, referenced from the market painting; its exact prompt and saved path are in `art/prompts/suzhou-passenger-boat.json`. It gently bobs when motion is enabled and is cached offline.
 
 Validation: all 66 unit/API tests passed; navigation tests, syntax and diff checks passed after the direction entry was added. `scripts/browser-boat.js` passed click-to-walk, Space interaction, 0/499 XP locks, exact-500 boarding, the departure goal and a return to the same dock. The final 0.9.0-4 cache passed offline exploration, reconnect, pairing and conflict recovery. The local service was restarted for the updated map guidance.
+
+## 2026-10-06 — Expanded market and visible grounds
+
+- Market v4 uses a higher orthographic view at its native 3:2 aspect, a 2764.8 × 1843.2 pre-scale footprint, re-traced canals/stalls, generous walking circuits and comparable bridge deck widths. A shared coordinate transform moves exterior streets while preserving actor/building proportions. Southern canal edges are parallel; its apron and promenade are wider.
+- Six exterior walled grounds represent the bamboo grove, gardens and courtyards; shifted doors retain their exact room returns. Bamboo is confined to its land enclosure. Map version 9 migrates old positions safely without losing progress.
+- Xiaoyu has a persistent two-step flower-shop directions quest with hints and a single 40 XP completion reward. Uncle Zhou opens with 常在河边站，哪有不湿鞋 and a basic-Chinese explanation. Ground route rings are cream; interaction routes remain blue.
+- Built-in image generation provenance: `art/prompts/v0.9-market-expansion.json`. Browser evidence: `scripts/browser-market-review.js` and `scripts/browser-town-expansion.js`.
+
+Validation for this pass: all 71 unit/API tests pass, including every destination's routes at three frame rates, the market walking circuit, exterior gate approaches, and quest state merging. Syntax and whitespace checks pass. Chromium checks pass for the new quest (wrong choices, hints, partial reload, completion and no repeat XP), the canal saying, both marker colors, all five shops, the two earlier directions quests, boat boarding/return, and offline/reconnect/pairing/conflict recovery. Layout screenshots are in `test-results/market-*.png` and `test-results/enclosure-*.png`.
+
+## Organic market revision — 2026-10-06
+
+Replaced the oversized open market with a transparent, complete Suzhou district based on the user's street references: connected L-shaped shophouses, Chinese signs, a bending main lane, a wide west cross alley and a waterfront loop. The market retains a compact 2203 × 1469 footprint within the 3607 × 3341 town. The north buildings sit closer to the edge; no additional blank plaza was added. Traced shop/canal collision, vendor approaches, clickable facades, visitor routes and old-save relocation match the final artwork (map version 11).
+
+All town bridges now show whole arches and masonry parapets. The northern market bridge ends at the canal and reaches the lane by paving, clear of the roofs. One continuous native canal supplies shared water outside the market's opaque quay; a complete boat and rooted willow replace the old clipped/faded objects. The original south promenade, enclosed yards, flower-directions quest, beginner idiom explanation and cream/blue destination markers remain. Exact ImageGen prompts are recorded in `art/prompts/organic-market.json` and `art/prompts/stone-bridges.json`; the final assets are included in the offline shell.
+
+Validation: 73 unit/API checks passed; isolated Chromium passed all five shops/purchases/mobile shop UI, flower quest hints/retry/partial reload/single reward, canal idiom, cream ground/blue interaction markers, transparent perimeter inspection, and offline/reconnect/pairing/conflict preservation. Syntax and whitespace checks passed. In-game market north/street/west/south edge screenshots were reviewed in `test-results/`. Physical-phone visual/performance review remains unverified.
+
+West bridge material follow-up: its deck now samples the market lane’s own stone colors, wear and moss joints, with continuous texture boundaries. The complete arch and parapets remain. Verified the isolated west-bridge browser preview and JavaScript syntax; walking geometry is unchanged. Offline shell bumped to organic-market-5.
+
+West crossing geometry follow-up: widened the canal locally by 54 world units with tapered north/south transitions. The adjacent yard wall retreats by the same amount, preserving the bank lane; its strolling neighbor now follows that lane. The bridge’s market end stops at the quay before both stairways, with a narrow coping threshold and paving aligned to the market’s vertical stone courses. Map version 12 preserves learner progress while relocating outdated positions safely. All 73 unit/API checks, the targeted browser preview, syntax and whitespace checks passed; added route assertions cover both stair landings and the west-bank lane. Offline shell: organic-market-6.
+
+## 2026-10-06 — Single music player, western bank and bamboo courtyard
+
+Music now waits for the saved scene to finish opening, reuses one media element across room changes, and disposes the previous audio graph if the app is initialized again in the same page. A focused browser regression counts active players through startup, twelve rapid scene changes, and replacement initialization; playback never exceeds one music element. The existing real-audio suite also passes playback/looping, mute, speech ducking, offline recording and synthesis fallback, pending requests and saved mute restoration.
+
+Expanded the western bank by 168 final world units while preserving the connected market as one undistorted block. The western canal lane is wider, the stationary western boat has been removed, and eight additional pear, bayberry and orange trees fill the southwest orchard. Map version 13 translates existing town positions with the layout while retaining progress.
+
+The former garden is now 竹林小院. Its entire town-view enclosure is solid and the door leads into the smaller courtyard. Both views show bamboo within walls; the interior now has matching side/front walls and a centered moon gate, with planting kept behind the boundary and the entrance clear of strolling visitors. Both the main duck pond and courtyard pond have mossy limestone outcrops, bank planting and small animated cascades. The duck swimming lanes remain open and reduced-motion settings freeze waterfall and ripple animation.
+
+Validation: all 74 unit/API tests pass, including reachable destinations, traversable routes, duck motion, solid courtyard entry and bamboo placement. The dedicated browser lifecycle/entry/return regression passes; screenshots of the widened bank, orchard, both ponds and courtyard boundaries were reviewed. Syntax and diff checks pass. Offline cache version: ponds-grove-audio-9.
+
+The offline browser regression also passes with the new pond module precached: exploration/local saves, reconnect, independent-device pairing, conflict preservation and interrupted-save recovery, with no browser errors.

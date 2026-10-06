@@ -1,3 +1,4 @@
+import { marketLayoutPoint, westBankX } from "../public/data/town-layout.js";
 import { Store } from "../server/store.js";
 import { createApp } from "../server/index.js";
 import { chromium } from "playwright";
@@ -46,16 +47,72 @@ async function seed(scene, position, adventure = {}) {
 }
 try {
   for (const [name, x, y] of [
+    ["market-street", 1850, 1600],
     ["market-north", 1850, 1050],
     ["market-east", 2840, 1900],
     ["market-south", 2250, 2160],
-    ["market-west-bridge", 730, 1185],
+    ["market-west-bridge", 730, 1570],
+    ["market-west-water", 650, 1450],
+    ["market-southwest", 1080, 2170],
+    ["market-northeast", 2790, 1080],
     ["tangerine-corner", 490, 2640],
-    ["bamboo-grove", 2910, 420],
   ]) {
-    await seed("shanghai", { x: x * 0.9, y: y * 0.9 });
+    if (process.env.REVIEW_ONLY && process.env.REVIEW_ONLY !== name) continue;
+    const p = marketLayoutPoint(x, y);
+    await seed("shanghai", { x: westBankX(p.x) * 0.9, y: p.y * 0.9 });
     await page.screenshot({ path: `test-results/${name}.png` });
   }
+  for (const id of [
+    "bamboo-grove",
+    "garden",
+    "classical-garden",
+    "neighbors-south",
+  ]) {
+    if (process.env.REVIEW_ONLY) continue;
+    await seed(
+      "shanghai",
+      interactionPoint(scenes.shanghai.interactables.find((o) => o.id === id)),
+    );
+    await page.screenshot({ path: `test-results/enclosure-${id}.png` });
+  }
+  const atlas = await page.evaluate(async () => {
+    const img = new Image();
+    img.src = "/assets/world/market-rows.png";
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const alpha = (x, y) => ctx.getImageData(x, y, 1, 1).data[3];
+    return {
+      width: img.width,
+      height: img.height,
+      empty: [
+        [0, 0],
+        [0, 430],
+        [50, 430],
+        [1535, 800],
+      ].map(([x, y]) => alpha(x, y)),
+      stall: [
+        [400, 150],
+        [1000, 180],
+        [550, 650],
+        [1280, 480],
+        [1200, 780],
+      ].map(([x, y]) => alpha(x, y)),
+    };
+  });
+  assert.equal(atlas.width, 1536);
+  assert.equal(atlas.height, 1024);
+  assert.ok(
+    atlas.empty.every((alpha) => alpha === 0),
+    "Outside water and district edges are transparent",
+  );
+  assert.ok(
+    atlas.stall.every((alpha) => alpha > 240),
+    "Stall artwork remains fully opaque",
+  );
   assert.deepEqual(errors, []);
   console.log("Market edge, tangerine corner and bamboo screenshots captured.");
 } finally {

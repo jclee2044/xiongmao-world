@@ -1,0 +1,10 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "prompt": "Use case: stylized-concept\nAsset type: transparent standing NPC sprite atlas for a cozy Suzhou watercolor game.\nInput image 1 is a STYLE reference only. Create TWO NEW distinct women who do not copy any reference identity. Match soft storybook watercolor, thin brown outlines, friendly faces, slightly big heads and compact full-body proportions. One row with TWO EQUAL rectangular cells. One complete isolated standing person per cell, same apparent height, feet aligned, generous transparent gutters around each figure, head and shoes entirely in frame. Neutral three-quarter view facing right with feet planted. Genuinely transparent background, no floor or cast shadows.\nLEFT: Axiang, a young female osmanthus-snack seller, dark black hair in two small side buns, a coral-red blouse with rolled sleeves, pale blue long apron over dark brown trousers, cream cloth shoes, holding a small bamboo pastry basket at waist level. Clearly different from the existing brown-haired sage-clad tea host.\nRIGHT: a Suzhou embroidery artisan, mature woman with salt-and-pepper hair neatly pinned up with a simple wooden hairpin, dusty mauve traditional blouse, long deep-plum skirt, grey cloth shoes, holding a ROUND embroidered hand fan decorated with a tiny flower at waist height. Clearly different from the ponytailed teal-shirt artist.\nConstraints: EXACTLY two people, full bodies, distinct faces, outfits and hairstyles, no repeated figures, no labels, no scenery, no watermark. Preserve real alpha transparency.",
+  "referenced_image_paths": [
+    "/home/jlrj/Documents/lotus/public/assets/characters/neighbors.webp"
+  ],
+  "transparent_background": true,
+  "source": "/home/jlrj/.codex/generated_images/01a110f1-9149-7751-a330-5190cbac08c4/exec-a6a7c574-8f76-4053-b1a7-32c474dc34af.png",
+  "saved_asset": "public/assets/characters/market-npcs.png"
+}

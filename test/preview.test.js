@@ -52,7 +52,7 @@ test("local preview ports load and save while foreign hosts and origins stay blo
       host === "private.example.test" ? `https://${host}` : `http://${host}`;
     const page = await fetchWithHost(base, { headers: { Host: host } });
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Wander with Panda/);
+    assert.match(await page.text(), /和熊猫一起走走/);
     const response = await fetchWithHost(`${base}/api/state`, {
       headers: { Host: host },
     });

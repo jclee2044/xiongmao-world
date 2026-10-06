@@ -1,6 +1,6 @@
 export const shops = {
   breakfast: {
-    name: "早饭铺 · Breakfast",
+    name: "早饭铺",
     seller: "baker",
     greeting: "早上好！包子三元一个，葱油饼五元一个。你想吃什么？",
     pinyin: "Zǎoshang hǎo! Bāozi sān yuán yí ge, cōngyóubǐng wǔ yuán yí ge. Nǐ xiǎng chī shénme?",
@@ -16,7 +16,7 @@ export const shops = {
     ],
   },
   snacks: {
-    name: "点心铺 · Sweets",
+    name: "点心铺",
     seller: "snack-host",
     greeting: "桂花糕五元一块，芝麻饼四元一个。要尝尝吗？",
     pinyin: "Guìhuāgāo wǔ yuán yí kuài, zhīmabǐng sì yuán yí ge. Yào chángchang ma?",
@@ -38,7 +38,7 @@ export const shops = {
     ],
   },
   souvenirs: {
-    name: "小礼物 · Souvenirs",
+    name: "小礼物",
     seller: "silk-host",
     greeting: "团扇十二元一把，明信片两元一张。你喜欢哪一个？",
     pinyin: "Tuánshàn shí èr yuán yì bǎ, míngxìnpiàn liǎng yuán yì zhāng. Nǐ xǐhuan nǎ yí ge?",
@@ -54,7 +54,7 @@ export const shops = {
     ],
   },
   produce: {
-    name: "水果摊 · Produce",
+    name: "水果摊",
     seller: "wei",
     greeting: "橘子很甜！两个四元。梨三元一个。你想买几个？",
     pinyin: "Júzi hěn tián! Liǎng ge sì yuán. Lí sān yuán yí ge. Nǐ xiǎng mǎi jǐ ge?",
@@ -70,7 +70,7 @@ export const shops = {
     ],
   },
   streetfood: {
-    name: "河边小吃 · Street food",
+    name: "河边小吃",
     seller: "waiter",
     greeting: "热面八元一碗，糖葫芦六元一串。想吃什么？",
     pinyin: "Rè miàn bā yuán yì wǎn, tánghúlu liù yuán yí chuàn. Xiǎng chī shénme?",

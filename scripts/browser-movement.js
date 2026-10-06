@@ -89,8 +89,8 @@ try {
   await page.locator("#reply").fill("wasd");
   await page.waitForTimeout(200);
   assert.deepEqual(await pos(), before, "Typing does not move avatar");
-  await page.getByRole("button", { name: "Close conversation" }).click();
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "结束聊天" }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
   );
@@ -145,7 +145,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   const touchBefore = await pos(),
     box = await page
-      .getByRole("button", { name: "Walk right", exact: true })
+      .getByRole("button", { name: "向右走", exact: true })
       .boundingBox();
   await page.mouse.move(box.x + 20, box.y + 20);
   await page.mouse.down();
@@ -167,7 +167,7 @@ try {
   await page.setViewportSize({ width: 844, height: 390 });
   await page.screenshot({ path: "test-results/stage-1-landscape.png" });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await walkToStop(page, "qiao");
   const qiao = scenes.shanghai.interactables.find((o) => o.id === "qiao"),
     qiaoApproach = interactionPoint(qiao);

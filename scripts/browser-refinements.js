@@ -55,7 +55,7 @@ async function clickWorld(x, y) {
   );
 }
 async function worldStop(id) {
-  await page.getByRole("button", { name: "Map", exact: true }).click();
+  await page.getByRole("button", { name: "地图", exact: true }).click();
   await page.locator(`[data-map-stop="${id}"]`).click();
 }
 const cached = () =>
@@ -114,7 +114,7 @@ try {
   await page.locator("#coach-question").fill("Why is 吗 at the end?");
   await page.click("#coach-send");
   await page.waitForFunction(() =>
-    document.querySelector("#coach-tip").textContent.includes("yes/no"),
+    document.querySelector("#coach-tip").textContent.includes("句子后面加“吗”"),
   );
   assert.ok((await page.locator(".coach-portrait").boundingBox()).width <= 130);
   await page.waitForTimeout(400);
@@ -141,7 +141,7 @@ try {
   );
   assert.match(
     await page.locator("#panel-title").innerText(),
-    /Seated with Lian/,
+    /和莲一起吃火锅/,
   );
   await page.waitForTimeout(400);
   await page.screenshot({ path: "test-results/refined-seated-hotpot.png" });
@@ -160,7 +160,7 @@ try {
   await page.waitForFunction(
     () => !document.querySelector("#world").dataset.seated,
   );
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("#world").dataset.scene === "home",
     {},

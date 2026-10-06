@@ -18,6 +18,7 @@ function asset(path) {
   return images.get(path);
 }
 const paths = {
+  bridges: "/assets/world/stone-bridges.png",
   boat: "/assets/world/suzhou-passenger-boat.png",
   water: "/assets/world/canal-water-v2.png",
   lian: "/assets/characters/lian-poses.png",
@@ -30,8 +31,9 @@ const paths = {
   panda: "/assets/characters/panda-v2.png",
   qiaoSeated: "/assets/characters/qiao-seated.png",
   neighborWalk: "/assets/characters/neighbors-walk-v2.png",
+  visitorWalk: "/assets/characters/visitors-walk.png",
   children: "/assets/characters/children-walk.png",
-  market: "/assets/world/market-lane-v3.png",
+  market: "/assets/world/market-rows.png",
   restaurant: "/assets/world/restaurant-interior-v3.png",
   player: "/assets/characters/player-atlas.webp",
   mei: "/assets/characters/mei.webp",
@@ -45,6 +47,8 @@ const paths = {
   house: "/assets/world/house.webp",
   tree: "/assets/world/willow.webp",
   neighbors: "/assets/characters/neighbors.webp",
+  indoorNpcs: "/assets/characters/indoor-npcs.png",
+  marketNpcs: "/assets/characters/market-npcs.png",
   walk: "/assets/characters/player-walk-v2.png",
   props: "/assets/world/props.webp",
   storefronts: "/assets/world/storefronts.webp",
@@ -77,9 +81,13 @@ export async function prepareArt(scene) {
     "momo",
     "walk",
     "neighbors",
+    "indoorNpcs",
+    "marketNpcs",
     "neighborWalk",
+    "visitorWalk",
     "children",
     "market",
+    "bridges",
     "restaurant",
     "qiaoSeated",
     "props",
@@ -155,10 +163,14 @@ function atlasCrop(name, col, row, columns, rows) {
         ? [0, 260, 525, 780, 1040, 1282, 1536].map(
             (n) => (n * img.naturalHeight) / 1536,
           )
-        : Array.from(
-            { length: rows + 1 },
-            (_, i) => (i * img.naturalHeight) / rows,
-          );
+        : name === "visitorWalk"
+          ? [0, 260, 510, 768, 1024, 1280, 1536].map(
+              (n) => (n * img.naturalHeight) / 1536,
+            )
+          : Array.from(
+              { length: rows + 1 },
+              (_, i) => (i * img.naturalHeight) / rows,
+            );
   const x = Math.floor(xs[col]),
     y = Math.floor(ys[row]);
   const w = Math.floor(xs[col + 1]) - x,
@@ -281,6 +293,110 @@ function festivalLanterns(ctx, rack, time, motion) {
   ctx.fillText("猜灯谜", 0, -7);
   ctx.restore();
 }
+function pondDecor(ctx, o, time, animate) {
+  ctx.save();
+  ctx.translate(o.x, o.y);
+  // Low waterline rings settle the stones into the pond.
+  for (let i = 0; i < 3; i++) {
+    const phase = animate ? (time * 0.28 + i / 3) % 1 : i / 3;
+    ctx.strokeStyle = `rgba(218,237,210,${0.35 * (1 - phase)})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(
+      0,
+      1,
+      o.h * (0.35 + phase * 0.35),
+      5 + phase * 12,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    ctx.stroke();
+  }
+  const waterfall = o.type === "pond-waterfall";
+  sprite(ctx, "landmarks", waterfall ? -o.w * 0.18 : 0, 0, o.h, {
+    crop: bounds.landmarks.rockery,
+  });
+  if (waterfall) {
+    sprite(ctx, "landmarks", o.w * 0.32, 5, o.h * 0.57, {
+      crop: bounds.landmarks.rockery,
+      flip: true,
+    });
+    const top = -o.h * 0.68,
+      bottom = -3,
+      width = o.w * 0.16;
+    const flow = ctx.createLinearGradient(0, top, 0, bottom);
+    flow.addColorStop(0, "#c9e0ce");
+    flow.addColorStop(0.5, "#8dc4bdcc");
+    flow.addColorStop(1, "#e0eddb");
+    ctx.fillStyle = flow;
+    ctx.beginPath();
+    ctx.moveTo(-width * 0.45, top);
+    ctx.bezierCurveTo(
+      -width * 0.8,
+      top + 20,
+      -width * 0.1,
+      bottom - 25,
+      -width,
+      bottom,
+    );
+    ctx.quadraticCurveTo(0, bottom + 8, width, bottom);
+    ctx.bezierCurveTo(
+      width * 0.1,
+      bottom - 30,
+      width * 0.8,
+      top + 15,
+      width * 0.45,
+      top,
+    );
+    ctx.closePath();
+    ctx.fill();
+    ctx.lineCap = "round";
+    for (let i = 0; i < 9; i++) {
+      const phase = animate ? (time * 0.85 + i * 0.137) % 1 : i / 9;
+      const x = Math.sin(i * 5) * width * 0.45;
+      const y = top + phase * (bottom - top - 14);
+      ctx.strokeStyle = i % 2 ? "#eef5dfa6" : "#f7f8e77a";
+      ctx.lineWidth = 1 + (i % 3);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x - 2, y + 7, x + 1, y + 14);
+      ctx.stroke();
+    }
+    for (let i = 0; i < 7; i++) {
+      ctx.fillStyle = i % 2 ? "#e4edceb3" : "#c7e6d099";
+      ctx.beginPath();
+      ctx.ellipse(
+        Math.sin(i * 3) * width,
+        bottom + (i % 3) * 2,
+        5 + (i % 3),
+        2,
+        0,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+    }
+  }
+  // Moss at the damp bases ties the illustrated limestone into the bank.
+  for (let i = 0; i < 10; i++) {
+    const x = Math.sin(i * 2.3) * o.h * 0.29;
+    if (waterfall && Math.abs(x) < o.w * 0.19) continue;
+    ctx.fillStyle = ["#607b4599", "#9faa5b99", "#bdc17780"][i % 3];
+    ctx.beginPath();
+    ctx.ellipse(
+      x,
+      -5 - (i % 3) * 4,
+      4 + (i % 5),
+      2 + (i % 3),
+      i,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.restore();
+}
 function sprite(
   ctx,
   name,
@@ -367,6 +483,7 @@ export function draw(
     found = false,
     near = null,
     route = [],
+    interactionTarget = null,
   } = {},
 ) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2),
@@ -427,6 +544,8 @@ export function draw(
         animate,
         earth,
         water: waterPattern,
+        bridges: asset(paths.bridges),
+        market: asset(paths.market),
       });
     }
     if (scene.landmark && plateVisible(scene.landmark, view)) {
@@ -439,35 +558,6 @@ export function draw(
           scene.landmark.w,
           scene.landmark.h,
         );
-    }
-  }
-  if (scene.marketPlate) {
-    const p = scene.marketPlate,
-      img = asset(p.path);
-    if (ready(img)) {
-      // Continue water below the painting's feathered edge, instead of exposing earth.
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(p.x, p.y, p.w, p.h);
-      ctx.clip();
-      for (const canal of scene.canals.filter((c) => c.painted)) {
-        ctx.beginPath();
-        canal.polygon.forEach(([x, y], i) =>
-          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y),
-        );
-        ctx.closePath();
-        ctx.fillStyle = waterPattern || "#438e94";
-        ctx.fill();
-      }
-      // Bridge approaches also continue underneath the feathered painting.
-      // Otherwise the water underlay would hide the western bridge's first steps.
-      ctx.fillStyle = groundPattern;
-      for (const bridge of scene.bridges.filter((b) => b.connector)) {
-        const c = bridge.connector;
-        ctx.fillRect(c.x, c.y, c.w, c.h);
-      }
-      ctx.restore();
-      ctx.drawImage(blendedPlate(img, true), p.x, p.y, p.w, p.h);
     }
   }
   const playerHeight =
@@ -509,7 +599,35 @@ export function draw(
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
   for (const o of entities) {
-    if (o.type === "garden-wall") {
+    if (o.type === "pond-rock" || o.type === "pond-waterfall") {
+      pondDecor(ctx, o, time, animate);
+    } else if (o.type === "canal-boat") {
+      sprite(
+        ctx,
+        "boat",
+        o.x,
+        o.y + (animate ? Math.sin(time * 0.8) * 1.3 : 0),
+        o.h,
+        {
+          crop: atlasCrop("boat", 0, 0, 1, 1),
+        },
+      );
+    } else if (o.type === "garden-wall-side") {
+      const top = o.y - o.h,
+        height = o.wallHeight;
+      ctx.fillStyle = "#c9bea3";
+      ctx.fillRect(o.x, top - height, o.w, o.h + height);
+      ctx.fillStyle = "#535b52";
+      ctx.fillRect(o.x - 4, top - height, o.w + 8, o.h);
+      ctx.strokeStyle = "#899187";
+      ctx.lineWidth = 2;
+      for (let y = top - height; y < o.y - height; y += 18) {
+        ctx.beginPath();
+        ctx.moveTo(o.x - 4, y);
+        ctx.lineTo(o.x + o.w + 4, y);
+        ctx.stroke();
+      }
+    } else if (o.type === "garden-wall") {
       ctx.fillStyle = "#746a5799";
       ctx.fillRect(o.x - o.w / 2 + 8, o.y - 8, o.w, 22);
       const plaster = ctx.createLinearGradient(0, o.y - o.h, 0, o.y);
@@ -527,7 +645,9 @@ export function draw(
         ctx.lineTo(x - 4, o.y - o.h + 7);
         ctx.stroke();
       }
-      for (const dx of [-420, -210, 210, 420]) {
+      for (const dx of [-420, -210, 0, 210, 420].filter(
+        (dx) => Math.abs(dx) + 40 < o.w / 2,
+      )) {
         ctx.strokeStyle = "#867a65";
         ctx.lineWidth = 7;
         ctx.strokeRect(o.x + dx - 31, o.y - 91, 62, 62);
@@ -568,7 +688,9 @@ export function draw(
       ctx.strokeStyle = "#43342b";
       ctx.fillStyle = "#fff9e9";
       const label =
-        adventure.xp >= AREA_XP ? "游船 · 可以出发了" : `游船 · ${AREA_XP} XP`;
+        adventure.xp >= AREA_XP
+          ? "游船 · 可以出发了"
+          : `游船 · ${AREA_XP} 经验`;
       ctx.strokeText(label, o.x, o.y - o.h - 18);
       ctx.fillText(label, o.x, o.y - o.h - 18);
       ctx.restore();
@@ -714,14 +836,19 @@ export function draw(
     } else if (o.type === "passerby" || o.type === "guest") {
       shadow(ctx, o.x, o.y, 25);
       const child = ["kid-one", "kid-two"].includes(o.id);
+      const visitor = o.id.startsWith("visitor-");
       const row = child
         ? Number(o.id === "kid-two")
-        : ["qiao", "bo", "lan", "wei", "an", "hao"].indexOf(o.appearance);
+        : visitor
+          ? Number(o.id.slice(8))
+          : ["qiao", "bo", "lan", "wei", "an", "hao"].indexOf(o.appearance);
       const atlas = child
         ? "children"
-        : o.id === "lin"
-          ? "linWalk"
-          : "neighborWalk";
+        : visitor
+          ? "visitorWalk"
+          : o.id === "lin"
+            ? "linWalk"
+            : "neighborWalk";
       const col = o.moving ? Math.floor(o.distance / 18) % 4 : 1;
       const crop = atlasCrop(
         atlas,
@@ -806,15 +933,23 @@ export function draw(
     } else if (o.type === "npc") {
       if (!o.painted && o.id !== "mei") shadow(ctx, o.x, o.y, 30);
       const neighbor = bounds.neighbors?.[o.appearance || o.id];
+      const indoorNpc = bounds.indoorNpcs?.[o.appearance || o.id];
+      const marketNpc = bounds.marketNpcs?.[o.appearance || o.id];
       if (!o.painted)
         sprite(
           ctx,
-          neighbor ? "neighbors" : o.id,
+          marketNpc
+            ? "marketNpcs"
+            : indoorNpc
+              ? "indoorNpcs"
+              : neighbor
+                ? "neighbors"
+                : o.id,
           o.artX ?? o.x,
           o.artY ?? o.y,
           o.artHeight || actorSizes[o.id],
           {
-            crop: neighbor,
+            crop: marketNpc || indoorNpc || neighbor,
             breathe: animate ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
             highlight: Boolean(o.id && hover?.id === o.id),
           },
@@ -956,8 +1091,8 @@ export function draw(
   const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);
   if (route.length) {
     const end = route.at(-1);
-    ctx.strokeStyle = "#429de1";
-    ctx.fillStyle = "#62baff44";
+    ctx.strokeStyle = interactionTarget ? "#429de1" : "#fff0cd";
+    ctx.fillStyle = interactionTarget ? "#62baff44" : "#fff0cd66";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.ellipse(end.x, end.y, 18, 7, 0, 0, Math.PI * 2);

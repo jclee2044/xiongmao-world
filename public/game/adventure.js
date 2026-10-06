@@ -242,8 +242,8 @@ export function createAdventure({
       const receipt = document.createElement("p");
       receipt.className = "notice";
       receipt.textContent = bought
-        ? `✓ ${o.item} · In your travel bag. ¥${a.coins} remaining`
-        : `¥${a.coins} in your purse`;
+        ? `✓ ${o.item} · 已经放进包里了。还剩 ${a.coins} 元`
+        : `还有 ${a.coins} 元`;
       $("panel-content").append(receipt);
       return true;
     }
@@ -302,7 +302,7 @@ export function createAdventure({
     if (o.type === "gate") {
       const unlocked = state().xp >= AREA_XP;
       line(
-        "游船码头 · Departure boat",
+        "游船码头",
         unlocked
           ? "经验满了！上船吧，我们去下一站。"
           : `还差${AREA_XP - state().xp}点经验。先去聊聊天、帮帮朋友吧。船在这里等你！`,
@@ -314,7 +314,7 @@ export function createAdventure({
           ? [
               [
                 "enter-next",
-                "上船出发 · Board the boat",
+                "上船出发",
                 () => {
                   // Re-check at boarding, including after a save conflict or state refresh.
                   if (state().xp < AREA_XP) return interact(o);
@@ -329,7 +329,7 @@ export function createAdventure({
       );
       $("panel-content").insertAdjacentHTML(
         "afterbegin",
-        `<img class="departure-portrait" src="/assets/world/suzhou-passenger-boat.png" alt="A covered wooden Suzhou passenger boat with red lanterns"/><p class="departure-progress">${Math.min(AREA_XP, state().xp)} / ${AREA_XP} XP · ${unlocked ? "Ready to sail" : `${AREA_XP - state().xp} XP to go`}</p><progress class="departure-meter" max="${AREA_XP}" value="${Math.min(AREA_XP, state().xp)}" aria-label="Departure experience"></progress>`,
+        `<img class="departure-portrait" src="/assets/world/suzhou-passenger-boat.png" alt="挂着红灯笼的苏州游船"/><p class="departure-progress">${Math.min(AREA_XP, state().xp)} / ${AREA_XP} 经验 · ${unlocked ? "可以出发了" : `还差 ${AREA_XP - state().xp} 经验`}</p><progress class="departure-meter" max="${AREA_XP}" value="${Math.min(AREA_XP, state().xp)}" aria-label="上船需要的经验"></progress>`,
       );
       return true;
     }
@@ -354,8 +354,8 @@ export function createAdventure({
     close();
     const chosen = hotpotItems.filter((i) => meal.selected.includes(i.id));
     openPanel(
-      meal.withLian ? "和莲一起吃火锅 · Seated with Lian" : "河畔火锅",
-      `${meal.withLian ? '<div class="meal-friend"><span class="seated-lian" role="img" aria-label="Lian sitting across the table"></span><p class="chinese">我们一起吃吧！</p></div>' : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">河畔面馆</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<output id="food-name" aria-live="polite"></output><div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="Your bowl">${meal.eaten.length ? "吃过 " + meal.eaten.length + " 口" : "我的碗"}</div></div><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
+      meal.withLian ? "和莲一起吃火锅" : "河畔火锅",
+      `${meal.withLian ? '<div class="meal-friend"><span class="seated-lian" role="img" aria-label="莲坐在桌子对面"></span><p class="chinese">我们一起吃吧！</p></div>' : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">河畔面馆</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<output id="food-name" aria-live="polite"></output><div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="我的碗">${meal.eaten.length ? "吃过 " + meal.eaten.length + " 口" : "我的碗"}</div></div><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
     );
     document.querySelectorAll("[data-learn-food]").forEach(
       (b) =>
@@ -478,12 +478,12 @@ export function createAdventure({
       );
     } else {
       work.innerHTML = meal.gift
-        ? `<div class="gift-reward"><img src="/assets/world/sheep-gift.png" alt="A stuffed sheep from Lian" />${text("谢谢你请我吃火锅！这只小羊送给你。", "Xièxie nǐ qǐng wǒ chī huǒguō! Zhè zhī xiǎoyáng sòng gěi nǐ.", "Thank you for treating me to hotpot! This little sheep is for you.")}<p class="notice">Panda: We can keep it at our house. It will remember this meal with Lian.</p><button id="gift-thanks">谢谢你，莲！</button><p class="xp-award">Sheep keepsake · Saved at home · +85 XP</p></div>`
+        ? `<div class="gift-reward"><img src="/assets/world/sheep-gift.png" alt="莲送的小羊" />${text("谢谢你请我吃火锅！这只小羊送给你。", "Xièxie nǐ qǐng wǒ chī huǒguō! Zhè zhī xiǎoyáng sòng gěi nǐ.", "Thank you for treating me to hotpot! This little sheep is for you.")}<p class="notice">熊猫：把小羊放在家里吧。看到它，就会想起和莲一起吃饭的这一天。</p><button id="gift-thanks">谢谢你，莲！</button><p class="xp-award">小羊放在家里了 · +85 经验</p></div>`
         : text(
             "吃饱了！真好吃。",
             "Chī bǎo le! Zhēn hǎochī.",
             "I am full! That was delicious.",
-          ) + '<p class="xp-award">+25 XP</p>';
+          ) + '<p class="xp-award">+25 经验</p>';
       if (meal.gift) {
         speech.speak("谢谢你请我吃火锅！这只小羊送给你。", false, "female");
         $("gift-thanks").onclick = () => {

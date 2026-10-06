@@ -35,11 +35,11 @@ try {
     } catch {}
   });
   await page.locator("#reply").fill("你好");
-  await page.getByRole("button", { name: "Send" }).click();
+  await page.getByRole("button", { name: "说 ↗" }).click();
   await page.locator("#reply").press("Enter");
   await page.waitForTimeout(100);
   assert.equal(calls, 1, "Repeated submit is suppressed");
-  await page.getByRole("button", { name: "Close conversation" }).click();
+  await page.getByRole("button", { name: "结束聊天" }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.paused === "false",
   );

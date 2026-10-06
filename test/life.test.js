@@ -2,6 +2,24 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { scenes, canStand, pointInPolygon } from "../public/game/world.js";
 import { lifeActors } from "../public/game/life.js";
+test("every outdoor neighbor and walker has a distinct sprite identity as they move", () => {
+  const scene = structuredClone(scenes.shanghai);
+  const movingIds = ["lin", "kid-one", "kid-two"];
+  const neighbors = scene.interactables.filter(
+    (o) => o.type === "npc" && !movingIds.includes(o.id),
+  );
+  for (let frame = 0; frame <= 1200; frame++) {
+    const walkers = lifeActors(scene, frame * 0.15, { x: 100, y: 100 }).filter(
+      (o) => o.type === "passerby",
+    );
+    const people = [...neighbors, ...walkers];
+    const identities = people.map((o) =>
+      movingIds.includes(o.id) ? o.id : o.appearance || o.id,
+    );
+    assert.equal(new Set(identities).size, people.length, `Frame ${frame}`);
+    assert.equal(walkers.filter((o) => o.id.startsWith("visitor-")).length, 6);
+  }
+});
 
 test("animals and strolling visitors remain within their water or walking boundaries", () => {
   const scene = structuredClone(scenes.shanghai),

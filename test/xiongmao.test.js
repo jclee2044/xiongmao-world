@@ -87,9 +87,7 @@ test("every public venue has hosts, real exits, and valid activities", () => {
   for (const s of Object.values(scenes))
     for (const o of s.interactables)
       if (o.type === "practice") assert.ok(activityById[o.activity], o.id);
-  const market = scenes.shanghai.groundZones.find(
-    (z) => z.type === "courtyard",
-  );
+  const market = scenes.shanghai.marketPlate;
   assert.ok(
     (market.w * market.h) / (scenes.shanghai.width * scenes.shanghai.height) >
       0.19,

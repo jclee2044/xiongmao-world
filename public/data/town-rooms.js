@@ -1,4 +1,6 @@
+import { npcs } from "./content.js";
 import { museumObjects } from "./adventure.js";
+import { decoratePond } from "./ponds.js";
 export const townRooms = {
   restaurant: {
     id: "restaurant",
@@ -41,7 +43,7 @@ export const townRooms = {
       {
         id: "hotpot",
         type: "hotpot",
-        name: "吃火锅 · Hot pot",
+        name: "吃火锅",
         x: 865,
         y: 390,
       },
@@ -61,10 +63,10 @@ export const townRooms = {
         id: "restaurant-waiter",
         type: "npc",
         dialogueId: "waiter",
-        name: "小陈 · Waiter",
+        name: "小陈",
         x: 700,
         y: 390,
-        appearance: "hao",
+        appearance: "waiter",
         artHeight: 220,
       },
     ],
@@ -111,8 +113,8 @@ export const townRooms = {
         id: "museum-guide",
         dialogueId: "guide",
         type: "npc",
-        name: "小文 · Guide",
-        appearance: "an",
+        name: "小文",
+        appearance: "guide",
         artHeight: 215,
         x: 970,
         y: 485,
@@ -202,7 +204,7 @@ export const townRooms = {
         id: "shantang-host",
         dialogueId: "suyin",
         type: "npc",
-        name: "素音 · Suyin",
+        name: "素音",
         appearance: "qiao",
         artHeight: 230,
         x: 1400,
@@ -288,7 +290,7 @@ const roomPerson = (
   id,
   type: "npc",
   dialogueId,
-  name: dialogueId,
+  name: npcs[dialogueId].name,
   appearance,
   x,
   y,
@@ -316,14 +318,14 @@ townRooms.restaurant.interactables.push(
   {
     id: "hotpot-two",
     type: "hotpot",
-    name: "火锅桌 · Hotpot table",
+    name: "火锅桌",
     x: 340,
     y: 460,
   },
   {
     id: "hotpot-three",
     type: "hotpot",
-    name: "火锅桌 · Hotpot table",
+    name: "火锅桌",
     x: 390,
     y: 670,
   },
@@ -341,7 +343,7 @@ Object.assign(
   { x: 690, y: 405, artHeight: 175, bubbles: ["慢慢吃！", "需要加汤吗？"] },
 );
 townRooms.museum.interactables.push(
-  roomPerson("museum-reader", "reader", "bo", 300, 535, [
+  roomPerson("museum-reader", "reader", "reader", 300, 535, [
     "莲花碗真漂亮。",
     "这是什么颜色？",
   ]),
@@ -400,7 +402,7 @@ function gardenRoom(id, title, chinese, returnDoor, rocky = false) {
         type: "door",
         target: "shanghai",
         returnDoor,
-        name: "出门 · Outside",
+        name: "出门",
         x: 700,
         y: 900,
       },
@@ -450,8 +452,8 @@ townRooms["lion-grove"] = gardenRoom(
 );
 townRooms["humble-garden"] = gardenRoom(
   "humble-garden",
-  "Humble Administrator’s Garden",
-  "拙政园",
+  "Bamboo Grove Courtyard",
+  "竹林小院",
   "garden",
 );
 townRooms["tiger-court"] = gardenRoom(
@@ -485,7 +487,7 @@ for (const [id, title, chinese, returnDoor, host] of [
       roomPerson(
         `${id}-host`,
         host,
-        host === "suyin" ? "qiao" : "an",
+        host === "suyin" ? "qiao" : "silk-host",
         440,
         570,
         ["欢迎进来坐坐。", "你想了解什么？"],
@@ -501,7 +503,7 @@ townRooms["silk-room"].interactables.push({
   id: "silk-workbench",
   type: "practice",
   activity: "silk-workshop",
-  name: "苏绣配色 · Embroidery colors",
+  name: "苏绣配色",
   x: 680,
   y: 530,
 });
@@ -553,9 +555,36 @@ Object.assign(
   { x: 1080, y: 715 },
 );
 garden.scenery.push(
-  { type: "landmark", landmark: "moon-gate", x: 380, y: 810, w: 240, h: 230 },
+  { type: "landmark", landmark: "moon-gate", x: 700, y: 975, w: 240, h: 205 },
   { type: "nature", nature: "lotus-bank", x: 1080, y: 645, w: 260, h: 120 },
 );
+// The same dense bamboo planting is visible through the town enclosure.
+garden.scenery = garden.scenery.filter((o) => o.nature !== "bamboo" && o.type !== "tree");
+for (const [x, y, h] of [
+  [190, 425, 250], [360, 355, 185], [475, 335, 165],
+  [940, 320, 150], [1100, 320, 150], [1210, 390, 220],
+  [180, 600, 260], [305, 560, 260], [185, 815, 270], [330, 810, 250],
+  [485, 825, 195], [930, 825, 180], [1100, 830, 205], [1210, 815, 255],
+  [1215, 620, 250],
+]) garden.scenery.push({ type: "nature", nature: "bamboo", x, y, w: h * 288 / 350, h });
+garden.groundZones[0] = { type: "garden", x: 68, y: 145, w: 1264, h: 815 };
+garden.paths.push({ points: [[700, 840], [700, 945]], width: 140 });
+garden.strolls = [{ points: [[515, 680], [610, 720]], width: 100 }];
+for (const x of [50, 1332]) {
+  garden.scenery.push({ type: "garden-wall-side", x, y: 975, w: 18, h: 830, wallHeight: 105 });
+  garden.solids.push({ x, y: 145, w: 18, h: 830 });
+}
+for (const x of [315, 1085])
+  garden.scenery.push({ type: "garden-wall", x, y: 975, w: 530, h: 105 });
+garden.solids.push({ x: 50, y: 960, w: 1300, h: 20 });
+decoratePond(garden, pond, { quiet: true });
+Object.assign(garden.interactables.find((o) => o.id === "humble-garden-story"), {
+  name: "竹林小院",
+  zh: "这里有很多竹子。竹子又高又绿。听，风吹过竹叶，沙沙响。",
+  pinyin: "Zhèlǐ yǒu hěn duō zhúzi. Zhúzi yòu gāo yòu lǜ. Tīng, fēng chuīguò zhúyè, shāshā xiǎng.",
+  meaning: "There is lots of bamboo here. It is tall and green. Listen to the leaves rustling in the wind.",
+});
+garden.interactables.find((o) => o.id === "humble-garden-keeper").bubbles = ["这里都是竹子。", "听听竹叶的声音。"];
 const lion = townRooms["lion-grove"];
 lion.paths = [
   {
@@ -612,7 +641,6 @@ for (const id of [
 for (const [room, key] of [
   ["tiger-court", "tiger-hill"],
   ["lion-grove", "classical-garden"],
-  ["humble-garden", "classical-garden"],
 ])
   townRooms[room].interactables.find((o) => o.id === `${room}-story`).culture =
     key;
@@ -695,7 +723,7 @@ dining("hotpot-three", {
 restaurant.interactables.push({
   id: "hotpot-four",
   type: "hotpot",
-  name: "空桌 · An empty table",
+  name: "空桌",
   x: 880,
   y: 490,
   approachX: 900,

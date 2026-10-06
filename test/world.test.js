@@ -1,9 +1,15 @@
+import { marketLayoutPoint, westBankX } from "../public/data/town-layout.js";
+const townPoint = (x, y) => {
+  const p = marketLayoutPoint(x, y);
+  return { x: westBankX(p.x) * 0.9, y: p.y * 0.9 };
+};
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
   scenes,
   move,
   canStand,
+  pointInPolygon,
   nearest,
   upgradeState,
   MAP_VERSION,
@@ -13,6 +19,22 @@ import { pathTo } from "../public/game/pathfinding.js";
 import { Store, newState } from "../server/store.js";
 import { interiors } from "../public/data/interiors.js";
 import { activityById } from "../public/data/activities.js";
+import bounds from "../public/data/art-bounds.js";
+test("indoor NPCs have distinct appearances, including painted diners", () => {
+  const seenSprites = new Set();
+  for (const scene of Object.values(scenes).filter((s) => s.interior)) {
+    const people = scene.interactables.filter((o) => o.type === "npc");
+    const appearances = people.map((o) => o.appearance || o.id);
+    assert.equal(new Set(appearances).size, people.length, scene.id);
+    for (const person of people)
+      if (!person.painted && bounds.indoorNpcs[person.appearance])
+        seenSprites.add(person.appearance);
+  }
+  assert.deepEqual(
+    [...seenSprites].sort(),
+    Object.keys(bounds.indoorNpcs).sort(),
+  );
+});
 test("collision cannot tunnel through a building and allows sliding along walls", () => {
   const scene = {
     width: 1300,
@@ -79,10 +101,13 @@ test("cultural activity stations have clear approaches and festival posts stay b
 test("compact district keeps its destinations connected while giving the wider market room in a compact map", () => {
   const scene = scenes.shanghai;
   const ratio = (scene.width * scene.height) / (1300 * 1000);
-  assert.equal(scene.width, 3240);
-  assert.equal(scene.height, 2700);
-  assert.ok(ratio > 6.7 && ratio < 6.8);
-  assert.ok((scene.width * scene.height) / (4000 * 3300) < 0.83);
+  assert.ok(scene.width > 3700 && scene.width < 3900);
+  assert.ok(scene.height > 3300 && scene.height < 3400);
+  assert.ok(ratio > 9 && ratio < 10);
+  assert.ok(
+    (scene.marketPlate.w * scene.marketPlate.h) / (scene.width * scene.height) >
+      0.25,
+  );
   for (const destination of scene.interactables) {
     const target = interactionPoint(destination),
       route = pathTo(scene, scene.spawn, target);
@@ -108,12 +133,12 @@ test("compact district keeps its destinations connected while giving the wider m
     }
   }
   assert.equal(
-    canStand(scene, 850 * 0.9, 1400 * 0.9),
+    canStand(scene, ...Object.values(townPoint(850, 1400))),
     false,
     "Canal water is blocked",
   );
   assert.equal(
-    canStand(scene, 810, 2862),
+    canStand(scene, ...Object.values(townPoint(850, 2900))),
     false,
     "Water below bridge is blocked",
   );
@@ -122,29 +147,32 @@ test("narrow streets join sixteen neighbors, lake and varied gardens without cro
   const scene = scenes.shanghai;
   assert.equal(scene.interactables.filter((o) => o.type === "npc").length, 16);
   assert.ok(scene.paths.every((p) => p.width <= 175));
-  const approximatePavedArea = scene.paths.reduce(
-    (area, path) =>
-      area +
-      path.points
-        .slice(1)
-        .reduce(
-          (sum, point, i) =>
-            sum +
-            Math.hypot(
-              point[0] - path.points[i][0],
-              point[1] - path.points[i][1],
-            ) *
-              path.width,
-          0,
-        ),
-    0,
-  );
+  const approximatePavedArea = scene.paths
+    .filter((p) => !p.painted)
+    .reduce(
+      (area, path) =>
+        area +
+        path.points
+          .slice(1)
+          .reduce(
+            (sum, point, i) =>
+              sum +
+              Math.hypot(
+                point[0] - path.points[i][0],
+                point[1] - path.points[i][1],
+              ) *
+                path.width,
+            0,
+          ),
+      0,
+    );
   assert.ok(approximatePavedArea < scene.width * scene.height * 0.3);
   assert.ok(scene.groundZones.some((o) => o.type === "garden"));
-  assert.ok(scene.marketPlate?.path.endsWith("market-lane-v3.png"));
-  assert.ok(scene.canals.filter((o) => o.painted).length >= 2);
+  assert.ok(scene.marketPlate?.path.endsWith("market-rows.png"));
+  assert.ok(scene.canals.some((o) => o.marketWest));
+  assert.ok(scene.bridges.every((b) => !b.painted && !b.connector));
   assert.equal(
-    canStand(scene, 3100 * 0.9, 1510 * 0.9),
+    canStand(scene, ...Object.values(townPoint(3100, 1510))),
     false,
     "Lake water is blocked",
   );
@@ -185,8 +213,8 @@ test("canal bridges cross continuous water and every building blocks its visible
       Math.hypot(end.x - start.x, end.y - start.y) > Math.max(b.w, b.h),
     );
   }
-  assert.equal(canStand(scene, 850 * 0.9, 1400 * 0.9), false);
-  assert.equal(canStand(scene, 2200 * 0.9, 2300 * 0.9), false);
+  assert.equal(canStand(scene, ...Object.values(townPoint(850, 1400))), false);
+  assert.equal(canStand(scene, ...Object.values(townPoint(2200, 2370))), false);
   for (const b of scene.scenery.filter(
     (o) => o.doorId && o.landmark !== "moon-gate",
   )) {
@@ -213,7 +241,7 @@ test("lake uses the same irregular shore for rendering and collision, with an ac
   assert.ok(canStand(scene, approach.x, approach.y));
   assert.equal(nearest(scene, approach).id, "lake-duck");
   assert.equal(
-    pathTo(scene, scene.spawn, { x: 3100 * 0.9, y: 1510 * 0.9 }).length,
+    pathTo(scene, scene.spawn, townPoint(3100, 1510)).length,
     0,
     "A lake-center click cannot enter the water",
   );
@@ -536,4 +564,189 @@ test("a saved position now covered by the lake moves to nearby shore without los
   );
   assert.deepEqual(upgraded.found, old.found);
   assert.deepEqual(upgraded.journal, old.journal);
+});
+
+test("market street keeps its painting undistorted and its waterfront walking circuit connected", () => {
+  const scene = scenes.shanghai,
+    plate = scene.marketPlate;
+  assert.ok(Math.abs(plate.w / plate.h - 1.5) < 0.001);
+  const points = [
+    [780, 140],
+    [760, 240],
+    [715, 340],
+    [700, 450],
+    [870, 490],
+    [910, 550],
+    [850, 650],
+    [820, 750],
+    [780, 850],
+    [800, 950],
+    [600, 490],
+    [425, 470],
+    [200, 460],
+    [215, 610],
+    [260, 795],
+    [345, 935],
+    [600, 950],
+    [1120, 490],
+    [1400, 650],
+  ];
+  for (const [x, y] of points) {
+    const point = {
+      x: plate.x + (x * plate.w) / 1536,
+      y: plate.y + (y * plate.h) / 1024,
+    };
+    assert.ok(
+      canStand(scene, point.x, point.y),
+      `Clear painted lane ${x},${y}`,
+    );
+    const route = pathTo(scene, scene.spawn, point);
+    assert.ok(route.length, `Connected painted lane ${x},${y}`);
+    assert.ok(
+      Math.hypot(route.at(-1).x - point.x, route.at(-1).y - point.y) < 25,
+    );
+  }
+  const emptyLanes = { ...scene, solidCircles: [] };
+  for (const [x, y] of points.slice(0, 10)) {
+    assert.ok(
+      canStand(
+        emptyLanes,
+        plate.x + (x * plate.w) / 1536,
+        plate.y + (y * plate.h) / 1024,
+        32,
+      ),
+      `Room to pass at ${x},${y}`,
+    );
+  }
+  const widths = scene.bridges.map((b) => (b.axis === "x" ? b.h : b.w));
+  assert.ok(
+    Math.max(...widths) / Math.min(...widths) < 1.2,
+    "Painted and exterior decks have matching usable widths",
+  );
+});
+
+test("yards occupy visible walled grounds with clear gate approaches, and bamboo is on land", () => {
+  const scene = scenes.shanghai;
+  assert.equal(scene.enclosures.length, 6);
+  for (const e of scene.enclosures) {
+    const fraction = (e.w * e.h) / (scene.width * scene.height);
+    assert.ok(fraction > 0.019 && fraction < 0.035, `${e.id}: ${fraction}`);
+    assert.equal(
+      canStand(scene, e.x + e.w / 2, e.y),
+      false,
+      "Back wall is solid",
+    );
+    assert.ok(canStand(scene, e.gateX, e.gateY + 40), "Gate approach is clear");
+    const entrance = scene.interactables.find((o) => o.id === e.id);
+    assert.ok(
+      pathTo(scene, scene.spawn, interactionPoint(entrance)).length,
+      e.id,
+    );
+  }
+  for (const bamboo of scene.scenery.filter((o) => o.nature === "bamboo"))
+    assert.ok(
+      !scene.canals.some((c) => pointInPolygon(bamboo.x, bamboo.y, c.polygon)),
+      "Bamboo roots are outside canal water",
+    );
+});
+
+test("bamboo courtyard is entered through its door and has matching dense planting", () => {
+  const town = scenes.shanghai;
+  const yard = town.enclosures.find((e) => e.id === "garden");
+  const door = town.interactables.find((o) => o.id === "garden");
+  const room = scenes[door.target];
+  const stopped = move(town, interactionPoint(door), 0, -yard.h);
+  assert.ok(stopped.y >= yard.gateY + 15);
+  for (const x of [yard.x + 40, yard.gateX, yard.x + yard.w - 40])
+    for (const y of [yard.y + 40, yard.y + yard.h / 2, yard.gateY - 40])
+      assert.equal(canStand(town, x, y), false);
+  const planting = town.scenery.filter(
+    (o) =>
+      o.x > yard.x && o.x < yard.x + yard.w && o.y > yard.y && o.y < yard.gateY,
+  );
+  assert.ok(planting.filter((o) => o.nature === "bamboo").length >= 12);
+  assert.ok(!planting.some((o) => o.type === "tree"));
+  assert.ok(room.scenery.filter((o) => o.nature === "bamboo").length >= 15);
+  assert.equal(
+    room.interactables.find((o) => o.returnDoor).returnDoor,
+    door.id,
+  );
+  assert.equal(room.chinese, door.name);
+  assert.equal(
+    room.scenery.filter((o) => o.type === "garden-wall-side").length,
+    2,
+  );
+  for (const bamboo of room.scenery.filter((o) => o.nature === "bamboo")) {
+    assert.ok(bamboo.x - bamboo.w / 2 >= 68 && bamboo.x + bamboo.w / 2 <= 1332);
+    assert.ok(
+      bamboo.y - bamboo.h >= 160 && bamboo.y <= 855,
+      "All bamboo is inside the visible walls",
+    );
+  }
+  assert.ok(
+    room.scenery.some(
+      (o) => o.landmark === "moon-gate" && o.x === 700 && o.y === 975,
+    ),
+  );
+  for (const scene of [town, room]) {
+    assert.equal(
+      scene.scenery.filter((o) => o.type === "pond-waterfall").length,
+      1,
+    );
+    assert.ok(scene.scenery.filter((o) => o.type === "pond-rock").length >= 2);
+  }
+});
+
+test("market edges use complete bridges, one connected canal and full freestanding scenery", () => {
+  const s = scenes.shanghai,
+    p = s.marketPlate;
+  assert.equal(p.integrated, true);
+  assert.ok(p.path.endsWith("market-rows.png"));
+  assert.ok(s.canals.every((c) => !c.painted));
+  assert.ok(s.bridges.every((b) => !b.painted && !b.connector));
+  const bridge = s.bridges.find((b) => b.id === "market-west-bridge");
+  assert.ok(
+    bridge.x < p.x && bridge.x + bridge.w > p.x,
+    "One complete bridge spans the former image seam",
+  );
+  const y = bridge.y + bridge.h / 2;
+  for (let x = bridge.x + 20; x < bridge.x + bridge.w - 20; x += 8)
+    assert.ok(canStand(s, x, y), "Walk continuously across both banks");
+  const west = s.canals.find((c) => !c.winding && c.x === p.x && c.h > p.h);
+  assert.ok(
+    west.y < p.y && west.y + west.h > p.y + p.h,
+    "The west channel continues beyond both market edges",
+  );
+  assert.ok(
+    pointInPolygon(p.x - 30, bridge.y - 40, west.polygon),
+    "The water is wider beside the crossing",
+  );
+  assert.ok(
+    bridge.x + bridge.w < p.x + (120 * p.w) / 1536,
+    "The bridge ends at the quay before either stairway",
+  );
+  for (const [x, y] of [
+    [160, 355],
+    [200, 550],
+  ]) {
+    const step = { x: p.x + (x * p.w) / 1536, y: p.y + (y * p.h) / 1024 };
+    assert.ok(canStand(s, step.x, step.y), "Market stair landing stays clear");
+    assert.ok(pathTo(s, s.spawn, step).length, "Stair landing is reachable");
+  }
+  const yard = s.enclosures.find((e) => e.id === "tiger-hill");
+  for (let y = bridge.y + bridge.h + 40; y < yard.gateY; y += 25)
+    assert.ok(
+      canStand(s, yard.x + yard.w + 36, y),
+      "West-bank lane remains walkable",
+    );
+  assert.ok(
+    !s.scenery.some((o) => o.type === "canal-boat"),
+    "No stationary boat obstructs passing boats",
+  );
+  const tree = s.scenery.find((o) => o.id === "market-bank-willow");
+  assert.equal(tree.type, "tree");
+  assert.ok(
+    !s.canals.some((c) => pointInPolygon(tree.x, tree.y, c.polygon)),
+    "Willow trunk is rooted on the bank",
+  );
 });

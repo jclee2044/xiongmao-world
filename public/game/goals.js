@@ -3,21 +3,21 @@ export function goalCards(a) {
   const cards = [];
   if (a.met.length < 5)
     cards.push({
-      title: "Meet the neighborhood",
-      detail: `Talk to five different people · ${a.met.length}/5`,
+      title: "认识邻居",
+      detail: `和五位邻居说说话 · ${a.met.length}/5`,
       target: ["lin", "lan", "bo", "mei", "wei"].find(
         (id) => !a.met.includes(id),
       ),
-      reward: "+40 XP",
+      reward: "+40 经验",
       key: "meet",
     });
   if (a.hungry !== "done")
     cards.push({
-      title: "A meal with Lian",
+      title: "和莲一起吃饭",
       detail: {
-        new: "Meet Lian beside the central market.",
-        invited: "Lian is following. Enter the hotpot restaurant together.",
-        dining: "Sit at a hotpot table. Order, cook and taste your meal.",
+        new: "去集市旁找莲。",
+        invited: "莲跟着你呢，一起去火锅店吧。",
+        dining: "去火锅桌旁，点菜、煮菜、尝一尝。",
       }[a.hungry],
       target:
         a.hungry === "new"
@@ -25,63 +25,69 @@ export function goalCards(a) {
           : a.hungry === "invited"
             ? "dumplings"
             : "hotpot",
-      reward: "+60 XP",
+      reward: "+60 经验",
       key: "hungry",
     });
   if (a.flowers !== "done")
     cards.push({
-      title: "Lan’s missing flowers",
+      title: "帮兰找花",
       detail: {
-        new: "Ask Lan at the flower stall what she lost.",
-        accepted:
-          "Cross the west bridge. Collect the bouquet beside the rockery.",
-        found: "Return the bouquet to Lan at the flower stall.",
+        new: "去花店问问兰，她在找什么。",
+        accepted: "过西边的桥，去大石头旁找花。",
+        found: "把花带回花店，还给兰。",
       }[a.flowers],
       target: a.flowers === "accepted" ? "lost-flowers" : "lan",
-      reward: "+60 XP",
+      reward: "+60 经验",
       key: "flowers",
     });
   if (a.tea !== "done" && a.met.length >= 2)
     cards.push({
-      title: "Tea with Qiao",
+      title: "和乔喝茶",
       detail: {
-        new: "Invite Qiao outside the teahouse.",
-        invited: "Follow Qiao to the courtyard tea table.",
-        seated: "Join Qiao at the tea table and share your day.",
+        new: "去茶馆门口，请乔一起喝茶。",
+        invited: "跟着乔去院子里的茶桌。",
+        seated: "去茶桌旁和乔说说今天的事。",
       }[a.tea],
       target: a.tea === "new" ? "qiao" : "tea-table",
-      reward: "+60 XP",
+      reward: "+60 经验",
       key: "tea",
     });
   if (a.nature.length < 3 && a.met.length >= 5)
     cards.push({
-      title: "Panda’s nature walk",
-      detail: `Discover bamboo, lotus and Taihu rocks · ${a.nature.length}/3`,
+      title: "和熊猫走走",
+      detail: `看看竹子、荷花和太湖石 · ${a.nature.length}/3`,
       target: ["bamboo-grove", "lake", "rock-study"].find(
         (x) => !a.nature.includes(x),
       ),
-      reward: "+40 XP",
+      reward: "+40 经验",
       key: "nature",
     });
   if (a.directionsFind !== "done")
     cards.push({
       key: "directionsFind",
-      title: "Ask the way",
+      title: "问问路",
       detail:
         a.directionsFind === "accepted"
-          ? "Follow Lin’s directions and enter 火锅店 east of the market, below the lake."
-          : "Ask Lin how to get to 火锅店.",
+          ? "听林说怎么走，去集市东边、湖下方的火锅店。"
+          : "问林：火锅店怎么走？",
       target: a.directionsFind === "accepted" ? "dumplings" : "lin",
-      reward: "+40 XP",
+      reward: "+40 经验",
     });
   if (a.directionsGive !== "done")
     cards.push({
       key: "directionsGive",
-      title: "Give directions",
-      detail:
-        "Help Hao at the southeast market find the bookshop across the southern canal.",
+      title: "帮忙指路",
+      detail: "去集市东南边找浩，帮他过南边的河去书店。",
       target: "hao",
-      reward: "+40 XP",
+      reward: "+40 经验",
+    });
+  if (a.flowerDirections !== "done")
+    cards.push({
+      key: "flowerDirections",
+      title: "找花店",
+      detail: "去北边的小路找小雨，告诉她怎么去湖上方的花店。",
+      target: "visitor-1",
+      reward: "+40 经验",
     });
   const active = (key) =>
     ["accepted", "invited", "found", "seated", "dining"].includes(a[key]);
@@ -90,19 +96,17 @@ export function goalCards(a) {
   );
   if (a.xp >= AREA_XP)
     cards.unshift({
-      title: "Your boat is ready",
-      detail:
-        "Board the lantern boat on the bottom-right canal for the next stop.",
+      title: "可以上船了",
+      detail: "去右下方的河边上船，去下一站。",
       target: "next-area",
-      reward: "500 / 500 XP · Ready to sail",
+      reward: "500 / 500 经验 · 可以出发了",
       key: "departure",
     });
   if (!cards.length)
     cards.push({
-      title: "A lovely day in Suzhou",
-      detail:
-        "You helped your neighbors. Explore, chat and discover new words.",
-      reward: "✓ All neighborhood goals complete",
+      title: "苏州的一天",
+      detail: "今天帮了邻居，继续走走、聊天、认识新词吧。",
+      reward: "✓ 小目标都做好了",
       key: "complete",
     });
   return cards;
@@ -120,7 +124,7 @@ export function createGoals({ persistence, world, panda, speech }) {
         const item = document.createElement("li");
         const button = document.createElement("button");
         button.className = "goal-card";
-        button.innerHTML = `<strong>${g.title}</strong><span>${g.detail}</span><small>${g.reward}${g.target ? " · Show me ↗" : ""}</small>`;
+        button.innerHTML = `<strong>${g.title}</strong><span>${g.detail}</span><small>${g.reward}${g.target ? " · 带我去 ↗" : ""}</small>`;
         button.disabled = !g.target;
         button.onclick = () => {
           const w = world();
@@ -189,10 +193,10 @@ export function createGoals({ persistence, world, panda, speech }) {
       el = document.getElementById("discovery");
     el.replaceChildren();
     for (const [tag, text] of [
-      ["small", "NEW WORD · 新词"],
+      ["small", "新词"],
       ["strong", w.zh],
-      ["span", w.pinyin],
-      ["span", w.meaning],
+      ...(persistence.state.settings.pinyin ? [["span", w.pinyin]] : []),
+      ...(persistence.state.settings.translation ? [["span", w.meaning]] : []),
     ]) {
       const n = document.createElement(tag);
       n.textContent = text;

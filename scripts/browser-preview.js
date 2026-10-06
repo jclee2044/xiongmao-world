@@ -35,13 +35,13 @@ try {
   page.on("pageerror", (error) => errors.push(error.message));
   const response = await page.goto(`http://localhost:${proxy.address().port}`);
   assert.equal(response.status(), 200);
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.waitForFunction(
     () =>
-      document.getElementById("save-status").textContent === "Saved on this PC",
+      document.getElementById("save-status").textContent === "日记存好了",
   );
   assert.equal(
     await page.evaluate(
@@ -51,9 +51,9 @@ try {
     false,
   );
   await page.reload();
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
   assert.equal(
     await page.locator('[data-setting="pinyin"]').inputValue(),
     "false",

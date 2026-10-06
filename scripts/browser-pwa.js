@@ -20,8 +20,8 @@ const saved = (page) =>
   page.waitForFunction(() => {
     const cache = JSON.parse(localStorage.getItem("panda-world-v1"));
     return (
-      document.getElementById("save-status").textContent ===
-        "Saved on this PC" && cache?.dirty === false
+      document.getElementById("save-status").textContent === "日记存好了" &&
+      cache?.dirty === false
     );
   });
 const saveMetadata = (page) =>
@@ -40,12 +40,11 @@ try {
     page = await context.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(base);
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   await page.waitForFunction(
-    () =>
-      document.getElementById("save-status").textContent === "Saved on this PC",
+    () => document.getElementById("save-status").textContent === "日记存好了",
   );
   const cache = await page.evaluate(async () => {
     const keys = await caches.keys();
@@ -60,18 +59,26 @@ try {
   assert.ok(cache.requests.includes("/assets/panda.png"));
   assert.ok(cache.requests.includes("/data/cultural-activities.js"));
   assert.ok(cache.requests.includes("/data/adventure.js"));
+  assert.ok(cache.requests.includes("/data/ponds.js"));
   assert.ok(cache.requests.includes("/assets/world/museum-interior.png"));
-  assert.ok(cache.requests.includes("/assets/audio/sonican-asian-music-magical-dream.mp3"));
+  assert.ok(cache.requests.includes("/assets/characters/indoor-npcs.png"));
+  assert.ok(cache.requests.includes("/assets/characters/market-npcs.png"));
+  assert.ok(cache.requests.includes("/assets/characters/visitors-walk.png"));
+  assert.ok(
+    cache.requests.includes(
+      "/assets/audio/sonican-asian-music-magical-dream.mp3",
+    ),
+  );
   assert.ok(!cache.requests.some((x) => x.startsWith("/api")));
   results.cache = cache;
   await context.setOffline(true);
   await page.reload();
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
   await page.locator("#practice").click();
   assert.equal(await page.locator("[data-activity]").count(), 17);
-  await page.getByRole("button", { name: "Close panel" }).click();
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "关闭" }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.routeLength === "0",
     null,
@@ -93,7 +100,7 @@ try {
   await saved(page);
   const beforeReload = await saveMetadata(page);
   await page.reload();
-  await page.getByRole("button", { name: "Wander with Panda" }).click();
+  await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
   await saved(page);
   const synced = await page.evaluate(() =>
@@ -105,10 +112,10 @@ try {
     cleanBeforeReload: beforeReload,
     persistedReload: "pass",
   };
-  await page.getByRole("button", { name: "Journal", exact: true }).click();
-  await page.getByRole("button", { name: "Create pairing code" }).click();
+  await page.getByRole("button", { name: "日记", exact: true }).click();
+  await page.getByRole("button", { name: "给我一个号码" }).click();
   await page.waitForFunction(() =>
-    document.getElementById("code-output").textContent.includes("expires"),
+    document.getElementById("code-output").textContent.includes("五分钟"),
   );
   const code = (await page.locator("#code-output").textContent()).split(" ")[0];
   const other = await browser.newContext({
@@ -116,21 +123,20 @@ try {
     }),
     second = await other.newPage();
   await second.goto(base);
-  await second.getByRole("button", { name: "Wander with Panda" }).click();
+  await second.getByRole("button", { name: "和熊猫一起走走" }).click();
   await second.locator("canvas").waitFor({ state: "visible" });
   await second.waitForFunction(
-    () =>
-      document.getElementById("save-status").textContent === "Saved on this PC",
+    () => document.getElementById("save-status").textContent === "日记存好了",
   );
   await second.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await second.getByRole("button", { name: "Journal", exact: true }).click();
+  await second.getByRole("button", { name: "日记", exact: true }).click();
   await second.locator("#pair-input").fill(code);
   await Promise.all([
     second.waitForEvent("framenavigated"),
-    second.getByRole("button", { name: "Pair", exact: true }).click(),
+    second.getByRole("button", { name: "连接", exact: true }).click(),
   ]);
   await second.waitForLoadState("load");
-  await second.getByRole("button", { name: "Wander with Panda" }).click();
+  await second.getByRole("button", { name: "和熊猫一起走走" }).click();
   await second.locator("canvas").waitFor({ state: "visible" });
   await second.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
@@ -139,14 +145,14 @@ try {
   await saved(second);
   // Make the paired writer's newer revision explicit before the original
   // client attempts its stale save; this assertion must not depend on timers.
-  await second.getByRole("button", { name: "Settings", exact: true }).click();
+  await second.getByRole("button", { name: "设置", exact: true }).click();
   await second.locator('[data-setting="pinyin"]').selectOption("true");
   await saved(second);
   const newerWriter = await saveMetadata(second);
-  await page.getByRole("button", { name: "Close panel" }).click();
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "关闭" }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(() =>
-    document.getElementById("save-status").textContent.includes("conflict"),
+    document.getElementById("save-status").textContent.includes("两本日记"),
   );
   const staleWriter = await saveMetadata(page);
   assert.equal(staleWriter.dirty, true);
@@ -167,15 +173,15 @@ try {
     interrupted = await interruptedContext.newPage();
   interrupted.on("pageerror", (error) => errors.push(error.message));
   await interrupted.goto(base);
-  await interrupted.getByRole("button", { name: "Wander with Panda" }).click();
+  await interrupted.getByRole("button", { name: "和熊猫一起走走" }).click();
   await interrupted.locator("canvas").waitFor({ state: "visible" });
   await interrupted.waitForFunction(() => !!navigator.serviceWorker.controller);
   await saved(interrupted);
   await interruptedContext.setOffline(true);
   await interrupted.reload();
-  await interrupted.getByRole("button", { name: "Wander with Panda" }).click();
+  await interrupted.getByRole("button", { name: "和熊猫一起走走" }).click();
   await interrupted.locator("canvas").waitFor({ state: "visible" });
-  await interrupted.getByRole("button", { name: "Home", exact: true }).click();
+  await interrupted.getByRole("button", { name: "回家", exact: true }).click();
   await interrupted.waitForFunction(
     () => document.querySelector("canvas").dataset.scene === "home",
     null,
@@ -223,10 +229,10 @@ try {
   assert.equal(beforeInterruptedReload.dirty, true);
   await interrupted.reload();
   releaseResponse();
-  await interrupted.getByRole("button", { name: "Wander with Panda" }).click();
+  await interrupted.getByRole("button", { name: "和熊猫一起走走" }).click();
   await interrupted.locator("canvas").waitFor({ state: "visible" });
   await interrupted.waitForFunction(() =>
-    document.getElementById("save-status").textContent.includes("conflict"),
+    document.getElementById("save-status").textContent.includes("两本日记"),
   );
   const interruptedReload = await saveMetadata(interrupted);
   assert.equal(interruptedReload.revision, pendingLocal.revision);

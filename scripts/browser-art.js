@@ -123,10 +123,10 @@ try {
   });
   assert.equal(idleDraws, 0, "Paused, unchanged scenery is not repainted");
   await page.screenshot({ path: "test-results/art-conversation.png" });
-  await page.getByRole("button", { name: "Close conversation" }).click();
+  await page.getByRole("button", { name: "结束聊天" }).click();
   await walkToStop(page, "momo");
   await page.locator("#interact").click();
-  await page.getByRole("button", { name: "Take Momo home" }).click();
+  await page.getByRole("button", { name: "带桃桃回家" }).click();
   await page.waitForFunction(
     () =>
       document.getElementById("world").dataset.scene === "home" &&
@@ -135,7 +135,7 @@ try {
   await page.waitForTimeout(260);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.screenshot({ path: "test-results/art-home.png" });
-  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("#world").dataset.scene === "shanghai",
   );

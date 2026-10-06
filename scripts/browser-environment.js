@@ -127,8 +127,8 @@ try {
   assert.equal(result.emptyOutlines, 0);
   assert.equal(result.doorOutlines, 1);
   await page.click("#settings");
-  await page.getByLabel("Nature sounds").fill("0");
-  await page.getByLabel("Nature sounds").dispatchEvent("change");
+  await page.getByLabel("风声和水声").fill("0");
+  await page.getByLabel("风声和水声").dispatchEvent("change");
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ ...result, errors }));
 } finally {

@@ -55,8 +55,7 @@ export class Speech {
     this.stop();
     const settings = this.getSettings();
     text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
-    if (!settings.voice)
-      return this.onStatus("Voice is turned off in Settings.");
+    if (!settings.voice) return this.onStatus("声音关了，可以在设置里打开。");
     const generation = this.generation;
     const selected =
       voice === "female"
@@ -78,18 +77,18 @@ export class Speech {
       utterance.onerror = () => {
         if (generation === this.generation) {
           this.finish(generation);
-          this.onStatus("Device speech could not play. Try again.");
+          this.onStatus("声音没播出来，再试一次吧。");
         }
       };
       try {
         speechSynthesis.speak(utterance);
       } catch {
         this.finish(generation);
-        return this.onStatus("Device speech could not play. Try again.");
+        return this.onStatus("声音没播出来，再试一次吧。");
       }
-      return this.onStatus(`Device Mandarin voice: ${utterance.voice.name}`);
+      return this.onStatus(`正在说话…`);
     }
-    this.onStatus("Preparing local Mandarin speech…");
+    this.onStatus("等一下，马上说…");
     this.controller = new AbortController();
     try {
       const response = await fetch("/api/speech", {
@@ -108,7 +107,7 @@ export class Speech {
       this.audio.onerror = () => {
         if (generation === this.generation) {
           this.finish(generation);
-          this.onStatus("Mandarin audio could not play. Try again.");
+          this.onStatus("声音没播出来，再试一次吧。");
         }
       };
       this.activity(settings.voiceVolume > 0, generation);
@@ -116,15 +115,13 @@ export class Speech {
       if (generation === this.generation)
         this.onStatus(
           response.headers.get("X-Speech-Engine") === "neural"
-            ? "Local Mandarin · neural voice"
-            : "Local Mandarin voice",
+            ? "正在说话…"
+            : "正在说话…",
         );
     } catch (error) {
       if (generation === this.generation && error.name !== "AbortError") {
         this.finish(generation);
-        this.onStatus(
-          "Mandarin audio is unavailable right now. Text practice still works.",
-        );
+        this.onStatus("现在没有声音，可以先看看文字。");
       }
     }
   }

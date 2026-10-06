@@ -3,7 +3,12 @@ import { scenes, interactionPoint } from "../game/world.js";
 // Authoritative orientation: north = screen up, east = screen right.
 // Coordinates come from the same scene data as walking and the Map buttons.
 export const locationNotes = {
-  "next-area": ["游船码头", "Departure boat", "东南边，南边河上的大船。刺绣坊的上面。", "Bottom-right canal, north of the silk workshop. Follow the south-bank stone path east to the wooden boarding dock. Sailing unlocks at 500 XP."],
+  "next-area": [
+    "游船码头",
+    "Departure boat",
+    "东南边，南边河上的大船。刺绣坊的上面。",
+    "Bottom-right canal, north of the silk workshop. Follow the south-bank stone path east to the wooden boarding dock. Sailing unlocks at 500 XP.",
+  ],
   "home-north": [
     "小家",
     "Home",
@@ -58,11 +63,17 @@ export const locationNotes = {
     "南边河的下面，书店和刺绣坊中间。",
     "South of the canal, between the bookshop and silk workshop.",
   ],
+  "bamboo-grove": [
+    "竹林",
+    "Bamboo grove",
+    "西北边，小家的上面，有白墙围着。",
+    "Northwest, in the walled grounds north of home.",
+  ],
   garden: [
     "拙政园",
     "Humble garden",
-    "东北边，竹林旁边。",
-    "Northeast, beside the bamboo grove.",
+    "东北边，狮子林的右边。",
+    "Northeast, east of the Lion grove.",
   ],
   "classical-garden": [
     "狮子林",
@@ -128,7 +139,8 @@ export function worldDirectory() {
   );
 }
 export function requestedPlace(text) {
-  if (/游船|码头|坐船|boat|ferry|dock|next area/i.test(text)) return "next-area";
+  if (/游船|码头|坐船|boat|ferry|dock|next area/i.test(text))
+    return "next-area";
   if (/火锅|面馆|hot.?pot|restaurant/i.test(text)) return "dumplings";
   if (/书店|书房|bookshop|bookstore|library/i.test(text)) return "books";
   if (/茶馆|tea.?house/i.test(text)) return "tea";
@@ -136,7 +148,7 @@ export function requestedPlace(text) {
   if (/博物馆|museum/i.test(text)) return "museum";
   if (/花店|florist|flower shop/i.test(text)) return "flowers";
   if (/糕点|bakery/i.test(text)) return "bakery";
-  if (/竹林|bamboo/i.test(text)) return "garden";
+  if (/竹林|bamboo/i.test(text)) return "bamboo-grove";
   return Object.keys(locationNotes).find((id) =>
     text.includes(locationNotes[id][0]),
   );
@@ -174,7 +186,12 @@ export function navigationContext(state, text = "") {
   const overview = Object.entries(locationNotes)
     .map(([key, n]) => `${n[0]} (${key}): ${n[3]}`)
     .join("\n");
-  const nearby = worldDirectory().filter((o) => o.scene === (state?.scene || "shanghai"))
-    .map((o) => `${o.name}: (${Math.round(o.x)}, ${Math.round(o.y)})${o.target ? " entrance to " + o.target : ""}`).join("; ");
+  const nearby = worldDirectory()
+    .filter((o) => o.scene === (state?.scene || "shanghai"))
+    .map(
+      (o) =>
+        `${o.name}: (${Math.round(o.x)}, ${Math.round(o.y)})${o.target ? " entrance to " + o.target : ""}`,
+    )
+    .join("; ");
   return `GAME MAP FACTS (never invent streets or shortcuts): North is screen up; east is right. Cross water only on visible bridges. Current scene: ${state?.scene || "shanghai"}.\n${overview}\nCurrent-scene stops (world coordinates): ${nearby}. Player: ${JSON.stringify(state?.position || null)}.${direction ? "\nRequested destination: " + direction.chinese : ""}`;
 }

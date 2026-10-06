@@ -18,6 +18,7 @@ const melody = [
 ];
 const bass = [38, 45, 42, 40];
 const frequency = (note) => 440 * 2 ** ((note - 69) / 12);
+const musicOwner = Symbol.for("panda-world.music");
 
 export const backgroundTrack = {
   url: "/assets/audio/asia-fsm-team.mp3",
@@ -40,6 +41,9 @@ export const indoorTrack = {
 // remains available when the recording cannot load or decode.
 export class Music {
   constructor(settings = {}) {
+    // Also protect against a second app/module initialization in the same page.
+    window[musicOwner]?.dispose();
+    window[musicOwner] = this;
     this.volume = 0.15;
     this.enabled = false;
     this.wanted = false;
@@ -50,10 +54,20 @@ export class Music {
     this.track = backgroundTrack;
     this.onVisibility = () => this.sync();
     document.addEventListener("visibilitychange", this.onVisibility);
+    this.onPageHide = () => this.pause();
+    window.addEventListener("pagehide", this.onPageHide);
+    // A game opened in another tab should take over the soundtrack.
+    if (typeof BroadcastChannel !== "undefined") {
+      this.channel = new BroadcastChannel("panda-world-music");
+      this.channel.onmessage = (event) => {
+        if (event.data === "takeover") this.pause();
+      };
+    }
     this.applySettings(settings);
   }
 
   async enable() {
+    if (this.disposed) return false;
     // Only the game's first user gesture calls this method. Merely loading the
     // page, restoring a save, or changing volume never creates an audio device.
     if (!this.context) {
@@ -66,6 +80,7 @@ export class Music {
     }
     this.enabled = true;
     this.wanted = true;
+    this.channel?.postMessage("takeover");
     await this.sync();
     return this.context.state === "running";
   }
@@ -92,20 +107,20 @@ export class Music {
   }
 
   setScene(scene) {
-    const track = scene?.interior || scene?.id === "home" ? indoorTrack : backgroundTrack;
+    const track =
+      scene?.interior || scene?.id === "home" ? indoorTrack : backgroundTrack;
     if (track === this.track) return;
     this.track = track;
     ++this.version;
     this.stopNotes();
     if (this.audio) {
-      this.audio.onplay = null;
-      this.audio.onerror = null;
       this.audio.pause();
+      // A scene change replaces the source of the one player. It never leaves
+      // a previous media element (or pending play request) behind.
       this.source?.disconnect();
-      this.audio.removeAttribute("src");
+      this.source?.connect(this.master);
+      this.audio.src = track.url;
       this.audio.load();
-      this.audio = null;
-      this.source = null;
     }
     this.trackFailed = false;
     if (this.master) {
@@ -148,7 +163,9 @@ export class Music {
         // A pending play must not outlive a mute, pause, or hidden page.
         if (!this.audible()) this.audio.pause();
       };
-      this.audio.onerror = () => this.failTrack();
+      this.audio.onerror = () => {
+        if (this.audio.error) this.failTrack();
+      };
       this.source = this.context.createMediaElementSource(this.audio);
       this.source.connect(this.master);
     } catch {
@@ -204,7 +221,7 @@ export class Music {
     }
     this.stopNotes();
     try {
-      await this.audio.play();
+      if (this.audio.paused) await this.audio.play();
       if (!this.audible()) this.audio.pause();
     } catch (error) {
       if (version !== this.version || !this.audible()) return;
@@ -253,8 +270,12 @@ export class Music {
   }
 
   async dispose() {
+    if (this.disposed) return;
     document.removeEventListener("visibilitychange", this.onVisibility);
+    window.removeEventListener("pagehide", this.onPageHide);
+    this.channel?.close();
     this.disposed = true;
+    if (window[musicOwner] === this) delete window[musicOwner];
     await this.pause();
     if (this.audio) {
       this.audio.onplay = null;

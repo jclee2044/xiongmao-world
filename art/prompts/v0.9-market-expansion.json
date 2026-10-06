@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "use_case": "precise-object-edit",
+  "reference": "public/assets/world/market-lane-v3.png",
+  "output": "public/assets/world/market-lane-v4.png",
+  "source": "exec-3e32cdbd-df8a-4e4e-be6a-2d82e551c47f.png",
+  "prompt": "Use case: precise-object-edit. Edit target: image 1, the Suzhou market game environment. Keep the same five beautiful detailed watercolor stalls, merchandise, warm palette, two islands, turquoise canals and three stone bridge locations. Change the camera to a higher, more overhead orthographic three-quarter game view, approximately 55 degrees looking down at the ground, no vanishing point. Widen ALL walkways and ALL three bridge decks to generous consistent widths, with clear open walking lanes around and between every stall. Reduce the stalls' footprints slightly if needed to create space. The entire bottom perimeter must be a continuous wide stone promenade with parallel, consistent inner and outer edges, no narrowing or planters in the walking lane. Keep all bridges approximately the same clear walking width as this promenade. Stone quay boundaries and planted margins must clearly separate water, market, and surrounding earth. Remove any bamboo growing in canal water. Preserve the overall placement topology and full framing so it remains traceable for game collision. No people, interface, text, lettering, labels or watermarks. 1536x1024 landscape."
+}

@@ -33,7 +33,7 @@ export async function api(path, body, signal) {
   });
   const data = await response.json();
   if (!response.ok) {
-    const error = new Error(data.error || "Could not connect to your world.");
+    const error = new Error(data.error || "暂时连不上，再试一次吧。");
     error.status = response.status;
     error.data = data;
     throw error;
@@ -65,7 +65,7 @@ export class Persistence {
       );
       return true;
     } catch {
-      this.onStatus("Device storage is full; keep this page open until saved.");
+      this.onStatus("这台设备存不下了。保存好以前，请先别关页面。");
       return false;
     }
   }
@@ -88,25 +88,23 @@ export class Persistence {
           cached.revision === remote.revision
         ) {
           this.identity = remote.identity;
-          this.onStatus("Recovered unsynced progress.");
+          this.onStatus("找到还没保存的日记了。");
           this.cache();
           await this.flush();
         } else {
           this.conflict = remote;
-          this.onStatus("Unsynced progress needs your choice.");
+          this.onStatus("有两本日记，请选一本。");
           this.onConflict(remote);
         }
       } else {
         this.state = upgradeState(remote.state);
         this.revision = remote.revision;
         this.identity = remote.identity;
-        this.onStatus("Saved on this PC");
+        this.onStatus("日记存好了");
         this.cache();
       }
     } catch {
-      this.onStatus(
-        "Offline · exploration works; progress stays on this device",
-      );
+      this.onStatus("没有网络，也可以玩。日记先存在这里。");
     }
     return this.state;
   }
@@ -117,7 +115,7 @@ export class Persistence {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.flush(), 900);
     this.onStatus(
-      this.conflict ? "Save conflict · choose in Journal" : "Saving…",
+      this.conflict ? "有两本日记，请在日记里选一本。" : "正在保存…",
     );
   }
   async flush() {
@@ -136,15 +134,14 @@ export class Persistence {
       this.persisted = generation;
       this.cache();
       this.onStatus(
-        this.generation === this.persisted ? "Saved on this PC" : "Saving…",
+        this.generation === this.persisted ? "日记存好了" : "正在保存…",
       );
     } catch (error) {
       if (error.status === 409 || error.status === 401) {
         this.conflict = error.data;
-        this.onStatus("Save conflict · choose in Journal");
+        this.onStatus("有两本日记，请在日记里选一本。");
         this.onConflict(error.data);
-      } else
-        this.onStatus("Not synced · kept on this device; retry in Journal");
+      } else this.onStatus("日记先存在这里，请在日记里再试一次。");
     } finally {
       this.saving = false;
       if (!this.conflict && this.generation !== this.persisted) {

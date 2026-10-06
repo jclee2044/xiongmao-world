@@ -59,19 +59,12 @@ function build(scene) {
         target: end,
         type: "passerby",
         id: `visitor-${i}`,
-        appearance: ["hao", "lan", "wei", "an", "bo", "qiao"][i],
+        appearance: visitors[i].appearance,
         phase: i,
         distance: 0,
         facing: 1,
         speed: 38 + i * 3,
       };
-    })
-    .map((o) => {
-      if (o.id !== "visitor-2" || scene.id !== "shanghai") return o;
-      const scale = scene.worldScale || 1;
-      const origin = { x: 450 * scale, y: 2640 * scale },
-        end = { x: 630 * scale, y: 2640 * scale };
-      return { ...o, ...origin, origin, end, target: end };
     })
     .filter((o) => canStand(scene, o.x, o.y));
   const birds = (scene.paths || []).slice(0, 3).map((p, i) => ({

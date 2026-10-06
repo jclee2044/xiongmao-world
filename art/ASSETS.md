@@ -119,3 +119,26 @@ Runtime preserves the full shop illustration without cropping faces. New assets 
 ## Suzhou departure boat
 
 `public/assets/world/suzhou-passenger-boat.png` is a transparent medium-large passenger boat with an arched wooden cabin, lattice windows, warm curtains and red lanterns. Generated with the built-in `image_gen.imagegen` tool using the market painting as a style reference. Original output: `exec-212ce8ea-8720-48d2-99dd-1952766cdf66.png`. The [exact prompt](prompts/suzhou-passenger-boat.json) records the reference, source and final saved path. Runtime gently bobs the boat when motion is enabled, and uses the same asset in the boarding dialogue.
+
+## Distinct indoor NPCs
+
+`public/assets/characters/indoor-npcs.png` contains four transparent standing sprites: an older baker with a yellow blouse and cream apron, a young reader in a rust vest, a museum guide in indigo with a gold scarf, and a waiter in a burgundy apron. Generated with the built-in `image_gen.imagegen` tool using the original neighbor atlas as a style reference; the [exact prompt and source](prompts/indoor-npcs.json) are recorded. The PNG is copied losslessly and each character has its own alpha-bound crop in `public/data/art-bounds.js`. Indoor assignments remove repeated appearances in the bakery, bookshop, museum and restaurant, including the diners painted into the restaurant plate. Existing dialogue IDs and positions are retained. The new atlas is cached for offline play.
+
+## Distinct outdoor NPCs
+
+The built-in `image_gen.imagegen` tool generated two more atlases from the original neighbor style reference:
+
+- `public/assets/characters/market-npcs.png`: separate standing snack seller and embroidery artisan. The [exact prompt and source](prompts/market-npcs.json) are recorded. The market breakfast seller and street-food cook use the new baker and waiter from `indoor-npcs.png`.
+- `public/assets/characters/visitors-walk.png`: six distinct strolling neighbors with four walking poses each. The [exact prompt and source](prompts/visitors-walk.json) are recorded. Their appearances are reserved for these visitors, so they no longer borrow shopkeeper sprites. Atlas row crops retain complete heads and shoes.
+
+Both PNGs are copied losslessly, retain alpha, and are cached offline. The outdoor cast has unique sprite identities across the whole scene, including animated Lin and the two children; tests verify the cast over three minutes of movement and check actual rendered sprite crops. Dialogue IDs, routes, and all six original visitors remain available.
+
+## Expanded market and walled grounds
+
+`public/assets/world/market-lane-v4.png` was edited with the built-in `image_gen.imagegen` tool from v3. The [exact prompt](prompts/v0.9-market-expansion.json) records a higher orthographic ground view, wider consistent lanes and bridges, and a continuous parallel-edged southern promenade. This expansion study is superseded by the organic market below. The surrounding walls reuse the game's canvas plaster-and-tile rendering and moon-gate artwork.
+
+## Organic market streets and complete bridges
+
+`public/assets/world/market-rows.png` is the final transparent district, generated with the built-in `image_gen.imagegen` tool from the user’s three Suzhou street references. Connected L-shaped shop blocks have readable Chinese signs, a widened west cross alley, a bending central lane and a waterfront loop. Every roof and perimeter wall is complete; the image contains no partial bridge, boat, tree or water backdrop. The [generation and clearance-edit prompts](prompts/organic-market.json) record the exact steps and output. The PNG is copied losslessly and rendered over shared town terrain with newly traced collision.
+
+`public/assets/world/stone-bridges.png` supplies complete arched bridges with masonry parapets for both crossing orientations. The [prompt and source](prompts/stone-bridges.json) record generation from the user’s bridge reference. Their full rendering spans both banks; the northern market bridge ends at the canal with a separate paved approach clear of the roofs. The existing complete passenger-boat sprite and rooted willow replace the old cropped boat and hanging foliage. Both new PNGs are cached offline.

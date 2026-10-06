@@ -1,3 +1,4 @@
+import { npcs } from "./content.js";
 // Shop rooms use independent 3:2 paintings. Furniture footprints are traced
 // in the same 1200 × 800 coordinates as their background plates.
 export const interiors = {
@@ -14,10 +15,10 @@ export const interiors = {
       [[1025, 389], [1115, 411], [1124, 519], [1040, 526]], // side cabinet
     ],
     interactables: [
-      { id: "bakery-exit", type: "door", name: "Outside · 出门", x: 600, y: 710, target: "shanghai", returnDoor: "bakery" },
-      { id: "bakery-workbench", type: "practice", activity: "bakery-recipe", name: "Make osmanthus cakes · 做桂花糕", x: 900, y: 440 },
-      { id: "bakery-order", type: "practice", activity: "shop-sentences", name: "Order pastries · 买点心", x: 525, y: 420 },
-      { id: "bakery-display", type: "inspect", name: "Pastry display · 点心柜", x: 425, y: 405, zh: "这些糕点闻起来很香。", pinyin: "Zhèxiē gāodiǎn wén qǐlái hěn xiāng.", meaning: "These pastries smell lovely." },
+      { id: "bakery-exit", type: "door", name: "出门", x: 600, y: 710, target: "shanghai", returnDoor: "bakery" },
+      { id: "bakery-workbench", type: "practice", activity: "bakery-recipe", name: "做桂花糕", x: 900, y: 440 },
+      { id: "bakery-order", type: "practice", activity: "shop-sentences", name: "买点心", x: 525, y: 420 },
+      { id: "bakery-display", type: "inspect", name: "点心柜", x: 425, y: 405, zh: "这些糕点闻起来很香。", pinyin: "Zhèxiē gāodiǎn wén qǐlái hěn xiāng.", meaning: "These pastries smell lovely." },
     ],
     roomForeground: [
       [[400, 500], [465, 500], [463, 720], [405, 712]],
@@ -45,10 +46,10 @@ export const interiors = {
       [[730, 535], [774, 540], [770, 740], [737, 740]],
     ],
     interactables: [
-      { id: "teahouse-exit", type: "door", name: "Outside · 出门", x: 600, y: 700, target: "shanghai", returnDoor: "tea" },
-      { id: "teahouse-counter", type: "practice", activity: "tea-listen-order", name: "Listen to tea orders · 茶馆接单", x: 795, y: 480 },
-      { id: "teahouse-order", type: "practice", activity: "shop-sentences", name: "Order tea · 点茶", x: 700, y: 460 },
-      { id: "teahouse-table", type: "inspect", name: "Tea table · 茶桌", x: 355, y: 430, zh: "茶有点热，我们慢慢喝。", pinyin: "Chá yǒudiǎn rè, wǒmen mànman hē.", meaning: "The tea is a little hot. Let's drink slowly." },
+      { id: "teahouse-exit", type: "door", name: "出门", x: 600, y: 700, target: "shanghai", returnDoor: "tea" },
+      { id: "teahouse-counter", type: "practice", activity: "tea-listen-order", name: "茶馆接单", x: 795, y: 480 },
+      { id: "teahouse-order", type: "practice", activity: "shop-sentences", name: "点茶", x: 700, y: 460 },
+      { id: "teahouse-table", type: "inspect", name: "茶桌", x: 355, y: 430, zh: "茶有点热，我们慢慢喝。", pinyin: "Chá yǒudiǎn rè, wǒmen mànman hē.", meaning: "The tea is a little hot. Let's drink slowly." },
     ],
   },
   bookshop: {
@@ -70,13 +71,13 @@ export const interiors = {
       [[540, 560], [588, 570], [585, 748], [542, 730]],
     ],
     interactables: [
-      { id: "bookshop-exit", type: "door", name: "Outside · 出门", x: 475, y: 695, target: "shanghai", returnDoor: "books" },
-      { id: "bookshop-table", type: "practice", activity: "book-memory", name: "Word pairs · 词语配对", x: 795, y: 480 },
-      { id: "bookshop-order", type: "practice", activity: "shop-sentences", name: "Choose a book · 选一本书", x: 500, y: 470 },
-      { id: "bookshop-shelves", type: "inspect", name: "Bookshelves · 书架", x: 450, y: 420, zh: "你喜欢看故事书，还是漫画？", pinyin: "Nǐ xǐhuan kàn gùshi shū, háishi mànhuà?", meaning: "Do you like storybooks or comics?" },
+      { id: "bookshop-exit", type: "door", name: "出门", x: 475, y: 695, target: "shanghai", returnDoor: "books" },
+      { id: "bookshop-table", type: "practice", activity: "book-memory", name: "词语配对", x: 795, y: 480 },
+      { id: "bookshop-order", type: "practice", activity: "shop-sentences", name: "选一本书", x: 500, y: 470 },
+      { id: "bookshop-shelves", type: "inspect", name: "书架", x: 450, y: 420, zh: "你喜欢看故事书，还是漫画？", pinyin: "Nǐ xǐhuan kàn gùshi shū, háishi mànhuà?", meaning: "Do you like storybooks or comics?" },
     ],
   },
 };
 
-const hosts={bakery:[['baker','qiao',650,470],['diner-friend','qiao',940,520]],teahouse:[['qiao','qiao',740,525],['diner','hao',440,465],['reader','bo',985,520]],bookshop:[['bo','bo',630,460],['reader','bo',295,530]]};
-for(const [room,people]of Object.entries(hosts)) for(const [id,appearance,x,y]of people)interiors[room].interactables.push({id:`${room}-${id}`,type:'npc',dialogueId:id,name:id,appearance,x,y,artHeight:165,bubbles:room==='bakery'?['桂花糕真香！','今天想吃什么？']:room==='teahouse'?['茶还有点热。','坐下来聊聊吧。']:['这本书很有意思。','你喜欢什么故事？']});
+const hosts={bakery:[['baker','baker',650,470],['diner-friend','qiao',940,520]],teahouse:[['qiao','qiao',740,525],['diner','hao',440,465],['reader','reader',985,520]],bookshop:[['bo','bo',630,460],['reader','reader',295,530]]};
+for(const [room,people]of Object.entries(hosts)) for(const [id,appearance,x,y]of people)interiors[room].interactables.push({id:`${room}-${id}`,type:'npc',dialogueId:id,name:npcs[id].name,appearance,x,y,artHeight:165,bubbles:room==='bakery'?['桂花糕真香！','今天想吃什么？']:room==='teahouse'?['茶还有点热。','坐下来聊聊吧。']:['这本书很有意思。','你喜欢什么故事？']});

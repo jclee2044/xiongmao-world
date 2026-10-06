@@ -1,4 +1,14 @@
 export default {
+  "marketNpcs": {
+    "snack-host": { "x": 248, "y": 11, "w": 434, "h": 1000 },
+    "silk-host": { "x": 870, "y": 19, "w": 412, "h": 995 }
+  },
+  "indoorNpcs": {
+    "baker": { "x": 223, "y": 0, "w": 282, "h": 648 },
+    "reader": { "x": 733, "y": 32, "w": 276, "h": 616 },
+    "guide": { "x": 244, "y": 657, "w": 258, "h": 624 },
+    "waiter": { "x": 720, "y": 647, "w": 311, "h": 633 }
+  },
   "player": [
     [
       {

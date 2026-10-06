@@ -1,7 +1,7 @@
 export async function registerPwa({ onUpdate, onStatus }) {
   if (!("serviceWorker" in navigator) || !window.isSecureContext)
     return onStatus(
-      "Offline installation requires HTTPS (localhost works on this PC).",
+      "要用 HTTPS 地址，才能离线玩。在这台电脑上也可以用 localhost。",
     );
   try {
     const wasControlled = !!navigator.serviceWorker.controller;
@@ -29,6 +29,6 @@ export async function registerPwa({ onUpdate, onStatus }) {
       }
     });
   } catch {
-    onStatus("Offline cache is unavailable; keep using the online game.");
+    onStatus("现在还不能离线玩，先连着网络玩吧。");
   }
 }

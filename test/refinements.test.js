@@ -99,11 +99,18 @@ test("Panda explains grammar offline and answers open questions through the loca
     { question: "Why use 吗 here?" },
     { provider: "story" },
   );
-  assert.match(guide.explanation, /yes\/no/);
+  assert.match(guide.explanation, /句子后面加“吗”/);
+  assert.doesNotMatch(guide.explanation, /[A-Za-z]/);
+  const english = await coachReply(
+    { question: "Why use 吗 here?" },
+    { provider: "story", state: { settings: { translation: true } } },
+  );
+  assert.match(english.explanation, /yes\/no/);
   const answer = await coachReply(
     { question: "How do I say I would like noodles?", context: "你想吃什么？" },
     {
       provider: "ollama",
+      state: { settings: { translation: true } },
       fetcher: async (_, request) => {
         const body = JSON.parse(request.body);
         assert.match(body.messages[0].content, /Mandarin tutor/);
