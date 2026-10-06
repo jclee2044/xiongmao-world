@@ -18,6 +18,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 const errors = [];
 try {

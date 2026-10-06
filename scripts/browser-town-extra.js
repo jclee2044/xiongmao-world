@@ -16,7 +16,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
-  args: [
+  args: ["--mute-audio",
     "--use-fake-device-for-media-stream",
     "--use-fake-ui-for-media-stream",
     `--use-file-for-fake-audio-capture=${process.cwd()}/test-results/microphone-order.wav`,

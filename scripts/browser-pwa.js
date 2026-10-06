@@ -13,6 +13,7 @@ import { writeFile } from "node:fs/promises";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 const results = {},
   errors = [];
@@ -60,6 +61,7 @@ try {
   assert.ok(cache.requests.includes("/data/cultural-activities.js"));
   assert.ok(cache.requests.includes("/data/adventure.js"));
   assert.ok(cache.requests.includes("/data/ponds.js"));
+  assert.ok(cache.requests.includes("/game/music-ownership.js"));
   assert.ok(cache.requests.includes("/assets/world/museum-interior.png"));
   assert.ok(cache.requests.includes("/assets/characters/indoor-npcs.png"));
   assert.ok(cache.requests.includes("/assets/characters/market-npcs.png"));

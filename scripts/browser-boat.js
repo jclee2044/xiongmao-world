@@ -14,7 +14,7 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
-  args: ["--no-sandbox"],
+  args: ["--mute-audio", "--no-sandbox"],
 });
 const base = `http://127.0.0.1:${server.address().port}`;
 let page, context;

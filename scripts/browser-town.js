@@ -18,6 +18,7 @@ await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 const page = await browser.newPage({
   viewport: { width: 1280, height: 900 },

@@ -5,6 +5,7 @@ import { writeFile } from "node:fs/promises";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 const errors = [],
   results = {};

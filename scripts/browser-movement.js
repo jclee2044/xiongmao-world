@@ -7,6 +7,7 @@ await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 const errors = [];
 try {

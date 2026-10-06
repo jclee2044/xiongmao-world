@@ -29,6 +29,7 @@ try {
   browser = await chromium.launch({
     executablePath: "/usr/bin/chromium",
     headless: true,
+    args: ["--mute-audio"],
   });
   const page = await browser.newPage({ serviceWorkers: "block" });
   const errors = [];

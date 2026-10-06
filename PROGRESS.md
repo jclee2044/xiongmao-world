@@ -218,3 +218,11 @@ Clicking the bottom-right panda portrait or message now expands a wider cream pa
 Validation: the focused isolated Chromium regression passes portrait/message clicks, expansion size, word lookup, keyboard toggles, independent practice/listening controls and bounds at desktop, mobile portrait and mobile landscape sizes. Reviewed all three expanded screenshots. JavaScript syntax and diff checks pass. Offline shell: panda-panel-11.
 
 The reported overlapping music remains unresolved: the user confirmed the remaining track ignores both music and ambience settings. The live app preview is unavailable through the browser tool; the close-preview diagnostic is still awaiting a response. No additional music fix is claimed in this change.
+
+## 2026-10-06 — Music ownership across isolated previews
+
+Reproduced the remaining gap with isolated browser storage partitions: the previous page-only/BroadcastChannel protection let two previews play together, even when they used the same server. Local previews now coordinate through the server across origins and session partitions. A new player waits for the previous player to acknowledge silence; Music Off revokes the active soundtrack even when changed in an older preview. Hosted sessions are scoped independently. Cached playback still works offline. Pending media playback also checks ownership and recording failure before starting.
+
+All headless browser regressions now mute hardware output while retaining the audio graph, so testing cannot add audible music to the user's game.
+
+Validation: the same isolated-preview regression fails against the previous code and passes against the change, covering three contexts, different origins, shared mute, no overlap during handoff, indoor/outdoor transitions and offline playback. All 76 then-existing unit/API checks passed; the additional focused API test also passes across forwarded ports, isolated sessions and rejected foreign origins. Existing real-audio, saved-mute, fallback, rapid-transition/reinitialization and offline/PWA regressions pass. Syntax and whitespace checks pass. Offline cache: music-ownership-12. The user also reported that reopening the game restored correct playback; direct audio inspection of the live app preview is unavailable.

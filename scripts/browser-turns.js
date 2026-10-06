@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 try {
   const page = await browser.newPage({

@@ -21,7 +21,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
-  args: ["--no-sandbox"],
+  args: ["--mute-audio", "--no-sandbox"],
 });
 const town = scenes.shanghai;
 const gate = town.interactables.find((o) => o.id === "garden");

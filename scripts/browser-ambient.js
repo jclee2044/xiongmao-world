@@ -9,6 +9,7 @@ await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 async function seededGame(state, viewport = { width: 1280, height: 900 }) {
   const context = await browser.newContext({

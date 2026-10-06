@@ -1,3 +1,5 @@
+import { MusicOwnership } from "./music-ownership.js";
+
 const melody = [
   62,
   null,
@@ -52,6 +54,7 @@ export class Music {
     this.step = 0;
     this.version = 0;
     this.track = backgroundTrack;
+    this.ownership = new MusicOwnership(() => this.pause());
     this.onVisibility = () => this.sync();
     document.addEventListener("visibilitychange", this.onVisibility);
     this.onPageHide = () => this.pause();
@@ -60,7 +63,7 @@ export class Music {
     if (typeof BroadcastChannel !== "undefined") {
       this.channel = new BroadcastChannel("panda-world-music");
       this.channel.onmessage = (event) => {
-        if (event.data === "takeover") this.pause();
+        if (event.data === "takeover" || event.data === "mute") this.pause();
       };
     }
     this.applySettings(settings);
@@ -80,6 +83,7 @@ export class Music {
     }
     this.enabled = true;
     this.wanted = true;
+    this.claiming = this.ownership.claim();
     this.channel?.postMessage("takeover");
     await this.sync();
     return this.context.state === "running";
@@ -87,17 +91,29 @@ export class Music {
 
   play() {
     this.wanted = true;
+    this.claiming = this.ownership.claim();
     return this.sync();
   }
 
   pause() {
     this.wanted = false;
-    return this.sync();
+    const result = this.sync();
+    this.ownership.stop();
+    return result;
   }
 
   applySettings(settings) {
+    const previous = this.volume;
     if (Number.isFinite(settings.music))
       this.volume = Math.max(0, Math.min(1, settings.music));
+    if (this.enabled && this.volume === 0) {
+      this.ownership.stop(true);
+      this.channel?.postMessage("mute");
+    } else if (this.enabled && previous === 0 && this.volume > 0) {
+      this.wanted = true;
+      this.claiming = this.ownership.claim();
+      this.channel?.postMessage("takeover");
+    }
     this.sync();
   }
 
@@ -161,7 +177,8 @@ export class Music {
       this.audio.preload = "auto";
       this.audio.onplay = () => {
         // A pending play must not outlive a mute, pause, or hidden page.
-        if (!this.audible()) this.audio.pause();
+        if (!this.audible() || !this.ownership.allowed || this.trackFailed)
+          this.audio.pause();
       };
       this.audio.onerror = () => {
         if (this.audio.error) this.failTrack();
@@ -205,6 +222,15 @@ export class Music {
         await this.context.suspend();
       } catch {}
       return;
+    }
+    if (!this.ownership.allowed) {
+      await this.claiming;
+      if (
+        version !== this.version ||
+        !this.audible() ||
+        !this.ownership.allowed
+      )
+        return;
     }
     this.setGain();
     try {

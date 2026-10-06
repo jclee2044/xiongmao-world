@@ -12,6 +12,7 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
+  args: ["--mute-audio"],
 });
 try {
   const page = await browser.newPage({

@@ -8,6 +8,7 @@ import { Store } from "./store.js";
 import { coachReply } from "./coach.js";
 import { reply } from "./dialogue.js";
 import { speechAvailable, neuralAvailable, synthesize } from "./speech.js";
+import { createMusicOwnership } from "./music-ownership.js";
 
 const root = resolve(fileURLToPath(new URL("../public/", import.meta.url)));
 const types = {
@@ -31,6 +32,7 @@ export function createApp({
     speechPending = 0,
     transcriptionBusy = false;
   const rates = new Map();
+  const musicOwnership = createMusicOwnership();
   const server = createServer(async (req, res) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "same-origin");
@@ -118,9 +120,11 @@ export function createApp({
           old.count >
           (pathname === "/api/pair"
             ? 8
-            : ["/api/dialogue", "/api/coach"].includes(pathname)
-              ? 16
-              : 80)
+            : pathname === "/api/music-owner"
+              ? 160
+              : ["/api/dialogue", "/api/coach"].includes(pathname)
+                ? 16
+                : 80)
         )
           return json(429, { error: "Take a short pause, then try again." });
         const chunks = [];
@@ -132,6 +136,15 @@ export function createApp({
           chunks.push(chunk);
         }
         const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        if (pathname === "/api/music-owner") {
+          // One soundtrack per local computer, even across preview ports or
+          // isolated embedded browsers. Hosted devices stay independent.
+          const device = `${localHost ? "local" : identity}:${req.socket.remoteAddress}`;
+          const result = musicOwnership(device, body);
+          return result
+            ? json(200, result)
+            : json(400, { error: "Invalid music ownership request." });
+        }
         if (pathname === "/api/define") return json(200, defineText(body.text));
         if (pathname === "/api/state") {
           if (!Number.isSafeInteger(body.revision) || body.revision < 0)

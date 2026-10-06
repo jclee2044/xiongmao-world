@@ -9,7 +9,7 @@ await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const browser = await chromium.launch({
   executablePath: "/usr/bin/chromium",
   headless: true,
-  args: ["--no-sandbox"],
+  args: ["--mute-audio", "--no-sandbox"],
 });
 let page = await browser.newPage({
   viewport: { width: 1440, height: 1000 },
