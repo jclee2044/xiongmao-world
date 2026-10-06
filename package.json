@@ -11,7 +11,7 @@
     "test": "node --test test/*.test.js",
     "check": "node scripts/check.js",
     "format": "prettier --write public server test scripts package.json *.md",
-    "test:browser": "node scripts/browser-west-grove-audio.js && node scripts/browser-town-expansion.js && node scripts/browser-boat.js && node scripts/browser-market-shops.js && node scripts/browser-character-consistency.js && node scripts/browser-indoor-npcs.js && node scripts/browser-npc-variety.js && node scripts/browser-refinements.js && node scripts/browser-environment.js && node scripts/browser-xiongmao.js && node scripts/browser-town.js && node scripts/browser-town-extra.js && node scripts/browser-life.js && node scripts/browser-culture.js && node scripts/browser-pinyin.js && node scripts/browser-music.js && node scripts/browser-pwa.js",
+    "test:browser": "node scripts/browser-panda-panel.js && node scripts/browser-west-grove-audio.js && node scripts/browser-town-expansion.js && node scripts/browser-boat.js && node scripts/browser-market-shops.js && node scripts/browser-character-consistency.js && node scripts/browser-indoor-npcs.js && node scripts/browser-npc-variety.js && node scripts/browser-refinements.js && node scripts/browser-environment.js && node scripts/browser-xiongmao.js && node scripts/browser-town.js && node scripts/browser-town-extra.js && node scripts/browser-life.js && node scripts/browser-culture.js && node scripts/browser-pinyin.js && node scripts/browser-music.js && node scripts/browser-pwa.js",
     "backup": "node --env-file-if-exists=.env scripts/backup.js"
   },
   "devDependencies": {

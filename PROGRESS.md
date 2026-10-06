@@ -210,3 +210,11 @@ The offline browser regression also passes with the new pond module precached: e
 Replaced the southeastern 评弹小院 compound (second from the right) with an open paved 河畔广场. Removed its building, perimeter walls, moon gate and interior planting; the paving joins the northern promenade and southern silk-workshop approach. Updated map directions and removed the former smaller room. Saves made inside that room migrate to the square without losing progress.
 
 Validation: world/navigation/adventure/venue regression files pass, including a sweep across the former wall and building footprints and old-room save migration. Reviewed the targeted in-game square screenshot. Syntax and diff checks pass. Offline shell: southeast-square-10.
+
+## 2026-10-06 — Expandable panda help panel
+
+Clicking the bottom-right panda portrait or message now expands a wider cream panel with larger text, portrait and controls. Its header toggles back to the compact view; Enter/Space and Escape work from the panel without moving the character. Word definitions remain available inside the expanded panel, separately from its toggle. Practice and listening controls do not collapse it. Short screens scroll the panel while keeping it inside the game viewport.
+
+Validation: the focused isolated Chromium regression passes portrait/message clicks, expansion size, word lookup, keyboard toggles, independent practice/listening controls and bounds at desktop, mobile portrait and mobile landscape sizes. Reviewed all three expanded screenshots. JavaScript syntax and diff checks pass. Offline shell: panda-panel-11.
+
+The reported overlapping music remains unresolved: the user confirmed the remaining track ignores both music and ambience settings. The live app preview is unavailable through the browser tool; the close-preview diagnostic is still awaiting a response. No additional music fix is claimed in this change.

@@ -1817,3 +1817,96 @@ dialog .primary {
   accent-color: #5b9eaa;
   margin-bottom: 20px;
 }
+
+/* The portrait and message share a generous, keyboard-accessible toggle. */
+.panda-bubble {
+  display: block;
+  cursor: pointer;
+  max-height: calc(100% - 180px);
+  overflow: auto;
+  z-index: 5;
+}
+#panda-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  line-height: 1.4;
+}
+#panda-toggle img {
+  width: 48px;
+  height: 54px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+#panda-preview,
+#panda-title {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+#panda-title,
+.panda-bubble:not(.expanded) #panda-message,
+.panda-bubble:not(.expanded) #panda-help {
+  display: none;
+}
+.panda-bubble.expanded #panda-preview {
+  display: none;
+}
+.panda-bubble.expanded #panda-title {
+  display: block;
+  font-size: 22px;
+}
+#panda-toggle-icon {
+  font:
+    22px system-ui,
+    sans-serif;
+}
+#panda-content {
+  padding-left: 60px;
+}
+.panda-bubble summary {
+  position: static;
+  padding: 4px 8px;
+  text-align: right;
+}
+.panda-bubble.expanded {
+  width: 450px;
+  max-width: calc(100% - 26px);
+  padding: 20px;
+  box-shadow: 0 8px 30px #65442640;
+}
+.panda-bubble.expanded #panda-message {
+  font-size: 22px;
+  line-height: 1.6;
+}
+.panda-bubble.expanded #panda-toggle img {
+  width: 72px;
+  height: 82px;
+}
+.panda-bubble.expanded #panda-content {
+  padding-left: 0;
+}
+.panda-bubble.expanded details p {
+  max-width: none;
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.panda-bubble.expanded #panda-content > button {
+  font-size: 18px;
+  min-height: 48px;
+  margin: 6px 8px 0 0;
+}
+@media (max-height: 500px) {
+  .panda-bubble {
+    max-height: calc(100% - 145px);
+  }
+  .panda-bubble.expanded {
+    padding: 12px;
+  }
+}

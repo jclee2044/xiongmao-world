@@ -62,12 +62,22 @@
         <div class="scene-note">
           <span class="dot"></span><span id="mode">苏州</span>
         </div>
-        <aside class="panda-bubble">
-          <img src="/assets/panda.png" alt="" />
-          <div>
-            <span id="panda-message">帮助</span>
+        <aside class="panda-bubble" aria-label="熊猫的帮助">
+          <button
+            id="panda-toggle"
+            aria-expanded="false"
+            aria-controls="panda-content"
+            aria-label="展开熊猫的帮助"
+          >
+            <img src="/assets/panda.png" alt="" />
+            <span id="panda-preview">帮助</span>
+            <span id="panda-title">熊猫的帮助</span>
+            <span id="panda-toggle-icon" aria-hidden="true">⌃</span>
+          </button>
+          <div id="panda-content">
+            <p id="panda-message">帮助</p>
             <details id="panda-help">
-              <summary aria-label="看看熊猫的帮助">▾</summary>
+              <summary>更多提示</summary>
               <p id="panda-explanation">我们一起去河边走走吧。</p>
             </details>
           </div>

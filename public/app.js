@@ -188,6 +188,39 @@ function updatePracticeStatus() {
   if ($("practice-active"))
     $("practice-active").textContent = status ? `进行中：${status}` : "";
 }
+const pandaBubble = $("panda-toggle").closest(".panda-bubble");
+const updatePandaPreview = () => {
+  $("panda-preview").textContent = $("panda-message").textContent;
+};
+new MutationObserver(updatePandaPreview).observe($("panda-message"), {
+  childList: true,
+  subtree: true,
+  characterData: true,
+});
+updatePandaPreview();
+function expandPanda(expanded) {
+  pandaBubble.classList.toggle("expanded", expanded);
+  $("panda-toggle").setAttribute("aria-expanded", String(expanded));
+  $("panda-toggle").setAttribute(
+    "aria-label",
+    expanded ? "收起熊猫的帮助" : "展开熊猫的帮助",
+  );
+  $("panda-toggle-icon").textContent = expanded ? "⌄" : "⌃";
+  $("panda-help").open = expanded;
+}
+$("panda-toggle").onclick = () =>
+  expandPanda(!pandaBubble.classList.contains("expanded"));
+pandaBubble.addEventListener("click", (event) => {
+  if (!event.target.closest("button, summary, a, input")) expandPanda(true);
+});
+pandaBubble.addEventListener("keydown", (event) => {
+  // Space/arrow keys belong to this panel while one of its controls has focus.
+  event.stopPropagation();
+  if (event.key === "Escape" && pandaBubble.classList.contains("expanded")) {
+    expandPanda(false);
+    $("panda-toggle").focus();
+  }
+});
 const practiceButton = document.createElement("button");
 practiceButton.id = "practice";
 practiceButton.textContent = "练习中文";
