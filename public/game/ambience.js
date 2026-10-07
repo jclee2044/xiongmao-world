@@ -7,16 +7,30 @@ const boxDistance = (p, o) =>
   );
 export function soundscape(scene, player) {
   if (!scene || scene.interior || scene.id === "home")
-    return { water: 0, birds: 0, ducks: 0, pan: 0 };
+    return { water: 0, fountain: 0, birds: 0, ducks: 0, pan: 0 };
   const water = Math.max(
     0,
     ...(scene.groundZones || [])
       .filter((o) => ["lake", "canal"].includes(o.type))
       .map((o) => falloff(boxDistance(player, o), 330)),
   );
+  const fountains = (scene.scenery || []).filter((o) => o.type === "fountain");
+  const fountain = Math.max(
+    0,
+    ...fountains.map((o) =>
+      falloff(
+        Math.max(0, Math.hypot(o.x - player.x, o.y - 22 - player.y) - o.w / 2),
+        520,
+      ),
+    ),
+  );
   const plants = (scene.scenery || []).filter(
     (o) =>
-      o.type === "tree" || o.type === "fruit-tree" || o.nature === "bamboo",
+      o.type === "tree" ||
+      o.type === "fruit-tree" ||
+      o.nature === "bamboo" ||
+      o.type === "fountain-birds" ||
+      o.animal === "bird",
   );
   const birds = Math.max(
     0,
@@ -33,6 +47,7 @@ export function soundscape(scene, player) {
     )[0];
   return {
     water,
+    fountain,
     birds,
     ducks: duck
       ? falloff(Math.hypot(duck.x - player.x, duck.y - player.y), 350)
@@ -75,6 +90,14 @@ export class Ambience {
     this.water = c.createGain();
     this.water.gain.value = 0;
     this.stream.connect(filter).connect(this.water).connect(this.master);
+    // Brighter falling-water hiss layered over the low canal murmur.
+    const splash = c.createBiquadFilter();
+    splash.type = "bandpass";
+    splash.frequency.value = 1600;
+    splash.Q.value = 0.45;
+    this.fountain = c.createGain();
+    this.fountain.gain.value = 0;
+    this.stream.connect(splash).connect(this.fountain).connect(this.master);
     this.stream.start();
     this.timer = setInterval(() => this.tick(), 450);
     this.tick();
@@ -107,6 +130,7 @@ export class Ambience {
       0.15,
     );
     this.water.gain.setTargetAtTime(levels.water * 0.085, t, 1.8);
+    this.fountain.gain.setTargetAtTime(levels.fountain * 0.85, t, 0.45);
     if (w.paused || this.ducked) return;
     if (levels.birds > 0.05 && t > this.nextBird) {
       this.bird(levels.birds);

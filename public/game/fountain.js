@@ -56,7 +56,39 @@ export function drawFountainBirds(ctx, o, time, animate) {
     ctx.restore();
   }
 }
-export function drawFountain(ctx, o, time, animate) {
+export function drawFountain(ctx, o, time, animate, artwork) {
+  if (artwork?.complete && artwork.naturalWidth) {
+    ctx.save();
+    ctx.translate(o.x, o.y);
+    ctx.scale(o.w / 260, o.w / 260);
+    ellipse(ctx, 3, 18, 125, 35, "#66584328");
+    ctx.drawImage(artwork, -138, -225, 276, 276);
+    // Register moving glints and ripples to the painted cascades.
+    for (const [x, startY, endY] of [
+      [-44, -169, -140],
+      [0, -164, -128],
+      [42, -169, -140],
+      [-68, -118, -59],
+      [0, -112, -42],
+      [66, -118, -59],
+    ]) {
+      const phase = animate ? (time * 0.9 + (x + 70) / 170) % 1 : 0.45;
+      ctx.globalAlpha = 0.35 + Math.sin(phase * Math.PI) * 0.35;
+      ellipse(ctx, x, startY + (endY - startY) * phase, 0.8, 2, "#f4fff0");
+      ctx.lineWidth = 0.7;
+      ellipse(
+        ctx,
+        x,
+        endY + 2,
+        3 + phase * 9,
+        1 + phase * 2.2,
+        null,
+        `rgba(239,251,224,${0.65 * (1 - phase)})`,
+      );
+    }
+    ctx.restore();
+    return;
+  }
   ctx.save();
   ctx.translate(o.x, o.y);
   const size = o.w / 260;

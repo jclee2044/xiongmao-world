@@ -2,6 +2,25 @@ import { npcs } from "./content.js";
 // Shop rooms use independent 3:2 paintings. Furniture footprints are traced
 // in the same 1200 × 800 coordinates as their background plates.
 export const interiors = {
+  "clothing-store": {
+    id: "clothing-store", title: "Clothing Store", chinese: "服装店", interior: true,
+    backgroundPath: "/assets/world/clothing-store-interior.png", width: 1200, height: 800,
+    spawn: { x: 600, y: 660 }, scenery: [], solids: [],
+    walkableFloor: [[190, 500], [305, 310], [585, 310], [745, 325], [785, 355], [985, 390], [1010, 530], [1000, 570], [715, 570], [645, 570], [645, 740], [445, 715], [445, 565], [195, 540]],
+    solidPolygons: [
+      [[80, 370], [260, 195], [315, 225], [300, 315], [180, 490], [80, 500]],
+      [[305, 100], [745, 125], [760, 310], [580, 320], [305, 290]],
+      [[770, 250], [1000, 265], [995, 365], [775, 340]],
+      [[1035, 300], [1140, 345], [1135, 550], [1015, 535]],
+    ],
+    interactables: [
+      { id: "clothing-exit", type: "door", name: "出门", x: 600, y: 715, target: "shanghai", returnDoor: "clothing-store" },
+      { id: "clothing-rack", type: "inspect", shopId: "clothing", name: "挑选衣服", x: 305, y: 420 },
+      { id: "clothing-dresses", type: "inspect", shopId: "clothing", name: "看看裙子", x: 645, y: 365 },
+      { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "阿宁", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真好看。", "你喜欢什么颜色？"] },
+      { id: "clothing-seller", type: "npc", dialogueId: "clothing-seller", shopId: "clothing", name: "小雅", appearance: "lan", x: 850, y: 405, artHeight: 170, bubbles: ["欢迎光临服装店！", "喜欢哪件衣服？"] },
+    ],
+  },
   bakery: {
     id: "bakery", title: "Bakery", chinese: "糕点铺", interior: true,
     backgroundPath: "/assets/world/bakery-interior.webp", width: 1200, height: 800,

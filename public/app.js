@@ -436,11 +436,17 @@ function interact(n) {
   }
 }
 let currentShop = null;
+let clothingItem = null;
+let clothingStage = "choose";
 function openConversation(id, shopId = null) {
   currentShop = shopId;
+  clothingItem = null;
+  clothingStage = "choose";
+  $("reply-form").hidden = shopId === "clothing";
   $("shop-view")?.remove();
   $("shop-purchases")?.remove();
   $("conversation").classList.toggle("shop-conversation", Boolean(shopId));
+  $("conversation").classList.toggle("clothing-conversation", shopId === "clothing");
   requestGeneration++;
   controller?.abort();
   speech.stop();
@@ -522,7 +528,10 @@ function openConversation(id, shopId = null) {
     displayReply({
       chinese: shop.greeting,
       pinyin: shop.pinyin,
-      meaning: shop.items.map((i) => `${i.en}: ¥${i.price}`).join(" · "),
+      meaning:
+        shopId === "clothing"
+          ? "Welcome! Take a look and see which piece of clothing you like."
+          : shop.items.map((i) => `${i.en}: ¥${i.price}`).join(" · "),
       topic: "food",
       mode: "authored",
       notice: "",
@@ -532,12 +541,13 @@ function openConversation(id, shopId = null) {
   $("conversation").showModal();
   animatePanel($("conversation"));
   world.pause(true);
-  $("reply").focus();
+  (shopId === "clothing" ? $("shop-purchases").querySelector("button") : $("reply")).focus();
   speech.speak(currentReply.chinese, false, npcs[id]?.voice || "male");
 }
 function renderShopPurchases() {
   $("shop-purchases")?.remove();
   if (!currentShop) return;
+  if (currentShop === "clothing") return renderClothingPurchase();
   const box = document.createElement("section");
   box.id = "shop-purchases";
   const a = persistence.state.adventure;
@@ -586,6 +596,201 @@ function renderShopPurchases() {
     $("reply-form").requestSubmit();
   };
   box.append(ask);
+  $("conversation").querySelector(".conversation-body").append(box);
+}
+function renderClothingPurchase() {
+  const box = document.createElement("section");
+  box.id = "shop-purchases";
+  box.className = "clothing-purchase";
+  const a = persistence.state.adventure;
+  const status = document.createElement("p");
+  status.setAttribute("role", "status");
+  status.textContent = `零钱 ${a.coins} 元 · ${clothingStage === "choose" ? "选一件衣服" : clothingItem?.zh || ""}`;
+  box.append(status);
+  const choice = (label, action, className = "") => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.className = className;
+    button.onclick = action;
+    box.append(button);
+    return button;
+  };
+  const say = (user, chinese, pinyin, meaning) => {
+    $("last-user").textContent = user;
+    displayReply({
+      chinese,
+      pinyin,
+      meaning,
+      topic: "activities",
+      mode: "authored",
+      notice: "",
+    });
+    speech.speak(chinese, false, "female");
+  };
+  const advance = (stage) => {
+    clothingStage = stage;
+    renderShopPurchases();
+    $("shop-purchases").querySelector("button")?.focus();
+  };
+  const garmentArt = (item) => {
+    const art = document.createElement("span");
+    art.className = "clothing-art";
+    art.style.backgroundPosition = `${shops.clothing.items.indexOf(item) * 50}% center`;
+    art.setAttribute("aria-hidden", "true");
+    return art;
+  };
+  const choosing = clothingStage === "choose" || clothingStage === "done";
+  if (!choosing && clothingItem) {
+    const preview = document.createElement("div");
+    preview.className = "clothing-selection";
+    preview.dataset.selectedClothing = clothingItem.id;
+    const details = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = `${clothingItem.zh} · ${clothingItem.price} 元`;
+    const description = document.createElement("p");
+    description.textContent = clothingItem.description;
+    details.append(title, description);
+    preview.append(garmentArt(clothingItem), details);
+    box.append(preview);
+  }
+  if (choosing) {
+    const catalog = document.createElement("div");
+    catalog.className = "clothing-catalog";
+    catalog.setAttribute("aria-label", "挑选衣服");
+    box.append(catalog);
+    for (const item of shops.clothing.items) {
+      const owned = a.purchases.includes(item.id);
+      const button = choice(
+        `${item.zh} · ¥${item.price}${owned ? " ✓ 已买" : ""}`,
+        () => {
+          clothingItem = item;
+          if (owned) {
+            advance("owned");
+            return;
+          }
+          const unit = item.unit === "条" ? "tiáo" : "jiàn";
+          say(
+            `我喜欢这${item.unit}${item.zh}。`,
+            `这${item.unit}${item.zh}很适合你！想知道多少钱吗？`,
+            `Zhè ${unit} ${item.pinyin} hěn shìhé nǐ! Xiǎng zhīdào duōshao qián ma?`,
+            `The ${item.en} suits you! Would you like to ask its price?`,
+          );
+          advance("price");
+        },
+      );
+      button.className = "clothing-card";
+      button.dataset.clothing = item.id;
+      const label = document.createElement("strong");
+      label.textContent = item.zh;
+      const price = document.createElement("span");
+      price.textContent = owned ? "✓ 已买" : `${item.price} 元`;
+      button.replaceChildren(garmentArt(item), label, price);
+      catalog.append(button);
+    }
+  } else if (clothingStage === "owned") {
+    const owned = document.createElement("p");
+    owned.textContent = "这件衣服已经买好了。再看看别的吧！";
+    box.append(owned);
+  } else if (clothingStage === "price") {
+    choice(`请问，这${clothingItem.unit}多少钱？`, () => {
+      const unit = clothingItem.unit === "条" ? "tiáo" : "jiàn";
+      say(
+        `请问，这${clothingItem.unit}多少钱？`,
+        `这${clothingItem.unit}${clothingItem.zh}${clothingItem.price}元。你觉得怎么样？`,
+        `Zhè ${unit} ${clothingItem.pinyin} ${clothingItem.pricePinyin} yuán. Nǐ juéde zěnmeyàng?`,
+        `This ${clothingItem.en} costs ¥${clothingItem.price}. What do you think?`,
+      );
+      advance("experience");
+    });
+  } else if (clothingStage === "experience") {
+    choice("我找到喜欢的衣服了，购物体验很好！", () => {
+      say(
+        "我找到喜欢的衣服了，购物体验很好！",
+        "太好了！很高兴你找到喜欢的。你想怎么付款？",
+        "Tài hǎo le! Hěn gāoxìng nǐ zhǎodào xǐhuan de. Nǐ xiǎng zěnme fùkuǎn?",
+        "Great! I’m glad you found something you like. How would you like to pay?",
+      );
+      advance("method");
+    });
+  } else if (clothingStage === "method") {
+    choice("可以扫码付款吗？", () => {
+      say(
+        "可以扫码付款吗？",
+        "可以！请拿出手机，扫描柜台上的二维码。",
+        "Kěyǐ! Qǐng ná chū shǒujī, sǎomiáo guìtái shàng de èrwéimǎ.",
+        "Yes. Take out your phone and scan the QR code on the counter.",
+      );
+      advance("qr");
+    });
+    choice("可以刷卡吗？", () => {
+      say(
+        "可以刷卡吗？",
+        "可以！请拿出卡，在读卡器上轻碰一下。",
+        "Kěyǐ! Qǐng ná chū kǎ, zài dúkǎqì shàng qīng pèng yíxià.",
+        "Yes. Take out your card and tap it on the card reader.",
+      );
+      advance("card");
+    });
+  } else if (["qr", "card"].includes(clothingStage)) {
+    const prop = document.createElement("div");
+    prop.className = `payment-prop ${clothingStage}`;
+    prop.setAttribute("aria-hidden", "true");
+    prop.textContent = clothingStage === "qr" ? "▣  →  ▦" : "▭  →  ▣";
+    box.append(prop);
+    const method = clothingStage;
+    const pay = choice(
+      method === "qr"
+        ? "拿出手机并扫描二维码 · " + clothingItem.price + " 元"
+        : "拿出卡并轻碰读卡器 · " + clothingItem.price + " 元",
+      () => {
+        if (persistence.state.adventure.coins < clothingItem.price) {
+          say(
+            "我的零钱不够。",
+            "零钱不够。你可以再选一件。",
+            "Língqián bú gòu. Nǐ kěyǐ zài xuǎn yí jiàn.",
+            "You don’t have enough coins. You can choose another item.",
+          );
+          advance("choose");
+          return;
+        }
+        const item = clothingItem;
+        persistence.change((s) => {
+          if (
+            s.adventure.purchases.includes(item.id) ||
+            s.adventure.coins < item.price
+          )
+            return;
+          s.adventure.coins -= item.price;
+          s.adventure.purchases.push(item.id);
+          award(s.adventure, 10);
+          s.journal.push(
+            `在锦衣坊买了${item.zh}，花了${item.price}元。${method === "qr" ? "用手机扫码付款。" : "用卡轻碰读卡器付款。"}`,
+          );
+          s.journal = s.journal.slice(-50);
+        });
+        say(
+          method === "qr"
+            ? "我拿出手机，扫描二维码付款。"
+            : "我拿出卡，在读卡器上轻碰一下。",
+          "付款成功！这是你的衣服。谢谢光临！",
+          "Fùkuǎn chénggōng! Zhè shì nǐ de yīfu. Xièxie guānglín!",
+          `Payment complete. Here is your ${item.en}. Thanks for shopping!`,
+        );
+        updateXP();
+        advance("done");
+      },
+      "primary",
+    );
+    pay.disabled = a.coins < clothingItem.price;
+    if (pay.disabled) {
+      const notice = document.createElement("p");
+      notice.textContent = "零钱不够，可以看看别的衣服。";
+      box.append(notice);
+    }
+    choice("换一种付款方式", () => advance("method"));
+  }
+  if (!choosing) choice("再看看别的衣服", () => advance("choose"), "clothing-change");
   $("conversation").querySelector(".conversation-body").append(box);
 }
 function displayReply(reply) {

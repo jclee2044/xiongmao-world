@@ -19,6 +19,7 @@ function asset(path) {
   return images.get(path);
 }
 const paths = {
+  fountain: "/assets/world/lotus-fountain.png",
   bridges: "/assets/world/stone-bridges.png",
   boat: "/assets/world/suzhou-passenger-boat.png",
   water: "/assets/world/canal-water-v2.png",
@@ -60,6 +61,7 @@ export const pandaImage = asset(paths.panda);
 export async function prepareArt(scene) {
   if (scene.backgroundPath) await asset(scene.backgroundPath).decode();
   const names = [
+    "fountain",
     "boat",
     "water",
     "lian",
@@ -99,7 +101,7 @@ export async function prepareArt(scene) {
   ];
   await Promise.all(names.map((name) => asset(paths[name]).decode()));
   await Promise.all(
-    ["restaurant", "museum"].map((name) =>
+    ["restaurant", "museum", "clothing-store"].map((name) =>
       asset(`/assets/world/${name}-interior.png`).decode(),
     ),
   );
@@ -601,7 +603,7 @@ export function draw(
   ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
   for (const o of entities) {
     if (o.type === "fountain") {
-      drawFountain(ctx, o, time, animate);
+      drawFountain(ctx, o, time, animate, asset(paths.fountain));
     } else if (o.type === "fountain-birds") {
       drawFountainBirds(ctx, o, time, animate);
     } else if (o.type === "pond-rock" || o.type === "pond-waterfall") {
@@ -752,6 +754,16 @@ export function draw(
         ctx.textAlign = "center";
         ctx.fillStyle = "#453420";
         ctx.fillText(o.label, o.x - 5, o.y - o.h * 0.27);
+      }
+      if (o.id === "building-clothing-store") {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.font = 'bold 25px "Noto Serif CJK SC",serif';
+        ctx.fillStyle = "#6e3c35";
+        ctx.fillRect(o.x - 68, o.y - o.h * 0.56, 136, 43);
+        ctx.fillStyle = "#fff1d6";
+        ctx.fillText("服装店", o.x, o.y - o.h * 0.56 + 30);
+        ctx.restore();
       }
     } else if (o.type === "festival-lanterns") {
       festivalLanterns(ctx, o, time, settings.motion !== false);

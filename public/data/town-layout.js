@@ -146,17 +146,19 @@ export function expandTown(scene) {
     width: 170,
   });
   addEnclosures(scene);
-  // Two neighboring homes finish the southern edge without extending the map.
+  // The west building is a clothing shop; its doorway opens onto the promenade.
   for (const [id, x, h, flip] of [
-    ["south-home-west", 1640, 330, false],
+    ["clothing-store", 1640, 330, false],
     ["south-home-east", 2160, 310, true],
   ]) {
     scene.scenery.push({ id: `building-${id}`, type: "house", x, y: 3590,
-      w: h * 1.25, h, flip });
+      w: h * 1.25, h, flip, ...(id === "clothing-store" ? { label: "服装店", doorId: id } : {}) });
     scene.groundZones.push({ type: "courtyard", x: x - h * .625 - 25,
       y: 3550, w: h * 1.25 + 50, h: 110 });
   }
   scene.paths.push({ points: [[1420, 3650], [2410, 3650]], width: 120 });
+  scene.interactables.push({ id: "clothing-store", type: "door", target: "clothing-store",
+    name: "服装店", x: 1640, y: 3650, approachX: 1640, approachY: 3650 });
   const relocate = (id, x, y) => {
     const o = scene.interactables.find((o) => o.id === id);
     Object.assign(o, { x, y });

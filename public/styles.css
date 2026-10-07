@@ -1751,6 +1751,79 @@ dialog .primary {
   margin: 0;
   font-size: 14px;
 }
+#reply-form[hidden] {
+  display: none;
+}
+.clothing-purchase button {
+  flex: 1 1 190px;
+}
+.clothing-conversation #shop-view {
+  display: none;
+}
+.clothing-catalog {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.clothing-purchase .clothing-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  background: #f5ead8;
+  border: 2px solid #c6a67e;
+  border-radius: 12px;
+  color: #513d30;
+  min-width: 0;
+}
+.clothing-card:hover, .clothing-card:focus-visible {
+  border-color: #71533b;
+  background-color: #fff5e3;
+}
+.clothing-art {
+  display: block;
+  width: 90px;
+  height: 180px;
+  max-width: 100%;
+  flex-shrink: 0;
+  background: url("/assets/world/clothing-catalog.png") no-repeat;
+  background-size: 300% 100%;
+  border-radius: 8px;
+  clip-path: inset(0 5% round 6px);
+}
+.clothing-selection {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 10px 16px;
+  background: #f5ead8;
+  border: 1px solid #c6a67e;
+  border-radius: 12px;
+}
+.clothing-selection .clothing-art { width: 64px; height: 128px; }
+.clothing-selection strong { display: block; margin-bottom: 8px; }
+.clothing-purchase .clothing-change { flex-basis: 100%; }
+@media (max-width: 600px) {
+  .clothing-catalog { gap: 6px; }
+  .clothing-art { width: 64px; height: 128px; }
+  .clothing-card strong { font-size: 14px; }
+}
+.clothing-purchase .payment-prop {
+  flex-basis: 100%;
+  text-align: center;
+  padding: 13px;
+  border-radius: 12px;
+  background: #f1e4cf;
+  color: #51403d;
+  font-size: 30px;
+  letter-spacing: 10px;
+}
+.clothing-purchase .payment-prop.qr {
+  background: #e4eee9;
+}
 .direction-choices {
   display: grid;
   gap: 10px;

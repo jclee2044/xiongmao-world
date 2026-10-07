@@ -39,6 +39,12 @@ export const locationNotes = {
     "南边河的下面，书店的左边。",
     "South of the southern canal, west of the bookshop.",
   ],
+  "clothing-store": [
+    "服装店",
+    "Clothing store",
+    "南边河的下面，南边步道的西侧。",
+    "South of the southern canal, on the west side of the south promenade.",
+  ],
   dumplings: [
     "火锅店",
     "Hotpot restaurant",
@@ -148,6 +154,7 @@ export function requestedPlace(text) {
   if (/博物馆|museum/i.test(text)) return "museum";
   if (/花店|florist|flower shop/i.test(text)) return "flowers";
   if (/糕点|bakery/i.test(text)) return "bakery";
+  if (/服装店|衣服|clothing store/i.test(text)) return "clothing-store";
   if (/竹林|bamboo/i.test(text)) return "bamboo-grove";
   return Object.keys(locationNotes).find((id) =>
     text.includes(locationNotes[id][0]),
@@ -164,7 +171,7 @@ export function directionsTo(id, state = {}) {
     approach = "沿着集市右边的石头路，往湖的下面走。";
     english =
       "Follow the stone path on the east side of the market toward the bottom of the lake.";
-  } else if (["books", "bakery", "fabric", "neighbors-south"].includes(id)) {
+  } else if (["books", "bakery", "fabric", "neighbors-south", "clothing-store"].includes(id)) {
     approach = "从集市往南走，过南边的石桥。";
     english = "Walk south from the market and cross a southern stone bridge.";
   } else if (id === "home-north") {

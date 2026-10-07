@@ -352,7 +352,7 @@ test("home rear and left walls cannot be walked or routed onto", () => {
     "Doorway approach stays walkable",
   );
 });
-test("three distinct shop interiors keep furniture and walls solid, with usable practice counters", () => {
+test("shop interiors keep furniture and walls solid, with usable interactions", () => {
   const furniture = {
     bakery: [
       { x: 500, y: 280 },
@@ -369,18 +369,31 @@ test("three distinct shop interiors keep furniture and walls solid, with usable 
       { x: 850, y: 370 },
       { x: 220, y: 385 },
     ],
+    "clothing-store": [
+      { x: 200, y: 390 },
+      { x: 660, y: 240 },
+      { x: 850, y: 320 },
+    ],
   };
   assert.deepEqual(Object.keys(interiors).sort(), [
     "bakery",
     "bookshop",
+    "clothing-store",
     "teahouse",
   ]);
   for (const room of Object.values(interiors)) {
     assert.equal(room.width / room.height, 1.5);
-    assert.ok(room.backgroundPath.endsWith(`${room.id}-interior.webp`));
     assert.ok(
-      room.interactables.filter((o) => o.type === "practice").length >= 2,
+      room.backgroundPath.endsWith(
+        `${room.id}-interior.${room.id === "clothing-store" ? "png" : "webp"}`,
+      ),
     );
+    if (room.id === "clothing-store")
+      assert.ok(room.interactables.some((o) => o.shopId === "clothing"));
+    else
+      assert.ok(
+        room.interactables.filter((o) => o.type === "practice").length >= 2,
+      );
     assert.equal(canStand(room, 700, 100), false, `${room.id} rear wall`);
     assert.equal(pathTo(room, room.spawn, { x: 700, y: 100 }).length, 0);
     for (const point of furniture[room.id])
@@ -808,10 +821,10 @@ test("all gated interior scenes block town entry and keep their entrance trees c
   }
 });
 
-test("south homes have solid footprints and the square fountain leaves a walking ring", () => {
+test("south buildings have solid footprints and the square fountain leaves a walking ring", () => {
   const town = scenes.shanghai;
   const homes = town.scenery.filter((o) =>
-    o.id?.startsWith("building-south-home-"),
+    ["building-clothing-store", "building-south-home-east"].includes(o.id),
   );
   assert.equal(homes.length, 2);
   for (const house of homes) {

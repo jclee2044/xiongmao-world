@@ -1,5 +1,7 @@
-const CACHE = "xiongmao-shell-0.9.3-square-fountain-13";
+const CACHE = "xiongmao-shell-0.9.3-fountain-painted-16";
 const SHELL = [
+  "/assets/world/lotus-fountain.png",
+  "/game/fountain.js",
   "/data/ponds.js",
   "/game/bridges.js",
   "/assets/world/stone-bridges.png",
@@ -9,6 +11,8 @@ const SHELL = [
   "/assets/world/suzhou-passenger-boat.png",
   "/assets/world/canal-water-v2.png",
   "/assets/world/shop-breakfast.png",
+  "/assets/world/clothing-store-interior.png",
+  "/assets/world/clothing-catalog.png",
   "/assets/world/shop-souvenirs.png",
   "/assets/world/shop-produce.png",
   "/assets/world/shop-snacks.png",

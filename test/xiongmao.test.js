@@ -43,6 +43,12 @@ test("dictionary covers the whole dialogue and supplies pinyin beyond authored v
   }
   assert.throws(() => defineText("字".repeat(601)));
 });
+test("故事 uses its everyday story meaning and neutral tone", () => {
+  const [word] = defineText("故事").tokens;
+  assert.equal(word.zh, "故事");
+  assert.equal(word.meaning, "story");
+  assert.equal(word.pinyin, "gùshi");
+});
 test("new and wandering NPCs reach local AI instead of throwing before the request", async () => {
   for (const npcId of ["visitor-0", "waiter", "guide", "lian", "kid-one"]) {
     let called = false;

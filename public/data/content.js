@@ -1,5 +1,7 @@
 export const topics=['food','school','work','activities','travel','greeting'];
 export const npcs={
+  'clothing-seller':{name:'小雅',identity:'苏州锦衣坊服装店的店员小雅',voice:'female',topic:'activities',personality:'A warm clothing shop assistant. Helps the visitor choose a linen shirt for 12 yuan, a blue jacket for 20 yuan, or a floral dress for 18 yuan. Discusses prices, whether the visitor found something they like, and QR or contactless card payment. Only the guided payment action completes a purchase.',greeting:{chinese:'欢迎光临！看看喜欢哪件衣服。',pinyin:'Huānyíng guānglín! Kànkan xǐhuan nǎ jiàn yīfu.',meaning:'Welcome! Take a look and see which piece of clothing you like.',topic:'activities'}},
+  'clothing-customer':{name:'阿宁',identity:'在苏州服装店挑衣服的顾客阿宁',voice:'male',topic:'activities',personality:'A friendly customer choosing clothing and chatting about colors and what looks good.',greeting:{chinese:'这件衣服真好看。你喜欢什么颜色？',pinyin:'Zhè jiàn yīfu zhēn hǎokàn. Nǐ xǐhuan shénme yánsè?',meaning:'This piece of clothing looks nice. What color do you like?',topic:'activities'}},
   mei:{name:'梅',identity:'苏州面馆的店主梅',personality:'Warm noodle-shop owner beside a Suzhou canal. Likes gardening and chatting about everyday plans.',topic:'food',greeting:{chinese:'你好！你想吃点什么？',pinyin:'Nǐ hǎo! Nǐ xiǎng chī diǎn shénme?',meaning:'Hello! What would you like to eat?',topic:'food'}},
   lin:{name:'林',identity:'苏州的大学生林',personality:'Friendly university student walking beside the Suzhou canal. Enjoys dramas, reading and meeting friends; curious about the visitor’s life.',topic:'school',greeting:{chinese:'你好！我叫林。你喜欢看什么书？',pinyin:'Nǐ hǎo! Wǒ jiào Lín. Nǐ xǐhuan kàn shénme shū?',meaning:'Hi! I’m Lin. What books do you like to read?',topic:'school'}},
   qiao:{name:'乔',identity:'苏州茶馆的主人乔',personality:'A Suzhou tea-house host. Offers green or black tea, hot or cold drinks, and simple snacks. Enjoys listening to everyday stories. Do not pretend to run the noodle shop.',topic:'food',greeting:{chinese:'你好！想喝热茶还是冷茶？',pinyin:'Nǐ hǎo! Xiǎng hē rè chá háishi lěng chá?',meaning:'Hello! Would you like hot or cold tea?',topic:'food'},starter:{zh:'请给我一杯…',example:'请给我一杯热茶。',why:'一杯 counts one cup. 热 means hot.'}},
@@ -27,6 +29,7 @@ export const lexicon=[
   {id:'color',zh:'颜色',pinyin:'yánsè',meaning:'color',example:'你喜欢什么颜色？',why:'什么颜色 asks which color.'},
   {id:'flowers',zh:'花',pinyin:'huā',meaning:'flower',example:'我想买一束花。',why:'一束 counts one bouquet.'},
   {id:'books',zh:'书',pinyin:'shū',meaning:'book',example:'我喜欢看书。',why:'看书 means read books.'},
+  {id:'story',zh:'故事',pinyin:'gùshi',meaning:'story',example:'我喜欢听故事。',why:'听故事 means listen to a story.'},
   {id:'panda',zh:'熊猫',pinyin:'xióngmāo',meaning:'panda',example:'我想画一只熊猫。',why:'只 is a measure word for many animals.'},
   {id:'place',zh:'哪里',pinyin:'nǎlǐ',meaning:'where',example:'你想去哪里？',why:'去哪里 asks where someone wants to go.'},
   {id:'again',zh:'再说一遍',pinyin:'zài shuō yí biàn',meaning:'say it one more time',example:'请再说一遍。',why:'A clarification request is useful communication, never a failure.'}

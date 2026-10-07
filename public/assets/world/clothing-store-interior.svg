@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+<defs>
+  <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#f7e9d1"/><stop offset="1" stop-color="#ddc7a9"/></linearGradient>
+  <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#dbc4a5"/><stop offset="1" stop-color="#b88f6c"/></linearGradient>
+  <pattern id="grain" width="80" height="60" patternUnits="userSpaceOnUse"><path d="M0 0h80M0 60h80M0 0v60M80 0v60" fill="none" stroke="#8f6d55" stroke-opacity=".18" stroke-width="2"/></pattern>
+  <filter id="shadow"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="1200" height="800" fill="url(#wall)"/>
+<path d="M0 390 600 465 1200 390v410H0Z" fill="url(#floor)"/>
+<path d="M0 390 600 465 1200 390v410H0Z" fill="url(#grain)"/>
+<path d="M0 0v390l600 75V0" fill="#f3e2c7" opacity=".44"/>
+<path d="M600 0v465l600-75V0" fill="#fff5e6" opacity=".3"/>
+<path d="M0 390 600 465l600-75" fill="none" stroke="#9d7658" stroke-width="14"/>
+<!-- warm shop sign and silk banner -->
+<rect x="403" y="54" width="394" height="96" rx="13" fill="#713f3a" stroke="#d9ae70" stroke-width="7"/>
+<text x="600" y="116" fill="#fff1d6" text-anchor="middle" font-family="serif" font-size="52" letter-spacing="15">锦衣坊</text>
+<path d="M415 150v165q65 40 125 0V150M660 150v165q65 40 125 0V150" fill="#bf6b5d" opacity=".65"/>
+<path d="M445 171v114m270-114v114" stroke="#edc69d" stroke-width="4"/>
+<!-- left clothes rail -->
+<ellipse cx="203" cy="468" rx="174" ry="27" fill="#5e3b29" opacity=".18" filter="url(#shadow)"/>
+<path d="M65 322h270M82 322l-21 161m256-161 24 161" stroke="#694a3b" stroke-width="13" stroke-linecap="round"/>
+<path d="M94 329l-32 33 18 38 10 55h58l12-55 21-38-36-33-22 19z" fill="#78a6a0" stroke="#436c69" stroke-width="4"/>
+<path d="M177 329l-28 33 15 38 9 55h60l13-55 20-38-34-33-18 18z" fill="#e8b885" stroke="#b07c5b" stroke-width="4"/>
+<path d="M262 329l-30 30 17 42 11 54h65l10-54 18-42-35-30-17 18z" fill="#a77891" stroke="#754d68" stroke-width="4"/>
+<path d="M120 318q14-26 28 0m58 0q13-26 28 0m58 0q14-26 28 0" fill="none" stroke="#765647" stroke-width="4"/>
+<!-- right clothes rail -->
+<path d="M871 316h270m-252 0-12 172m246-172 20 172" stroke="#694a3b" stroke-width="13" stroke-linecap="round"/>
+<path d="m907 324-34 37 23 38 13 84h68l13-84 21-38-34-37-25 19z" fill="#6d8caa" stroke="#48677c" stroke-width="4"/>
+<path d="m1004 324-32 35 17 40 14 84h70l11-84 19-40-31-35-24 19z" fill="#be735c" stroke="#8d514b" stroke-width="4"/>
+<path d="m1093 324-30 35 18 41 13 83h70l10-83 16-41-32-35-22 20z" fill="#baab78" stroke="#857a54" stroke-width="4"/>
+<!-- counter with card reader and QR stand -->
+<ellipse cx="817" cy="509" rx="113" ry="31" fill="#54382b" opacity=".15" filter="url(#shadow)"/>
+<path d="M741 390h122l25 31-6 71-147 4-8-72z" fill="#946648" stroke="#604333" stroke-width="5"/>
+<path d="m724 390 132-17 31 32-149 20z" fill="#c79467" stroke="#694a39" stroke-width="5"/>
+<rect x="777" y="365" width="33" height="27" rx="4" fill="#373c42" stroke="#d7d6c9" stroke-width="4"/>
+<rect x="781" y="369" width="25" height="14" fill="#8bd8ad"/>
+<path d="M829 368h38v44h-38z" fill="#f8f2e7" stroke="#6b5546" stroke-width="4"/>
+<path d="M835 374h8v8h-8zm17 0h8v8h-8zm-17 17h8v8h-8zm17 0h8v8h-8z" fill="#55493d"/>
+<!-- fitting mirror and textile shelf -->
+<rect x="468" y="210" width="120" height="207" rx="8" fill="#6c4939"/>
+<rect x="477" y="219" width="102" height="187" fill="#bdd7ce"/>
+<path d="M482 394 574 230" stroke="#e9f4e5" stroke-width="12" opacity=".6"/>
+<path d="M609 336h103v78H609z" fill="#895b46" stroke="#563d32" stroke-width="6"/>
+<path d="M617 338h89M617 369h89" stroke="#e0b584" stroke-width="16"/>
+<!-- foreground rug makes central walking lane apparent -->
+<path d="M356 520h486l142 260H230z" fill="#ad745e" opacity=".42"/>
+<path d="M380 535h440l112 225H277z" fill="none" stroke="#f1d3a3" stroke-width="6" stroke-dasharray="13 14"/>
+</svg>

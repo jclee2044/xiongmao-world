@@ -439,7 +439,7 @@ export class World {
         dy = (destination.y - this.player.y) / d;
       }
       const len = Math.hypot(dx, dy),
-        speed = this.getSettings().pace === "slow" ? 230 : 330;
+        speed = this.getSettings().pace === "slow" ? 184 : 264;
       if (len) {
         if (Math.abs(dx) > 0.1) this.facing = Math.sign(dx);
         const step = Math.min(

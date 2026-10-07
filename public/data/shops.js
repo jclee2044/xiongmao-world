@@ -1,4 +1,15 @@
 export const shops = {
+  clothing: {
+    name: "锦衣坊 · 服装店",
+    seller: "clothing-seller",
+    greeting: "欢迎光临！看看喜欢哪件衣服。",
+    pinyin: "Huānyíng guānglín! Kànkan xǐhuan nǎ jiàn yīfu.",
+    items: [
+      { id: "linen-shirt", zh: "亚麻衬衫", en: "linen shirt", unit: "件", pinyin: "yàmá chènshān", price: 12, pricePinyin: "shí èr", description: "米色的衬衫，穿着很舒服。" },
+      { id: "blue-jacket", zh: "蓝色外套", en: "blue jacket", unit: "件", pinyin: "lánsè wàitào", price: 20, pricePinyin: "èr shí", description: "蓝色的外套，天气凉了可以穿。" },
+      { id: "flower-dress", zh: "花裙子", en: "floral dress", unit: "条", pinyin: "huā qúnzi", price: 18, pricePinyin: "shí bā", description: "粉色的裙子，上面有小花。" },
+    ],
+  },
   breakfast: {
     name: "早饭铺",
     seller: "baker",
@@ -87,7 +98,7 @@ export const shops = {
   },
 };
 for (const [id, shop] of Object.entries(shops))
-  shop.image = `/assets/world/shop-${id}.png`;
+  shop.image = id === "clothing" ? "/assets/world/clothing-store-interior.png" : `/assets/world/shop-${id}.png`;
 export function shopContext(id) {
   const shop = shops[id];
   return shop

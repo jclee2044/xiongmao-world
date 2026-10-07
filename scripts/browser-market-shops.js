@@ -62,7 +62,9 @@ async function worldStop(id) {
 const cached = () =>
   page.evaluate(() => JSON.parse(localStorage.getItem("panda-world-v1")).state);
 try {
-  for (const [id, shop] of Object.entries(shops)) {
+  for (const [id, shop] of Object.entries(shops).filter(
+    ([id]) => id !== "clothing",
+  )) {
     const seller = scenes.shanghai.interactables.find(
       (o) => o.shopId === id && o.type === "npc",
     );
