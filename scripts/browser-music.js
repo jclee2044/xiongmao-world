@@ -295,7 +295,9 @@ try {
 
   // A stale native speech end event must not unduck a newer utterance.
   await page.evaluate(async () => {
-    check.speech.voices = [{ lang: "zh-CN", name: "Fixture female" }];
+    speechSynthesis.getVoices = () => [
+      { lang: "zh-CN", name: "Fixture female", localService: true },
+    ];
     const utterances = [];
     window.SpeechSynthesisUtterance = class {};
     speechSynthesis.speak = (utterance) => utterances.push(utterance);

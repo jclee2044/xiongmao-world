@@ -18,7 +18,9 @@ export class Speech {
         .filter(
           (v) =>
             v.localService &&
-            (/^(zh-CN|zh-TW|zh-SG|zh-Hans|cmn)(-|$)/i.test(v.lang) ||
+            (/^(zh-CN|zh-TW|zh-SG|zh-Hans|cmn)(-|$)/i.test(
+              v.lang.replaceAll("_", "-"),
+            ) ||
               v.lang === "zh"),
         ) || [];
   }
@@ -57,10 +59,12 @@ export class Speech {
     text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
     if (!settings.voice) return this.onStatus("声音关了，可以在设置里打开。");
     const generation = this.generation;
+    // Mobile voice lists can arrive after construction without voiceschanged.
+    this.refresh();
     const selected =
       voice === "female"
         ? this.voices.find((v) =>
-            /female|xiaoxiao|xiaoyi|huihui|ting.?ting|meijia|sin.?ji|yaoyao|女/i.test(
+            /female|xiaoxiao|xiaoyi|huihui|ting.?ting|mei.?jia|sin.?ji|yaoyao|tian.?tian|女/i.test(
               v.name,
             ),
           )

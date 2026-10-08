@@ -2,23 +2,32 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 const speechRoot = resolve("tools/speech/usr");
-export const neuralAvailable = () =>
-  existsSync(
-    resolve("tools/vits-zh-hf-fanchen-wnj/vits-zh-hf-fanchen-wnj.onnx"),
-  ) && existsSync(resolve("tools/asr-venv/bin/python"));
+export const neuralAvailable = (voice = "male") => {
+  const root =
+    voice === "female"
+      ? "tools/vits-icefall-zh-aishell3"
+      : "tools/vits-zh-hf-fanchen-wnj";
+  const model =
+    voice === "female" ? "model.onnx" : "vits-zh-hf-fanchen-wnj.onnx";
+  return (
+    [model, "lexicon.txt", "tokens.txt"].every((file) =>
+      existsSync(resolve(root, file)),
+    ) && existsSync(resolve("tools/asr-venv/bin/python"))
+  );
+};
 export const speechAvailable = () =>
   existsSync(resolve(speechRoot, "bin/espeak-ng"));
 export function synthesize(text, slow = false, voice = "male") {
   if (typeof text !== "string" || !text.trim() || text.length > 180)
     throw new Error("Please use a short phrase.");
-  if (!speechAvailable())
+  const neural = neuralAvailable(voice);
+  if (!neural && (!speechAvailable() || voice === "female"))
     throw new Error("No local Mandarin speech engine installed.");
   // Punctuation supplies a pause; never send repeated marks to the phoneme engine.
   text = text
     .replace(/[?？!！]+/g, "。")
     .replace(/。+/g, "。")
     .trim();
-  const neural = voice === "male" && neuralAvailable();
   return new Promise((resolvePromise, reject) => {
     const child = spawn(
       neural
@@ -30,7 +39,7 @@ export function synthesize(text, slow = false, voice = "male") {
             `--path=${speechRoot}/share`,
             "--stdout",
             "-v",
-            voice === "female" ? "cmn+f3" : "cmn",
+            "cmn",
             "-s",
             slow ? "115" : "155",
             "--stdin",
@@ -74,6 +83,6 @@ export function synthesize(text, slow = false, voice = "male") {
       resolvePromise(audio);
     });
     child.stdin.on("error", () => {});
-    child.stdin.end(neural ? JSON.stringify({ text, slow }) : text);
+    child.stdin.end(neural ? JSON.stringify({ text, slow, voice }) : text);
   });
 }

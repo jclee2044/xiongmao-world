@@ -1,4 +1,4 @@
-const CACHE = "xiongmao-shell-0.9.3-mobile-audio-20";
+const CACHE = "xiongmao-shell-0.9.3-mobile-voice-21";
 const SHELL = [
   "/assets/world/lotus-fountain.png",
   "/game/fountain.js",

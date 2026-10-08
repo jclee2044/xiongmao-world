@@ -238,8 +238,7 @@ export function createApp({
             res.writeHead(200, {
               "Content-Type": "audio/wav",
               "Cache-Control": "no-store",
-              "X-Speech-Engine":
-                voice === "male" && neuralAvailable() ? "neural" : "basic",
+              "X-Speech-Engine": neuralAvailable(voice) ? "neural" : "basic",
             });
             return res.end(wav);
           } finally {
