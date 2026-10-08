@@ -58,6 +58,9 @@ const paths = {
   animals: "/assets/characters/animals.webp",
 };
 export const pandaImage = asset(paths.panda);
+// Boundaries lie in the transparent gaps between the unevenly spaced poses.
+// Equal-width cells included black slivers from neighboring animation frames.
+const pandaFrameEdges = [0, 382, 742, 1086, 1444, 1802, 2172];
 export async function prepareArt(scene) {
   if (scene.backgroundPath) await asset(scene.backgroundPath).decode();
   const names = [
@@ -997,7 +1000,12 @@ export function draw(
         o.y - hop,
         scene.interior ? 72 : actorSizes.panda,
         {
-          crop: { x: frame * 362, y: 0, w: 362, h: 620 },
+          crop: {
+            x: pandaFrameEdges[frame],
+            y: 0,
+            w: pandaFrameEdges[frame + 1] - pandaFrameEdges[frame],
+            h: 620,
+          },
           uniformHeight: 510,
           sway:
             pandaMoving && settings.motion !== false

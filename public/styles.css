@@ -1923,18 +1923,15 @@ dialog .primary {
   position: relative;
   display: block;
   width: 60px;
-  height: 52px;
+  height: 60px;
   flex-shrink: 0;
-  overflow: hidden;
-  border-radius: 50%;
+  overflow: visible;
 }
 .panda-face img {
-  position: absolute;
-  width: 80px;
-  height: auto;
-  max-width: none;
-  left: -10px;
-  top: -8px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 #panda-title {
   flex: 1;
@@ -1990,13 +1987,7 @@ dialog .primary {
 }
 .panda-bubble.expanded .panda-face {
   width: 72px;
-  height: 62px;
-}
-.panda-bubble.expanded .panda-face img {
-  width: 96px;
-  height: auto;
-  left: -12px;
-  top: -10px;
+  height: 72px;
 }
 .panda-bubble.expanded #panda-content {
   padding-left: 0;
