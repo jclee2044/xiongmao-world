@@ -1,4 +1,4 @@
-const CACHE = "xiongmao-shell-0.9.3-fountain-painted-16";
+const CACHE = "xiongmao-shell-0.9.3-touch-steering-19";
 const SHELL = [
   "/assets/world/lotus-fountain.png",
   "/game/fountain.js",

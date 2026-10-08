@@ -37,6 +37,10 @@ try {
   const toggle = page.locator("#panda-toggle");
   const bubble = page.locator(".panda-bubble");
   const compact = await bubble.boundingBox();
+  assert.equal(await page.locator("#panda-content").isVisible(), false);
+  assert.equal(await page.locator("#practice").isVisible(), false);
+  assert.equal(await page.locator("#panda-title").isVisible(), false);
+  assert.equal(compact.width, 60);
   await page.locator("#panda-toggle img").click();
   assert.equal(await toggle.getAttribute("aria-expanded"), "true");
   assert.ok((await bubble.boundingBox()).width > compact.width + 100);
@@ -60,7 +64,7 @@ try {
   assert.equal(await toggle.getAttribute("aria-expanded"), "true");
   await page.keyboard.press("Space");
   assert.equal(await toggle.getAttribute("aria-expanded"), "false");
-  await page.locator("#panda-preview").click();
+  await page.locator("#panda-toggle img").click();
   assert.equal(await toggle.getAttribute("aria-expanded"), "true");
   assert.equal(await page.locator("#panda-toggle button").count(), 0);
   assert.equal(
@@ -101,7 +105,7 @@ try {
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Panda expansion: portrait/message clicks, larger text, keyboard, independent controls and mobile bounds pass.",
+    "Panda expansion: face-only button, hidden compact controls, larger text, keyboard, independent controls and mobile bounds pass.",
   );
 } finally {
   await browser.close();

@@ -28,7 +28,7 @@ Chinese dialogue plays automatically. Full English and pinyin are hidden by defa
 
 ## Play on this PC
 
-Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. Walk with WASD/arrows, on-screen direction buttons, or tap/click on clear ground. Tap-to-walk routes around buildings and canal edges. Open Map and select a destination to walk there. Press Space/E or use the interaction button near a person/object.
+Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. On a phone, hold the screen to keep walking in that direction, drag to steer, and release to stop. Tap the ground to walk there, or tap a person or building to walk over and interact or enter. On a computer, walk with WASD/arrows or click clear ground; routes avoid buildings and canal edges. Open Map and select a destination to walk there. Press Space/E or use the interaction button near a person/object. Tap Panda's face to expand his help panel.
 
 Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Dialogue speaks on opening and after replies; Replay/slow replay remains available. Every dialogue word supports dictionary lookup. Ask Panda offers a starter, then an optional “You can say…” example, plus a text box for your own language questions. No expected answer is required.
 

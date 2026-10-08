@@ -189,17 +189,9 @@ function updatePracticeStatus() {
     $("practice-active").textContent = status ? `进行中：${status}` : "";
 }
 const pandaBubble = $("panda-toggle").closest(".panda-bubble");
-const updatePandaPreview = () => {
-  $("panda-preview").textContent = $("panda-message").textContent;
-};
-new MutationObserver(updatePandaPreview).observe($("panda-message"), {
-  childList: true,
-  subtree: true,
-  characterData: true,
-});
-updatePandaPreview();
 function expandPanda(expanded) {
   pandaBubble.classList.toggle("expanded", expanded);
+  $("panda-content").hidden = !expanded;
   $("panda-toggle").setAttribute("aria-expanded", String(expanded));
   $("panda-toggle").setAttribute(
     "aria-label",
@@ -285,8 +277,6 @@ function startWorld() {
       panda("乔已经坐下了，我们也去喝茶吧。");
     },
     onNear: (n) => {
-      $("interact").disabled = !n;
-      $("interact").textContent = n ? n.name : "四处走走";
       if (n && Date.now() - (panda.last || 0) > 6500) {
         panda.last = Date.now();
         const hints = {
@@ -975,7 +965,6 @@ $("begin").onclick = async () => {
     $("mode").textContent = "四处走走";
   }
 };
-$("interact").onclick = () => world.interact();
 $("home").onclick = () => {
   speech.stop();
   if (world.scene.id === "home") {

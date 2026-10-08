@@ -246,6 +246,11 @@ canvas {
 .control-note span {
   color: #888373;
 }
+@media (pointer: coarse) {
+  .control-note {
+    display: none;
+  }
+}
 .chinese {
   font-size: 25px;
   line-height: 1.6;
@@ -335,6 +340,7 @@ textarea {
   white-space: nowrap;
 }
 #toast {
+  pointer-events: none;
   position: fixed;
   left: 50%;
   bottom: 100px;
@@ -1891,7 +1897,7 @@ dialog .primary {
   margin-bottom: 20px;
 }
 
-/* The portrait and message share a generous, keyboard-accessible toggle. */
+/* Panda's face opens the help panel without covering the town. */
 .panda-bubble {
   display: block;
   cursor: pointer;
@@ -1900,6 +1906,8 @@ dialog .primary {
   z-index: 5;
 }
 #panda-toggle {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1911,23 +1919,46 @@ dialog .primary {
   text-align: left;
   line-height: 1.4;
 }
-#panda-toggle img {
-  width: 48px;
-  height: 54px;
+.panda-face {
+  position: relative;
+  display: block;
+  width: 60px;
+  height: 52px;
   flex-shrink: 0;
-  object-fit: contain;
+  overflow: hidden;
+  border-radius: 50%;
 }
-#panda-preview,
+.panda-face img {
+  position: absolute;
+  width: 80px;
+  height: auto;
+  max-width: none;
+  left: -10px;
+  top: -8px;
+}
 #panda-title {
   flex: 1;
   overflow-wrap: anywhere;
 }
-#panda-title,
-.panda-bubble:not(.expanded) #panda-message,
-.panda-bubble:not(.expanded) #panda-help {
+.panda-bubble:not(.expanded) #panda-title,
+.panda-bubble:not(.expanded) #panda-toggle-icon {
   display: none;
 }
-.panda-bubble.expanded #panda-preview {
+.panda-bubble:not(.expanded) {
+  width: 60px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+.panda-bubble:not(.expanded) #panda-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  filter: drop-shadow(0 3px 4px #65442650);
+}
+#panda-content[hidden] {
   display: none;
 }
 .panda-bubble.expanded #panda-title {
@@ -1957,9 +1988,15 @@ dialog .primary {
   font-size: 22px;
   line-height: 1.6;
 }
-.panda-bubble.expanded #panda-toggle img {
+.panda-bubble.expanded .panda-face {
   width: 72px;
-  height: 82px;
+  height: 62px;
+}
+.panda-bubble.expanded .panda-face img {
+  width: 96px;
+  height: auto;
+  left: -12px;
+  top: -10px;
 }
 .panda-bubble.expanded #panda-content {
   padding-left: 0;
@@ -1981,5 +2018,14 @@ dialog .primary {
   }
   .panda-bubble.expanded {
     padding: 12px;
+  }
+}
+
+/* Long presses on phones belong to the game, never browser text selection. */
+@media (any-pointer: coarse) {
+  html, body, body * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none;
   }
 }

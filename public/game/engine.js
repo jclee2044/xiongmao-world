@@ -77,23 +77,28 @@ export class World {
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) this.clear();
     });
-    for (const button of document.querySelectorAll("[data-direction]")) {
-      const key = button.dataset.direction;
-      button.addEventListener("pointerdown", (e) => {
-        if (this.paused) return;
-        e.preventDefault();
-        button.setPointerCapture(e.pointerId);
-        this.keys.add(key);
-      });
-      for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-        button.addEventListener(type, () => this.keys.delete(key));
-    }
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
     canvas.addEventListener("pointerdown", (e) => {
       if (this.paused || !this.camera) return;
-      const r = canvas.getBoundingClientRect(),
-        c = this.camera;
-      const x = (e.clientX - r.left) / c.scale + c.camX - c.ox,
-        y = (e.clientY - r.top) / c.scale + c.camY - c.oy;
+      if (e.pointerType === "touch" || e.pointerType === "pen") {
+        if (this.heldPointer) return;
+        e.preventDefault();
+        this.clear();
+        this.heldPointer = {
+          id: e.pointerId,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          startX: e.clientX,
+          startY: e.clientY,
+          started: performance.now(),
+          dragged: false,
+          origin: this.pointerPoint(e),
+          playerOrigin: { ...this.player },
+        };
+        canvas.setPointerCapture(e.pointerId);
+        return;
+      }
+      const { x, y } = this.pointerPoint(e);
       const target = this.hitAt(x, y);
       if (
         target &&
@@ -107,14 +112,44 @@ export class World {
     });
     canvas.addEventListener("pointermove", (e) => {
       if (this.paused || !this.camera) return;
-      const r = canvas.getBoundingClientRect(),
-        c = this.camera;
-      this.hover = this.hitAt(
-        (e.clientX - r.left) / c.scale + c.camX - c.ox,
-        (e.clientY - r.top) / c.scale + c.camY - c.oy,
-      );
+      const held = this.heldPointer;
+      if (held?.id === e.pointerId) {
+        held.clientX = e.clientX;
+        held.clientY = e.clientY;
+        held.dragged ||=
+          Math.hypot(e.clientX - held.startX, e.clientY - held.startY) > 8;
+        return;
+      }
+      const { x, y } = this.pointerPoint(e);
+      this.hover = this.hitAt(x, y);
       canvas.style.cursor = this.hover ? "pointer" : "default";
     });
+    canvas.addEventListener("pointerup", (e) => {
+      const held = this.heldPointer;
+      if (held?.id !== e.pointerId) return;
+      const tapped =
+        !held.dragged &&
+        performance.now() - held.started < 250 &&
+        Math.hypot(e.clientX - held.startX, e.clientY - held.startY) <= 8;
+      this.clear();
+      if (tapped && !this.paused) {
+        const { x, y } = this.pointerPoint(e);
+        const target = this.hitAt(x, y);
+        if (
+          target &&
+          Math.hypot(
+            interactionPoint(target).x - this.player.x,
+            interactionPoint(target).y - this.player.y,
+          ) < 100
+        )
+          this.onInteract(target);
+        else this.walkTo(target || { x, y }, !!target);
+      }
+    });
+    for (const type of ["pointercancel", "lostpointercapture"])
+      canvas.addEventListener(type, (e) => {
+        if (this.heldPointer?.id === e.pointerId) this.clear();
+      });
     canvas.addEventListener("pointerleave", () => {
       this.hover = null;
     });
@@ -341,10 +376,38 @@ export class World {
     this.paintKey = null;
   }
   clear() {
+    const held = this.heldPointer;
+    this.heldPointer = null;
+    if (held && this.canvas.hasPointerCapture(held.id))
+      this.canvas.releasePointerCapture(held.id);
     this.keys.clear();
     this.route = [];
     this.pendingInteraction = null;
     this.navigationFocus = null;
+  }
+  pointerPoint({ clientX, clientY }) {
+    const r = this.canvas.getBoundingClientRect(),
+      c = this.camera;
+    return {
+      x: (clientX - r.left) / c.scale + c.camX - c.ox,
+      y: (clientY - r.top) / c.scale + c.camY - c.oy,
+    };
+  }
+  pointerDirection(t) {
+    const held = this.heldPointer;
+    if (!held || (!held.dragged && t - held.started < 250))
+      return { dx: 0, dy: 0 };
+    // Anchor steering to the player's screen position at touch-down. Neither
+    // walking past the finger nor camera scrolling changes the held direction.
+    const dx =
+      held.origin.x -
+      held.playerOrigin.x +
+      (held.clientX - held.startX) / this.camera.scale;
+    const dy =
+      held.origin.y -
+      held.playerOrigin.y +
+      (held.clientY - held.startY) / this.camera.scale;
+    return Math.hypot(dx, dy) < 12 ? { dx: 0, dy: 0 } : { dx, dy };
   }
   walkTo(point, interactOnArrival = false) {
     this.pendingInteraction = interactOnArrival ? point.id : null;
@@ -417,10 +480,11 @@ export class World {
         Number(this.keys.has("s") || this.keys.has("arrowdown")) -
         Number(this.keys.has("w") || this.keys.has("arrowup"));
       if (dx || dy) {
+        if (this.heldPointer) this.clear();
         this.route = [];
         this.pendingInteraction = null;
         this.navigationFocus = null;
-      }
+      } else ({ dx, dy } = this.pointerDirection(t));
       while (
         this.route.length &&
         Math.hypot(

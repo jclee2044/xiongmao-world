@@ -50,10 +50,10 @@
         <canvas
           id="world"
           tabindex="0"
-          aria-label="用 WASD 或方向键走路。走近后按空格键。也可以点下面的按钮。"
+          aria-label="按住或拖动屏幕走路，松开停止。也可以用 WASD 或方向键走路，走近后按空格键互动。"
         ></canvas>
         <aside id="goals" aria-label="熊猫的小目标">
-          <details open>
+          <details>
             <summary>熊猫的小目标</summary>
             <ol id="goals-list"></ol>
           </details>
@@ -69,12 +69,13 @@
             aria-controls="panda-content"
             aria-label="展开熊猫的帮助"
           >
-            <img src="/assets/panda.png" alt="" />
-            <span id="panda-preview">帮助</span>
+            <span class="panda-face"
+              ><img src="/assets/panda.png" alt=""
+            /></span>
             <span id="panda-title">熊猫的帮助</span>
             <span id="panda-toggle-icon" aria-hidden="true">⌃</span>
           </button>
-          <div id="panda-content">
+          <div id="panda-content" hidden>
             <p id="panda-message">帮助</p>
             <details id="panda-help">
               <summary>更多提示</summary>
@@ -84,18 +85,11 @@
         </aside>
       </section>
       <footer class="bottom-bar">
-        <div class="controls" aria-label="走路按钮">
-          <button data-direction="arrowup" aria-label="向上走">↑</button
-          ><button data-direction="arrowleft" aria-label="向左走">←</button
-          ><button data-direction="arrowdown" aria-label="向下走">↓</button
-          ><button data-direction="arrowright" aria-label="向右走">→</button>
-        </div>
         <div class="control-note">
           WASD / 方向键走路 · 空格键说话或看看<br /><span id="save-status"
             >正在读日记…</span
           >
         </div>
-        <button class="primary" id="interact" disabled>四处走走</button>
       </footer>
     </main>
     <dialog id="conversation" class="conversation">
