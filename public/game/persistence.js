@@ -33,7 +33,7 @@ export async function api(path, body, signal) {
   });
   const data = await response.json();
   if (!response.ok) {
-    const error = new Error(data.error || "暂时连不上，再试一次吧。");
+    const error = new Error(data.error || "现在还不能用。再试一次吧。");
     error.status = response.status;
     error.data = data;
     throw error;
@@ -65,7 +65,7 @@ export class Persistence {
       );
       return true;
     } catch {
-      this.onStatus("这台设备存不下了。保存好以前，请先别关页面。");
+      this.onStatus("This device cannot store your save. Keep this page open and export your journal.");
       return false;
     }
   }
@@ -88,23 +88,23 @@ export class Persistence {
           cached.revision === remote.revision
         ) {
           this.identity = remote.identity;
-          this.onStatus("找到还没保存的日记了。");
+          this.onStatus("Recovered an unsynced journal.");
           this.cache();
           await this.flush();
         } else {
           this.conflict = remote;
-          this.onStatus("有两本日记，请选一本。");
+          this.onStatus("Choose between the two saves.");
           this.onConflict(remote);
         }
       } else {
         this.state = upgradeState(remote.state);
         this.revision = remote.revision;
         this.identity = remote.identity;
-        this.onStatus("日记存好了");
+        this.onStatus("Journal saved");
         this.cache();
       }
     } catch {
-      this.onStatus("没有网络，也可以玩。日记先存在这里。");
+      this.onStatus("You can play offline. Your journal is saved on this device.");
     }
     return this.state;
   }
@@ -115,7 +115,7 @@ export class Persistence {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.flush(), 900);
     this.onStatus(
-      this.conflict ? "有两本日记，请在日记里选一本。" : "正在保存…",
+      this.conflict ? "Choose between the two saves in your journal." : "Saving…",
     );
   }
   async flush() {
@@ -134,14 +134,14 @@ export class Persistence {
       this.persisted = generation;
       this.cache();
       this.onStatus(
-        this.generation === this.persisted ? "日记存好了" : "正在保存…",
+        this.generation === this.persisted ? "Journal saved" : "Saving…",
       );
     } catch (error) {
       if (error.status === 409 || error.status === 401) {
         this.conflict = error.data;
-        this.onStatus("有两本日记，请在日记里选一本。");
+        this.onStatus("Choose between the two saves in your journal.");
         this.onConflict(error.data);
-      } else this.onStatus("日记先存在这里，请在日记里再试一次。");
+      } else this.onStatus("Saved on this device. Retry syncing from your journal.");
     } finally {
       this.saving = false;
       if (!this.conflict && this.generation !== this.persisted) {

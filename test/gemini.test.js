@@ -43,7 +43,7 @@ test("Gemini answers NPC dialogue with bounded history and server-side key", asy
       apiKey: "test-key",
       fetcher: mockGemini(
         {
-          chinese: "你想吃什么面？",
+          chinese: "你想吃什么面条？",
           meaning: "What noodles would you like?",
           topic: "food",
         },

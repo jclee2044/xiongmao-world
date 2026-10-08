@@ -646,6 +646,8 @@ input[type="range"] {
 }
 .bottom-bar {
   position: absolute;
+  /* This informational footer must not swallow taps on the world below it. */
+  pointer-events: none;
   z-index: 2;
   inset: auto 22px max(16px, env(safe-area-inset-bottom));
   padding: 0;
@@ -677,9 +679,7 @@ input[type="range"] {
   min-width: 85px;
 }
 .welcome {
-  background:
-    linear-gradient(#f8f0dedb, #f8f0deed),
-    url("/assets/world/canal-lane.webp") center / cover;
+  background: #f5efdf;
 }
 .district-map {
   display: block;

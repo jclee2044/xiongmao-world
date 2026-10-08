@@ -60,7 +60,7 @@ export class Speech {
     const settings = this.getSettings();
     voice = normalizeVoice(voice);
     text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
-    if (!settings.voice) return this.onStatus("声音关了，可以在设置里打开。");
+    if (!settings.voice) return this.onStatus("声音关了。可以在 Settings 里开。");
     const generation = this.generation;
     // Mobile voice lists can arrive after construction without voiceschanged.
     this.refresh();
@@ -84,14 +84,14 @@ export class Speech {
       utterance.onerror = () => {
         if (generation === this.generation) {
           this.finish(generation);
-          this.onStatus("声音没播出来，再试一次吧。");
+          this.onStatus("现在听不到声音。再试一次吧。");
         }
       };
       try {
         speechSynthesis.speak(utterance);
       } catch {
         this.finish(generation);
-        return this.onStatus("声音没播出来，再试一次吧。");
+        return this.onStatus("现在听不到声音。再试一次吧。");
       }
       return this.onStatus(`正在说话…`);
     }
@@ -114,7 +114,7 @@ export class Speech {
       this.audio.onerror = () => {
         if (generation === this.generation) {
           this.finish(generation);
-          this.onStatus("声音没播出来，再试一次吧。");
+          this.onStatus("现在听不到声音。再试一次吧。");
         }
       };
       this.activity(settings.voiceVolume > 0, generation);
@@ -128,7 +128,7 @@ export class Speech {
     } catch (error) {
       if (generation === this.generation && error.name !== "AbortError") {
         this.finish(generation);
-        this.onStatus("现在没有声音，可以先看看文字。");
+        this.onStatus("现在没有声音，可以先看看字。");
       }
     }
   }

@@ -203,7 +203,7 @@ try {
   await page.screenshot({ path: "test-results/life-listening.png" });
   await page.locator('[data-practice-choice="1"]').click();
   await page.locator('[data-close="panel"]').click();
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.locator('[data-setting="translation"]').selectOption("false");
   await page.locator('[data-close="panel"]').click();
@@ -221,7 +221,7 @@ try {
   );
   await page.locator("#practice-share button").click();
   await page.locator('[data-close="panel"]').click();
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("true");
   await page.locator('[data-setting="translation"]').selectOption("true");
   await page.locator('[data-close="panel"]').click();

@@ -1,5 +1,6 @@
 import { scenes, move, nearest, canStand, interactionPoint } from "./world.js";
-import { draw } from "./render.js";
+import { draw, prepareArt } from "./render.js";
+import { hitExitArrow } from "./exit-arrow.js";
 import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
 import { lifeActors } from "./life.js";
@@ -16,6 +17,7 @@ export class World {
       getFound = () => false,
       getAdventure = () => ({}),
       onGuestArrive = () => {},
+      onArtStatus = () => {},
     },
   ) {
     Object.assign(this, {
@@ -27,6 +29,7 @@ export class World {
       getFound,
       getAdventure,
       onGuestArrive,
+      onArtStatus,
     });
     this.ctx = canvas.getContext("2d");
     this.keys = new Set();
@@ -44,7 +47,7 @@ export class World {
     const editable = () =>
       /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
     window.addEventListener("keydown", (e) => {
-      if (editable() || this.paused) return;
+      if (editable() || this.paused || this.artPending) return;
       const k = e.key.toLowerCase();
       if (
         k === " " &&
@@ -79,7 +82,7 @@ export class World {
     });
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
     canvas.addEventListener("pointerdown", (e) => {
-      if (this.paused || !this.camera) return;
+      if (this.paused || this.artPending || !this.camera) return;
       if (e.pointerType === "touch" || e.pointerType === "pen") {
         if (this.heldPointer) return;
         e.preventDefault();
@@ -99,6 +102,12 @@ export class World {
         return;
       }
       const { x, y } = this.pointerPoint(e);
+      const exit = hitExitArrow(this.scene, this.player, x, y);
+      if (exit) {
+        this.clear();
+        this.onInteract(exit);
+        return;
+      }
       const target = this.hitAt(x, y);
       if (
         target &&
@@ -111,7 +120,7 @@ export class World {
       else this.walkTo(target || { x, y }, !!target);
     });
     canvas.addEventListener("pointermove", (e) => {
-      if (this.paused || !this.camera) return;
+      if (this.paused || this.artPending || !this.camera) return;
       const held = this.heldPointer;
       if (held?.id === e.pointerId) {
         held.clientX = e.clientX;
@@ -134,6 +143,11 @@ export class World {
       this.clear();
       if (tapped && !this.paused) {
         const { x, y } = this.pointerPoint(e);
+        const exit = hitExitArrow(this.scene, this.player, x, y);
+        if (exit) {
+          this.onInteract(exit);
+          return;
+        }
         const target = this.hitAt(x, y);
         if (
           target &&
@@ -199,6 +213,8 @@ export class World {
     );
   }
   hitAt(x, y) {
+    const exit = hitExitArrow(this.scene, this.player, x, y);
+    if (exit) return exit;
     const actors = [
       ...this.actors().filter((o) => o.type === "passerby"),
       ...this.scene.interactables.filter(
@@ -315,7 +331,7 @@ export class World {
         id: "lian",
         dialogueId: "lian",
         type: "guest",
-        name: "莲 · Lian",
+        name: "Lian",
         appearance: "lian",
         x: this.player.x - 50,
         y: this.player.y,
@@ -451,10 +467,27 @@ export class World {
     ].find((p) => canStand(this.scene, p.x, p.y));
     this.trail = [];
     this.clear();
+    this.loadSceneArt();
     this.onMove?.(this.scene.id, this.player);
   }
+  loadSceneArt() {
+    const generation = (this.artGeneration = (this.artGeneration || 0) + 1);
+    this.artPending = true;
+    this.canvas.dataset.artReady = "false";
+    this.onArtStatus("loading");
+    prepareArt(this.scene)
+      .then(() => {
+        if (generation !== this.artGeneration) return;
+        this.artPending = false;
+        this.paintKey = null;
+        this.onArtStatus("ready");
+      })
+      .catch(() => {
+        if (generation === this.artGeneration) this.onArtStatus("error");
+      });
+  }
   interact() {
-    if (this.paused) return;
+    if (this.paused || this.artPending) return;
     const n = this.nearby();
     if (n) this.onInteract(n);
   }
@@ -466,6 +499,10 @@ export class World {
   frame(t) {
     const dt = Math.min(0.1, (t - this.last) / 1000 || 0);
     this.last = t;
+    if (this.artPending) {
+      requestAnimationFrame((next) => this.frame(next));
+      return;
+    }
     if (!this.paused && this.getSettings().motion !== false)
       this.ambientTime += dt;
     let moving = false;

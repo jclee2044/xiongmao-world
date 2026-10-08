@@ -1,3 +1,4 @@
+import { optimizedArt } from "../public/data/optimized-art.js";
 import { Store } from "../server/store.js";
 import { createApp } from "../server/index.js";
 const testStore = new Store(":memory:");
@@ -21,7 +22,7 @@ const saved = (page) =>
   page.waitForFunction(() => {
     const cache = JSON.parse(localStorage.getItem("panda-world-v1"));
     return (
-      document.getElementById("save-status").textContent === "日记存好了" &&
+      document.getElementById("save-status").textContent === "Journal saved" &&
       cache?.dirty === false
     );
   });
@@ -45,7 +46,8 @@ try {
   await page.locator("canvas").waitFor({ state: "visible" });
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   await page.waitForFunction(
-    () => document.getElementById("save-status").textContent === "日记存好了",
+    () =>
+      document.getElementById("save-status").textContent === "Journal saved",
   );
   const cache = await page.evaluate(async () => {
     const keys = await caches.keys();
@@ -62,10 +64,20 @@ try {
   assert.ok(cache.requests.includes("/data/adventure.js"));
   assert.ok(cache.requests.includes("/data/ponds.js"));
   assert.ok(cache.requests.includes("/game/music-ownership.js"));
-  assert.ok(cache.requests.includes("/assets/world/museum-interior.png"));
-  assert.ok(cache.requests.includes("/assets/characters/indoor-npcs.png"));
-  assert.ok(cache.requests.includes("/assets/characters/market-npcs.png"));
-  assert.ok(cache.requests.includes("/assets/characters/visitors-walk.png"));
+  assert.ok(
+    cache.requests.includes(optimizedArt["/assets/world/museum-interior.png"]),
+  );
+  assert.ok(
+    cache.requests.includes(optimizedArt["/assets/characters/indoor-npcs.png"]),
+  );
+  assert.ok(
+    cache.requests.includes(optimizedArt["/assets/characters/market-npcs.png"]),
+  );
+  assert.ok(
+    cache.requests.includes(
+      optimizedArt["/assets/characters/visitors-walk.png"],
+    ),
+  );
   assert.ok(
     cache.requests.includes(
       "/assets/audio/sonican-asian-music-magical-dream.mp3",
@@ -79,7 +91,7 @@ try {
   await page.locator("canvas").waitFor({ state: "visible" });
   await page.locator("#practice").click();
   assert.equal(await page.locator("[data-activity]").count(), 17);
-  await page.getByRole("button", { name: "关闭" }).click();
+  await page.locator('[data-close="panel"]').click();
   await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(
     () => document.querySelector("canvas").dataset.routeLength === "0",
@@ -114,10 +126,10 @@ try {
     cleanBeforeReload: beforeReload,
     persistedReload: "pass",
   };
-  await page.getByRole("button", { name: "日记", exact: true }).click();
-  await page.getByRole("button", { name: "给我一个号码" }).click();
+  await page.getByRole("button", { name: "Journal", exact: true }).click();
+  await page.getByRole("button", { name: "Get a pairing code" }).click();
   await page.waitForFunction(() =>
-    document.getElementById("code-output").textContent.includes("五分钟"),
+    document.getElementById("code-output").textContent.includes("five minutes"),
   );
   const code = (await page.locator("#code-output").textContent()).split(" ")[0];
   const other = await browser.newContext({
@@ -128,14 +140,15 @@ try {
   await second.getByRole("button", { name: "和熊猫一起走走" }).click();
   await second.locator("canvas").waitFor({ state: "visible" });
   await second.waitForFunction(
-    () => document.getElementById("save-status").textContent === "日记存好了",
+    () =>
+      document.getElementById("save-status").textContent === "Journal saved",
   );
   await second.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await second.getByRole("button", { name: "日记", exact: true }).click();
+  await second.getByRole("button", { name: "Journal", exact: true }).click();
   await second.locator("#pair-input").fill(code);
   await Promise.all([
     second.waitForEvent("framenavigated"),
-    second.getByRole("button", { name: "连接", exact: true }).click(),
+    second.getByRole("button", { name: "Connect", exact: true }).click(),
   ]);
   await second.waitForLoadState("load");
   await second.getByRole("button", { name: "和熊猫一起走走" }).click();
@@ -147,14 +160,14 @@ try {
   await saved(second);
   // Make the paired writer's newer revision explicit before the original
   // client attempts its stale save; this assertion must not depend on timers.
-  await second.getByRole("button", { name: "设置", exact: true }).click();
+  await second.getByRole("button", { name: "Settings", exact: true }).click();
   await second.locator('[data-setting="pinyin"]').selectOption("true");
   await saved(second);
   const newerWriter = await saveMetadata(second);
-  await page.getByRole("button", { name: "关闭" }).click();
+  await page.locator('[data-close="panel"]').click();
   await page.getByRole("button", { name: "回家", exact: true }).click();
   await page.waitForFunction(() =>
-    document.getElementById("save-status").textContent.includes("两本日记"),
+    document.getElementById("save-status").textContent.includes("two saves"),
   );
   const staleWriter = await saveMetadata(page);
   assert.equal(staleWriter.dirty, true);
@@ -234,7 +247,7 @@ try {
   await interrupted.getByRole("button", { name: "和熊猫一起走走" }).click();
   await interrupted.locator("canvas").waitFor({ state: "visible" });
   await interrupted.waitForFunction(() =>
-    document.getElementById("save-status").textContent.includes("两本日记"),
+    document.getElementById("save-status").textContent.includes("two saves"),
   );
   const interruptedReload = await saveMetadata(interrupted);
   assert.equal(interruptedReload.revision, pendingLocal.revision);

@@ -99,7 +99,7 @@ test("Panda explains grammar offline and answers open questions through the loca
     { question: "Why use 吗 here?" },
     { provider: "story" },
   );
-  assert.match(guide.explanation, /句子后面加“吗”/);
+  assert.match(guide.explanation, /句子后面放“吗”/);
   assert.doesNotMatch(guide.explanation, /[A-Za-z]/);
   const english = await coachReply(
     { question: "Why use 吗 here?" },
@@ -147,5 +147,5 @@ test("every original strolling character remains present, with the tangerine vis
   assert.ok(
     tangerines.x < scene.width * 0.2 && tangerines.y > scene.height * 0.8,
   );
-  assert.match(tangerines.bubble, /橘子很甜/);
+  assert.match(tangerines.bubble, /tangerines\s*很甜/);
 });

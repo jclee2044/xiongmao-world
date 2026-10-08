@@ -59,7 +59,7 @@ try {
       const original = ctx.drawImage.bind(ctx),
         calls = [];
       ctx.drawImage = (img, ...args) => {
-        if (img.src?.endsWith("/assets/characters/indoor-npcs.png"))
+        if (img.src?.endsWith("/assets/optimized/indoor-npcs.webp"))
           calls.push(args.slice(0, 4));
         original(img, ...args);
       };

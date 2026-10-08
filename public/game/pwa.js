@@ -1,12 +1,13 @@
 export async function registerPwa({ onUpdate, onStatus }) {
   if (!("serviceWorker" in navigator) || !window.isSecureContext)
     return onStatus(
-      "要用 HTTPS 地址，才能离线玩。在这台电脑上也可以用 localhost。",
+      "Offline play requires HTTPS or localhost on this computer.",
     );
   try {
     const wasControlled = !!navigator.serviceWorker.controller;
     const registration = await navigator.serviceWorker.register("/sw.js", {
       updateViaCache: "none",
+      type: "module",
     });
     const announce = () => {
       if (registration.waiting)
@@ -29,6 +30,6 @@ export async function registerPwa({ onUpdate, onStatus }) {
       }
     });
   } catch {
-    onStatus("现在还不能离线玩，先连着网络玩吧。");
+    onStatus("Offline play is unavailable. Keep your internet connection on.");
   }
 }

@@ -86,7 +86,7 @@ try {
     await ambience.context.close();
     return { gain, calls, rms, muted };
   });
-  assert.ok(audio.gain > 0.5, JSON.stringify(audio));
+  assert.ok(audio.gain > 0.15 && audio.gain < 0.25, JSON.stringify(audio));
   assert.ok(audio.calls > 0, JSON.stringify(audio));
   assert.ok(audio.rms > 0.001, JSON.stringify(audio));
   assert.equal(audio.muted, 0);

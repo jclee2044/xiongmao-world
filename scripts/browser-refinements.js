@@ -141,7 +141,7 @@ try {
   );
   assert.match(
     await page.locator("#panel-title").innerText(),
-    /和莲一起吃火锅/,
+    /和Lian吃hot pot/,
   );
   await page.waitForTimeout(400);
   await page.screenshot({ path: "test-results/refined-seated-hotpot.png" });

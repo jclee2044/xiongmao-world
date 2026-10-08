@@ -130,7 +130,7 @@ export class Ambience {
       0.15,
     );
     this.water.gain.setTargetAtTime(levels.water * 0.085, t, 1.8);
-    this.fountain.gain.setTargetAtTime(levels.fountain * 0.85, t, 0.45);
+    this.fountain.gain.setTargetAtTime(levels.fountain * 0.25, t, 0.45);
     if (w.paused || this.ducked) return;
     if (levels.birds > 0.05 && t > this.nextBird) {
       this.bird(levels.birds);

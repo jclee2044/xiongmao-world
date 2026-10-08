@@ -21,11 +21,11 @@ export function createDirections({
     const d = directionsTo("dumplings", persistence.state);
     const zh =
       a.directionsFind === "done"
-        ? "你找到火锅店了！下次你可以帮别人指路。"
-        : "火锅店在湖的下面。沿着集市右边的石头路走。不要走进水里，要走桥哦。";
+        ? "你找到饭店了！下次你可以帮别人说怎么走。"
+        : "饭店在湖的下面。跟着市场右边的石头路走。不要走进水里，要走桥啊。";
     openPanel(
       "问路",
-      `<p class="chinese" lang="zh-CN">${zh}</p><p>听林说怎么走，再去找火锅店。可以看看地图，或沿着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一遍</button><button id="directions-go" class="primary">我去找找！</button></div>`,
+      `<p class="chinese" lang="zh-CN">${zh}</p><p>听Lin说怎么走，再去找饭店。可以看看地图，或者跟着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一次</button><button id="directions-go" class="primary">我去找找！</button></div>`,
     );
     $("directions-listen").onclick = () => say(zh);
     $("directions-go").onclick = () => {
@@ -39,17 +39,17 @@ export function createDirections({
       zh: "书店在河的哪边？",
       options: ["南边。", "北边。", "水里面。"],
       correct: 0,
-      hint: "书店在集市南边。要过南边的桥。",
+      hint: "书店在市场南边。要过南边的桥。",
     },
     {
       zh: "从这里到书店，怎么走？",
       options: [
-        "往左走，过南边的桥，再往左走。",
+        "往左边走，过南边的桥，再往左边走。",
         "往北走，去竹林。",
         "穿过河水就到了。",
       ],
       correct: 0,
-      hint: "我们在集市东南边。先往左找石桥，过桥后再往左。",
+      hint: "我们在市场东南边。先往左边找桥，过桥，然后再往左边。",
     },
   ];
   function give() {
@@ -57,8 +57,8 @@ export function createDirections({
     if (a.directionsGive === "done") {
       const zh = "谢谢你！我知道怎么去书店了。";
       openPanel(
-        "帮浩指路",
-        `<p class="chinese">${zh}</p><p>✓ 浩知道怎么去书店了。</p>`,
+        "帮Hao说怎么走",
+        `<p class="chinese">${zh}</p><p>✓ Hao知道怎么去书店了。</p>`,
       );
       say(zh);
       return;
@@ -68,8 +68,8 @@ export function createDirections({
     const step = steps[Math.min(1, a.directionsStep)],
       order = a.directionsStep ? [1, 0, 2] : [0, 2, 1];
     openPanel(
-      "帮浩找书店",
-      `<p class="chinese">我想去书店。你能告诉我怎么走吗？</p><p>${a.directionsStep + 1} / 2 · 看看地图，帮浩找路。</p><p class="chinese">${step.zh}</p><div id="direction-choices" class="direction-choices">${order.map((i) => `<button data-direction="${i}">${step.options[i]}</button>`).join("")}</div><p id="directions-feedback" role="status"></p><button id="directions-hint">问熊猫</button>`,
+      "帮Hao找书店",
+      `<p class="chinese">我想去书店。你能告诉我怎么走吗？</p><p>${a.directionsStep + 1} / 2 · 看看地图，帮Hao找路。</p><p class="chinese">${step.zh}</p><div id="direction-choices" class="direction-choices">${order.map((i) => `<button data-direction="${i}">${step.options[i]}</button>`).join("")}</div><p id="directions-feedback" role="status"></p><button id="directions-hint">问熊猫</button>`,
     );
     $("directions-hint").onclick = () => {
       $("directions-feedback").textContent = step.hint;
@@ -102,10 +102,10 @@ export function createDirections({
     const a = persistence.state.adventure;
     const sayFlower = (zh) => speech.speak(zh, false, "female");
     if (a.flowerDirections === "done") {
-      const zh = "谢谢你！先往右走，过桥，再往右走。花店在湖的上面。我知道了！";
+      const zh = "谢谢你！先往右边走，过桥，再往右边走。花店在湖的上面。我知道了！";
       openPanel(
-        "帮小雨指路",
-        `<p class="chinese" lang="zh-CN">${zh}</p><p>✓ 小雨知道怎么去花店了。+40 经验</p>`,
+        "帮Xiaoyu说怎么走",
+        `<p class="chinese" lang="zh-CN">${zh}</p><p>✓ Xiaoyu知道怎么去花店了。+40 XP</p>`,
       );
       sayFlower(zh);
       return;
@@ -116,27 +116,27 @@ export function createDirections({
       {
         zh: "花店在哪里？",
         options: [
-          "在集市东北边，湖的上面。",
+          "在市场东北边，湖的上面。",
           "在书店里面。",
           "在西边的竹林里。",
         ],
         correct: 0,
-        hint: "看地图：花店在集市的右上方，湖的上面。",
+        hint: "看地图：花店在市场的右边上面，湖的上面。",
       },
       {
         zh: "从这里怎么去花店？",
         options: [
-          "往左走，去竹林。",
-          "先往右走，过桥，再往右走。",
+          "往左边走，去竹林。",
+          "先往右边走，过桥，再往右边走。",
           "走进河里。",
         ],
         correct: 1,
-        hint: "沿着集市北边的路往右走，过东边的桥。花店就在前面。",
+        hint: "跟着市场北边的路往右边走，过东边的桥。花店就在前面。",
       },
     ];
     const step = steps[Math.min(1, a.flowerDirectionsStep)];
     openPanel(
-      "帮小雨找花店",
+      "帮Xiaoyu找花店",
       `<p class="chinese" lang="zh-CN">我在找花店。你能告诉我怎么走吗？</p><p>${a.flowerDirectionsStep + 1} / 2</p><p class="chinese" lang="zh-CN">${step.zh}</p><div id="flower-direction-choices" class="direction-choices">${step.options.map((text, i) => `<button data-direction="${i}">${text}</button>`).join("")}</div><p id="flower-directions-feedback" role="status"></p><button id="flower-directions-hint">问熊猫</button>`,
     );
     const hint = () => {
@@ -176,7 +176,7 @@ export function createDirections({
       a.directionsFind = "done";
       award(a, 40);
     });
-    panda("找到了！这就是火锅店。你会问路了！");
+    panda("找到了！这就是饭店。你会问路了！");
   }
   return { find, give, flowers, visit };
 }

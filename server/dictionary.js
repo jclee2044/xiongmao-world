@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { pinyin } from "pinyin-pro";
 import { lexicon } from "../public/data/content.js";
+import { isBeginnerChinese } from "../public/data/language.js";
 let dictionary;
 function load() {
   if (dictionary) return dictionary;
@@ -33,13 +34,25 @@ export function defineText(text) {
     tokens = [];
   let i = 0;
   while (i < text.length) {
+    const english = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*/.exec(text.slice(i));
+    if (english) {
+      tokens.push({ zh: english[0], pinyin: "", meaning: "", punctuation: true });
+      i += english[0].length;
+      continue;
+    }
     let entry;
     for (let n = Math.min(12, text.length - i); n > 0; n--) {
       entry = d.get(text.slice(i, i + n));
       if (entry) break;
     }
     if (entry) {
-      tokens.push({ ...entry, pinyin: entry.pinyin || pinyin(entry.zh) });
+      tokens.push({
+        ...entry,
+        meaning: entry.meaning.replace(/[\p{Script=Han}]+/gu, (word) =>
+          isBeginnerChinese(word) ? word : "(Chinese term)",
+        ),
+        pinyin: entry.pinyin || pinyin(entry.zh),
+      });
       i += entry.zh.length;
     } else {
       const zh = String.fromCodePoint(text.codePointAt(i));

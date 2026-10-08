@@ -87,27 +87,27 @@ export function refineMarket(scene) {
       id: "market-baker",
       type: "npc",
       dialogueId: "baker",
-      name: "阿香",
+      name: "Axiang",
       appearance: "baker",
       x: 1470,
       y: 1400,
       approachX: 1470,
       approachY: 1450,
       artHeight: 175,
-      bubbles: ["包子热热的！", "来吃早饭吧。"],
+      bubbles: ["面包热热的！", "来吃东西吧。"],
     },
     {
       id: "market-cook",
       type: "npc",
       dialogueId: "waiter",
-      name: "小陈",
+      name: "Xiaochen",
       appearance: "waiter",
       x: 2510,
       y: 2130,
       approachX: 2510,
       approachY: 2180,
       artHeight: 180,
-      bubbles: ["面好了！", "你想吃什么？"],
+      bubbles: ["面条好了！", "你想吃什么？"],
     },
   );
   const native = (id, x, y, ax = x, ay = y + 40) => {
@@ -179,7 +179,7 @@ export function refineMarket(scene) {
     });
   }
   scene.scenery.push(
-    { type: "market", x: 320, y: 2620, w: 190, h: 165, label: "橘子" },
+    { type: "market", x: 320, y: 2620, w: 190, h: 165, label: "tangerines" },
     { type: "fruit-tree", fruit: "orange", x: 175, y: 2500, w: 135, h: 190 },
     { type: "fruit-tree", fruit: "orange", x: 215, y: 2770, w: 135, h: 190 },
   );
@@ -464,7 +464,7 @@ export function refineMarket(scene) {
   }
   // A moored passenger boat replaces the invisible southeast departure gate.
   Object.assign(stop("next-area"), {
-    name: "游船码头",
+    name: "Boat dock",
     x: 3420,
     y: 2445,
     approachX: 3420,

@@ -1,4 +1,6 @@
+import { optimizedArt } from "../data/optimized-art.js";
 import { drawFountain, drawFountainBirds } from "./fountain.js";
+import { exitArrow } from "./exit-arrow.js";
 import { AREA_XP } from "../data/adventure.js";
 import bounds from "../data/art-bounds.js";
 import {
@@ -11,6 +13,7 @@ import { paintGround, blendedPlate } from "./terrain.js";
 import { lifeActors, paintLeaves } from "./life.js";
 const images = new Map();
 function asset(path) {
+  path = optimizedArt[path] || path;
   if (!images.has(path)) {
     const img = new Image();
     img.src = path;
@@ -57,61 +60,83 @@ const paths = {
   landmarks: "/assets/world/landmarks.webp",
   animals: "/assets/characters/animals.webp",
 };
-export const pandaImage = asset(paths.panda);
 // Boundaries lie in the transparent gaps between the unevenly spaced poses.
 // Equal-width cells included black slivers from neighboring animation frames.
 const pandaFrameEdges = [0, 382, 742, 1086, 1444, 1802, 2172];
-export async function prepareArt(scene) {
-  if (scene.backgroundPath) await asset(scene.backgroundPath).decode();
-  const names = [
-    "fountain",
-    "boat",
-    "water",
-    "lian",
-    "fruitTrees",
-    "linWalk",
-    "seated",
-    "sheep",
-    "lane",
-    "paving",
-    "earth",
-    "house",
-    "tree",
-    "player",
-    "idle",
-    "hotpotTable",
-    "panda",
-    "mei",
-    "lin",
-    "yun",
-    "momo",
-    "walk",
-    "neighbors",
-    "indoorNpcs",
-    "marketNpcs",
-    "neighborWalk",
-    "visitorWalk",
-    "children",
-    "market",
-    "bridges",
-    "restaurant",
-    "qiaoSeated",
-    "props",
-    "home",
-    "storefronts",
-    "landmarks",
-    "animals",
-  ];
-  await Promise.all(names.map((name) => asset(paths[name]).decode()));
+const decoded = new Map();
+function decodeAsset(path) {
+  if (!decoded.has(path)) {
+    const promise = asset(path)
+      .decode()
+      .catch((error) => {
+        decoded.delete(path);
+        images.delete(optimizedArt[path] || path);
+        throw error;
+      });
+    decoded.set(path, promise);
+  }
+  return decoded.get(path);
+}
+const commonArt = ["player", "idle", "walk", "panda", "seated", "momo"];
+export function prepareCommonArt() {
+  return Promise.all(commonArt.map((name) => decodeAsset(paths[name])));
+}
+export async function prepareArt(scene, onProgress = () => {}) {
+  const names = new Set(commonArt);
+  // Interior backgrounds are fetched only when that room is entered.
+  if (scene.id === "home" || scene.interior) {
+    [
+      "neighbors",
+      "indoorNpcs",
+      "mei",
+      "lin",
+      "yun",
+      "qiaoSeated",
+      "lian",
+    ].forEach((name) => names.add(name));
+    if (scene.id === "home") names.add("sheep");
+    if (scene.id === "restaurant") names.add("hotpotTable");
+  } else {
+    [
+      "fountain",
+      "boat",
+      "water",
+      "lian",
+      "fruitTrees",
+      "linWalk",
+      "lane",
+      "paving",
+      "earth",
+      "house",
+      "tree",
+      "mei",
+      "lin",
+      "yun",
+      "neighbors",
+      "indoorNpcs",
+      "marketNpcs",
+      "neighborWalk",
+      "visitorWalk",
+      "children",
+      "market",
+      "bridges",
+      "qiaoSeated",
+      "props",
+      "storefronts",
+      "landmarks",
+      "animals",
+    ].forEach((name) => names.add(name));
+  }
+  const files = [...names].map((name) => paths[name]);
+  if (scene.backgroundPath) files.push(scene.backgroundPath);
+  else if (scene.id === "home") files.push(paths.home);
+  let completed = 0;
+  onProgress(completed, files.length);
   await Promise.all(
-    ["restaurant", "museum", "clothing-store"].map((name) =>
-      asset(`/assets/world/${name}-interior.png`).decode(),
-    ),
-  );
-  await Promise.all(
-    ["bakery", "teahouse", "bookshop"].map((name) =>
-      asset(`/assets/world/${name}-interior.webp`).decode(),
-    ),
+    files.map(async (path) => {
+      await decodeAsset(path);
+      onProgress(++completed, files.length);
+    }),
   );
 }
 const idleCrops = [];
@@ -296,7 +321,7 @@ function festivalLanterns(ctx, rack, time, motion) {
   ctx.fillStyle = "#624833";
   ctx.textAlign = "center";
   ctx.font = '19px "Noto Serif CJK SC",serif';
-  ctx.fillText("猜灯谜", 0, -7);
+  ctx.fillText("回答问题", 0, -7);
   ctx.restore();
 }
 function pondDecor(ctx, o, time, animate) {
@@ -698,9 +723,7 @@ export function draw(
       ctx.strokeStyle = "#43342b";
       ctx.fillStyle = "#fff9e9";
       const label =
-        adventure.xp >= AREA_XP
-          ? "游船 · 可以出发了"
-          : `游船 · ${AREA_XP} 经验`;
+        adventure.xp >= AREA_XP ? "船 · 可以走了" : `船 · ${AREA_XP} XP`;
       ctx.strokeText(label, o.x, o.y - o.h - 18);
       ctx.fillText(label, o.x, o.y - o.h - 18);
       ctx.restore();
@@ -765,7 +788,7 @@ export function draw(
         ctx.fillStyle = "#6e3c35";
         ctx.fillRect(o.x - 68, o.y - o.h * 0.56, 136, 43);
         ctx.fillStyle = "#fff1d6";
-        ctx.fillText("服装店", o.x, o.y - o.h * 0.56 + 30);
+        ctx.fillText("Clothing shop", o.x, o.y - o.h * 0.56 + 30);
         ctx.restore();
       }
     } else if (o.type === "festival-lanterns") {
@@ -1129,6 +1152,34 @@ export function draw(
     ctx.beginPath();
     ctx.ellipse(near.x, near.y + 3, 28, 9, 0, 0, Math.PI * 2);
     ctx.fill();
+  }
+  const exit = exitArrow(scene, player);
+  if (exit) {
+    ctx.save();
+    ctx.fillStyle = hover?.id === exit.door.id ? "#326b69" : "#214e50";
+    ctx.strokeStyle = "#fff4dc";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(exit.x, exit.y, exit.w, exit.h, 16);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = "#fff4dc";
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(exit.x + 27, exit.y + 16);
+    ctx.lineTo(exit.x + 27, exit.y + 42);
+    ctx.moveTo(exit.x + 17, exit.y + 32);
+    ctx.lineTo(exit.x + 27, exit.y + 42);
+    ctx.lineTo(exit.x + 37, exit.y + 32);
+    ctx.stroke();
+    ctx.fillStyle = "#fff4dc";
+    ctx.font = 'bold 22px "Noto Sans CJK SC",sans-serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("出门", exit.x + 75, exit.y + 29);
+    ctx.restore();
   }
   ctx.restore();
   canvas.dataset.artReady = String(

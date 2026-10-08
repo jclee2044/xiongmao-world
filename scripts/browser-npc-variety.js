@@ -27,9 +27,12 @@ try {
     errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   // The sprite review owns the page; the game starts after the review is saved.
-  await page.route("**/app.js", (route) => route.fulfill({
-    contentType: "text/javascript", body: "",
-  }));
+  await page.route("**/app.js", (route) =>
+    route.fulfill({
+      contentType: "text/javascript",
+      body: "",
+    }),
+  );
   await page.goto(base);
   const results = await page.evaluate(async () => {
     const { scenes } = await import("/game/world.js");
@@ -158,7 +161,7 @@ try {
   );
   for (const o of results.filter((o) => o.poses)) {
     assert.ok(
-      o.poses.every((p) => p.source.endsWith("/visitors-walk.png")),
+      o.poses.every((p) => p.source.endsWith("/visitors-walk.webp")),
       o.id,
     );
     assert.equal(
@@ -170,7 +173,7 @@ try {
   assert.ok(
     results
       .find((o) => o.id === "market-cook")
-      .calls[0].source.endsWith("/indoor-npcs.png"),
+      .calls[0].source.endsWith("/indoor-npcs.webp"),
   );
   assert.ok(
     results

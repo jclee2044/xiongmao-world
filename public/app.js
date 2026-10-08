@@ -16,7 +16,7 @@ import { expose, explicitPreference } from "./data/learner.js";
 import { createPanels } from "./game/panels.js";
 import { createPractice } from "./game/practice.js";
 import { registerPwa } from "./game/pwa.js";
-import { prepareArt } from "./game/render.js";
+import { prepareArt, prepareCommonArt } from "./game/render.js";
 import { scenes, districtAt } from "./game/world.js";
 const $ = (id) => document.getElementById(id);
 const escape = (text) =>
@@ -36,7 +36,8 @@ let world,
   controller;
 const persistence = new Persistence(
   (text) => ($("save-status").textContent = text),
-  () => toast("另一台设备有新的日记。请在日记里选择要用哪一本。"),
+  () =>
+    toast("Another device has a newer save. Choose a save in your journal."),
 );
 // Unlock audio in the first gesture, but wait for saved preferences before sound.
 const music = new Music({ ...persistence.state.settings, music: 0 });
@@ -67,10 +68,10 @@ function toast(text) {
 function updatePlace() {
   const district = districtAt(world.scene, world.player);
   $("place").textContent = district
-    ? `苏州 · ${district.zh}`
+    ? `Suzhou · ${district.zh}`
     : world.scene.chinese;
   $("place-cn").textContent = district
-    ? `苏州 · ${district.zh}`
+    ? `Suzhou · ${district.zh}`
     : world.scene.chinese;
 }
 function applySettings() {
@@ -89,7 +90,11 @@ function restoreWorld() {
   updatePlace();
   applySettings();
 }
-function openPanel(title, html) {
+function openPanel(title, html, language = "zh-CN") {
+  $("panel").lang = language;
+  $("panel")
+    .querySelector(".close")
+    .setAttribute("aria-label", language === "en" ? "Close" : "关");
   speech.stop();
   $("panel-title").textContent = title;
   $("panel-content").innerHTML = html;
@@ -118,10 +123,10 @@ function updateXP() {
   if (!$("xp-progress")) return;
   const xp = persistence.state.adventure.xp;
   $("xp-progress").value = Math.min(AREA_XP, xp);
-  $("xp-text").textContent = `${xp} / ${AREA_XP} 经验`;
+  $("xp-text").textContent = `${xp} / ${AREA_XP} XP`;
   $("xp-progress").setAttribute(
     "aria-label",
-    xp >= AREA_XP ? "可以去下一站了" : `${xp} / ${AREA_XP} 经验`,
+    xp >= AREA_XP ? "可以去下一站了" : `${xp} / ${AREA_XP} XP`,
   );
 }
 const goals = createGoals({ persistence, world: () => world, panda, speech });
@@ -157,7 +162,7 @@ const panels = createPanels({
     $("panel").close();
     world.pause(false);
     $("world").focus();
-    if (!world.walkTo(position)) toast("这里走不过去，换个地方吧。");
+    if (!world.walkTo(position)) toast("这里走但是去，换个地方吧。");
   },
 });
 const practice = createPractice({
@@ -187,7 +192,7 @@ function updatePracticeStatus() {
   updateXP();
   const status = practice.status();
   if ($("practice-active"))
-    $("practice-active").textContent = status ? `进行中：${status}` : "";
+    $("practice-active").textContent = status ? `正在做：${status}` : "";
 }
 const pandaBubble = $("panda-toggle").closest(".panda-bubble");
 function expandPanda(expanded) {
@@ -196,7 +201,7 @@ function expandPanda(expanded) {
   $("panda-toggle").setAttribute("aria-expanded", String(expanded));
   $("panda-toggle").setAttribute(
     "aria-label",
-    expanded ? "收起熊猫的帮助" : "展开熊猫的帮助",
+    expanded ? "不看熊猫的帮助" : "看熊猫的帮助",
   );
   $("panda-toggle-icon").textContent = expanded ? "⌄" : "⌃";
   $("panda-help").open = expanded;
@@ -237,29 +242,30 @@ practiceStatus.setAttribute("role", "status");
 $("panda-help").append(practiceStatus);
 const neighborPractice = document.createElement("button");
 neighborPractice.id = "neighbor-practice";
-neighborPractice.textContent = "中文小任务";
+neighborPractice.textContent = "中文练习";
 neighborPractice.onclick = () => {
   const id = currentNpc;
   $("conversation").close();
   practice.openForNpc(id);
 };
 $("speech-controls").append(neighborPractice);
-registerPwa({
-  onStatus: toast,
-  onUpdate: (activate) => {
-    $("update").hidden = false;
-    $("update").onclick = async () => {
-      persistence.cache();
-      await persistence.flush();
-      if (
-        persistence.conflict ||
-        persistence.generation !== persistence.persisted
-      )
-        return toast("更新前，请先在日记里保存或下载你的日记。");
-      activate();
-    };
-  },
-});
+const enableOffline = () =>
+  registerPwa({
+    onStatus: toast,
+    onUpdate: (activate) => {
+      $("update").hidden = false;
+      $("update").onclick = async () => {
+        persistence.cache();
+        await persistence.flush();
+        if (
+          persistence.conflict ||
+          persistence.generation !== persistence.persisted
+        )
+          return toast("Save or export your journal before updating.");
+        activate();
+      };
+    },
+  });
 function startWorld() {
   const state = persistence.state;
   world = new World($("world"), {
@@ -271,30 +277,38 @@ function startWorld() {
     }),
     getFound: () => persistence.state.found.includes("momo"),
     getAdventure: () => persistence.state.adventure,
+    onArtStatus: (status) => {
+      $("scene-loading").hidden = status === "ready";
+      $("scene-loading").firstChild.textContent =
+        status === "error"
+          ? "This corner could not load. Check your connection and try again. "
+          : "Opening the next little corner… ";
+      $("scene-retry").hidden = status !== "error";
+    },
     onGuestArrive: () => {
       persistence.change((s) => {
         if (s.adventure.tea === "invited") s.adventure.tea = "seated";
       });
-      panda("乔已经坐下了，我们也去喝茶吧。");
+      panda("Qiao 已经坐下了，我们也去喝茶吧。");
     },
     onNear: (n) => {
       if (n && Date.now() - (panda.last || 0) > 6500) {
         panda.last = Date.now();
         const hints = {
-          lian: "莲饿了。我们请她吃火锅吧！",
-          lan: "兰好像在找什么。去问问她吧。",
-          qiao: "乔今天有空。要不要请她喝茶？",
+          lian: "Lian 饿了。我们请她吃 hot pot 吧！",
+          lan: "Lan 可能在找什么。去问问她吧。",
+          qiao: "Qiao 今天有时间。想不想请她喝茶？",
           "tea-table": "两只杯子！找个朋友一起喝茶吧。",
-          "lost-flowers": "石头旁边是不是有一束花？",
-          museum: "里面有苏州的故事，我们进去看看吧。",
+          "lost-flowers": "石头旁边是不是有一些花？",
+          museum: "里面有 Suzhou 的故事，我们进看看吧。",
           dumplings: "你想吃什么？试着用中文点菜吧。",
         };
         panda(
           hints[n.id] ||
             (n.type === "npc" || n.type === "passerby"
-              ? "我们和他聊聊吧。"
+              ? "我们和他说说吧。"
               : n.type === "door"
-                ? "我们可以进去。"
+                ? "我们可以进。"
                 : n.type === "inspect"
                   ? "看看这里吧。"
                   : "我们一起试试吧。"),
@@ -316,16 +330,17 @@ function startWorld() {
   applySettings();
   updatePracticeStatus();
   updateXP();
-  panda("欢迎！先认识五位邻居吧。左上角有我们的小目标。");
+  panda("欢迎！先认识五位邻居吧。左边上面有我们的要做的事情。");
 }
 function interact(n) {
   goals.nature(n.id);
   directions.visit(n.id);
-  if (n.shopId) return openConversation(shops[n.shopId].seller, n.shopId, n.appearance);
+  if (n.shopId)
+    return openConversation(shops[n.shopId].seller, n.shopId, n.appearance);
   if (n.id === "sheep-keepsake") {
     openPanel(
-      "莲送的小羊",
-      `<img src="/assets/world/sheep-gift.png" alt="你的小羊" width="130" height="145" class="keepsake-portrait"/><p class="chinese" lang="zh-CN">${escape(n.zh)}</p><p class="notice">这是和莲一起吃火锅后，她送给你的。</p>`,
+      "Lian 送的 sheep",
+      `<img src="/assets/optimized/sheep-gift.webp" alt="你的sheep" width="130" height="145" class="keepsake-portrait"/><p class="chinese" lang="zh-CN">${escape(n.zh)}</p><p class="notice">这是和Lian一起吃hot pot的时候，她送给你的。</p>`,
     );
     speech.speak(n.zh, false, "female");
     return;
@@ -342,7 +357,7 @@ function interact(n) {
       persistence.state.adventure.hungry === "invited"
     ) {
       persistence.change((s) => (s.adventure.hungry = "dining"));
-      panda("莲跟我们进来了！一起坐下吃火锅吧。");
+      panda("Lian 跟我们进来了！一起坐下吃 hot pot 吧。");
       updateXP();
     }
     updatePlace();
@@ -353,39 +368,39 @@ function interact(n) {
     if (!persistence.state.found.includes("momo"))
       persistence.change((s) => {
         s.found.push("momo");
-        s.journal.push("在河边认识了桃桃，带桃桃回家了。");
+        s.journal.push("在河边认识了 Momo，带 Momo 回家了。");
         s.journal = s.journal.slice(-50);
       });
     openPanel(
-      "桃桃",
-      `<p class="chinese" lang="zh-CN">我们一起回家吧。</p>${persistence.state.settings.translation ? "<p>Let’s go home together.</p>" : ""}<button class="primary" id="bring-home">带桃桃回家 ↗</button>`,
+      "Momo",
+      `<p class="chinese" lang="zh-CN">我们一起回家吧。</p>${persistence.state.settings.translation ? "<p>Let’s go home together.</p>" : ""}<button class="primary" id="bring-home">带Momo回家 ↗</button>`,
     );
     $("bring-home").onclick = () => {
       $("panel").close();
       world.changeScene("home");
       updatePlace();
-      toast("桃桃到家了。");
+      toast("Momo 到家了。");
     };
   } else if (n.type === "friend")
     openPanel(
-      "桃桃",
+      "Momo",
       `<p class="chinese" lang="zh-CN">和你在一起，真好。</p>${persistence.state.settings.translation ? "<p>It’s good to be with you.</p>" : ""}`,
     );
   else if (n.type === "animal") {
     const animals = {
       "lake-cat": {
-        zh: "你好，小猫！你在湖边做什么？",
-        pinyin: "Nǐ hǎo, xiǎo māo! Nǐ zài hú biān zuò shénme?",
+        zh: "你好，小猫！你在湖旁边做什么？",
+        pinyin: "nǐ hǎo ， xiǎo māo ！ nǐ zài hú páng biān zuò shén me ？",
         meaning: "Hello, kitty! What are you doing by the lake?",
       },
       "lake-duck": {
-        zh: "你好，小鸭子！你喜欢游泳吗？",
-        pinyin: "Nǐ hǎo, xiǎo yāzi! Nǐ xǐhuan yóuyǒng ma?",
+        zh: "你好，duck！你喜欢游泳吗？",
+        pinyin: "nǐ hǎo ，duck！ nǐ xǐ huan yóu yǒng ma ？",
         meaning: "Hello, little duck! Do you like swimming?",
       },
       "garden-rabbit": {
-        zh: "你好，小兔子！你的耳朵真长。",
-        pinyin: "Nǐ hǎo, xiǎo tùzi! Nǐ de ěrduo zhēn cháng.",
+        zh: "你好，rabbit！你的耳朵真长。",
+        pinyin: "nǐ hǎo ，rabbit！ nǐ de ěr duo zhēn cháng 。",
         meaning: "Hello, little rabbit! Your ears are so long.",
       },
     };
@@ -393,14 +408,14 @@ function interact(n) {
     if (!text.zh) return;
     openPanel(
       n.name,
-      `<p class="chinese" lang="zh-CN">${text.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${text.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${text.meaning}</p>` : ""}<div class="small-actions"><button id="animal-replay">听一听</button><button id="animal-practice">湖边找动物</button></div><p id="panel-audio-status" role="status" class="muted"></p>`,
+      `<p class="chinese" lang="zh-CN">${text.zh}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${text.pinyin}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${text.meaning}</p>` : ""}<div class="small-actions"><button id="animal-replay">听一听</button><button id="animal-practice">湖旁边找动物</button></div><p id="panel-audio-status" role="status" class="muted"></p>`,
     );
     $("animal-replay").onclick = () => speech.speak(text.zh);
     $("animal-practice").onclick = () => practice.start("lake-animals");
   } else if (n.type === "inspect") {
     const fact = culture[n.culture];
     const factHtml = fact
-      ? `<div class="panel-section"><h3 lang="zh-CN">${escape(fact.title.split(" · ")[0])}</h3><p class="chinese" lang="zh-CN">${escape(fact.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(fact.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(fact.meaning)}</p>` : ""}<div class="small-actions"><button id="culture-replay">听苏州的故事</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">资料来源 ↗</a></div><p class="notice" lang="zh-CN">这是游戏里的苏州。真的苏州更大，路也不一样。</p>${persistence.state.settings.translation ? '<p class="notice">This is a condensed illustrated interpretation of Suzhou; places and routes have been rearranged.</p>' : ""}</div>`
+      ? `<div class="panel-section"><h3 lang="zh-CN">${escape(fact.title.split(" · ")[0])}</h3><p class="chinese" lang="zh-CN">${escape(fact.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(fact.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(fact.meaning)}</p>` : ""}<div class="small-actions"><button id="culture-replay">听Suzhou的故事</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">Source ↗</a></div><p class="notice" lang="zh-CN">这是游戏里的Suzhou。真的Suzhou更大，路也不一样。</p>${persistence.state.settings.translation ? '<p class="notice">This is a condensed illustrated interpretation of Suzhou; places and routes have been rearranged.</p>' : ""}</div>`
       : "";
     openPanel(
       n.name,
@@ -420,7 +435,7 @@ function interact(n) {
     };
     if (hosts[n.id]) {
       const button = document.createElement("button");
-      button.textContent = "中文小任务";
+      button.textContent = "中文练习";
       button.onclick = () => practice.openForNpc(hosts[n.id]);
       $("panel-content").append(button);
     }
@@ -439,7 +454,10 @@ function openConversation(id, shopId = null, appearance = null) {
   $("shop-view")?.remove();
   $("shop-purchases")?.remove();
   $("conversation").classList.toggle("shop-conversation", Boolean(shopId));
-  $("conversation").classList.toggle("clothing-conversation", shopId === "clothing");
+  $("conversation").classList.toggle(
+    "clothing-conversation",
+    shopId === "clothing",
+  );
   requestGeneration++;
   controller?.abort();
   speech.stop();
@@ -470,7 +488,7 @@ function openConversation(id, shopId = null, appearance = null) {
     button.className = "quest-invitation";
     button.textContent =
       id === "lin"
-        ? "火锅店怎么走？"
+        ? "饭店怎么走？"
         : id === "visitor-1"
           ? "我来告诉你花店怎么走。"
           : "我来帮你找书店。";
@@ -490,7 +508,7 @@ function openConversation(id, shopId = null, appearance = null) {
     button.className = "quest-invitation";
     button.textContent =
       id === "lian"
-        ? "我请你吃火锅吧！"
+        ? "我请你吃 hot pot 吧！"
         : id === "lan"
           ? persistence.state.adventure.flowers === "found"
             ? "我找到你的花了！"
@@ -534,7 +552,10 @@ function openConversation(id, shopId = null, appearance = null) {
   $("conversation").showModal();
   animatePanel($("conversation"));
   world.pause(true);
-  (shopId === "clothing" ? $("shop-purchases").querySelector("button") : $("reply")).focus();
+  (shopId === "clothing"
+    ? $("shop-purchases").querySelector("button")
+    : $("reply")
+  ).focus();
   speech.speak(currentReply.chinese, false, currentVoice);
 }
 function renderShopPurchases() {
@@ -545,14 +566,14 @@ function renderShopPurchases() {
   box.id = "shop-purchases";
   const a = persistence.state.adventure;
   const money = document.createElement("p");
-  money.textContent = `零钱 ${a.coins} 元`;
+  money.textContent = `钱 ${a.coins} 元`;
   box.append(money);
   for (const item of shops[currentShop].items) {
     const b = document.createElement("button");
     b.dataset.buy = item.id;
     const bought = a.purchases.includes(item.id);
     b.textContent = bought
-      ? `${item.zh} ✓ 已买`
+      ? `${item.zh} ✓ 已经买了`
       : `${item.zh} · ¥${item.price}`;
     b.disabled = bought || a.coins < item.price;
     b.onclick = () => {
@@ -598,7 +619,7 @@ function renderClothingPurchase() {
   const a = persistence.state.adventure;
   const status = document.createElement("p");
   status.setAttribute("role", "status");
-  status.textContent = `零钱 ${a.coins} 元 · ${clothingStage === "choose" ? "选一件衣服" : clothingItem?.zh || ""}`;
+  status.textContent = `钱 ${a.coins} 元 · ${clothingStage === "choose" ? "选择一件衣服" : clothingItem?.zh || ""}`;
   box.append(status);
   const choice = (label, action, className = "") => {
     const button = document.createElement("button");
@@ -650,12 +671,12 @@ function renderClothingPurchase() {
   if (choosing) {
     const catalog = document.createElement("div");
     catalog.className = "clothing-catalog";
-    catalog.setAttribute("aria-label", "挑选衣服");
+    catalog.setAttribute("aria-label", "选择衣服");
     box.append(catalog);
     for (const item of shops.clothing.items) {
       const owned = a.purchases.includes(item.id);
       const button = choice(
-        `${item.zh} · ¥${item.price}${owned ? " ✓ 已买" : ""}`,
+        `${item.zh} · ¥${item.price}${owned ? " ✓ 已经买了" : ""}`,
         () => {
           clothingItem = item;
           if (owned) {
@@ -665,8 +686,8 @@ function renderClothingPurchase() {
           const unit = item.unit === "条" ? "tiáo" : "jiàn";
           say(
             `我喜欢这${item.unit}${item.zh}。`,
-            `这${item.unit}${item.zh}很适合你！想知道多少钱吗？`,
-            `Zhè ${unit} ${item.pinyin} hěn shìhé nǐ! Xiǎng zhīdào duōshao qián ma?`,
+            `你穿着这${item.unit}${item.zh}真漂亮！想知道多少钱吗？`,
+            `Nǐ chuānzhe zhè ${unit} ${item.pinyin} zhēn piàoliang! Xiǎng zhīdào duōshao qián ma?`,
             `The ${item.en} suits you! Would you like to ask its price?`,
           );
           advance("price");
@@ -677,7 +698,7 @@ function renderClothingPurchase() {
       const label = document.createElement("strong");
       label.textContent = item.zh;
       const price = document.createElement("span");
-      price.textContent = owned ? "✓ 已买" : `${item.price} 元`;
+      price.textContent = owned ? "✓ 已经买了" : `${item.price} 元`;
       button.replaceChildren(garmentArt(item), label, price);
       catalog.append(button);
     }
@@ -697,30 +718,30 @@ function renderClothingPurchase() {
       advance("experience");
     });
   } else if (clothingStage === "experience") {
-    choice("我找到喜欢的衣服了，购物体验很好！", () => {
+    choice("我找到喜欢的衣服了！", () => {
       say(
-        "我找到喜欢的衣服了，购物体验很好！",
-        "太好了！很高兴你找到喜欢的。你想怎么付款？",
-        "Tài hǎo le! Hěn gāoxìng nǐ zhǎodào xǐhuan de. Nǐ xiǎng zěnme fùkuǎn?",
-        "Great! I’m glad you found something you like. How would you like to pay?",
+        "我找到喜欢的衣服了！",
+        "太好了！你想用手机还是信用卡？",
+        "tài hǎo le ！ nǐ xiǎng yòng shǒu jī hái shì xìn yòng kǎ ？",
+        "Great! Would you like to use your phone or a credit card?",
       );
       advance("method");
     });
   } else if (clothingStage === "method") {
-    choice("可以扫码付款吗？", () => {
+    choice("可以用手机吗？", () => {
       say(
-        "可以扫码付款吗？",
-        "可以！请拿出手机，扫描柜台上的二维码。",
-        "Kěyǐ! Qǐng ná chū shǒujī, sǎomiáo guìtái shàng de èrwéimǎ.",
+        "可以用手机吗？",
+        "可以！请拿出手机。 Scan the QR code.",
+        "kě yǐ ！ qǐng ná chū shǒu jī 。 Scan the QR code.",
         "Yes. Take out your phone and scan the QR code on the counter.",
       );
       advance("qr");
     });
-    choice("可以刷卡吗？", () => {
+    choice("可以用信用卡吗？", () => {
       say(
-        "可以刷卡吗？",
-        "可以！请拿出卡，在读卡器上轻碰一下。",
-        "Kěyǐ! Qǐng ná chū kǎ, zài dúkǎqì shàng qīng pèng yíxià.",
+        "可以用信用卡吗？",
+        "可以！请拿出信用卡。 Tap the card reader.",
+        "kě yǐ ！ qǐng ná chū xìn yòng kǎ 。 Tap the card reader.",
         "Yes. Take out your card and tap it on the card reader.",
       );
       advance("card");
@@ -734,14 +755,14 @@ function renderClothingPurchase() {
     const method = clothingStage;
     const pay = choice(
       method === "qr"
-        ? "拿出手机并扫描二维码 · " + clothingItem.price + " 元"
-        : "拿出卡并轻碰读卡器 · " + clothingItem.price + " 元",
+        ? "Use your phone to scan the QR code · " + clothingItem.price + " 元"
+        : "Tap your card on the reader · " + clothingItem.price + " 元",
       () => {
         if (persistence.state.adventure.coins < clothingItem.price) {
           say(
-            "我的零钱不够。",
-            "零钱不够。你可以再选一件。",
-            "Língqián bú gòu. Nǐ kěyǐ zài xuǎn yí jiàn.",
+            "我的钱太少了。",
+            "钱太少了。你可以再选择一件。",
+            "qián tài shǎo le 。 nǐ kě yǐ zài xuǎn zé yí jiàn 。",
             "You don’t have enough coins. You can choose another item.",
           );
           advance("choose");
@@ -758,16 +779,14 @@ function renderClothingPurchase() {
           s.adventure.purchases.push(item.id);
           award(s.adventure, 10);
           s.journal.push(
-            `在锦衣坊买了${item.zh}，花了${item.price}元。${method === "qr" ? "用手机扫码付款。" : "用卡轻碰读卡器付款。"}`,
+            `在衣服店买了${item.zh}，花了${item.price}元。${method === "qr" ? "Paid by phone." : "Paid by card."}`,
           );
           s.journal = s.journal.slice(-50);
         });
         say(
-          method === "qr"
-            ? "我拿出手机，扫描二维码付款。"
-            : "我拿出卡，在读卡器上轻碰一下。",
-          "付款成功！这是你的衣服。谢谢光临！",
-          "Fùkuǎn chénggōng! Zhè shì nǐ de yīfu. Xièxie guānglín!",
+          method === "qr" ? "我用手机。" : "我用信用卡。",
+          "买好了！这是你的衣服。谢谢你！",
+          "mǎi hǎo le ！ zhè shì nǐ de yī fu 。 xiè xiè nǐ ！",
           `Payment complete. Here is your ${item.en}. Thanks for shopping!`,
         );
         updateXP();
@@ -778,12 +797,13 @@ function renderClothingPurchase() {
     pay.disabled = a.coins < clothingItem.price;
     if (pay.disabled) {
       const notice = document.createElement("p");
-      notice.textContent = "零钱不够，可以看看别的衣服。";
+      notice.textContent = "钱太少了，可以看看别的衣服。";
       box.append(notice);
     }
-    choice("换一种付款方式", () => advance("method"));
+    choice("Choose another payment method", () => advance("method"));
   }
-  if (!choosing) choice("再看看别的衣服", () => advance("choose"), "clothing-change");
+  if (!choosing)
+    choice("再看看别的衣服", () => advance("choose"), "clothing-change");
   $("conversation").querySelector(".conversation-body").append(box);
 }
 function displayReply(reply) {
@@ -795,18 +815,19 @@ function displayReply(reply) {
   wordHelp.annotate($("npc-zh"));
   $("npc-pinyin").textContent = reply.pinyin;
   $("npc-pinyin").hidden = !settings.pinyin;
-  $("toggle-pinyin").textContent = settings.pinyin ? "不看拼音" : "看拼音";
+  $("toggle-pinyin").textContent = settings.pinyin
+    ? "不看 Pinyin"
+    : "看 Pinyin";
   $("toggle-pinyin").setAttribute("aria-pressed", String(settings.pinyin));
   $("npc-meaning").textContent = reply.meaning;
   $("npc-meaning").hidden = !settings.translation;
   $("mode").textContent =
     reply.mode === "local"
-      ? "聊聊天"
+      ? "聊天"
       : reply.mode === "story"
-        ? "聊聊日常"
-        : "苏州";
-  $("reply-notice").textContent =
-    reply.mode === "story" ? "先聊聊日常吧。" : "";
+        ? "聊天"
+        : "Suzhou";
+  $("reply-notice").textContent = reply.mode === "story" ? "先聊天吧。" : "";
   updateHelp();
 }
 function explain(word) {
@@ -823,12 +844,12 @@ function explain(word) {
     ? `${word.zh} · ${pronunciation}`
     : word.zh;
   $("panda-explanation").textContent = persistence.state.settings.translation
-    ? `${word.meaning}. ${word.why} 例句：${word.example}`
-    : `例句：${word.example}`;
+    ? `${word.meaning}. ${word.why} 句子：${word.example}`
+    : `句子：${word.example}`;
   $("panda-help").open = true;
   $("dialog-status").textContent = persistence.state.settings.translation
     ? `${word.zh}: ${word.meaning}. ${word.why}`
-    : `例句：${word.example}`;
+    : `句子：${word.example}`;
 }
 function updateHelp() {
   const starter =
@@ -844,14 +865,14 @@ function updateHelp() {
   $("panda-explanation").textContent =
     helpLevel >= 2
       ? starter.tip
-      : "可以再听一次，点点下面有线的词，或问熊猫怎么说。";
+      : "可以再听一次，点点下面的词，或者问熊猫怎么说。";
   $("help-inline").textContent =
     helpLevel >= 3
       ? `你可以说：${starter.example} ${starter.tip}`
       : helpLevel >= 2
-        ? `可以这样说：${starter.zh} · ${starter.tip}`
+        ? `可以说：${starter.zh} · ${starter.tip}`
         : helpLevel >= 1
-          ? "点点下面有线的词，或慢慢听一次。"
+          ? "点点下面的词，或者慢慢听一次。"
           : "";
   if (helpLevel >= 2) $("panda-help").open = true;
 }
@@ -875,8 +896,8 @@ function showPandaCoach() {
         : "别着急，我们一起想。";
   $("coach-zh").textContent = message;
   $("coach-tip").textContent =
-    helpLevel >= 2 ? starter.tip : `对方说：${currentReply.chinese}`;
-  $("coach-next").textContent = helpLevel >= 2 ? "看看例句" : "帮我开个头";
+    helpLevel >= 2 ? starter.tip : `别人说：${currentReply.chinese}`;
+  $("coach-next").textContent = helpLevel >= 2 ? "看看句子" : "帮我说一句子";
   $("coach-next").hidden = helpLevel >= 3;
   $("coach-use").hidden = helpLevel < 3;
   $("coach-next").onclick = () => {
@@ -936,36 +957,57 @@ $("coach-form").onsubmit = async (event) => {
   } catch (error) {
     if (token === coachGeneration && $("panda-coach").open)
       $("coach-status").textContent =
-        "现在回答不了。再问一次，或看看怎么开头吧。";
+        "现在回答不了。再问一次，或者看看先说什么吧。";
   } finally {
     if (token === coachGeneration) $("coach-send").disabled = false;
   }
 };
+$("welcome-how").onclick = () => $("welcome-guide").showModal();
+$("welcome-about").onclick = () => $("welcome-credits").showModal();
+$("demo-word").onclick = () => {
+  const show = $("demo-definition").hidden;
+  $("demo-definition").hidden = !show;
+  $("demo-hint").hidden = show;
+  $("demo-word").setAttribute("aria-expanded", String(show));
+};
+$("scene-retry").onclick = () => world?.loadSceneArt();
+let offlineScheduled = false;
 $("begin").onclick = async () => {
   music.enable().catch(() => {});
   ambience.enable();
   $("begin").disabled = true;
-  $("begin").textContent = "等一下…";
-  await persistence.load();
+  $("begin").textContent = "Opening your world…";
+  $("welcome-loading").hidden = false;
+  $("entry-status").textContent = "Opening your journal…";
+  $("entry-progress").removeAttribute("value");
   try {
-    await prepareArt(scenes[persistence.state.scene]);
+    // Shared character art can load while the server checks the journal.
+    await Promise.all([persistence.load(), prepareCommonArt()]);
+    await prepareArt(
+      scenes[persistence.state.scene] || scenes.shanghai,
+      (done, total) => {
+        $("entry-status").textContent =
+          `Preparing your little world · ${done} of ${total}`;
+        $("entry-progress").value = Math.round((done / total) * 100);
+      },
+    );
   } catch {
     $("begin").disabled = false;
-    $("begin").textContent = "再试一次";
-    toast("图片还没打开。看看网络，再试一次。");
+    $("begin").textContent = "Try again →";
+    $("entry-status").textContent =
+      "Artwork could not load. Check your connection and try again.";
     return;
   }
   $("welcome").hidden = true;
   $("game").hidden = false;
+  window.scrollTo(0, 0);
   startWorld();
   world.pause(false);
   $("world").focus();
-  try {
-    const health = await api("/api/health");
-    $("mode").textContent =
-      health.provider === "ollama" ? "聊聊天" : "聊聊日常";
-  } catch {
-    $("mode").textContent = "四处走走";
+  // Offline installation must not compete with the first playable scene.
+  if (!offlineScheduled) {
+    offlineScheduled = true;
+    setTimeout(enableOffline, 2000);
   }
 };
 $("home").onclick = () => {
@@ -987,7 +1029,7 @@ $("home").onclick = () => {
     );
     panda(
       persistence.state.adventure.hungry === "done"
-        ? "回家吧！小羊在家里等我们。"
+        ? "回家吧！sheep 在家里等我们。"
         : "回家吧！我们一起走。",
     );
   }
@@ -1017,7 +1059,7 @@ for (const dialog of document.querySelectorAll("dialog"))
       speech.stop();
       currentNpc = null;
       $("panda-help").open = false;
-      panda("我们接下来做什么？看看左上角的目标吧。");
+      panda("我们接下来做什么？看看左边上面的要做的事情吧。");
     }
     if (!$("panel").open && !$("conversation").open) world?.pause(false);
   });
@@ -1028,7 +1070,7 @@ $("slow-replay").onclick = () =>
 $("stop-speech").onclick = () => speech.stop();
 $("toggle-pinyin").onclick = () => {
   const pinyin = !persistence.state.settings.pinyin;
-  panels.setSettings({ pinyin }, `拼音：${pinyin ? "看" : "不看"}`);
+  panels.setSettings({ pinyin }, `Pinyin：${pinyin ? "看" : "不看"}`);
 };
 $("more-help").onclick = () => {
   helpLevel = Math.min(3, helpLevel + 1);
@@ -1087,7 +1129,7 @@ $("reply-form").onsubmit = async (e) => {
     $("reply").value = "";
     displayReply(result);
     speech.speak(result.chinese, false, currentVoice);
-    $("dialog-status").textContent = "+10 经验";
+    $("dialog-status").textContent = "+10 XP";
   } catch (error) {
     if (generation === requestGeneration && error.name !== "AbortError")
       $("dialog-status").textContent = error.message;

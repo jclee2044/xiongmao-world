@@ -7,70 +7,305 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#7b8f79" />
-    <title>熊猫世界</title>
+    <title>Xiongmao World · 熊猫世界</title>
+    <meta
+      name="description"
+      content="Learn Chinese through little adventures in a peaceful canal town. Explore, meet your neighbors, and discover new words with Panda."
+    />
     <link rel="icon" href="/assets/panda.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/assets/icon-192.png" />
     <link rel="stylesheet" href="/styles-v9.css" />
+    <link rel="stylesheet" href="/welcome.css" />
   </head>
   <body>
-    <main class="welcome" id="welcome">
-      <img
-        class="welcome-panda"
-        src="/assets/panda.png"
-        alt="陪你一起玩的熊猫"
-      />
-      <h1>熊猫世界</h1>
-      <button class="primary" id="begin">
-        和熊猫一起走走 <span aria-hidden="true">↗</span>
-      </button>
+    <main
+      class="welcome"
+      id="welcome"
+      lang="en"
+      aria-labelledby="welcome-title"
+    >
+      <div class="welcome-layout">
+        <section class="welcome-intro">
+          <p class="welcome-kicker">
+            <span></span> A little world to get lost in
+          </p>
+          <div class="welcome-brand">
+            <h1 id="welcome-title" lang="zh-CN">熊猫世界</h1>
+            <span class="welcome-seal" lang="zh-CN" aria-hidden="true"
+              >苏<br />州</span
+            >
+          </div>
+          <p class="welcome-name">Xiongmao World</p>
+          <h2>
+            Learn Chinese, one little<br class="desktop-break" />
+            adventure at a time.
+          </h2>
+          <p class="welcome-description">
+            Meet your neighbors, explore little shops, and discover new words in
+            a peaceful canal town—with Panda by your side.
+          </p>
+          <div class="welcome-actions">
+            <button
+              class="primary"
+              id="begin"
+              aria-label="Enter the world · 和熊猫一起走走"
+            >
+              Enter the world <span aria-hidden="true">→</span>
+            </button>
+            <button class="welcome-help" id="welcome-how">
+              How to play <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+          <div class="welcome-loading" id="welcome-loading" hidden>
+            <label for="entry-progress" id="entry-status" role="status"
+              >Opening your journal…</label
+            >
+            <progress
+              id="entry-progress"
+              max="100"
+              aria-labelledby="entry-status"
+            ></progress>
+          </div>
+          <div class="welcome-companion">
+            <img
+              src="/assets/welcome/panda-240.webp"
+              width="120"
+              height="130"
+              alt="Panda, your companion"
+              decoding="async"
+            />
+            <p>
+              “Let’s take a walk together.”<span
+                >A friendly face. A little help. Your own pace.</span
+              >
+            </p>
+          </div>
+        </section>
+        <section class="welcome-windows" aria-label="A peek inside your world">
+          <article class="welcome-window town-window">
+            <img
+              class="window-art"
+              src="/assets/welcome/town-960.webp"
+              srcset="
+                /assets/welcome/town-480.webp 480w,
+                /assets/welcome/town-960.webp 960w
+              "
+              sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1200px) 50vw, 620px"
+              width="960"
+              height="960"
+              alt="A lantern-lit noodle shop and stone bridge beside the canal"
+              fetchpriority="high"
+            />
+            <div class="window-heading">
+              <span class="window-number">01 / WANDER</span>
+              <h2>Explore the town</h2>
+              <p>Little shops. New neighbors. Stories around every corner.</p>
+            </div>
+            <span class="window-caption" lang="zh-CN"
+              >苏州 · A slower kind of adventure</span
+            >
+          </article>
+          <article class="welcome-window conversation-window">
+            <img
+              class="window-art"
+              src="/assets/welcome/tea-960.webp"
+              srcset="
+                /assets/welcome/tea-480.webp 480w,
+                /assets/welcome/tea-960.webp 960w
+              "
+              sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1200px) 50vw, 620px"
+              width="960"
+              height="640"
+              alt="A warm wooden teahouse with a table set for friends"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="window-heading">
+              <span class="window-number">02 / CONNECT</span>
+              <h2>Learn through conversation</h2>
+              <p>A cup of tea. A few new words. A little more confidence.</p>
+            </div>
+            <div class="welcome-demo">
+              <p lang="zh-CN">
+                你好！想喝<button
+                  id="demo-word"
+                  aria-expanded="false"
+                  aria-controls="demo-definition"
+                  aria-label="Show the meaning of 茶"
+                >
+                  茶</button
+                >吗？
+              </p>
+              <span id="demo-definition" hidden>茶 · chá · tea</span
+              ><span id="demo-hint"
+                >Tap the underlined word to discover its meaning.</span
+              >
+            </div>
+          </article>
+        </section>
+      </div>
+      <footer class="welcome-footer">
+        <span
+          >Built by Jacob Lee <span class="footer-dot">·</span> © 2026 Jacob
+          Lee</span
+        ><button id="welcome-about">About &amp; credits</button
+        ><span class="footer-note">Small steps. New discoveries.</span>
+      </footer>
+      <noscript
+        >This world needs JavaScript to play. Please enable it in your
+        browser.</noscript
+      >
     </main>
+    <dialog
+      id="welcome-guide"
+      class="welcome-dialog"
+      lang="en"
+      aria-labelledby="guide-title"
+    >
+      <div class="dialog-heading">
+        <h2 id="guide-title">Your first little adventure</h2>
+        <button data-close="welcome-guide" aria-label="Close guide">×</button>
+      </div>
+      <p>
+        There’s no rush. Explore the town, meet someone new, and try a little
+        Chinese.
+      </p>
+      <ul>
+        <li>
+          <strong>On your phone:</strong> hold and drag to walk. Release to
+          stop, then tap a nearby person or object to interact.
+        </li>
+        <li>
+          <strong>On a computer:</strong> click where you want to go, or walk
+          with WASD / arrow keys. Press Space near someone to talk.
+        </li>
+        <li>
+          <strong>Discover words:</strong> tap Chinese words in conversations
+          for their meaning and pinyin. Replay speech when you need another
+          listen.
+        </li>
+        <li>
+          <strong>Ask Panda:</strong> open Panda’s help for hints, translations,
+          and a nudge toward your next adventure.
+        </li>
+      </ul>
+      <p class="muted">
+        Your journal keeps your progress. Voice and online conversations need a
+        connection; offline exploration becomes available after the world
+        finishes downloading.
+      </p>
+      <button class="primary" data-close="welcome-guide">Let’s explore</button>
+    </dialog>
+    <dialog
+      id="welcome-credits"
+      class="welcome-dialog"
+      lang="en"
+      aria-labelledby="credits-title"
+    >
+      <div class="dialog-heading">
+        <h2 id="credits-title">A little about this world</h2>
+        <button data-close="welcome-credits" aria-label="Close credits">
+          ×
+        </button>
+      </div>
+      <p>
+        <strong>Xiongmao World · 熊猫世界</strong> is a Chinese learning
+        adventure in a fictional town inspired by Suzhou’s canals, gardens, and
+        everyday life.
+      </p>
+      <p>Built by Jacob Lee. © 2026 Jacob Lee.</p>
+      <h3>Art &amp; music</h3>
+      <p>
+        The painted world uses AI-generated artwork and a user-supplied Panda
+        reference.
+      </p>
+      <p>
+        “Asia” by FSM Team ·
+        <a
+          href="https://www.free-stock-music.com/fsm-team-asia.html"
+          target="_blank"
+          rel="noopener"
+          >Free Stock Music</a
+        >
+        ·
+        <a href="/assets/audio/CC-BY-4.0.txt" target="_blank" rel="noopener"
+          >CC BY 4.0</a
+        >.
+      </p>
+      <p>
+        “Asian Music – Magical Dream” by Sonican ·
+        <a
+          href="https://pixabay.com/music/china-asian-music-magical-dream-321895/"
+          target="_blank"
+          rel="noopener"
+          >Pixabay</a
+        >.
+      </p>
+      <p>
+        Dictionary data: CC-CEDICT contributors,
+        <a
+          href="https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
+          target="_blank"
+          rel="noopener"
+          >CC BY-SA 4.0</a
+        >. Third-party works retain their own licenses.
+      </p>
+    </dialog>
     <main class="game" id="game" hidden>
       <header class="topbar">
         <div class="place">
           <span class="eyebrow" id="place-cn" lang="zh-CN" hidden
-            >苏州 · 河巷</span
+            >Suzhou · Canal lane</span
           >
-          <h1 id="place">苏州 · 河巷</h1>
+          <h1 id="place">Suzhou · Canal lane</h1>
           <div class="xp-meter">
             <progress id="xp-progress" value="0" max="500"></progress
-            ><span id="xp-text">0 / 500 经验</span>
+            ><span id="xp-text">0 / 500 XP</span>
           </div>
         </div>
         <nav aria-label="你的世界">
-          <button id="update" hidden aria-label="更新">更新</button
+          <button id="update" hidden lang="en" aria-label="Update">
+            Update</button
           ><button id="home" aria-label="回家" title="回家">
             ⌂ <span>回家</span></button
           ><button id="map" aria-label="地图">⌖ <span>地图</span></button
-          ><button id="journal" aria-label="日记">▤ <span>日记</span></button
-          ><button id="settings" aria-label="设置">⚙ <span>设置</span></button>
+          ><button id="journal" aria-label="Journal">
+            ▤ <span>Journal</span></button
+          ><button id="settings" lang="en" aria-label="Settings">
+            ⚙ <span>Settings</span>
+          </button>
         </nav>
       </header>
-      <section class="world-wrap" aria-label="河巷">
+      <section class="world-wrap" aria-label="Canal lane">
         <canvas
           id="world"
           tabindex="0"
-          aria-label="按住或拖动屏幕走路，松开停止。也可以用 WASD 或方向键走路，走近后按空格键互动。"
+          aria-label="Hold or drag to walk; release to stop. Use WASD or arrow keys to walk, and Space to interact nearby."
         ></canvas>
-        <aside id="goals" aria-label="熊猫的小目标">
+        <div class="scene-loading" id="scene-loading" role="status" hidden>
+          Opening the next little corner…
+          <button id="scene-retry" hidden>Try again</button>
+        </div>
+        <aside id="goals" aria-label="熊猫要做的事情">
           <details>
-            <summary>熊猫的小目标</summary>
+            <summary>熊猫要做的事情</summary>
             <ol id="goals-list"></ol>
           </details>
         </aside>
         <div id="discovery" popover="manual" aria-live="polite" hidden></div>
         <div class="scene-note">
-          <span class="dot"></span><span id="mode">苏州</span>
+          <span class="dot"></span><span id="mode">Suzhou</span>
         </div>
         <aside class="panda-bubble" aria-label="熊猫的帮助">
           <button
             id="panda-toggle"
             aria-expanded="false"
             aria-controls="panda-content"
-            aria-label="展开熊猫的帮助"
+            aria-label="看熊猫的帮助"
           >
             <span class="panda-face"
-              ><img src="/assets/panda.png" alt=""
+              ><img src="/assets/welcome/panda-240.webp" alt=""
             /></span>
             <span id="panda-title">熊猫的帮助</span>
             <span id="panda-toggle-icon" aria-hidden="true">⌃</span>
@@ -78,7 +313,7 @@
           <div id="panda-content" hidden>
             <p id="panda-message">帮助</p>
             <details id="panda-help">
-              <summary>更多提示</summary>
+              <summary>更多帮助</summary>
               <p id="panda-explanation">我们一起去河边走走吧。</p>
             </details>
           </div>
@@ -86,23 +321,27 @@
       </section>
       <footer class="bottom-bar">
         <div class="control-note">
-          WASD / 方向键走路 · 空格键说话或看看<br /><span id="save-status"
-            >正在读日记…</span
+          WASD / arrow keys: walk · Space: talk or look<br /><span
+            id="save-status"
+            >Loading journal…</span
           >
         </div>
       </footer>
     </main>
     <dialog id="conversation" class="conversation">
       <div class="dialog-heading">
-        <span id="npc-name">梅</span
+        <span id="npc-name">Mei</span
         ><button class="close" data-close="conversation" aria-label="结束聊天">
           ×
         </button>
       </div>
       <button id="foreground-panda" aria-label="问熊猫">
-        <img src="/assets/panda.png" alt="" width="60" height="60" /><span
-          >问熊猫</span
-        >
+        <img
+          src="/assets/welcome/panda-240.webp"
+          alt=""
+          width="60"
+          height="60"
+        /><span>问熊猫</span>
       </button>
       <div class="conversation-body">
         <p id="last-user" class="muted"></p>
@@ -111,11 +350,11 @@
         <p id="npc-meaning" class="meaning"></p>
         <div class="small-actions" id="speech-controls">
           <button id="toggle-pinyin" type="button" aria-pressed="true">
-            不看拼音
+            不看Pinyin
           </button>
           <button id="replay">↻ 再听一次</button
           ><button id="slow-replay">慢慢听</button
-          ><button id="stop-speech">停一下</button
+          ><button id="stop-speech">等一下</button
           ><button id="more-help">多帮一点</button
           ><button id="less-help">少帮一点</button>
         </div>
@@ -128,7 +367,7 @@
             id="reply"
             maxlength="500"
             autocomplete="off"
-            placeholder="你好！我想吃面。"
+            placeholder="你好！我想吃面条。"
           /><button class="primary" id="send">说 ↗</button>
         </div>
       </form>
@@ -138,19 +377,19 @@
     <dialog id="panel">
       <div class="dialog-heading">
         <h2 id="panel-title"></h2>
-        <button class="close" data-close="panel" aria-label="关闭">×</button>
+        <button class="close" data-close="panel" aria-label="关">×</button>
       </div>
       <div id="panel-content"></div>
     </dialog>
     <dialog id="panda-coach" aria-labelledby="coach-title">
-      <button class="close" data-close="panda-coach" aria-label="关闭帮助">
+      <button class="close" data-close="panda-coach" aria-label="关帮助">
         ×
       </button>
       <img
         class="coach-portrait"
         width="130"
         height="130"
-        src="/assets/panda.png"
+        src="/assets/welcome/panda-240.webp"
         alt="熊猫"
       />
       <div class="coach-bubble">
@@ -161,7 +400,7 @@
         <div class="small-actions">
           <button id="coach-listen">听一听</button
           ><button id="coach-next"></button
-          ><button id="coach-use" hidden>试着说这句</button
+          ><button id="coach-use" hidden>试着说这个句子</button
           ><button data-close="panda-coach">回去聊天</button>
         </div>
         <form id="coach-form">
@@ -170,7 +409,7 @@
             <input
               id="coach-question"
               maxlength="500"
-              placeholder="这句话怎么说？这里为什么用“吗”？"
+              placeholder="这个句子怎么说？这里为什么用“吗”？"
               required
             /><button id="coach-send" class="primary">问问</button>
           </div>

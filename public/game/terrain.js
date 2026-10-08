@@ -1,4 +1,5 @@
 import { bridgeArt } from "./bridges.js";
+import { paintMarketSigns } from "./language-signs.js";
 import { pointInPolygon } from "./world.js";
 const plates = new WeakMap();
 function zonePath(ctx, zone) {
@@ -346,6 +347,7 @@ export function paintGround(
   if (scene.marketPlate && market?.complete && market.naturalWidth) {
     const p = scene.marketPlate;
     ctx.drawImage(market, p.x, p.y, p.w, p.h);
+    paintMarketSigns(ctx, p);
   }
   ctx.save();
   for (const bridge of scene.bridges || []) {

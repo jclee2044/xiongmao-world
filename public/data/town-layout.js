@@ -152,13 +152,13 @@ export function expandTown(scene) {
     ["south-home-east", 2160, 310, true],
   ]) {
     scene.scenery.push({ id: `building-${id}`, type: "house", x, y: 3590,
-      w: h * 1.25, h, flip, ...(id === "clothing-store" ? { label: "服装店", doorId: id } : {}) });
+      w: h * 1.25, h, flip, ...(id === "clothing-store" ? { label: "衣服店", doorId: id } : {}) });
     scene.groundZones.push({ type: "courtyard", x: x - h * .625 - 25,
       y: 3550, w: h * 1.25 + 50, h: 110 });
   }
   scene.paths.push({ points: [[1420, 3650], [2410, 3650]], width: 120 });
   scene.interactables.push({ id: "clothing-store", type: "door", target: "clothing-store",
-    name: "服装店", x: 1640, y: 3650, approachX: 1640, approachY: 3650 });
+    name: "衣服店", x: 1640, y: 3650, approachX: 1640, approachY: 3650 });
   const relocate = (id, x, y) => {
     const o = scene.interactables.find((o) => o.id === id);
     Object.assign(o, { x, y });
@@ -290,9 +290,9 @@ function addEnclosures(scene) {
         y: fountainY + 20, w: 500, h: 340 });
       const square = stop(e.id);
       Object.assign(square, {
-        type: "inspect", name: "河畔广场",
-        zh: "这里是河畔广场。我们可以在这里散步、休息。",
-        pinyin: "Zhèlǐ shì hépàn guǎngchǎng. Wǒmen kěyǐ zài zhèlǐ sànbù, xiūxi.",
+        type: "inspect", name: "Canal square",
+        zh: "这里是 Canal square。我们可以在这里走走、休息。",
+        pinyin: "zhè lǐ shì  Canal square。 wǒ men kě yǐ zài zhè lǐ zǒu zǒu 、 xiū xi 。",
         meaning: "This is the canal square. We can walk and rest here.",
       });
       delete square.target;
@@ -335,8 +335,8 @@ function addEnclosures(scene) {
     }
     move(e.id, gateX, gateY + 45);
     if (e.id === "garden") {
-      Object.assign(stop(e.id), { name: "竹林小院", zh: "从门口进去，看看竹林吧。", pinyin: "Cóng ménkǒu jìnqù, kànkan zhúlín ba.", meaning: "Enter through the gate to visit the bamboo grove." });
-      if (b) b.label = "竹林小院";
+      Object.assign(stop(e.id), { name: "竹林", zh: "从门口进，看看竹林吧。", pinyin: "cóng mén kǒu jìn ， kàn kàn zhú lín ba 。", meaning: "Enter through the gate to visit the bamboo grove." });
+      if (b) b.label = "竹林";
     }
     scene.scenery.push({
       type: "landmark",

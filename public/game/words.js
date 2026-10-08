@@ -28,7 +28,7 @@ export function createWordHelp({ discover, speech }) {
                   zh: s.segment,
                   pinyin: "",
                   meaning: "Dictionary unavailable offline.",
-                  punctuation: !/[\p{Letter}]/u.test(s.segment),
+                  punctuation: !/\p{Script=Han}/u.test(s.segment),
                 },
             );
           }),
@@ -69,7 +69,7 @@ export function createWordHelp({ discover, speech }) {
     listen.textContent = "听一听";
     listen.onclick = () => speech.speak(word.zh);
     close.textContent = "×";
-    close.setAttribute("aria-label", "关闭");
+    close.setAttribute("aria-label", "关");
     close.onclick = hide;
     actions.append(listen, close);
     callout.append(actions);
@@ -86,6 +86,7 @@ export function createWordHelp({ discover, speech }) {
     const text = el.textContent;
     if (
       !text ||
+      !/\p{Script=Han}/u.test(text) ||
       pending.get(el) === text ||
       (el.dataset.words === text &&
         (el.querySelector(".help-word") || !/[\p{Letter}]/u.test(text)))

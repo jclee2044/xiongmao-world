@@ -38,11 +38,11 @@ try {
   assert.equal(response.status(), 200);
   await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.waitForFunction(
     () =>
-      document.getElementById("save-status").textContent === "日记存好了",
+      document.getElementById("save-status").textContent === "Journal saved",
   );
   assert.equal(
     await page.evaluate(
@@ -54,7 +54,7 @@ try {
   await page.reload();
   await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   assert.equal(
     await page.locator('[data-setting="pinyin"]').inputValue(),
     "false",

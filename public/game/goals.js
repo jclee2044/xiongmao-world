@@ -1,3 +1,4 @@
+import { isBeginnerChinese } from "../data/language.js";
 import { AREA_XP, award } from "../data/adventure.js";
 export function goalCards(a) {
   const cards = [];
@@ -8,16 +9,16 @@ export function goalCards(a) {
       target: ["lin", "lan", "bo", "mei", "wei"].find(
         (id) => !a.met.includes(id),
       ),
-      reward: "+40 经验",
+      reward: "+40 XP",
       key: "meet",
     });
   if (a.hungry !== "done")
     cards.push({
-      title: "和莲一起吃饭",
+      title: "和Lian一起吃饭",
       detail: {
-        new: "去集市旁找莲。",
-        invited: "莲跟着你呢，一起去火锅店吧。",
-        dining: "去火锅桌旁，点菜、煮菜、尝一尝。",
+        new: "去市场旁边找Lian。",
+        invited: "Lian跟着你呢，一起去饭店吧。",
+        dining: "去hot pot 桌子旁边，点菜、做菜、尝一尝。",
       }[a.hungry],
       target:
         a.hungry === "new"
@@ -25,41 +26,41 @@ export function goalCards(a) {
           : a.hungry === "invited"
             ? "dumplings"
             : "hotpot",
-      reward: "+60 经验",
+      reward: "+60 XP",
       key: "hungry",
     });
   if (a.flowers !== "done")
     cards.push({
-      title: "帮兰找花",
+      title: "帮Lan找花",
       detail: {
-        new: "去花店问问兰，她在找什么。",
-        accepted: "过西边的桥，去大石头旁找花。",
-        found: "把花带回花店，还给兰。",
+        new: "去花店问问Lan，她在找什么。",
+        accepted: "过西边的桥，去大石头旁边找花。",
+        found: "把花带回花店，还给Lan。",
       }[a.flowers],
       target: a.flowers === "accepted" ? "lost-flowers" : "lan",
-      reward: "+60 经验",
+      reward: "+60 XP",
       key: "flowers",
     });
   if (a.tea !== "done" && a.met.length >= 2)
     cards.push({
-      title: "和乔喝茶",
+      title: "和Qiao喝茶",
       detail: {
-        new: "去茶馆门口，请乔一起喝茶。",
-        invited: "跟着乔去院子里的茶桌。",
-        seated: "去茶桌旁和乔说说今天的事。",
+        new: "去茶馆门口，请Qiao一起喝茶。",
+        invited: "跟着Qiao去courtyard里的茶桌子。",
+        seated: "去茶桌子旁边和Qiao说说今天的事情。",
       }[a.tea],
       target: a.tea === "new" ? "qiao" : "tea-table",
-      reward: "+60 经验",
+      reward: "+60 XP",
       key: "tea",
     });
   if (a.nature.length < 3 && a.met.length >= 5)
     cards.push({
       title: "和熊猫走走",
-      detail: `看看竹子、荷花和太湖石 · ${a.nature.length}/3`,
+      detail: `看看竹子、lotus flowers和Taihu rock · ${a.nature.length}/3`,
       target: ["bamboo-grove", "lake", "rock-study"].find(
         (x) => !a.nature.includes(x),
       ),
-      reward: "+40 经验",
+      reward: "+40 XP",
       key: "nature",
     });
   if (a.directionsFind !== "done")
@@ -68,26 +69,26 @@ export function goalCards(a) {
       title: "问问路",
       detail:
         a.directionsFind === "accepted"
-          ? "听林说怎么走，去集市东边、湖下方的火锅店。"
-          : "问林：火锅店怎么走？",
+          ? "听Lin说怎么走，去市场东边、湖下面的饭店。"
+          : "问Lin：饭店怎么走？",
       target: a.directionsFind === "accepted" ? "dumplings" : "lin",
-      reward: "+40 经验",
+      reward: "+40 XP",
     });
   if (a.directionsGive !== "done")
     cards.push({
       key: "directionsGive",
-      title: "帮忙指路",
-      detail: "去集市东南边找浩，帮他过南边的河去书店。",
+      title: "帮忙说怎么走",
+      detail: "去市场东南边找Hao，帮他过南边的河去书店。",
       target: "hao",
-      reward: "+40 经验",
+      reward: "+40 XP",
     });
   if (a.flowerDirections !== "done")
     cards.push({
       key: "flowerDirections",
       title: "找花店",
-      detail: "去北边的小路找小雨，告诉她怎么去湖上方的花店。",
+      detail: "去北边的小路找Xiaoyu，告诉她怎么去湖上面的花店。",
       target: "visitor-1",
-      reward: "+40 经验",
+      reward: "+40 XP",
     });
   const active = (key) =>
     ["accepted", "invited", "found", "seated", "dining"].includes(a[key]);
@@ -97,16 +98,16 @@ export function goalCards(a) {
   if (a.xp >= AREA_XP)
     cards.unshift({
       title: "可以上船了",
-      detail: "去右下方的河边上船，去下一站。",
+      detail: "去右边下面的河边上船，去下一站。",
       target: "next-area",
-      reward: "500 / 500 经验 · 可以出发了",
+      reward: "500 / 500 XP · 可以走了",
       key: "departure",
     });
   if (!cards.length)
     cards.push({
-      title: "苏州的一天",
-      detail: "今天帮了邻居，继续走走、聊天、认识新词吧。",
-      reward: "✓ 小目标都做好了",
+      title: "Suzhou的一天",
+      detail: "今天帮了邻居，再走走、聊天、认识新词吧。",
+      reward: "✓ 要做的事情都做好了",
       key: "complete",
     });
   return cards;
@@ -138,8 +139,8 @@ export function createGoals({ persistence, world, panda, speech }) {
             );
             if (exit) {
               w.walkTo(exit, true);
-              panda("先出门，再点一下目标，我们就出发。");
-            } else panda("先进入火锅店，我们再去桌边。");
+              panda("先出门，再点一下要做的事情，我们就走。");
+            } else panda("先去饭店，我们再去桌子旁边。");
           }
         };
         item.append(button);
@@ -216,6 +217,7 @@ export function createGoals({ persistence, world, panda, speech }) {
     }, 4300);
   }
   function discover(word) {
+    if (!/\p{Script=Han}/u.test(word.zh) || !isBeginnerChinese(word.zh)) return;
     const a = persistence.state.adventure;
     if (a.clickedWords.includes(word.zh)) return;
     persistence.change((s) => {

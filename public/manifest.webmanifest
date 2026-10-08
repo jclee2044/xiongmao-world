@@ -2,7 +2,7 @@
   "id": "/",
   "name": "熊猫世界",
   "short_name": "熊猫世界",
-  "description": "和熊猫一起逛苏州，说中文。",
+  "description": "和熊猫一起玩，说中文。",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

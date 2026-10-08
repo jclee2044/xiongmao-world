@@ -3,7 +3,7 @@ import { npcs } from "./content.js";
 // in the same 1200 × 800 coordinates as their background plates.
 export const interiors = {
   "clothing-store": {
-    id: "clothing-store", title: "Clothing Store", chinese: "服装店", interior: true,
+    id: "clothing-store", title: "衣服店", chinese: "衣服店", interior: true,
     backgroundPath: "/assets/world/clothing-store-interior.png", width: 1200, height: 800,
     spawn: { x: 600, y: 660 }, scenery: [], solids: [],
     walkableFloor: [[190, 500], [305, 310], [585, 310], [745, 325], [785, 355], [985, 390], [1010, 530], [1000, 570], [715, 570], [645, 570], [645, 740], [445, 715], [445, 565], [195, 540]],
@@ -15,14 +15,14 @@ export const interiors = {
     ],
     interactables: [
       { id: "clothing-exit", type: "door", name: "出门", x: 600, y: 715, target: "shanghai", returnDoor: "clothing-store" },
-      { id: "clothing-rack", type: "inspect", shopId: "clothing", name: "挑选衣服", x: 305, y: 420 },
+      { id: "clothing-rack", type: "inspect", shopId: "clothing", name: "选择衣服", x: 305, y: 420 },
       { id: "clothing-dresses", type: "inspect", shopId: "clothing", name: "看看裙子", x: 645, y: 365 },
-      { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "阿宁", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真好看。", "你喜欢什么颜色？"] },
-      { id: "clothing-seller", type: "npc", dialogueId: "clothing-seller", shopId: "clothing", name: "小雅", appearance: "lan", x: 850, y: 405, artHeight: 170, bubbles: ["欢迎光临服装店！", "喜欢哪件衣服？"] },
+      { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "Aning", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真漂亮。", "你喜欢什么颜色？"] },
+      { id: "clothing-seller", type: "npc", dialogueId: "clothing-seller", shopId: "clothing", name: "Xiaoya", appearance: "lan", x: 850, y: 405, artHeight: 170, bubbles: ["欢迎衣服店！", "喜欢哪件衣服？"] },
     ],
   },
   bakery: {
-    id: "bakery", title: "Bakery", chinese: "糕点铺", interior: true,
+    id: "bakery", title: "Bakery", chinese: "蛋糕店", interior: true,
     backgroundPath: "/assets/world/bakery-interior.webp", width: 1200, height: 800,
     spawn: { x: 600, y: 620 }, scenery: [], solids: [],
     walkableFloor: [[200, 510], [330, 340], [700, 370], [815, 365], [1000, 410], [1040, 550], [980, 585], [705, 545], [645, 545], [645, 740], [455, 730], [455, 550], [200, 520]],
@@ -35,9 +35,9 @@ export const interiors = {
     ],
     interactables: [
       { id: "bakery-exit", type: "door", name: "出门", x: 600, y: 710, target: "shanghai", returnDoor: "bakery" },
-      { id: "bakery-workbench", type: "practice", activity: "bakery-recipe", name: "做桂花糕", x: 900, y: 440 },
-      { id: "bakery-order", type: "practice", activity: "shop-sentences", name: "买点心", x: 525, y: 420 },
-      { id: "bakery-display", type: "inspect", name: "点心柜", x: 425, y: 405, zh: "这些糕点闻起来很香。", pinyin: "Zhèxiē gāodiǎn wén qǐlái hěn xiāng.", meaning: "These pastries smell lovely." },
+      { id: "bakery-workbench", type: "practice", activity: "bakery-recipe", name: "做蛋糕", x: 900, y: 440 },
+      { id: "bakery-order", type: "practice", activity: "shop-sentences", name: "买蛋糕", x: 525, y: 420 },
+      { id: "bakery-display", type: "inspect", name: "cake counter", x: 425, y: 405, zh: "这些蛋糕很好吃。", pinyin: "zhè xiē dàn gāo hěn hǎo chī 。", meaning: "These pastries smell lovely." },
     ],
     roomForeground: [
       [[400, 500], [465, 500], [463, 720], [405, 712]],
@@ -45,7 +45,7 @@ export const interiors = {
     ],
   },
   teahouse: {
-    id: "teahouse", title: "Teahouse", chinese: "茶馆", interior: true,
+    id: "teahouse", title: "茶馆", chinese: "茶馆", interior: true,
     backgroundPath: "/assets/world/teahouse-interior.webp", width: 1200, height: 800,
     spawn: { x: 600, y: 600 }, scenery: [], solids: [],
     walkableFloor: [[130, 445], [265, 335], [440, 250], [590, 340], [750, 430], [930, 495], [1060, 445], [1110, 500], [1050, 540], [875, 605], [750, 575], [715, 575], [715, 725], [480, 725], [480, 575], [425, 575], [235, 495]],
@@ -66,13 +66,13 @@ export const interiors = {
     ],
     interactables: [
       { id: "teahouse-exit", type: "door", name: "出门", x: 600, y: 700, target: "shanghai", returnDoor: "tea" },
-      { id: "teahouse-counter", type: "practice", activity: "tea-listen-order", name: "茶馆接单", x: 795, y: 480 },
+      { id: "teahouse-counter", type: "practice", activity: "tea-listen-order", name: "准备饮料", x: 795, y: 480 },
       { id: "teahouse-order", type: "practice", activity: "shop-sentences", name: "点茶", x: 700, y: 460 },
-      { id: "teahouse-table", type: "inspect", name: "茶桌", x: 355, y: 430, zh: "茶有点热，我们慢慢喝。", pinyin: "Chá yǒudiǎn rè, wǒmen mànman hē.", meaning: "The tea is a little hot. Let's drink slowly." },
+      { id: "teahouse-table", type: "inspect", name: "茶桌子", x: 355, y: 430, zh: "茶有点热，我们慢慢喝。", pinyin: "chá yǒu diǎn rè ， wǒ men màn màn hē 。", meaning: "The tea is a little hot. Let's drink slowly." },
     ],
   },
   bookshop: {
-    id: "bookshop", title: "Bookshop", chinese: "书店", interior: true,
+    id: "bookshop", title: "书店", chinese: "书店", interior: true,
     backgroundPath: "/assets/world/bookshop-interior.webp", width: 1200, height: 800,
     spawn: { x: 520, y: 580 }, scenery: [], solids: [],
     walkableFloor: [[200, 495], [330, 350], [500, 345], [760, 400], [985, 475], [1040, 525], [960, 570], [860, 610], [680, 600], [600, 570], [555, 555], [555, 740], [395, 710], [395, 655], [300, 625], [180, 555]],
@@ -91,12 +91,12 @@ export const interiors = {
     ],
     interactables: [
       { id: "bookshop-exit", type: "door", name: "出门", x: 475, y: 695, target: "shanghai", returnDoor: "books" },
-      { id: "bookshop-table", type: "practice", activity: "book-memory", name: "词语配对", x: 795, y: 480 },
-      { id: "bookshop-order", type: "practice", activity: "shop-sentences", name: "选一本书", x: 500, y: 470 },
-      { id: "bookshop-shelves", type: "inspect", name: "书架", x: 450, y: 420, zh: "你喜欢看故事书，还是漫画？", pinyin: "Nǐ xǐhuan kàn gùshi shū, háishi mànhuà?", meaning: "Do you like storybooks or comics?" },
+      { id: "bookshop-table", type: "practice", activity: "book-memory", name: "找一样的词", x: 795, y: 480 },
+      { id: "bookshop-order", type: "practice", activity: "shop-sentences", name: "选择一本书", x: 500, y: 470 },
+      { id: "bookshop-shelves", type: "inspect", name: "bookshelf", x: 450, y: 420, zh: "你喜欢看故事书，还是 comics？", pinyin: "nǐ xǐ huan kàn gù shì shū ， hái shì  comics？", meaning: "Do you like storybooks or comics?" },
     ],
   },
 };
 
 const hosts={bakery:[['baker','baker',650,470],['diner-friend','qiao',940,520]],teahouse:[['qiao','qiao',740,525],['diner','hao',440,465],['reader','reader',985,520]],bookshop:[['bo','bo',630,460],['reader','reader',295,530]]};
-for(const [room,people]of Object.entries(hosts)) for(const [id,appearance,x,y]of people)interiors[room].interactables.push({id:`${room}-${id}`,type:'npc',dialogueId:id,name:npcs[id].name,appearance,x,y,artHeight:165,bubbles:room==='bakery'?['桂花糕真香！','今天想吃什么？']:room==='teahouse'?['茶还有点热。','坐下来聊聊吧。']:['这本书很有意思。','你喜欢什么故事？']});
+for(const [room,people]of Object.entries(hosts)) for(const [id,appearance,x,y]of people)interiors[room].interactables.push({id:`${room}-${id}`,type:'npc',dialogueId:id,name:npcs[id].name,appearance,x,y,artHeight:165,bubbles:room==='bakery'?["蛋糕真好吃！",'今天想吃什么？']:room==='teahouse'?['茶还有点热。',"坐下来说说吧。"]:['这本书很有意思。','你喜欢什么故事？']});

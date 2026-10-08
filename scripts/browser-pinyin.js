@@ -24,9 +24,15 @@ try {
   });
   page.on("pageerror", (e) => errors.push(e.message));
   const enter = () => enterWorld(page);
+  const talk = async () => {
+    await walkToStop(page, "mei");
+    await page.locator("#world").focus();
+    await page.keyboard.press("Space");
+    await page.locator("#conversation").waitFor({ state: "visible" });
+  };
   const saved = async () =>
     page.waitForFunction(
-      () => document.getElementById("save-status").textContent === "日记存好了",
+      () => document.getElementById("save-status").textContent === "Journal saved",
     );
   const shown = async (enabled) => {
     assert.equal(await page.locator("#npc-pinyin").isVisible(), enabled);
@@ -36,17 +42,17 @@ try {
     );
     assert.equal(
       await page.locator("#toggle-pinyin").textContent(),
-      enabled ? "不看拼音" : "看拼音",
+      enabled ? "不看 Pinyin" : "看 Pinyin",
     );
   };
   await page.goto(base);
   await enter();
   await walkToStop(page, "mei");
-  await page.locator("#interact").click();
+  await talk();
   await shown(false);
-  await page.getByRole("button", { name: "看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
   await shown(true);
-  await page.getByRole("button", { name: "不看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "不看 Pinyin", exact: true }).click();
   await shown(false);
   await page
     .getByRole("button", { name: "看看“吃”的意思", exact: true })
@@ -66,9 +72,9 @@ try {
   );
   await page.reload();
   await enter();
-  await page.locator("#interact").click();
+  await talk();
   await shown(false);
-  await page.getByRole("button", { name: "看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
   await shown(true);
   await page
     .getByRole("button", { name: "看看“吃”的意思", exact: true })
@@ -76,7 +82,7 @@ try {
   assert.ok(
     (await page.locator("#word-callout").textContent()).includes("chī"),
   );
-  await page.getByRole("button", { name: "不看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "不看 Pinyin", exact: true }).click();
   await shown(false);
   assert.ok(
     !(await page.locator("#panda-message").textContent()).includes("chī"),
@@ -84,29 +90,29 @@ try {
   assert.ok(
     !(await page.locator("#dialog-status").textContent()).includes("chī"),
   );
-  await page.getByRole("button", { name: "看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
   await page.getByRole("button", { name: "结束聊天" }).click();
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   assert.equal(
     await page.locator('[data-setting="pinyin"]').inputValue(),
     "true",
   );
-  await page.getByRole("button", { name: "改回去" }).click();
+  await page.getByRole("button", { name: "Undo" }).click();
   assert.equal(
     await page.locator('[data-setting="pinyin"]').inputValue(),
     "false",
   );
-  await page.getByRole("button", { name: "关闭" }).click();
-  await page.locator("#interact").click();
+  await page.locator('[data-close="panel"]').click();
+  await talk();
   await shown(false);
   await page.screenshot({ path: "test-results/pinyin-hidden-mobile.png" });
-  await page.getByRole("button", { name: "看拼音", exact: true }).click();
+  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
   await shown(true);
   await saved();
   await page.screenshot({ path: "test-results/pinyin-shown-mobile.png" });
   await page.reload();
   await enter();
-  await page.locator("#interact").click();
+  await talk();
   await shown(true);
   assert.deepEqual(errors, []);
   await writeFile(

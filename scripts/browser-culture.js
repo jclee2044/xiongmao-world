@@ -251,14 +251,14 @@ try {
   await reloadAndResume("lantern-after-first-riddle");
 
   await closePanel();
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("true");
   await page.locator('[data-setting="translation"]').selectOption("false");
   await resume();
   assert.ok(await page.locator("#panel-content .pinyin").count());
   assert.equal(await page.locator("#panel-content .meaning").count(), 0);
   await closePanel();
-  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.locator('[data-setting="pinyin"]').selectOption("false");
   await page.locator('[data-setting="translation"]').selectOption("true");
   await resume();

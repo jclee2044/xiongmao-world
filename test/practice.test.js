@@ -1,3 +1,4 @@
+import { isBeginnerChinese } from "../public/data/language.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -342,8 +343,10 @@ test("culture games preserve all earlier activities and teach distinct replayabl
         ...(variant.instructions || []).map((i) => i.clue),
         ...(variant.steps || []).flatMap((s) => [s.clue, s.hint, ...s.options]),
       ].filter(Boolean)) {
-        assert.match(text.zh, /\p{Script=Han}/u);
-        assert.ok(text.pinyin && text.meaning);
+        assert.ok(isBeginnerChinese(text.zh), text.zh);
+        assert.ok(text.meaning);
+        if (/\p{Script=Han}/u.test(text.zh)) assert.ok(text.pinyin);
+        else assert.equal(text.pinyin, "");
       }
     }
   }

@@ -100,7 +100,7 @@ function build(scene) {
           speed: 48,
           phase: i,
           bubble:
-            o.id === "lin" ? "去河边走走吧。" : i ? "接住！" : "一、二、三！",
+            o.id === "lin" ? "去河旁边走走吧。" : i ? "接住！" : "一、二、三！",
         })),
     ],
     last: null,

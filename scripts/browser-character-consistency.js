@@ -150,7 +150,9 @@ try {
     new Set(result.lianCalls.map((c) => JSON.stringify(c.crop))).size,
     6,
   );
-  assert.ok(result.lianCalls.every((c) => c.source.endsWith("lian-poses.png")));
+  assert.ok(
+    result.lianCalls.every((c) => c.source.endsWith("lian-poses.webp")),
+  );
   assert.deepEqual(errors, []);
   await page
     .locator("#character-review")
