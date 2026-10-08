@@ -1,3 +1,4 @@
+import { normalizeVoice } from "../public/data/voices.js";
 import { defineText } from "./dictionary.js";
 import { transcribe, transcriptionAvailable } from "./transcription.js";
 import { createServer } from "node:http";
@@ -232,13 +233,14 @@ export function createApp({
           await previous;
           try {
             if (res.destroyed) return;
-            const voice = body.voice === "female" ? "female" : "male";
+            const voice = normalizeVoice(body.voice);
             const wav = await synthesize(body.text, body.slow === true, voice);
             if (res.destroyed) return;
             res.writeHead(200, {
               "Content-Type": "audio/wav",
               "Cache-Control": "no-store",
               "X-Speech-Engine": neuralAvailable(voice) ? "neural" : "basic",
+              "X-Speech-Voice": voice,
             });
             return res.end(wav);
           } finally {

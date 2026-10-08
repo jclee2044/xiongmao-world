@@ -1,3 +1,4 @@
+import { voiceForNpc } from "./voices.js";
 export const topics=['food','school','work','activities','travel','greeting'];
 export const npcs={
   'clothing-seller':{name:'小雅',identity:'苏州锦衣坊服装店的店员小雅',voice:'female',topic:'activities',personality:'A warm clothing shop assistant. Helps the visitor choose a linen shirt for 12 yuan, a blue jacket for 20 yuan, or a floral dress for 18 yuan. Discusses prices, whether the visitor found something they like, and QR or contactless card payment. Only the guided payment action completes a purchase.',greeting:{chinese:'欢迎光临！看看喜欢哪件衣服。',pinyin:'Huānyíng guānglín! Kànkan xǐhuan nǎ jiàn yīfu.',meaning:'Welcome! Take a look and see which piece of clothing you like.',topic:'activities'}},
@@ -96,3 +97,5 @@ for (const [id, tip] of Object.entries({
   an: '想画什么？可以说：“我想画一只熊猫。”',
   hao: '想去哪里？可以问：“请问，书店在哪儿？”',
 })) npcs[id].starter.tip = tip;
+
+for (const [id, npc] of Object.entries(npcs)) npc.voiceProfile = voiceForNpc(id);

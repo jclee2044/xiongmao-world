@@ -1,14 +1,16 @@
+import { normalizeVoice, voiceProfiles } from "../public/data/voices.js";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 const speechRoot = resolve("tools/speech/usr");
 export const neuralAvailable = (voice = "male") => {
+  const profile = voiceProfiles[normalizeVoice(voice)];
   const root =
-    voice === "female"
+    profile.model === "aishell3"
       ? "tools/vits-icefall-zh-aishell3"
       : "tools/vits-zh-hf-fanchen-wnj";
   const model =
-    voice === "female" ? "model.onnx" : "vits-zh-hf-fanchen-wnj.onnx";
+    profile.model === "aishell3" ? "model.onnx" : "vits-zh-hf-fanchen-wnj.onnx";
   return (
     [model, "lexicon.txt", "tokens.txt"].every((file) =>
       existsSync(resolve(root, file)),
@@ -20,8 +22,10 @@ export const speechAvailable = () =>
 export function synthesize(text, slow = false, voice = "male") {
   if (typeof text !== "string" || !text.trim() || text.length > 180)
     throw new Error("Please use a short phrase.");
+  voice = normalizeVoice(voice);
+  const profile = voiceProfiles[voice];
   const neural = neuralAvailable(voice);
-  if (!neural && (!speechAvailable() || voice === "female"))
+  if (!neural && (!speechAvailable() || voice !== "older-male"))
     throw new Error("No local Mandarin speech engine installed.");
   // Punctuation supplies a pause; never send repeated marks to the phoneme engine.
   text = text
@@ -83,6 +87,10 @@ export function synthesize(text, slow = false, voice = "male") {
       resolvePromise(audio);
     });
     child.stdin.on("error", () => {});
-    child.stdin.end(neural ? JSON.stringify({ text, slow, voice }) : text);
+    child.stdin.end(
+      neural
+        ? JSON.stringify({ text, slow, model: profile.model, sid: profile.sid })
+        : text,
+    );
   });
 }

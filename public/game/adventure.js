@@ -1,3 +1,4 @@
+import { voiceForNpc } from "../data/voices.js";
 import {
   AREA_XP,
   award,
@@ -119,7 +120,7 @@ export function createAdventure({
         "Chá zhēn hǎo hē! Hé nǐ yìqǐ hē chá, wǒ hěn kāixīn.",
         "The tea is lovely! I am happy to have tea with you.",
         [],
-        "female",
+        voiceForNpc("qiao"),
       );
     if (atTable && a.tea === "new")
       return line(
@@ -145,7 +146,7 @@ export function createAdventure({
             },
           ],
         ],
-        "female",
+        voiceForNpc("qiao"),
       );
     if (a.tea === "invited")
       return line(
@@ -154,7 +155,7 @@ export function createAdventure({
         "Wǒ zhè jiù guòqu. Wǒmen zài yuànzi lǐ de cházhuō jiàn!",
         "I am on my way. Meet me at the courtyard tea table!",
         [],
-        "female",
+        voiceForNpc("qiao"),
       );
     line(
       "一起喝茶",
@@ -165,7 +166,7 @@ export function createAdventure({
         ["tea-happy", "今天很开心，因为认识了你。", () => finishTea()],
         ["tea-tired", "有一点累，不过喝茶很舒服。", () => finishTea()],
       ],
-      "female",
+      voiceForNpc("qiao"),
     );
   }
   function finishTea() {

@@ -85,7 +85,7 @@ try {
   await go("lan");
   await page.locator("#replay").click();
   await page.waitForTimeout(100);
-  assert.equal(voices.at(-1).voice, "female");
+  assert.equal(voices.at(-1).voice, "young-female");
   await page.locator("#reply").fill("你好，我喜欢花。");
   await page.locator("#reply-form").evaluate((f) => f.requestSubmit());
   await page.waitForFunction(

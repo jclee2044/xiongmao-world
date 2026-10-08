@@ -104,7 +104,7 @@ export function createPractice({
     if (showing === id && document.querySelector(".silk-instructions"))
       clothCluesOpen = document.querySelector(".silk-instructions").open;
     showing = id;
-    speech.voice = npcs[activityById[id].npc]?.voice || "male";
+    speech.voice = npcs[activityById[id].npc]?.voiceProfile || "older-male";
     const progress = state(),
       active = progress.active;
     const round =

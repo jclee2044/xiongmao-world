@@ -313,17 +313,17 @@ try {
   assert.equal(await page.evaluate(() => check.music.ducked), false);
 
   await page.evaluate(() => check.panels.settings());
-  await page.getByLabel("音乐", { exact: true }).selectOption("off");
+  await page.locator("#music-toggle").selectOption("off");
   await page.waitForFunction(() => check.music.context.state === "suspended");
   assert.equal(await page.evaluate(() => check.music.audio.paused), true);
   assert.equal(await page.evaluate(() => check.music.master.gain.value), 0);
-  assert.equal(await page.getByLabel("音乐声音大小").isDisabled(), true);
+  assert.equal(await page.locator("#music-volume").isDisabled(), true);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0);
-  await page.getByLabel("音乐", { exact: true }).selectOption("on");
+  await page.locator("#music-toggle").selectOption("on");
   await page.waitForFunction(() => check.music.context.state === "running");
   await page.waitForFunction(() => !check.music.audio.paused);
   assert.equal(await page.evaluate(() => check.state.settings.music), 0.2);
-  await page.getByLabel("音乐声音大小").evaluate((input) => {
+  await page.locator("#music-volume").evaluate((input) => {
     input.value = "0.35";
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
@@ -497,8 +497,8 @@ try {
       musicGraphs[0]?.musicMaster.gain.value > 0.1 &&
       musicGraphs[0]?.musicTracks[0]?.currentTime > 0.1,
   );
-  await game.getByRole("button", { name: "设置", exact: true }).click();
-  await game.getByLabel("音乐", { exact: true }).selectOption("off");
+  await game.locator("#settings").click();
+  await game.locator("#music-toggle").selectOption("off");
   await game.waitForFunction(() => musicGraphs[0]?.state === "suspended");
   await game.waitForFunction(
     () => !JSON.parse(localStorage.getItem("panda-world-v1")).dirty,
@@ -569,12 +569,9 @@ try {
     0,
   );
   assert.equal(await game.evaluate(() => musicGraphs[0].state), "suspended");
-  await game.getByRole("button", { name: "设置", exact: true }).click();
-  assert.equal(
-    await game.getByLabel("音乐", { exact: true }).inputValue(),
-    "off",
-  );
-  assert.equal(await game.getByLabel("音乐声音大小").isDisabled(), true);
+  await game.locator("#settings").click();
+  assert.equal(await game.locator("#music-toggle").inputValue(), "off");
+  assert.equal(await game.locator("#music-volume").isDisabled(), true);
   assert.equal(
     await game.evaluate(
       async () =>

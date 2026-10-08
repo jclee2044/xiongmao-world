@@ -1,3 +1,5 @@
+import { normalizeVoice } from "../data/voices.js";
+
 export class Speech {
   constructor(onStatus, getSettings, onActivity = () => {}) {
     this.onStatus = onStatus;
@@ -56,13 +58,14 @@ export class Speech {
   async speak(text, slow = false, voice = this.voice || "male") {
     this.stop();
     const settings = this.getSettings();
+    voice = normalizeVoice(voice);
     text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
     if (!settings.voice) return this.onStatus("声音关了，可以在设置里打开。");
     const generation = this.generation;
     // Mobile voice lists can arrive after construction without voiceschanged.
     this.refresh();
     const selected =
-      voice === "female"
+      voice === "young-female"
         ? this.voices.find((v) =>
             /female|xiaoxiao|xiaoyi|huihui|ting.?ting|mei.?jia|sin.?ji|yaoyao|tian.?tian|女/i.test(
               v.name,

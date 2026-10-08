@@ -1,3 +1,4 @@
+import { voiceForNpc } from "./data/voices.js";
 import { createDirections } from "./game/directions.js";
 import { shops } from "./data/shops.js";
 import { createGoals } from "./game/goals.js";
@@ -320,7 +321,7 @@ function startWorld() {
 function interact(n) {
   goals.nature(n.id);
   directions.visit(n.id);
-  if (n.shopId) return openConversation(shops[n.shopId].seller, n.shopId);
+  if (n.shopId) return openConversation(shops[n.shopId].seller, n.shopId, n.appearance);
   if (n.id === "sheep-keepsake") {
     openPanel(
       "莲送的小羊",
@@ -346,7 +347,7 @@ function interact(n) {
     }
     updatePlace();
   } else if (["npc", "passerby", "guest"].includes(n.type))
-    openConversation(n.dialogueId || n.id);
+    openConversation(n.dialogueId || n.id, null, n.appearance);
   else if (n.type === "journal") panels.journal();
   else if (n.type === "stuffy") {
     if (!persistence.state.found.includes("momo"))
@@ -428,7 +429,9 @@ function interact(n) {
 let currentShop = null;
 let clothingItem = null;
 let clothingStage = "choose";
-function openConversation(id, shopId = null) {
+let currentVoice = "older-male";
+function openConversation(id, shopId = null, appearance = null) {
+  currentVoice = voiceForNpc(id, appearance);
   currentShop = shopId;
   clothingItem = null;
   clothingStage = "choose";
@@ -442,7 +445,7 @@ function openConversation(id, shopId = null) {
   speech.stop();
   currentNpc = id;
   goals.meet(id);
-  speech.voice = npcs[id]?.voice || "male";
+  speech.voice = currentVoice;
   helpLevel = persistence.state.settings.help === "more" ? 1 : 0;
   $("npc-name").textContent = npcs[id].name;
   $("reply").value = "";
@@ -532,7 +535,7 @@ function openConversation(id, shopId = null) {
   animatePanel($("conversation"));
   world.pause(true);
   (shopId === "clothing" ? $("shop-purchases").querySelector("button") : $("reply")).focus();
-  speech.speak(currentReply.chinese, false, npcs[id]?.voice || "male");
+  speech.speak(currentReply.chinese, false, currentVoice);
 }
 function renderShopPurchases() {
   $("shop-purchases")?.remove();
@@ -573,7 +576,7 @@ function renderShopPurchases() {
         mode: "authored",
         notice: "",
       });
-      speech.speak(thanks, false, npcs[currentNpc]?.voice || "female");
+      speech.speak(thanks, false, currentVoice);
       updateXP();
       renderShopPurchases();
     };
@@ -1019,9 +1022,9 @@ for (const dialog of document.querySelectorAll("dialog"))
     if (!$("panel").open && !$("conversation").open) world?.pause(false);
   });
 $("replay").onclick = () =>
-  speech.speak(currentReply.chinese, false, npcs[currentNpc]?.voice || "male");
+  speech.speak(currentReply.chinese, false, currentVoice);
 $("slow-replay").onclick = () =>
-  speech.speak(currentReply.chinese, true, npcs[currentNpc]?.voice || "male");
+  speech.speak(currentReply.chinese, true, currentVoice);
 $("stop-speech").onclick = () => speech.stop();
 $("toggle-pinyin").onclick = () => {
   const pinyin = !persistence.state.settings.pinyin;
@@ -1083,7 +1086,7 @@ $("reply-form").onsubmit = async (e) => {
     $("last-user").textContent = text;
     $("reply").value = "";
     displayReply(result);
-    speech.speak(result.chinese, false, npcs[id]?.voice || "male");
+    speech.speak(result.chinese, false, currentVoice);
     $("dialog-status").textContent = "+10 经验";
   } catch (error) {
     if (generation === requestGeneration && error.name !== "AbortError")
