@@ -83,6 +83,12 @@ export class Music {
     }
     this.enabled = true;
     this.wanted = true;
+    // Mobile browsers need both the context and media element unlocked inside
+    // the Start tap, before settings or the ownership request finish loading.
+    // The master gain stays silent until sync() has permission to play.
+    this.context.resume().catch(() => {});
+    this.createTrack();
+    this.audio?.play().catch(() => {});
     this.claiming = this.ownership.claim();
     this.channel?.postMessage("takeover");
     await this.sync();

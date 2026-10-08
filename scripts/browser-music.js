@@ -17,6 +17,61 @@ const browser = await chromium.launch({
   args: ["--mute-audio"],
 });
 try {
+  const mobile = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    serviceWorkers: "block",
+  });
+  const phone = await mobile.newPage();
+  await phone.route("**/mobile-music-check", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: '<button id="start">Start</button>',
+    }),
+  );
+  await phone.goto(base + "/mobile-music-check");
+  await phone.evaluate(async () => {
+    await fetch("/api/state");
+    const { Music } = await import("/game/music.js");
+    // Model phone policy: each audio device must first start in the tap handler.
+    let inTap = false;
+    for (const [prototype, method] of [
+      [AudioContext.prototype, "resume"],
+      [HTMLMediaElement.prototype, "play"],
+    ]) {
+      const original = prototype[method];
+      const unlocked = new WeakSet();
+      prototype[method] = function (...args) {
+        if (inTap) unlocked.add(this);
+        if (!unlocked.has(this))
+          return Promise.reject(
+            new DOMException("Tap required", "NotAllowedError"),
+          );
+        return original.apply(this, args);
+      };
+    }
+    window.mobileMusic = new Music({ music: 0 });
+    document.querySelector("#start").onclick = () => {
+      inTap = true;
+      mobileMusic.enable();
+      inTap = false;
+      setTimeout(() => mobileMusic.applySettings({ music: 0.2 }), 300);
+    };
+  });
+  await phone.locator("#start").tap();
+  await phone.waitForFunction(
+    () =>
+      mobileMusic.context.state === "running" &&
+      !mobileMusic.audio.paused &&
+      mobileMusic.audio.currentTime > 0.1 &&
+      mobileMusic.master.gain.value > 0.1,
+  );
+  await phone.evaluate(() => mobileMusic.dispose());
+  await mobile.close();
+  console.log(
+    "Phone startup plays saved volume after delayed settings without another tap.",
+  );
   const page = await browser.newPage({ serviceWorkers: "block" });
   let recordingRequests = 0;
   page.on("request", (request) => {
@@ -477,6 +532,7 @@ try {
     maximumGain: Math.max(...musicGainSamples),
     createdNotes: musicGraphs[0].createdNotes,
     createdTracks: musicGraphs[0].musicTracks.length,
+    trackPaused: musicGraphs[0].musicTracks[0]?.paused,
     state: musicGraphs[0].state,
   }));
   assert.equal(
@@ -496,9 +552,10 @@ try {
   );
   assert.equal(
     pendingMute.createdTracks,
-    0,
-    "Muted loading creates no recording",
+    1,
+    "The Start tap primes one silent recording for mobile playback",
   );
+  assert.equal(pendingMute.trackPaused, true);
   assert.equal(pendingMute.state, "suspended");
   releaseState();
   await game.locator("#world").waitFor({ state: "visible" });
