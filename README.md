@@ -1,5 +1,34 @@
 # Xiongmao World 熊猫世界
 
+Wander a painted Suzhou-inspired canal town with Panda, meet the neighbors, and practice Chinese through conversations, quests, and everyday activities.
+
+![The player and Panda meet neighbors among lantern-lit shops in the riverside market](docs/screenshots/market-town.jpg)
+
+## A glimpse of the world
+
+These screenshots show the current game. Click an image to take a closer look.
+
+[![The player stands in the middle of the market lane between fruit and noodle stalls, flowering shophouses, and red lanterns](docs/screenshots/market-center.jpg)](docs/screenshots/market-center.jpg)
+
+*In the heart of the market: browse the stalls and practice everyday Chinese with the sellers.*
+
+| Canal walks | Classical gardens |
+| --- | --- |
+| [![Panda follows the player beside a blue canal, stone bridge, and willow tree](docs/screenshots/canal-walk.jpg)](docs/screenshots/canal-walk.jpg) | [![Neighbors tend a classical garden with limestone rockeries, flowers, and a tea pavilion](docs/screenshots/classical-garden.jpg)](docs/screenshots/classical-garden.jpg) |
+| Follow the water, cross stone bridges, and meet people along the way. | Explore garden paths, rockeries, and quiet places to sit. |
+
+| Suzhou Museum | Tea and conversation |
+| --- | --- |
+| [![The player and Panda visit a museum gallery with a lotus bowl, Pearl Pillar, and canal map](docs/screenshots/museum.jpg)](docs/screenshots/museum.jpg) | [![A Chinese conversation in the teahouse with a tapped word showing its pinyin and definition](docs/screenshots/tea-conversation.jpg)](docs/screenshots/tea-conversation.jpg) |
+| Discover exhibits and listen to short Chinese descriptions. | Chat with neighbors, tap unfamiliar words, and ask Panda for help. |
+
+| Hotpot together | Clothing shop |
+| --- | --- |
+| [![An interactive hotpot meal with tofu and greens ordered in Chinese](docs/screenshots/hotpot.jpg)](docs/screenshots/hotpot.jpg) | [![The player and Panda browse a painted clothing shop with dresses, shirts, and a shopkeeper](docs/screenshots/clothing-shop.jpg)](docs/screenshots/clothing-shop.jpg) |
+| Order ingredients, review your meal, and add food to the pot. | Browse clothes and practice shopping with the seller. |
+
+## About the game
+
 Panda offers brief language tips inside conversations: a correction, a natural phrasing suggestion, or a useful grammar point, with an example to listen to or put into the reply box. AI dialogue returns optional coaching in the same request; clear clock-minute errors also have authored coaching in story mode and during provider failures. Tips can be dismissed and never interrupt the NPC’s voice. Check this flow with `node scripts/browser-conversation-feedback.js`.
 
 Journal opens to **What to do**, with a recommended or resumable activity, plain-English instructions and a clear completion condition. **My words** offers tappable pronunciation and definitions; **Memories** records adventures and keeps original older entries accessible. Activity guidance stays visible in town, and exploration activities offer a route to the next stop. Exercises are labeled as practice, separate from real purchases. Save export, conflict resolution and device pairing are under **Settings → Save and devices**. Check desktop and mobile flows with `node scripts/browser-journal.js`.
