@@ -30,14 +30,17 @@ try {
       const { Music } = await import("/game/music.js");
       window.music = new Music({ music: 0.2 });
       window.timeline = [];
-      const OriginalAudio = window.Audio;
-      window.Audio = function (...args) {
-        const audio = new OriginalAudio(...args);
-        for (const name of ["playing", "pause"])
-          audio.addEventListener(name, () =>
-            timeline.push({ time: Date.now(), active: name === "playing" }),
-          );
-        return audio;
+      const createSource = AudioContext.prototype.createBufferSource;
+      AudioContext.prototype.createBufferSource = function () {
+        const node = createSource.call(this);
+        for (const method of ["start", "stop"]) {
+          const original = node[method].bind(node);
+          node[method] = (...args) => {
+            timeline.push({ time: Date.now(), active: method === "start" });
+            return original(...args);
+          };
+        }
+        return node;
       };
       document.querySelector("#start").onclick = () => music.enable();
       document.querySelector("#mute").onclick = () =>
@@ -74,7 +77,9 @@ try {
   );
   await pages[0].evaluate(() => music.setScene({ id: "home" }));
   await pages[0].waitForFunction(
-    () => music.audio.src.includes("sonican") && music.audio.currentTime > 0.1,
+    () =>
+      music.audio.src.includes("hana-daria-semikina") &&
+      music.audio.currentTime > 0.1,
   );
   await pages[0].click("#mute");
   await pages[0].waitForFunction(

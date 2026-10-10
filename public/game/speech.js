@@ -1,4 +1,5 @@
 import { normalizeVoice } from "../data/voices.js";
+import { needsPronunciationContext } from "../data/pronunciation.js";
 
 export class Speech {
   constructor(onStatus, getSettings, onActivity = () => {}) {
@@ -55,13 +56,18 @@ export class Speech {
       this.url = null;
     }
   }
-  async speak(text, slow = false, voice = this.voice || "male") {
+  async speak(text, slow = false, voice = this.voice || "male", context) {
     this.stop();
     const settings = this.getSettings();
     voice = normalizeVoice(voice);
-    text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
-    if (!settings.voice) return this.onStatus("声音关了。可以在 Settings 里开。");
+    if (!settings.voice)
+      return this.onStatus("声音关了。可以在 Settings 里开。");
     const generation = this.generation;
+    if (this.resolveText) text = await this.resolveText(text);
+    if (generation !== this.generation) return;
+    // Preserve Panda's expressive punctuation; NPCs use simple pause marks.
+    if (voice !== "panda")
+      text = text.replace(/[?？!！]+/g, "。").replace(/。+/g, "。");
     // Mobile voice lists can arrive after construction without voiceschanged.
     this.refresh();
     const selected =
@@ -72,12 +78,14 @@ export class Speech {
             ),
           )
         : null;
-    if (selected) {
+    // Native voices cannot accept our explicit contextual phones.
+    if (selected && !needsPronunciationContext(text)) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.voice = selected;
       utterance.lang = selected.lang;
       utterance.rate = slow ? 0.65 : 0.9;
-      utterance.volume = settings.voiceVolume;
+      // Native speech has no PCM gain stage; use the remaining volume headroom.
+      utterance.volume = Math.min(1, settings.voiceVolume * 1.5);
       utterance.onstart = () =>
         this.activity(settings.voiceVolume > 0, generation);
       utterance.onend = () => this.finish(generation);
@@ -101,7 +109,12 @@ export class Speech {
       const response = await fetch("/api/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, slow, voice }),
+        body: JSON.stringify({
+          text,
+          slow,
+          voice,
+          ...(context ? { context } : {}),
+        }),
         signal: this.controller.signal,
       });
       if (!response.ok) throw new Error("Speech unavailable");

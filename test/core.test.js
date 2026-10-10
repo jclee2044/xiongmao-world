@@ -167,7 +167,7 @@ test("provider failure and malformed output fall back honestly without executing
     },
   });
   assert.equal(result.mode, "story");
-  assert.match(result.notice, /could not finish/);
+  assert.match(result.notice, /prepared reply.*AI is unavailable/);
   assert.throws(() =>
     validateReply({
       chinese: "你好",

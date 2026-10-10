@@ -1,12 +1,28 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.4-welcome-fast-entry-everyday-places-25";
+const CACHE = "xiongmao-shell-0.9.5-panda-feedback-72";
+// The user's personal recording is kept outside source control. A checkout
+// without that file must still install the rest of the offline game.
+const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
 const SHELL = [
   ...new Set(
     [
       "/welcome.css",
+      "/assets/map-icon.svg",
       "/data/optimized-art.js",
       "/data/language.js",
       "/data/hsk-vocabulary.js",
+      "/game/map.js",
+      "/game/dialogue-variation.js",
+      "/game/coach-questions.js",
+      "/data/dialogue-options.js",
+      "/data/conversation-subjects.js",
+      "/data/family-dialogue.js",
+      "/data/book-dialogue.js",
+      "/game/panda-landmarks.js",
+      "/game/collectibles.js",
+      "/data/panda-areas.js",
+      "/game/interactions.js",
+      "/game/activity-guide.js",
       "/game/language-signs.js",
       "/assets/welcome/panda-240.webp",
       "/assets/welcome/town-480.webp",
@@ -17,6 +33,7 @@ const SHELL = [
       "/data/language.js",
       "/data/hsk-vocabulary.js",
       "/data/voices.js",
+      "/data/pronunciation.js",
       "/game/exit-arrow.js",
       "/assets/world/lotus-fountain.png",
       "/game/fountain.js",
@@ -26,10 +43,13 @@ const SHELL = [
       "/assets/characters/market-npcs.png",
       "/assets/characters/visitors-walk.png",
       "/assets/characters/indoor-npcs.png",
+      "/assets/characters/garden-workers.png",
+      "/assets/characters/garden-workers-work.png",
       "/assets/world/suzhou-passenger-boat.png",
       "/assets/world/canal-water-v2.png",
       "/assets/world/shop-breakfast.png",
       "/assets/world/clothing-store-interior.png",
+      "/assets/world/clothing-store-exterior.png",
       "/assets/world/clothing-catalog.png",
       "/assets/world/shop-souvenirs.png",
       "/assets/world/shop-produce.png",
@@ -45,12 +65,17 @@ const SHELL = [
       "/assets/characters/lin-walk.png",
       "/assets/characters/seated-friends.png",
       "/data/market.js",
+      "/data/market-foreground.js",
+      "/data/market-colliders.js",
       "/data/town-layout.js",
       "/data/market-integration.js",
       "/assets/world/market-rows.png",
       "/assets/world/restaurant-interior-v3.png",
       "/assets/characters/neighbors-walk-v2.png",
       "/assets/characters/children-walk.png",
+      "/assets/characters/roamers-idle.png",
+      "/assets/characters/market-cat-poses.png",
+      "/data/roaming-zones.js",
       "/assets/world/hotpot-view.png",
       "/assets/world/hotpot-table.png",
       "/game/ambience.js",
@@ -87,6 +112,7 @@ const SHELL = [
       "/game/appearance.js",
       "/game/terrain.js",
       "/game/music.js",
+      "/game/music-track.js",
       "/game/music-ownership.js",
       "/game/fountain.js",
       "/game/practice.js",
@@ -118,6 +144,7 @@ const SHELL = [
       "/assets/characters/lin.webp",
       "/assets/characters/yun.webp",
       "/assets/characters/momo.webp",
+      "/assets/characters/fox-plush.png",
       "/data/content.js",
       "/data/learner.js",
       "/data/settings.js",
@@ -133,6 +160,7 @@ self.addEventListener("install", (event) =>
       for (let i = 0; i < SHELL.length; i += 3) {
         await cache.addAll(SHELL.slice(i, i + 3));
       }
+      for (const path of OPTIONAL_SHELL) await cache.add(path).catch(() => {});
     })(),
   ),
 );
@@ -186,7 +214,7 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  if (SHELL.includes(url.pathname))
+  if (SHELL.includes(url.pathname) || OPTIONAL_SHELL.includes(url.pathname))
     event.respondWith(
       caches
         .open(CACHE)

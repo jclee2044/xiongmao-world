@@ -157,8 +157,103 @@ try {
   await page
     .locator("#character-review")
     .screenshot({ path: "test-results/character-consistency.png" });
+  const headChecks = await page.evaluate(async () => {
+    const { draw } = await import("/game/render.js");
+    const { outfitColors } = await import("/game/appearance.js");
+    const scene = {
+      id: "head-review",
+      interior: true,
+      width: 1200,
+      height: 800,
+      scenery: [],
+      interactables: [],
+      paths: [],
+    };
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 800;
+    const cx = canvas.getContext("2d");
+    const head = document.createElement("canvas");
+    head.width = 200;
+    head.height = 160;
+    const hx = head.getContext("2d");
+    let captured;
+    cx.drawImage = (image, ...args) => {
+      if (image instanceof HTMLCanvasElement) captured = { image, args };
+    };
+    function headPixels(options, height) {
+      draw(cx, canvas, scene, { x: 600, y: 400 }, { x: 100, y: 100 }, options);
+      const { image, args } = captured;
+      const [sx, sy, sw, sh, x, y, w, h] = args;
+      hx.clearRect(0, 0, 200, 160);
+      hx.save();
+      hx.translate(100, 160);
+      hx.scale(options.facing < 0 ? -1 : 1, 1);
+      hx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+      hx.restore();
+      return hx.getImageData(0, 0, 200, height).data;
+    }
+    const checks = [];
+    for (const hair of ["bun", "short"])
+      for (const outfit of outfitColors)
+        for (const facing of [-1, 1]) {
+          const options = { settings: { hair, outfit }, time: 0, facing };
+          // Compare the head above the collar; walking shoulders have a
+          // different silhouette and must not be mistaken for face pixels.
+          const height = hair === "bun" ? 50 : 48;
+          const idle = headPixels(options, height);
+          for (let frame = 0; frame < 4; frame++) {
+            const walk = headPixels(
+              { ...options, moving: true, walkDistance: frame * 27 },
+              height,
+            );
+            let difference = 0;
+            let edgeDifference = 0;
+            // Compare visible colors: a transparent canvas round trip can
+            // round RGB values at almost-transparent watercolor edges.
+            for (let i = 0; i < idle.length; i += 4) {
+              if (Math.max(idle[i + 3], walk[i + 3]) < 180) {
+                edgeDifference = Math.max(
+                  edgeDifference,
+                  Math.abs(idle[i + 3] - walk[i + 3]),
+                );
+                continue;
+              }
+              difference = Math.max(
+                difference,
+                Math.abs(idle[i + 3] - walk[i + 3]),
+              );
+              for (let channel = 0; channel < 3; channel++)
+                difference = Math.max(
+                  difference,
+                  Math.abs(
+                    (idle[i + channel] * idle[i + 3]) / 255 -
+                      (walk[i + channel] * walk[i + 3]) / 255,
+                  ),
+                );
+            }
+            checks.push({
+              hair,
+              outfit,
+              facing,
+              frame,
+              difference,
+              edgeDifference,
+            });
+          }
+        }
+    return checks;
+  });
+  assert.equal(headChecks.length, 64);
+  assert.ok(
+    headChecks.every((check) => check.difference <= 1),
+    JSON.stringify(headChecks.filter((check) => check.difference > 1)),
+  );
+  // The cropped bob's faint outer edge can differ by ten alpha levels after
+  // canvas resampling. The face and opaque hair must still match exactly.
+  assert.ok(headChecks.every((check) => check.edgeDifference <= 10));
   console.log(
-    "All eight player appearances rendered idle/walking/seated; Lian uses six distinct crops from one identity sheet.",
+    "All eight player appearances rendered idle/walking/seated; all walking heads match idle pixels in both directions; Lian uses six distinct crops from one identity sheet.",
   );
 } finally {
   await browser.close();

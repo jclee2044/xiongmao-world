@@ -1,3 +1,6 @@
+import { marketForeground, behindMarketForeground } from "../data/market-foreground.js";
+import { npcFeet } from "./interactions.js";
+import { hasCollectible } from "./collectibles.js";
 import { optimizedArt } from "../data/optimized-art.js";
 import { drawFountain, drawFountainBirds } from "./fountain.js";
 import { exitArrow } from "./exit-arrow.js";
@@ -8,6 +11,8 @@ import {
   walkFrame,
   recolorOutfitPixels,
   lianPose,
+  npcIdlePose,
+  gardenWorkFrame,
 } from "./appearance.js";
 import { paintGround, blendedPlate } from "./terrain.js";
 import { lifeActors, paintLeaves } from "./life.js";
@@ -37,6 +42,8 @@ const paths = {
   qiaoSeated: "/assets/characters/qiao-seated.png",
   neighborWalk: "/assets/characters/neighbors-walk-v2.png",
   visitorWalk: "/assets/characters/visitors-walk.png",
+  roamersIdle: "/assets/characters/roamers-idle.png",
+  marketCat: "/assets/characters/market-cat-poses.png",
   children: "/assets/characters/children-walk.png",
   market: "/assets/world/market-rows.png",
   restaurant: "/assets/world/restaurant-interior-v3.png",
@@ -45,6 +52,7 @@ const paths = {
   lin: "/assets/characters/lin.webp",
   yun: "/assets/characters/yun.webp",
   momo: "/assets/characters/momo.webp",
+  fox: "/assets/characters/fox-plush.png",
   lane: "/assets/world/canal-lane.webp",
   home: "/assets/world/home.webp",
   paving: "/assets/world/paving.webp",
@@ -53,10 +61,12 @@ const paths = {
   tree: "/assets/world/willow.webp",
   neighbors: "/assets/characters/neighbors.webp",
   indoorNpcs: "/assets/characters/indoor-npcs.png",
+  gardenWorkers: "/assets/characters/garden-workers-work.png",
   marketNpcs: "/assets/characters/market-npcs.png",
   walk: "/assets/characters/player-walk-v2.png",
   props: "/assets/world/props.webp",
   storefronts: "/assets/world/storefronts.webp",
+  clothingStore: "/assets/world/clothing-store-exterior.png",
   landmarks: "/assets/world/landmarks.webp",
   animals: "/assets/characters/animals.webp",
 };
@@ -77,12 +87,14 @@ function decodeAsset(path) {
   }
   return decoded.get(path);
 }
-const commonArt = ["player", "idle", "walk", "panda", "seated", "momo"];
+const commonArt = ["player", "idle", "walk", "panda", "seated", "momo", "fox"];
 export function prepareCommonArt() {
   return Promise.all(commonArt.map((name) => decodeAsset(paths[name])));
 }
 export async function prepareArt(scene, onProgress = () => {}) {
   const names = new Set(commonArt);
+  if (scene.interactables?.some((o) => bounds.gardenWorkers[o.appearance]))
+    names.add("gardenWorkers");
   // Interior backgrounds are fetched only when that room is entered.
   if (scene.id === "home" || scene.interior) {
     [
@@ -104,6 +116,8 @@ export async function prepareArt(scene, onProgress = () => {}) {
       "lian",
       "fruitTrees",
       "linWalk",
+      "roamersIdle",
+      "marketCat",
       "lane",
       "paving",
       "earth",
@@ -123,6 +137,7 @@ export async function prepareArt(scene, onProgress = () => {}) {
       "qiaoSeated",
       "props",
       "storefronts",
+      "clothingStore",
       "landmarks",
       "animals",
     ].forEach((name) => names.add(name));
@@ -181,14 +196,18 @@ function atlasCrop(name, col, row, columns, rows) {
   if (atlasCrops.has(key)) return atlasCrops.get(key);
   const img = asset(paths[name]);
   const xs =
-    name === "neighborWalk"
+    name === "panda"
+      ? pandaFrameEdges.map((n) => (n * img.naturalWidth) / 2172)
+      : name === "neighborWalk"
       ? [80, 320, 535, 750, 975].map((n) => (n * img.naturalWidth) / 1024)
       : Array.from(
           { length: columns + 1 },
           (_, i) => (i * img.naturalWidth) / columns,
         );
   const ys =
-    name === "walk"
+    name === "roamersIdle"
+      ? [0, 450, 855, 1278].map((n) => n * img.naturalHeight / 1278)
+      : name === "walk"
       ? [0, 0.514, 1].map((n) => n * img.naturalHeight)
       : name === "neighborWalk"
         ? [0, 260, 525, 780, 1040, 1282, 1536].map(
@@ -248,6 +267,138 @@ function playerOutfit(color, name = "idle") {
   cx.putImageData(frame, 0, 0);
   idleOutfits.set(key, c);
   return c;
+}
+const playerWalkPoses = new Map();
+const playerParts = new Map();
+function playerPartsAt(color, name, crop) {
+  const key = `${color}:${name}:${crop.x}:${crop.y}`;
+  if (playerParts.has(key)) return playerParts.get(key);
+  const canvas = document.createElement("canvas");
+  canvas.width = crop.w;
+  canvas.height = crop.h;
+  const cx = canvas.getContext("2d");
+  cx.drawImage(
+    asset(paths[name]),
+    crop.x,
+    crop.y,
+    crop.w,
+    crop.h,
+    0,
+    0,
+    crop.w,
+    crop.h,
+  );
+  const original = cx.getImageData(0, 0, crop.w, crop.h).data;
+  cx.clearRect(0, 0, crop.w, crop.h);
+  cx.drawImage(
+    playerOutfit(color, name),
+    crop.x,
+    crop.y,
+    crop.w,
+    crop.h,
+    0,
+    0,
+    crop.w,
+    crop.h,
+  );
+  const head = cx.getImageData(0, 0, crop.w, crop.h);
+  const body = cx.getImageData(0, 0, crop.w, crop.h);
+  const limit = Math.round(crop.h * 0.43);
+  const neckRows = Array.from({ length: limit }, () => ({ x: 0, count: 0 }));
+  // Follow the actual collar silhouette. A horizontal cut removes the
+  // tops of the walking shoulders and leaves the idle neck floating.
+  for (let x = 0; x < crop.w; x++) {
+    let collar = limit;
+    for (let y = Math.round(crop.h * 0.27); y < limit; y++) {
+      const i = (y * crop.w + x) * 4;
+      const r = original[i],
+        g = original[i + 1],
+        b = original[i + 2];
+      if (
+        original[i + 3] > 180 &&
+        ((r > g * 1.05 && b > g * 1.05) || (g > r && g > b * 1.08))
+      ) {
+        collar = y;
+        break;
+      }
+    }
+    for (let y = 0; y < crop.h; y++) {
+      const i = (y * crop.w + x) * 4;
+      if (y >= collar) head.data[i + 3] = 0;
+      else {
+        body.data[i + 3] = 0;
+        const r = original[i],
+          g = original[i + 1],
+          b = original[i + 2];
+        // The lowest skin pixels above the collar locate the neck join.
+        if (
+          y > crop.h * 0.29 &&
+          original[i + 3] > 200 &&
+          r > 210 &&
+          g > 130 &&
+          r > g * 1.06 &&
+          g > b * 1.1 &&
+          r > b * 1.2
+        ) {
+          neckRows[y].x += x;
+          neckRows[y].count++;
+        }
+      }
+    }
+  }
+  cx.putImageData(head, 0, 0);
+  const torso = document.createElement("canvas");
+  torso.width = crop.w;
+  torso.height = crop.h;
+  torso.getContext("2d").putImageData(body, 0, 0);
+  const neckY = neckRows.findLastIndex((row) => row.count >= 4);
+  const parts = {
+    head: canvas,
+    body: torso,
+    neckX: neckRows[neckY].x / neckRows[neckY].count,
+    neckY,
+  };
+  playerParts.set(key, parts);
+  return parts;
+}
+function playerWalkPose(color, row, frame) {
+  const key = `${color}:${row}:${frame}`;
+  if (playerWalkPoses.has(key)) return playerWalkPoses.get(key);
+  const idle = idleCrop(0, row);
+  const idleHeight = Math.max(
+    ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, row).h),
+  );
+  const walk = atlasCrop("walk", frame, row, 4, 2);
+  const walkHeight = Math.max(
+    ...[0, 1, 2, 3].map((f) => atlasCrop("walk", f, row, 4, 2).h),
+  );
+  const scale = idleHeight / walkHeight;
+  // Keep the idle face, hair and neck at their original scale. Normalizing
+  // two independently painted full bodies does not normalize their faces.
+  const idleParts = playerPartsAt(color, "idle", idle);
+  const walkParts = playerPartsAt(color, "walk", walk);
+  const headY = idleHeight - idle.h;
+  const neckY = headY + idleParts.neckY;
+  const bodyScaleY = (idleHeight - neckY) / (walk.h - walkParts.neckY);
+  const bodyX = idleParts.neckX - idle.w / 2 - walkParts.neckX * scale;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.ceil(
+    Math.max(idle.w, -bodyX * 2, (bodyX + walk.w * scale) * 2),
+  );
+  // Integer padding preserves the idle head pixels without resampling them.
+  if ((canvas.width - idle.w) % 2) canvas.width++;
+  canvas.height = idleHeight;
+  const cx = canvas.getContext("2d");
+  cx.drawImage(
+    walkParts.body,
+    canvas.width / 2 + bodyX,
+    neckY - walkParts.neckY * bodyScaleY,
+    walk.w * scale,
+    walk.h * bodyScaleY,
+  );
+  cx.drawImage(idleParts.head, (canvas.width - idle.w) / 2, headY);
+  playerWalkPoses.set(key, canvas);
+  return canvas;
 }
 function ready(img) {
   if (img instanceof HTMLCanvasElement) return img.width > 0;
@@ -439,6 +590,7 @@ function sprite(
     flip = false,
     bob = 0,
     sway = 0,
+    settle = 0,
     uniformHeight,
     breathe = 0,
     highlight = false,
@@ -455,7 +607,7 @@ function sprite(
   ctx.save();
   ctx.translate(x, y + bob);
   ctx.rotate(sway);
-  ctx.scale(1 + breathe, 1 + breathe * 0.45);
+  ctx.scale(1 + breathe, 1 + breathe * 0.45 - settle);
   if (highlight) {
     ctx.shadowColor = "white";
     ctx.shadowBlur = 5;
@@ -499,11 +651,13 @@ export function draw(
   player,
   companion,
   {
+    varyBubble = text => text,
     time = 0,
     walkDistance = 0,
     animate = false,
     moving = false,
     pandaMoving = false,
+    pandaWalkDistance = 0,
     facing = 1,
     hover = null,
     guest = null,
@@ -515,6 +669,7 @@ export function draw(
     near = null,
     route = [],
     interactionTarget = null,
+    overview = null,
   } = {},
 ) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2),
@@ -531,25 +686,46 @@ export function draw(
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
-  const scale =
-    scene.id === "home" || scene.interior
-      ? Math.max(
+  const scale = overview
+    ? Math.min(w / overview.w, h / overview.h)
+    : scene.id === "home" || scene.interior
+      ? (scene.id === "home" ? 0.830584 : 1) * Math.max(
           w / (scene.id === "home" ? scene.width : 1200),
           h / (scene.id === "home" ? scene.height : 800),
         )
-      : Math.min(1.15, Math.max(0.68, w / 1254, h / 1254));
+      : Math.min(1.15, Math.max(0.68, w / 1254, h / 1254)) *
+        (window.matchMedia("(hover: hover) and (pointer: fine)").matches
+          ? 1.1
+          : 1);
   const viewW = w / scale,
     viewH = h / scale,
-    camX = Math.max(0, Math.min(scene.width - viewW, player.x - viewW / 2)),
-    camY = Math.max(0, Math.min(scene.height - viewH, player.y - viewH * 0.55));
-  const ox = scene.width < viewW ? (viewW - scene.width) / 2 : 0,
-    oy = scene.height < viewH ? (viewH - scene.height) / 2 : 0;
+    camX = overview
+      ? overview.x
+      : Math.max(0, Math.min(scene.width - viewW, player.x - viewW / 2)),
+    camY = overview
+      ? overview.y
+      : Math.max(0, Math.min(scene.height - viewH, player.y - viewH * 0.55));
+  const ox = overview
+      ? (viewW - overview.w) / 2
+      : scene.width < viewW
+        ? (viewW - scene.width) / 2
+        : 0,
+    oy = overview
+      ? (viewH - overview.h) / 2
+      : scene.height < viewH
+        ? (viewH - scene.height) / 2
+        : 0;
   const view = { x: camX - ox, y: camY - oy, w: viewW, h: viewH };
   ctx.fillStyle = "#e9d7b5";
   ctx.fillRect(0, 0, w, h);
   ctx.save();
   ctx.scale(scale, scale);
   ctx.translate(ox - camX, oy - camY);
+  if (overview) {
+    ctx.beginPath();
+    ctx.rect(overview.x, overview.y, overview.w, overview.h);
+    ctx.clip();
+  }
   if (scene.id === "home" || scene.interior) {
     const img = asset(scene.backgroundPath || paths.home);
     if (ready(img)) ctx.drawImage(img, 0, 0, scene.width, scene.height);
@@ -591,24 +767,36 @@ export function draw(
         );
     }
   }
+  // Walkable planks must be below actors, independent of their foot position.
+  // The upright posts remain in the depth-sorted scenery pass.
+  for (const o of scene.scenery.filter(
+    (o) => o.type === "boat-dock" && visible(o, view),
+  )) {
+    ctx.fillStyle = "#755437";
+    ctx.fillRect(o.x - o.w / 2, o.y - o.h, o.w, o.h);
+    for (let y = o.y - o.h; y < o.y; y += 11) {
+      ctx.fillStyle = Math.round(y) % 2 ? "#b49364" : "#c3a477";
+      ctx.fillRect(o.x - o.w / 2 + 3, y, o.w - 6, Math.min(9, o.y - y));
+    }
+  }
   const playerHeight =
     scene.interior || scene.id === "home" ? 160 : actorSizes.player;
   const ambient = lifeActors(scene, time, player, settings.motion !== false);
   const entities = [
-    ...scene.scenery.filter((o) => visible(o, view)),
+    ...scene.scenery.filter((o) => o.type !== "boat-dock" && visible(o, view)),
     ...scene.interactables.filter(
       (o) =>
         (o.type === "npc" &&
           !["kid-one", "kid-two", "lin"].includes(o.id) &&
           !(o.id === "lian" && hungryGuest) &&
           !(o.id === "qiao" && guest)) ||
-        (o.type === "stuffy" && !found) ||
-        (o.type === "friend" && found),
+        (o.type === "stuffy" && !o.hidden && !o.concealed && !hasCollectible(found, o.collectible || "momo")) ||
+        (o.type === "friend" && hasCollectible(found, o.collectible || "momo")),
     ),
     { ...player, ...(seat || {}), type: "player" },
     {
       ...companion,
-      ...(seat?.kind === "tea" ? { x: seat.x + 60, y: seat.y + 35 } : {}),
+      ...(seat?.kind === "tea" ? { x: seat.x + 75, y: seat.y + 8 } : {}),
       type: "panda",
     },
     ...ambient,
@@ -628,8 +816,31 @@ export function draw(
       type: "room-foreground",
     })),
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
-  ].sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
+  ].filter((o) => !overview || !["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"].includes(o.type))
+    .sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
+  const marketMasks = marketForeground(scene.marketPlate);
   for (const o of entities) {
+    const marketActor = marketMasks.length &&
+      ["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"].includes(o.type);
+    if (marketActor) {
+      ctx.save();
+      for (const { polygon } of marketMasks) {
+        if (!behindMarketForeground(polygon, o.artX ?? o.x, o.artY ?? o.y, 60)) continue;
+        ctx.beginPath();
+        ctx.rect(0, 0, scene.width, scene.height);
+        polygon.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+        ctx.closePath();
+        ctx.clip("evenodd");
+      }
+    }
+    if (!overview && ["npc", "passerby", "guest"].includes(o.type) &&
+        (near?.id === o.id || hover?.id === o.id)) {
+      const feet = npcFeet(o);
+      ctx.fillStyle = "#fff6dfa0";
+      ctx.beginPath();
+      ctx.ellipse(feet.x, feet.y, 28, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
     if (o.type === "fountain") {
       drawFountain(ctx, o, time, animate, asset(paths.fountain));
     } else if (o.type === "fountain-birds") {
@@ -696,19 +907,17 @@ export function draw(
           ctx.stroke();
         }
       }
-    } else if (o.type === "boat-dock") {
-      ctx.fillStyle = "#755437";
+    } else if (o.type === "boat-dock-post") {
+      const scale = scene.worldScale || 1;
+      ctx.fillStyle = "#6e5034";
       ctx.fillRect(o.x - o.w / 2, o.y - o.h, o.w, o.h);
-      for (let y = o.y - o.h; y < o.y; y += 11) {
-        ctx.fillStyle = Math.round(y) % 2 ? "#b49364" : "#c3a477";
-        ctx.fillRect(o.x - o.w / 2 + 3, y, o.w - 6, 9);
-      }
-      for (const dx of [-o.w / 2, o.w / 2]) {
-        ctx.fillStyle = "#6e5034";
-        ctx.fillRect(o.x + dx - 4, o.y - 26, 8, 32);
-        ctx.fillStyle = "#c8ad7a";
-        ctx.fillRect(o.x + dx - 6, o.y - 28, 12, 6);
-      }
+      ctx.fillStyle = "#c8ad7a";
+      ctx.fillRect(
+        o.x - o.w / 2 - 2 * scale,
+        o.y - o.h - 2 * scale,
+        o.w + 4 * scale,
+        6 * scale,
+      );
     } else if (o.type === "passenger-boat") {
       const bob = animate ? Math.sin(time * 0.8) * 1.3 : 0;
       sprite(ctx, "boat", o.x, o.y + bob, o.h, {
@@ -723,7 +932,7 @@ export function draw(
       ctx.strokeStyle = "#43342b";
       ctx.fillStyle = "#fff9e9";
       const label =
-        adventure.xp >= AREA_XP ? "船 · 可以走了" : `船 · ${AREA_XP} XP`;
+        adventure.xp >= AREA_XP ? "船·可以走了" : `船 · ${AREA_XP} XP`;
       ctx.strokeText(label, o.x, o.y - o.h - 18);
       ctx.fillText(label, o.x, o.y - o.h - 18);
       ctx.restore();
@@ -781,22 +990,13 @@ export function draw(
         ctx.fillStyle = "#453420";
         ctx.fillText(o.label, o.x - 5, o.y - o.h * 0.27);
       }
-      if (o.id === "building-clothing-store") {
-        ctx.save();
-        ctx.textAlign = "center";
-        ctx.font = 'bold 25px "Noto Serif CJK SC",serif';
-        ctx.fillStyle = "#6e3c35";
-        ctx.fillRect(o.x - 68, o.y - o.h * 0.56, 136, 43);
-        ctx.fillStyle = "#fff1d6";
-        ctx.fillText("Clothing shop", o.x, o.y - o.h * 0.56 + 30);
-        ctx.restore();
-      }
     } else if (o.type === "festival-lanterns") {
       festivalLanterns(ctx, o, time, settings.motion !== false);
     } else if (["storefront", "landmark", "nature"].includes(o.type)) {
-      const group = o.type === "storefront" ? "storefronts" : "landmarks";
+      const group = o.storefront === "clothing-store" ? "clothingStore"
+        : o.type === "storefront" ? "storefronts" : "landmarks";
       const key = o.storefront || o.landmark || o.nature,
-        crop = bounds[group]?.[key];
+        crop = group === "clothingStore" ? bounds.clothingStore : bounds[group]?.[key];
       if (!crop) continue;
       ctx.save();
       const obscures =
@@ -826,7 +1026,10 @@ export function draw(
         ctx.fillText(o.label, o.x, o.y - o.h * 0.4);
       }
     } else if (o.type === "animal") {
-      const frames = bounds.animals?.[o.animal];
+      const marketCat = o.id === "courtyard-cat";
+      const frames = marketCat
+        ? Array.from({ length: 9 }, (_, i) => atlasCrop("marketCat", i % 3, Math.floor(i / 3), 3, 3))
+        : bounds.animals?.[o.animal];
       if (!frames) continue;
       const height = { cat: 64, duck: 54, rabbit: 58, bird: 30 }[o.animal];
       const swimming = o.animal === "duck";
@@ -845,8 +1048,9 @@ export function draw(
         ctx.rect(o.x - height, o.y - height * 1.2, height * 2, height * 1.03);
         ctx.clip();
       }
-      sprite(ctx, "animals", o.x, o.y, height, {
-        crop: frames[swimming ? 1 : active ? walkFrame(o.distance) : 1],
+      sprite(ctx, marketCat ? "marketCat" : "animals", o.x, o.y, height, {
+        // Ducks rest in their neutral floating sprite; grounded rabbits crouch.
+        crop: frames[marketCat ? (active ? Math.floor(o.distance / 4) % 8 : 8) : swimming ? 1 : o.animal === "rabbit" ? (o.hop > 0.2 ? 1 : 0) : active ? walkFrame(o.distance) : 1],
         uniformHeight: Math.max(...frames.map((f) => f.h)),
         flip: o.facing < 0,
         bob: o.animal === "rabbit" ? -(o.hop || 0) * 23 : 0,
@@ -854,15 +1058,17 @@ export function draw(
       if (swimming) ctx.restore();
     } else if (o.id === "lian" && ["npc", "guest"].includes(o.type)) {
       const pose = lianPose(o);
+      const height = o.seated ? 130 : scene.interior ? 165 : 171;
       shadow(ctx, o.x, o.y, 25);
       sprite(
         ctx,
         "lian",
         o.x,
         o.y,
-        o.seated ? 130 : scene.interior ? 165 : 171,
+        height,
         {
           crop: atlasCrop("lian", pose.col, pose.row, 3, 2),
+          ...npcIdlePose(o, time, animate && settings.motion !== false),
           flip: !o.seated && o.facing < 0,
           highlight: hover?.id === o.id,
           breathe:
@@ -873,11 +1079,12 @@ export function draw(
         speechBubble(
           ctx,
           o.x,
-          o.y - 195,
-          o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length],
+          o.y - height - 12,
+          varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time),
         );
     } else if (o.type === "passerby" || o.type === "guest") {
       shadow(ctx, o.x, o.y, 25);
+      const height = o.seated ? (o.id === "qiao" ? actorSizes.player : 130) : scene.interior ? 165 : o.artHeight || 165;
       const child = ["kid-one", "kid-two"].includes(o.id);
       const visitor = o.id.startsWith("visitor-");
       const row = child
@@ -885,27 +1092,30 @@ export function draw(
         : visitor
           ? Number(o.id.slice(8))
           : ["qiao", "bo", "lan", "wei", "an", "hao"].indexOf(o.appearance);
-      const atlas = child
+      const walkingAtlas = child
         ? "children"
         : visitor
           ? "visitorWalk"
           : o.id === "lin"
             ? "linWalk"
             : "neighborWalk";
-      const col = o.moving ? Math.floor(o.distance / 18) % 4 : 1;
+      const idleIndex = child ? 6 + Number(o.id === "kid-two") : visitor ? row : o.id === "lin" ? 8 : -1;
+      const idle = idleIndex >= 0 && (!o.moving || settings.motion === false);
+      const atlas = idle ? "roamersIdle" : walkingAtlas;
+      const col = o.moving && settings.motion !== false ? Math.floor(o.distance / 18) % 4 : 1;
       const crop = atlasCrop(
         atlas,
-        col,
-        o.id === "lin" ? 0 : Math.max(0, row),
-        4,
-        child ? 2 : o.id === "lin" ? 1 : 6,
+        idle ? idleIndex % 3 : col,
+        idle ? Math.floor(idleIndex / 3) : o.id === "lin" ? 0 : Math.max(0, row),
+        idle ? 3 : 4,
+        idle ? 3 : child ? 2 : o.id === "lin" ? 1 : 6,
       );
       sprite(
         ctx,
         o.seated ? (o.id === "lian" ? "seated" : "qiaoSeated") : atlas,
         o.x,
         o.y,
-        o.seated ? 130 : scene.interior ? 165 : o.artHeight || 165,
+        height,
         {
           crop: o.seated
             ? o.id === "lian"
@@ -913,13 +1123,14 @@ export function draw(
               : { x: 180, y: 80, w: 690, h: 1390 }
             : crop,
           flip: o.id === "lin" ? o.facing > 0 : o.seated ? false : o.facing < 0,
+          ...npcIdlePose(o, time, animate && settings.motion !== false),
           breathe:
             animate && !o.moving ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
           highlight: Boolean(o.id && hover?.id === o.id),
         },
       );
       if (o.bubble && Math.floor(time / 6 + o.phase) % 3 === 0)
-        speechBubble(ctx, o.x, o.y - (o.artHeight || 205) - 30, o.bubble);
+        speechBubble(ctx, o.x, o.y - height - 12, varyBubble(o.bubble, o.id, scene.id, time));
     } else if (bounds.props?.[o.type]) {
       shadow(ctx, o.x, o.y, o.w * 0.3);
       const img = asset(paths.props),
@@ -945,10 +1156,9 @@ export function draw(
     } else if (o.type === "player") {
       const col = settings.hair === "short" ? 1 : 0;
       const animatedWalk = moving && settings.motion !== false;
-      const frames = [0, 1, 2, 3].map((f) => atlasCrop("walk", f, col, 4, 2));
       shadow(ctx, o.x, o.y, 32);
       if (seat) {
-        sprite(ctx, "seated", o.x, o.y, scene.interior ? 128 : 138, {
+        sprite(ctx, "seated", o.x, o.y, seat.kind === "tea" ? playerHeight : scene.interior ? 128 : 138, {
           crop: atlasCrop("seated", col, 0, 3, 1),
           imageOverride: playerOutfit(settings.outfit, "seated"),
           flip: Boolean(seat.flip),
@@ -966,53 +1176,65 @@ export function draw(
           ),
           flip: facing < 0,
         });
-      } else
+      } else {
+        const pose = playerWalkPose(settings.outfit, col, Math.floor(walkDistance / 27) % 4);
         sprite(ctx, "walk", o.x, o.y, playerHeight, {
-          imageOverride: playerOutfit(settings.outfit, "walk"),
-          crop: frames[Math.floor(walkDistance / 27) % 4],
-          uniformHeight: Math.max(...frames.map((f) => f.h)),
+          imageOverride: pose,
+          crop: { x: 0, y: 0, w: pose.width, h: pose.height },
+          uniformHeight: pose.height,
           flip: facing < 0,
         });
+      }
     } else if (o.type === "npc") {
+      const feet = npcFeet(o);
+      const height = o.artHeight || actorSizes[o.id];
       if (!o.painted && o.id !== "mei") shadow(ctx, o.x, o.y, 30);
       const neighbor = bounds.neighbors?.[o.appearance || o.id];
       const indoorNpc = bounds.indoorNpcs?.[o.appearance || o.id];
       const marketNpc = bounds.marketNpcs?.[o.appearance || o.id];
+      const gardenWorker = bounds.gardenWorkers?.[o.appearance || o.id];
       if (!o.painted)
         sprite(
           ctx,
-          marketNpc
-            ? "marketNpcs"
-            : indoorNpc
-              ? "indoorNpcs"
-              : neighbor
-                ? "neighbors"
-                : o.id,
-          o.artX ?? o.x,
-          o.artY ?? o.y,
-          o.artHeight || actorSizes[o.id],
+          gardenWorker
+            ? "gardenWorkers"
+            : marketNpc
+              ? "marketNpcs"
+              : indoorNpc
+                ? "indoorNpcs"
+                : neighbor
+                  ? "neighbors"
+                  : o.id,
+          feet.x,
+          feet.y,
+          height,
           {
-            crop: marketNpc || indoorNpc || neighbor,
-            breathe: animate ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
+            crop: gardenWorker
+              ? gardenWorker[gardenWorkFrame(o, time, animate && settings.motion !== false)]
+              : marketNpc || indoorNpc || neighbor,
+            ...(!gardenWorker && npcIdlePose(o, time, animate && settings.motion !== false)),
+            breathe: animate && !gardenWorker ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
             highlight: Boolean(o.id && hover?.id === o.id),
           },
         );
       if (o.bubbles && Math.floor(time / 5 + o.x) % 3 !== 2)
         speechBubble(
           ctx,
-          o.x,
-          o.y - (o.artHeight || 205) - 20,
-          o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length],
+          feet.x,
+          feet.y - height - 12,
+          varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time),
         );
     } else if (o.type === "panda") {
       shadow(ctx, o.x, o.y, 30);
+      const walking = pandaMoving && settings.motion !== false;
+      const phase = (pandaWalkDistance % 96) / 96;
       const hop =
-        pandaMoving && settings.motion !== false
-          ? Math.max(0, Math.sin(time * 15)) * 9
+        walking && phase > 0.25 && phase < 0.75
+          ? Math.sin((phase - 0.25) * Math.PI * 2) * 9
           : 0;
       const frame =
-        pandaMoving && settings.motion !== false
-          ? [1, 2, 0][Math.floor(time * 8) % 3]
+        walking
+          ? [0, 1, 2, 0][Math.floor(phase * 4)]
           : settings.motion !== false && time % 6 > 5.65
             ? 4
             : 0;
@@ -1023,22 +1245,15 @@ export function draw(
         o.y - hop,
         scene.interior ? 72 : actorSizes.panda,
         {
-          crop: {
-            x: pandaFrameEdges[frame],
-            y: 0,
-            w: pandaFrameEdges[frame + 1] - pandaFrameEdges[frame],
-            h: 620,
-          },
+          // Tight crops keep each pose centered with its feet on the same ground.
+          crop: atlasCrop("panda", frame, 0, 6, 1),
           uniformHeight: 510,
-          sway:
-            pandaMoving && settings.motion !== false
-              ? Math.sin(time * 15) * 0.025
-              : 0,
+          sway: hop * 0.0025,
         },
       );
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
-      sprite(ctx, "momo", o.x, o.y, actorSizes.momo);
+      sprite(ctx, o.collectible === "fox-plush" ? "fox" : "momo", o.x, o.y, actorSizes.momo);
     } else if (o.type === "room-foreground" && scene.backgroundPath) {
       const img = asset(scene.backgroundPath);
       if (!ready(img)) continue;
@@ -1076,6 +1291,7 @@ export function draw(
       );
       ctx.restore();
     }
+    if (marketActor) ctx.restore();
   }
   for (const o of scene.interactables) {
     const building = scene.scenery.find((b) => b.doorId === o.id);
@@ -1098,13 +1314,7 @@ export function draw(
         building.y - building.h - 35,
       );
       ctx.restore();
-      ctx.fillStyle = "#64b4d7";
-      ctx.strokeStyle = "#fff5db";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(building.x, building.y - building.h - 16, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+
     }
     if (o.id === "lost-flowers" && adventure.flowers === "accepted") {
       ctx.fillStyle = "#d68ba3";
@@ -1129,7 +1339,7 @@ export function draw(
       ctx.stroke();
     }
   }
-  if (hover && !["npc", "passerby"].includes(hover.type)) {
+  if (hover && !["npc", "passerby", "guest", "door"].includes(hover.type)) {
     ctx.strokeStyle = "#79bcdc";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -1137,48 +1347,32 @@ export function draw(
     ctx.stroke();
   }
   const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);
-  if (route.length) {
-    const end = route.at(-1);
-    ctx.strokeStyle = interactionTarget ? "#429de1" : "#fff0cd";
-    ctx.fillStyle = interactionTarget ? "#62baff44" : "#fff0cd66";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(end.x, end.y, 18, 7, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-  }
-  if (near) {
-    ctx.fillStyle = "#fff6dfa0";
-    ctx.beginPath();
-    ctx.ellipse(near.x, near.y + 3, 28, 9, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
   const exit = exitArrow(scene, player);
   if (exit) {
     ctx.save();
     ctx.fillStyle = hover?.id === exit.door.id ? "#326b69" : "#214e50";
     ctx.strokeStyle = "#fff4dc";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(exit.x, exit.y, exit.w, exit.h, 16);
+    ctx.roundRect(exit.x, exit.y, exit.w, exit.h, 12);
     ctx.fill();
     ctx.stroke();
     ctx.strokeStyle = "#fff4dc";
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.beginPath();
-    ctx.moveTo(exit.x + 27, exit.y + 16);
-    ctx.lineTo(exit.x + 27, exit.y + 42);
-    ctx.moveTo(exit.x + 17, exit.y + 32);
-    ctx.lineTo(exit.x + 27, exit.y + 42);
-    ctx.lineTo(exit.x + 37, exit.y + 32);
+    ctx.moveTo(exit.x + 21, exit.y + 12);
+    ctx.lineTo(exit.x + 21, exit.y + 32);
+    ctx.moveTo(exit.x + 13, exit.y + 24);
+    ctx.lineTo(exit.x + 21, exit.y + 32);
+    ctx.lineTo(exit.x + 29, exit.y + 24);
     ctx.stroke();
     ctx.fillStyle = "#fff4dc";
-    ctx.font = 'bold 22px "Noto Sans CJK SC",sans-serif';
+    ctx.font = 'bold 18px "Noto Sans CJK SC",sans-serif';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("出门", exit.x + 75, exit.y + 29);
+    ctx.fillText("出门", exit.x + 58, exit.y + 22);
     ctx.restore();
   }
   ctx.restore();
@@ -1204,6 +1398,13 @@ function speechBubble(ctx, x, y, text) {
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.roundRect(x - w / 2, y - 32, w, 34, 12);
+  ctx.fill();
+  ctx.stroke();
+  // Connect the bubble to the top of the speaker's sprite.
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y + 1);
+  ctx.lineTo(x, y + 12);
+  ctx.lineTo(x + 6, y + 1);
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#70533b";

@@ -65,7 +65,7 @@ export class Persistence {
       );
       return true;
     } catch {
-      this.onStatus("This device cannot store your save. Keep this page open and export your journal.");
+      this.onStatus("This device cannot store your save. Keep this page open and export your save in Settings → Save and devices.");
       return false;
     }
   }
@@ -115,7 +115,7 @@ export class Persistence {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.flush(), 900);
     this.onStatus(
-      this.conflict ? "Choose between the two saves in your journal." : "Saving…",
+      this.conflict ? "Choose which save to use in Settings → Save and devices." : "Saving…",
     );
   }
   async flush() {
@@ -139,9 +139,9 @@ export class Persistence {
     } catch (error) {
       if (error.status === 409 || error.status === 401) {
         this.conflict = error.data;
-        this.onStatus("Choose between the two saves in your journal.");
+        this.onStatus("Choose which save to use in Settings → Save and devices.");
         this.onConflict(error.data);
-      } else this.onStatus("Saved on this device. Retry syncing from your journal.");
+      } else this.onStatus("Saved on this device. Retry syncing in Settings → Save and devices.");
     } finally {
       this.saving = false;
       if (!this.conflict && this.generation !== this.persisted) {

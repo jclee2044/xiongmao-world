@@ -1,0 +1,12 @@
+{
+  "tool": "built-in image_gen",
+  "use_case": "stylized-concept",
+  "prompt": "Use case: stylized-concept. Asset type: transparent working NPC sprite atlas for a cozy Suzhou watercolor exploration game. Input image is a STYLE reference only: match the soft hand-painted watercolor, fine warm brown outlines, friendly large heads, compact full-body proportions, muted natural colors and elevated three-quarter game view. Create THREE NEW distinct adult workers, arranged in exactly ONE horizontal row of THREE EQUAL cells. Full body plus tools per cell, equal apparent human height, aligned feet, ample transparent gutters, no clipping or overlapping cells. LEFT: male bamboo grove worker, dark hair beneath a muted beige cloth work cap, rolled-sleeve moss-green work shirt, indigo trousers, dark cloth shoes. Slightly leaning forward, both hands actively tying a rope around a small upright bundle of freshly cut green bamboo poles beside his feet. Bamboo has clearly visible segmented canes, a few leafy twigs, about shoulder height. This should clearly read as someone doing manual bamboo work, not simply carrying a basket. CENTER: mature female rock-garden groundskeeper, dark hair in a bun, muted rust blouse, faded sage apron, charcoal trousers, sturdy brown shoes. Bending gently forward while using a small long-handled wooden rake on a few weeds and fallen leaves beside her shoes. RIGHT: older male pagoda courtyard caretaker, silver short hair, pale blue rolled-sleeve shirt, taupe work vest, brown trousers and grey shoes. Actively sweeping a small pile of fallen leaves using a traditional long-handled straw broom held in both hands, broom bristles touch the ground near his feet. Keep all human heads at the same height across cells. Exactly three complete isolated workers and their immediate working materials only. Actual transparent alpha background, no colored background, floor, scenery, cast shadow, text, grid, labels, watermarks. No fruit, no tangerines, no baskets. Match the reference's painted detail and warm cozy aesthetic.",
+  "referenced_image_paths": [
+    "public/assets/characters/neighbors.webp"
+  ],
+  "transparent_background": true,
+  "generated_source": "/home/jlrj/.codex/generated_images/01a126c5-d302-7682-8c80-23809c2b294e/exec-5ed6158a-e9db-4394-9044-39da4bcf3f9e.png",
+  "saved_asset": "public/assets/characters/garden-workers.png",
+  "optimized_asset": "public/assets/optimized/garden-workers.webp"
+}

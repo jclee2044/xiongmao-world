@@ -215,11 +215,8 @@ test("each new neighbor supports honest fallback and has a distinct local AI ide
     assert.equal(local.mode, "local");
     assert.ok(sent.messages[0].content.includes(npcs[id].identity));
     assert.ok(!sent.messages[0].content.includes("上海"));
-    assert.equal(JSON.parse(sent.messages[2].content).topic, npcs[id].topic);
-    if (id !== "mei")
-      assert.ok(
-        !JSON.parse(sent.messages[2].content).chinese.includes("青菜面"),
-      );
+    assert.equal(sent.messages.at(-1).content, "你好");
+    assert.equal(sent.messages.length, 2, "no invented example conversation");
   }
   await assert.rejects(() => reply("constructor", "你好", [], state));
 });
@@ -351,10 +348,10 @@ test("culture games preserve all earlier activities and teach distinct replayabl
     }
   }
   assert.match(
-    culture["lantern-festival"].meaning,
+    culture["lantern-festival"].note,
     /written for Chinese practice/,
   );
-  assert.match(culture["suzhou-embroidery"].meaning, /does not teach real/);
+  assert.match(culture["suzhou-embroidery"].note, /does not teach real/);
 });
 
 test("riddle answers, color placements and market quantity budgets accept the requested task only", () => {

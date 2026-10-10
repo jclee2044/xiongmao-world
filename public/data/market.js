@@ -1,3 +1,4 @@
+import { marketColliders } from "./market-colliders.js";
 // The market painting and its traced geometry share one coordinate transform.
 // Shop interiors retain their original designs around this irregular canal island.
 export function refineMarket(scene) {
@@ -49,7 +50,7 @@ export function refineMarket(scene) {
       o.id?.startsWith("building-") ||
       !(o.x > 940 && o.x < 2810 && o.y > 1000 && o.y < 2220),
   );
-  const teaTable = { type: "tea-table", x: 1110, y: 795, w: 220, h: 160 };
+  const teaTable = { type: "tea-table", x: 1110, y: 795, w: 297, h: 216 };
   scene.scenery = scene.scenery.filter(
     (o) =>
       o.type !== "tree" || Math.hypot(o.x - teaTable.x, o.y - teaTable.y) > 230,
@@ -179,7 +180,7 @@ export function refineMarket(scene) {
     });
   }
   scene.scenery.push(
-    { type: "market", x: 320, y: 2620, w: 190, h: 165, label: "tangerines" },
+    { type: "market", x: 320, y: 2620, w: 190, h: 165, label: "橘子" },
     { type: "fruit-tree", fruit: "orange", x: 175, y: 2500, w: 135, h: 190 },
     { type: "fruit-tree", fruit: "orange", x: 215, y: 2770, w: 135, h: 190 },
   );
@@ -228,15 +229,7 @@ export function refineMarket(scene) {
     },
   ];
   scene.marketPlate = plate;
-  const stalls = [
-    // Building silhouettes match the five facades and their joined L returns.
-    [[220, 45], [425, 10], [680, 40], [730, 190], [675, 265], [575, 275], [580, 360], [505, 415], [245, 420], [210, 275]],
-    [[825, 80], [905, 10], [1260, 60], [1360, 115], [1380, 255], [1145, 385], [1010, 415], [870, 395], [795, 335]],
-    [[260, 540], [445, 550], [650, 490], [820, 565], [825, 675], [755, 705], [760, 785], [655, 805], [630, 875], [555, 920], [375, 890], [285, 735]],
-    [[1140, 285], [1290, 255], [1470, 370], [1455, 530], [1410, 605], [1275, 610], [1160, 550], [1135, 405]],
-    [[1050, 500], [1270, 580], [1375, 665], [1400, 785], [1335, 840], [1110, 930], [995, 925], [915, 870], [905, 725], [965, 690], [950, 590]],
-  ];
-  scene.solidPolygons.push(...stalls.map(polygon));
+  scene.solidPolygons.push(...marketColliders.map((o) => polygon(o.polygon)));
   const canal = (x, y, w, h) => ({
     type: "canal",
     x,
@@ -250,7 +243,8 @@ export function refineMarket(scene) {
       [x, y + h],
     ],
   });
-  const north = canal(940, 880, 1940, 120);
+  // Continue the northern channel to the town boundary, past the eastern bridge.
+  const north = canal(940, 880, scene.width - 940, 120);
   // The street has an exterior canal only. Its continuous west bank is joined
   // to the northern and southern town channels after the layout transform.
   scene.canals = scene.canals.filter((c) => c.w > c.h);
@@ -295,7 +289,7 @@ export function refineMarket(scene) {
       painted: true,
       connector: { ...rect(-85, 390, 110, 105) },
     },
-    ...[1580, 2840].map((x) => ({
+    ...[1580, 2620].map((x) => ({
       x,
       y: 840,
       w: 170,
@@ -411,7 +405,6 @@ export function refineMarket(scene) {
     [1670, 2600],
     [2310, 2600],
     [2820, 2590],
-    [3410, 2530],
   ]) {
     scene.scenery.push({ type: "planter", x, y, w: 90, h: 88 });
     scene.groundZones.push({
@@ -464,7 +457,7 @@ export function refineMarket(scene) {
   }
   // A moored passenger boat replaces the invisible southeast departure gate.
   Object.assign(stop("next-area"), {
-    name: "Boat dock",
+    name: "河边的大船",
     x: 3420,
     y: 2445,
     approachX: 3420,

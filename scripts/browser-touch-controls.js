@@ -51,15 +51,19 @@ const pos = () =>
     x: Number(canvas.dataset.x),
     y: Number(canvas.dataset.y),
   }));
-const screen = (point) =>
-  page.locator("#world").evaluate((canvas, p) => {
-    const d = canvas.dataset,
-      r = canvas.getBoundingClientRect();
-    return {
-      x: r.left + (p.x - Number(d.camX) + Number(d.ox)) * Number(d.scale),
-      y: r.top + (p.y - Number(d.camY) + Number(d.oy)) * Number(d.scale),
-    };
-  }, point);
+const screen = (point, relative = false) =>
+  page.locator("#world").evaluate(
+    (canvas, { point: p, relative }) => {
+      const d = canvas.dataset,
+        r = canvas.getBoundingClientRect();
+      if (relative) p = { x: Number(d.x) + p.x, y: Number(d.y) + p.y };
+      return {
+        x: r.left + (p.x - Number(d.camX) + Number(d.ox)) * Number(d.scale),
+        y: r.top + (p.y - Number(d.camY) + Number(d.oy)) * Number(d.scale),
+      };
+    },
+    { point, relative },
+  );
 const touch = (type, point) =>
   cdp.send("Input.dispatchTouchEvent", {
     type,
@@ -82,7 +86,20 @@ try {
   ]) {
     await seed("home", { x: 450, y: 465 }, viewport);
     assert.equal(await page.locator("[data-direction]").count(), 0);
+    await page.evaluate(() => {
+      window.canvasTouches = [];
+      for (const type of ["touchstart", "touchmove"])
+        document.addEventListener(type, (event) => {
+          if (event.target.id === "world")
+            window.canvasTouches.push({
+              type,
+              prevented: event.defaultPrevented,
+            });
+        });
+    });
     const holdPoint = await screen({ x: 520, y: 465 });
+    // Tap once, then hold the second tap and drag: Safari's magnifier gesture.
+    await page.touchscreen.tap(holdPoint.x, holdPoint.y);
     await touch("touchStart", holdPoint);
     await page.waitForFunction(
       () => Number(document.querySelector("#world").dataset.x) > 500,
@@ -95,6 +112,13 @@ try {
     );
     await touch("touchEnd");
     await stopped("Releasing a dragged finger stops movement");
+    const gestures = await page.evaluate(() => window.canvasTouches);
+    assert.ok(gestures.some((event) => event.type === "touchmove"));
+    assert.ok(
+      gestures.every((event) => event.prevented),
+      "Canvas touches must cancel the native selection/magnifier gesture",
+    );
+    assert.equal(await page.evaluate(() => getSelection().toString()), "");
     await touch(
       "touchStart",
       await screen({ x: (await pos()).x + 70, y: 465 }),
@@ -110,9 +134,11 @@ try {
     await page.evaluate(() => window.dispatchEvent(new Event("blur")));
     await touch("touchEnd");
     await stopped("Losing focus stops movement");
-    await page.locator("#panda-toggle").tap();
+    await page.locator("#panda-toggle .panda-face").tap();
+    await page.locator("#panda-content").waitFor({ state: "visible" });
     assert.equal(await page.locator("#panda-content").isVisible(), true);
-    await page.locator("#panda-toggle").tap();
+    await page.locator("#panda-toggle .panda-face").tap();
+    await page.locator("#panda-content").waitFor({ state: "hidden" });
     assert.equal(await page.locator("#panda-content").isVisible(), false);
     await page.waitForTimeout(350);
     await mkdir("test-results", { recursive: true });
@@ -130,6 +156,29 @@ try {
   await page.waitForFunction(
     (x) => Number(document.querySelector("#world").dataset.x) > x + 180,
     origin.x,
+  );
+  // After sustained travel, steering uses the player's current position.
+  // Drag straight down without moving left of the original touch-down anchor.
+  await touch("touchMove", await screen({ x: 0, y: 90 }, true));
+  const downStart = await pos();
+  await page.waitForTimeout(120);
+  const afterDown = await pos();
+  assert.ok(
+    afterDown.y > downStart.y + 10,
+    "A long hold turns down immediately",
+  );
+  assert.ok(
+    afterDown.y - downStart.y > 2 * Math.abs(afterDown.x - downStart.x),
+    "Turning down discards the old horizontal direction",
+  );
+  await touch("touchMove", await screen({ x: -90, y: 0 }, true));
+  const leftStart = await pos();
+  await page.waitForTimeout(120);
+  const afterLeft = await pos();
+  assert.ok(afterLeft.x < leftStart.x - 10, "Dragging left turns immediately");
+  assert.ok(
+    leftStart.x - afterLeft.x > 2 * Math.abs(afterLeft.y - leftStart.y),
+    "Turning left discards the old vertical direction",
   );
   await touch("touchEnd");
   await stopped(
@@ -150,14 +199,28 @@ try {
       .evaluate((el) => getComputedStyle(el).userSelect),
     "none",
   );
-  // A held finger is a direction, even with a stationary indoor camera.
-  await seed("home", { x: 450, y: 465 });
-  await touch("touchStart", await screen({ x: 485, y: 465 }));
+  // Touch-down moves immediately, then stops at a stationary finger indoors.
+  await seed("home", { x: 450, y: 465 }, { width: 844, height: 390 });
+  await touch("touchStart", await screen({ x: 520, y: 465 }));
+  await page.waitForTimeout(120);
+  assert.ok((await pos()).x > 460, "Touch-down has no hold delay");
   await page.waitForFunction(
-    () => Number(document.querySelector("#world").dataset.x) > 570,
+    () => Number(document.querySelector("#world").dataset.x) >= 516,
+  );
+  await stopped("The character waits at the finger instead of walking past it");
+  assert.ok(
+    (await pos()).x <= 520,
+    "Held movement cannot overshoot the finger",
+  );
+  const atFinger = await pos();
+  await touch("touchMove", await screen({ x: atFinger.x, y: atFinger.y + 65 }));
+  await page.waitForTimeout(120);
+  assert.ok(
+    (await pos()).y > atFinger.y + 10,
+    "Dragging restarts movement immediately",
   );
   await touch("touchEnd");
-  await stopped("Holding walks beyond the original finger position");
+  await stopped("Releasing after reaching and dragging stops movement");
 
   // The narrow bridge beside the museum must work in both directions.
   for (const [startY, endY] of [
@@ -167,7 +230,7 @@ try {
     await seed("shanghai", { x: 1978, y: startY });
     await touch(
       "touchStart",
-      await screen({ x: 1978, y: startY + Math.sign(endY - startY) * 60 }),
+      await screen({ x: 1978, y: startY + Math.sign(endY - startY) * 90 }),
     );
     await page.waitForFunction(
       ({ endY, startY }) => {

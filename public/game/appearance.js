@@ -20,6 +20,86 @@ export function walkFrame(distance) {
   return [0, 1, 2, 1][Math.floor(distance / 27) % 4];
 }
 
+// All 35 stationary NPC placements. Append new neighbors to preserve the
+// existing characters' timing and lean directions.
+const idleNeighbors = new Map(
+  [
+    "mei",
+    "qiao",
+    "lan",
+    "an",
+    "lian",
+    "silk-host",
+    "market-cook",
+    "clothing-customer",
+    "bakery-baker",
+    "teahouse-qiao",
+    "bookshop-bo",
+    "museum-guide",
+    "museum-artist",
+    "shantang-host",
+    "lion-grove-keeper",
+    "humble-garden-keeper",
+    "tiger-court-keeper",
+    "silk-room-host",
+    "yun",
+    "bo",
+    "wei",
+    "hao",
+    "snack-host",
+    "market-baker",
+    "clothing-seller",
+    "bakery-diner-friend",
+    "teahouse-diner",
+    "teahouse-reader",
+    "bookshop-reader",
+    "restaurant-waiter",
+    "museum-reader",
+    "lion-grove-visitor",
+    "humble-garden-visitor",
+    "tiger-court-visitor",
+    "silk-room-guest",
+  ].map((id, index) => {
+    const seed = [...id].reduce(
+      (value, char) => (value * 31 + char.charCodeAt(0)) >>> 0,
+      0,
+    );
+    return [
+      id,
+      {
+        phase: (seed % 1000) / 100,
+        period: 9 + (seed % 5),
+        direction: index % 2 ? -1 : 1,
+      },
+    ];
+  }),
+);
+
+export function npcIdlePose(actor, time, animate) {
+  const idle = idleNeighbors.get(actor.id);
+  if (!idle || !animate || actor.moving || actor.seated || actor.painted)
+    return { sway: 0, settle: 0 };
+  const phase = (time + idle.phase) % idle.period;
+  // Ease into a weight shift, pause, then settle. Both gestures return to
+  // neutral with zero velocity; the feet and interaction point stay planted.
+  const pulse = (start, duration) => {
+    const progress = (phase - start) / duration;
+    return progress > 0 && progress < 1 ? Math.sin(progress * Math.PI) ** 2 : 0;
+  };
+  return {
+    sway: idle.direction * 0.014 * pulse(0, 3.2),
+    settle: 0.009 * pulse(4.5, 2.2),
+  };
+}
+
+// Hold briefly at each end of the work stroke, then return through the
+// intermediate pose. Each worker has a different phase in the two-second loop.
+export function gardenWorkFrame(actor, time, animate) {
+  if (!animate) return 0;
+  const phase = [...actor.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 8;
+  return [0, 0, 1, 2, 2, 3, 0, 0][(Math.floor(time * 4) + phase) % 8];
+}
+
 // All player poses start with the same lavender outfit. Keep its painted
 // highlights and shadows, but use one palette for walking, resting and sitting.
 export function recolorOutfitPixels(data, color) {

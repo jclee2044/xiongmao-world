@@ -100,11 +100,21 @@ try {
     });
     await page.locator('[data-close="panel"]').click();
     await page.locator("#map").click();
-    assert.equal(await page.locator('[data-map-stop="books"]').textContent(), "书店");
-    assert.equal(await page.locator('[data-map-stop="tea"]').textContent(), "茶馆");
-    assert.equal(await page.locator('[data-map-stop="flowers"]').textContent(), "花店");
+    assert.equal(
+      await page.locator('.map-stops [data-map-stop="books"]').evaluate(el => el.textContent.replace(/^\d+\s*/, '').trim()),
+      "书店",
+    );
+    assert.equal(
+      await page.locator('.map-stops [data-map-stop="tea"]').evaluate(el => el.textContent.replace(/^\d+\s*/, '').trim()),
+      "茶馆",
+    );
+    assert.equal(
+      await page.locator('.map-stops [data-map-stop="flowers"]').evaluate(el => el.textContent.replace(/^\d+\s*/, '').trim()),
+      "花店",
+    );
     await page.locator('[data-close="panel"]').click();
     await page.locator("#journal").click();
+    await page.locator('[data-journal-tab="words"]').click();
     assert.doesNotMatch(
       await page.locator("#panel-content").textContent(),
       /苏绣/,

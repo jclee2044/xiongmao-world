@@ -97,27 +97,27 @@ export function award(a, amount) {
 }
 export const museumObjects = {
   "lotus-bowl": {
-    name: "Celadon lotus bowl",
-    zh: "这只碗很老了。它像一个花。你看到了什么颜色？",
+    name: "漂亮的碗",
+    zh: "这只碗已经有很多年的历史了。它像一朵花。你看到了什么颜色？",
     pinyin:
-      "zhè zhī wǎn hěn lǎo le 。 tā xiàng yí gè huā 。 nǐ kàn dào le shén me yán sè ？",
+      "zhè zhī wǎn yǐ jīng yǒu hěn duō nián de lì shǐ le 。 tā xiàng yì duǒ huā 。 nǐ kàn dào le shén me yán sè ？",
     meaning:
-      "This bowl is very old. It looks like a flower. What colors can you see?",
+      "This bowl has many years of history. It looks like a flower. What colors did you notice?",
     source:
       "https://file.szmuseum.com/WaterMark/%E9%97%A8%E6%88%B7%E7%BD%91%E7%AB%99%E5%A4%9A%E5%AA%92%E4%BD%93%E6%96%87%E4%BB%B6/academic/2019/201911_msclhwdqsjs_cheny.pdf",
   },
   "pearl-pillar": {
-    name: "Pearl Pillar",
-    zh: "这个东西很老，也很漂亮。我们看看吧。",
+    name: "以前的东西",
+    zh: "这件东西很漂亮，而且有很长的历史。我们看看吧。",
     pinyin:
-      "zhè ge dōng xī hěn lǎo ， yě hěn piào liang 。 wǒ men kàn kàn ba 。",
+      "zhè jiàn dōng xī hěn piào liang ， ér qiě yǒu hěn cháng de lì shǐ 。 wǒ men kàn kàn ba 。",
     meaning:
-      "This object is very old and beautiful. Look, but please do not touch.",
+      "This object is beautiful and has a long history. Let’s take a look.",
     source:
       "https://english.suzhou.gov.cn/szsenglish/News/202609/db4e25059d964d5b824d7b1199698424.shtml",
   },
   "canal-map": {
-    name: "Roads and canals",
+    name: "路和河",
     zh: "这里有路，也有河。你能找到桥吗？",
     pinyin: "zhè lǐ yǒu lù ， yě yǒu hé 。 nǐ néng zhǎo dào qiáo ma ？",
     meaning: "There are roads and canals here. Can you find a bridge?",
@@ -126,7 +126,7 @@ export const museumObjects = {
   },
 };
 export const hotpotItems = [
-  { id: "tofu", zh: "tofu", pinyin: "", en: "tofu", color: "#f6e4ad" },
+  { id: "tofu", zh: "豆腐", pinyin: "dòu fu", en: "tofu", color: "#f6e4ad" },
   {
     id: "greens",
     zh: "菜",
@@ -136,12 +136,12 @@ export const hotpotItems = [
   },
   {
     id: "mushrooms",
-    zh: "mushrooms",
-    pinyin: "",
+    zh: "蘑菇",
+    pinyin: "mó gu",
     en: "mushrooms",
     color: "#b49376",
   },
-  { id: "beef", zh: "beef", pinyin: "", en: "beef", color: "#b95c52" },
+  { id: "beef", zh: "牛肉", pinyin: "niú ròu", en: "beef", color: "#b95c52" },
   {
     id: "noodles",
     zh: "面条",
@@ -156,9 +156,9 @@ export function parseOrder(text) {
       text
         .replace(/(?:不要|不吃|不想吃)[^，。；,;]*/g, "")
         .replace(/麵條/g, "面条")
-        .replace(/豆腐/g, "tofu")
-        .replace(/蘑菇/g, "mushrooms")
-        .replace(/牛肉/g, "beef")
+        .replace(/tofu/gi, "豆腐")
+        .replace(/mushrooms?/gi, "蘑菇")
+        .replace(/beef/gi, "牛肉")
         .includes(i.zh),
     )
     .map((i) => i.id);

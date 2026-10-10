@@ -1,0 +1,47 @@
+// These characters need sentence context in speech and in word help.
+export const polyphonicCharacters = "长重行乐得着还种空为教便少数觉调地只相难更干背藏弹朝处看发中好都了和系间分传转累应似薄角结降差量落鲜强曾倒要给会";
+export const needsPronunciationContext = (text) =>
+  [...text].some((char) => polyphonicCharacters.includes(char));
+
+// Reviewed game usages that the general pinyin dictionary misreads.
+export const pronunciationOverrides = {
+  中文: "zhōng wén",
+  中间: "zhōng jiān",
+  还给: "huán gěi",
+  还书: "huán shū",
+  还钱: "huán qián",
+  长得: "zhǎng de",
+  长大: "zhǎng dà",
+  睡得: "shuì de",
+  过得: "guò de",
+  住得: "zhù de",
+  做得: "zuò de",
+  吃得: "chī de",
+  说得: "shuō de",
+  走得: "zǒu de",
+  跑得: "pǎo de",
+  看得: "kàn de",
+  听得: "tīng de",
+  学得: "xué de",
+  写得: "xiě de",
+  玩得: "wán de",
+  唱得: "chàng de",
+  穿得: "chuān de",
+  慢慢地: "màn màn de",
+  教我: "jiāo wǒ",
+  教你: "jiāo nǐ",
+  教他: "jiāo tā",
+  教她: "jiāo tā",
+  教中文: "jiāo zhōng wén",
+  种花: "zhòng huā",
+  一种花: "yì zhǒng huā",
+  两种花: "liǎng zhǒng huā",
+  几种花: "jǐ zhǒng huā",
+  哪种花: "nǎ zhǒng huā",
+  这种花: "zhè zhǒng huā",
+  那种花: "nà zhǒng huā",
+  种树: "zhòng shù",
+  种菜: "zhòng cài",
+  有空: "yǒu kòng",
+  没空: "méi kòng",
+};

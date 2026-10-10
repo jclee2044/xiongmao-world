@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#7b8f79" />
     <title>Xiongmao World · 熊猫世界</title>
@@ -267,9 +267,9 @@
         <nav aria-label="你的世界">
           <button id="update" hidden lang="en" aria-label="Update">
             Update</button
-          ><button id="home" aria-label="回家" title="回家">
-            ⌂ <span>回家</span></button
-          ><button id="map" aria-label="地图">⌖ <span>地图</span></button
+          ><button id="map" aria-label="地图">
+            <img class="map-button-icon" src="/assets/map-icon.svg" width="28" height="28" alt="" aria-hidden="true" />
+            <span>地图</span></button
           ><button id="journal" aria-label="Journal">
             ▤ <span>Journal</span></button
           ><button id="settings" lang="en" aria-label="Settings">
@@ -287,9 +287,9 @@
           Opening the next little corner…
           <button id="scene-retry" hidden>Try again</button>
         </div>
-        <aside id="goals" aria-label="熊猫要做的事情">
-          <details>
-            <summary>熊猫要做的事情</summary>
+        <aside id="goals" aria-label="Panda Hints">
+          <details id="panda-hints">
+            <summary lang="en">Panda Hints</summary>
             <ol id="goals-list"></ol>
           </details>
         </aside>
@@ -297,6 +297,10 @@
         <div class="scene-note">
           <span class="dot"></span><span id="mode">Suzhou</span>
         </div>
+        <aside id="panda-speech" aria-label="Panda says" hidden>
+          <img src="/assets/welcome/panda-240.webp" alt="" />
+          <p id="panda-message" aria-live="polite">我们一起去河边走走吧。</p>
+        </aside>
         <aside class="panda-bubble" aria-label="熊猫的帮助">
           <button
             id="panda-toggle"
@@ -311,7 +315,6 @@
             <span id="panda-toggle-icon" aria-hidden="true">⌃</span>
           </button>
           <div id="panda-content" hidden>
-            <p id="panda-message">帮助</p>
             <details id="panda-help">
               <summary>更多帮助</summary>
               <p id="panda-explanation">我们一起去河边走走吧。</p>
@@ -335,40 +338,47 @@
           ×
         </button>
       </div>
-      <button id="foreground-panda" aria-label="问熊猫">
-        <img
-          src="/assets/welcome/panda-240.webp"
-          alt=""
-          width="60"
-          height="60"
-        /><span>问熊猫</span>
-      </button>
       <div class="conversation-body">
         <p id="last-user" class="muted"></p>
         <p id="npc-zh" class="chinese" lang="zh-CN">你好！欢迎你。</p>
-        <p id="npc-pinyin" class="pinyin"></p>
         <p id="npc-meaning" class="meaning"></p>
         <div class="small-actions" id="speech-controls">
           <button id="toggle-pinyin" type="button" aria-pressed="true">
-            不看Pinyin
+            Hide pinyin
           </button>
-          <button id="replay">↻ 再听一次</button
-          ><button id="slow-replay">慢慢听</button
-          ><button id="stop-speech">等一下</button
-          ><button id="more-help">多帮一点</button
-          ><button id="less-help">少帮一点</button>
+          <button id="replay">↻ Listen again</button
+          ><button id="slow-replay">Listen slowly</button
+          >
+          <button id="foreground-panda" type="button" aria-haspopup="dialog" aria-controls="panda-coach">
+            <img src="/assets/welcome/panda-240.webp" alt="" width="28" height="28" />
+            <span>Ask Panda</span>
+          </button>
         </div>
         <p id="help-inline" class="notice"></p>
+        <section id="conversation-feedback" hidden aria-label="Panda’s language tip" aria-live="polite" aria-atomic="true">
+          <div class="feedback-heading">
+            <img src="/assets/welcome/panda-240.webp" alt="" width="36" height="36" />
+            <strong id="feedback-title">Panda’s tip</strong>
+            <button id="feedback-dismiss" type="button" aria-label="Dismiss Panda’s tip">×</button>
+          </div>
+          <p id="feedback-explanation" lang="en"></p>
+          <p id="feedback-zh" class="chinese" lang="zh-CN"></p>
+          <p id="feedback-pinyin" class="pinyin" hidden></p>
+          <div class="small-actions">
+            <button id="feedback-listen" type="button">Listen to example</button>
+            <button id="feedback-use" type="button">Try this wording</button>
+          </div>
+        </section>
       </div>
       <form id="reply-form">
-        <label for="reply">到你了，说说你想说的吧</label>
+        <label for="reply">Your turn — what would you like to say?</label>
         <div class="reply-row">
           <input
             id="reply"
             maxlength="500"
             autocomplete="off"
             placeholder="你好！我想吃面条。"
-          /><button class="primary" id="send">说 ↗</button>
+          /><button class="primary" id="send">Send ↗</button>
         </div>
       </form>
       <p id="dialog-status" role="status" class="muted"></p>
@@ -382,7 +392,7 @@
       <div id="panel-content"></div>
     </dialog>
     <dialog id="panda-coach" aria-labelledby="coach-title">
-      <button class="close" data-close="panda-coach" aria-label="关帮助">
+      <button class="close" data-close="panda-coach" aria-label="Close Panda help">
         ×
       </button>
       <img
@@ -390,28 +400,29 @@
         width="130"
         height="130"
         src="/assets/welcome/panda-240.webp"
-        alt="熊猫"
+        alt="Panda"
       />
       <div class="coach-bubble">
-        <h2 id="coach-title">熊猫来帮你</h2>
+        <h2 id="coach-title">Ask Panda</h2>
+        <p class="muted">Choose a question about this dialogue, or ask your own.</p>
+        <div id="coach-presets" aria-label="Suggested questions"></div>
         <p id="coach-zh" class="chinese" lang="zh-CN"></p>
         <p id="coach-tip"></p>
         <p id="coach-pinyin" class="pinyin" hidden></p>
         <div class="small-actions">
-          <button id="coach-listen">听一听</button
-          ><button id="coach-next"></button
-          ><button id="coach-use" hidden>试着说这个句子</button
-          ><button data-close="panda-coach">回去聊天</button>
+          <button id="coach-listen" hidden>Listen to example</button
+          ><button id="coach-use" hidden>Use this reply</button
+          ><button data-close="panda-coach">Back to conversation</button>
         </div>
         <form id="coach-form">
-          <label for="coach-question">问熊猫一个中文问题</label>
+          <label for="coach-question">Your question</label>
           <div class="coach-question-row">
             <input
               id="coach-question"
               maxlength="500"
-              placeholder="这个句子怎么说？这里为什么用“吗”？"
+              placeholder="Ask about a word, grammar, or how to respond…"
               required
-            /><button id="coach-send" class="primary">问问</button>
+            /><button id="coach-send" class="primary">Ask</button>
           </div>
           <p id="coach-status" role="status"></p>
         </form>

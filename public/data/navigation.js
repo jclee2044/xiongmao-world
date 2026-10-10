@@ -4,10 +4,10 @@ import { scenes, interactionPoint } from "../game/world.js";
 // Coordinates come from the same scene data as walking and the Map buttons.
 export const locationNotes = {
   "next-area": [
-    "Boat dock",
-    "Departure boat",
-    "东南边，南边河上的大船。Silk workshop 的上面。",
-    "Bottom-right canal, north of the silk workshop. Follow the south-bank stone path east to the wooden boarding dock. Sailing unlocks at 500 XP.",
+    "河边的大船",
+    "大船",
+    "东南边，南边河上的大船。画画小屋的上面。",
+    "The large boat in the southeast, on the southern canal, north of the painting house.",
   ],
   "home-north": [
     "小家",
@@ -22,7 +22,7 @@ export const locationNotes = {
     "North of the market, across the north canal.",
   ],
   museum: [
-    "Museum",
+    "苏州博物馆",
     "Museum",
     "市场北边，茶馆的右边。",
     "North of the market, east of the teahouse.",
@@ -43,13 +43,13 @@ export const locationNotes = {
     "衣服店",
     "Clothing store",
     "南边河的下面，南边的路左边。",
-    "South of the southern canal, on the west side of the south promenade.",
+    "South of the southern canal, on the left side of the southern path.",
   ],
   dumplings: [
-    "饭店",
+    "火锅店",
     "Hotpot restaurant",
     "市场东边，湖的下面。",
-    "East of the market, below the lotus lake.",
+    "East of the market, south of the lake.",
   ],
   flowers: [
     "花店",
@@ -58,52 +58,52 @@ export const locationNotes = {
     "Northeast of the market, above the lake.",
   ],
   fabric: [
-    "Silk workshop",
-    "Silk workshop",
+    "画画小屋",
+    "画画小屋",
     "东南边，南边河的下面。",
     "Southeast, south of the southern canal.",
   ],
   "neighbors-south": [
-    "Canal square",
-    "Canal square",
-    "南边河的下面，书店和 Silk workshop 中间。",
-    "South of the canal, between the bookshop and silk workshop.",
+    "河边",
+    "河边",
+    "南边河的下面，书店和画画小屋中间。",
+    "South of the canal, between the bookshop and painting house.",
   ],
   "bamboo-grove": [
     "竹林",
-    "Bamboo grove",
-    "西北边，小家的上面，有 white walls。",
-    "Northwest, in the walled grounds north of home.",
+    "竹林",
+    "西北边，小家的上面，有白色的房子。",
+    "Northwest, north of home, where there is a white house.",
   ],
   garden: [
-    "Humble garden",
-    "Humble garden",
-    "东北边，Lion grove 的右边。",
-    "Northeast, east of the Lion grove.",
+    "大花园",
+    "大花园",
+    "东北边，石头花园的右边。",
+    "Northeast, to the right of the rock garden.",
   ],
   "classical-garden": [
-    "Lion grove",
-    "Lion grove",
-    "东北边，Humble garden 的左边。",
-    "Northeast, west of the Humble garden.",
+    "石头花园",
+    "石头花园",
+    "东北边，大花园的左边。",
+    "Northeast, to the left of the large garden.",
   ],
   "tiger-hill": [
-    "Tiger Hill",
-    "Tiger Hill",
+    "虎丘",
+    "虎丘",
     "西边河的左边，小家的南边。",
     "West of the western canal, south of home.",
   ],
   "market-baker": [
-    "Breakfast stall",
-    "Breakfast stall",
+    "早餐店",
+    "早餐店",
     "市场西北边。",
     "Northwest corner of the central market.",
   ],
   "snack-host": [
-    "Snack shop",
+    "小吃店",
     "Sweets stall",
-    "市场西边，Breakfast stall 的下面。",
-    "West bank within the market, below breakfast.",
+    "市场西边，早餐店的下面。",
+    "West side of the market, south of the breakfast shop.",
   ],
   "silk-host": [
     "礼物商店",
@@ -115,19 +115,19 @@ export const locationNotes = {
     "水果商店",
     "Produce stall",
     "市场东边，礼物商店的下面。",
-    "East bank within the market, below souvenirs.",
+    "East side of the market, south of the gift shop.",
   ],
   "market-cook": [
-    "Food stall",
+    "饭店",
     "Street food",
     "市场东南边，水果商店的下面。",
-    "Southeast market corner, below produce.",
+    "Southeast side of the market, south of the fruit shop.",
   ],
   "buy-oranges": [
-    "Tangerine stall",
-    "Tangerine stall",
+    "水果店",
+    "水果店",
     "市场东边，水果商店旁边。",
-    "East side of the market, beside the produce seller. The sweet-tangerine walker and trees also remain in the far southwest.",
+    "East side of the market, beside the fruit shop.",
   ],
 };
 export function worldDirectory() {
@@ -166,14 +166,14 @@ export function directionsTo(id, state = {}) {
   const target = scenes.shanghai.interactables.find((o) => o.id === id);
   if (!target) return null;
   let approach = "跟着路走。过河要从桥上走。";
-  let english = "Follow the stone paths and cross canals using the bridges.";
+  let english = "Follow the path. Use a bridge to cross the canal.";
   if (id === "dumplings") {
     approach = "从市场右边的路，往湖的下面走。";
     english =
-      "Follow the stone path on the east side of the market toward the bottom of the lake.";
+      "Take the path on the right side of the market toward the south side of the lake.";
   } else if (["books", "bakery", "fabric", "neighbors-south", "clothing-store"].includes(id)) {
     approach = "从市场往南走，过南边的桥。";
-    english = "Walk south from the market and cross a southern stone bridge.";
+    english = "Walk south from the market and cross the southern bridge.";
   } else if (id === "home-north") {
     approach = "过西边或者最北边的桥，跟着河左边的路往上走。";
     english =

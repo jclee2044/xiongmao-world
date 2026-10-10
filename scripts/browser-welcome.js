@@ -17,6 +17,45 @@ const browser = await chromium.launch({
 const errors = [],
   results = [];
 await mkdir("test-results", { recursive: true });
+async function checkTouchZoom(page, context, target) {
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  const x = box.x + box.width / 2,
+    y = box.y + box.height / 2;
+  await page.touchscreen.tap(x, y);
+  await page.touchscreen.tap(x, y);
+  const session = await context.newCDPSession(page);
+  try {
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [
+        { x: x - 20, y, id: 1 },
+        { x: x + 20, y, id: 2 },
+      ],
+    });
+    for (const distance of [35, 50, 70]) {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [
+          { x: x - distance, y, id: 1 },
+          { x: x + distance, y, id: 2 },
+        ],
+      });
+    }
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await page.waitForTimeout(350);
+    assert.equal(
+      await page.evaluate(() => visualViewport.scale),
+      1,
+      "Double taps and pinches must not zoom the page",
+    );
+  } finally {
+    await session.detach();
+  }
+}
 try {
   for (const viewport of [
     { width: 1440, height: 900 },
@@ -52,11 +91,39 @@ try {
         begin.y + begin.height < viewport.height,
         "Start visible without scrolling",
       );
+    if (viewport.width < 500) {
+      await checkTouchZoom(page, context, page.locator("#welcome-title"));
+      const session = await context.newCDPSession(page);
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: 15, y: viewport.height / 2, id: 1 }],
+      });
+      for (const distance of [30, 60, 100, 150, 200]) {
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: 15, y: viewport.height / 2 - distance, id: 1 }],
+        });
+        await page.waitForTimeout(30);
+      }
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await page.waitForTimeout(350);
+      assert.ok(
+        await page.evaluate(() => scrollY > 0),
+        "Disabling zoom must preserve touch scrolling",
+      );
+      await session.detach();
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
     await page.locator("#welcome-how").click();
     assert.equal(
       await page.locator("#welcome-guide").evaluate((e) => e.open),
       true,
     );
+    if (viewport.width < 500)
+      await checkTouchZoom(page, context, page.locator("#guide-title"));
     await page.keyboard.press("Escape");
     await page.locator("#welcome-about").click();
     assert.match(
@@ -85,6 +152,8 @@ try {
       () => document.querySelector("#world").dataset.artReady === "true",
     );
     assert.equal(await page.locator("#scene-loading").isVisible(), false);
+    if (viewport.width < 500)
+      await checkTouchZoom(page, context, page.locator("#place"));
     assert.ok(
       !assets.some((p) => p.includes("interior") || p.endsWith("/home.webp")),
       "Town entry must not fetch room backgrounds",

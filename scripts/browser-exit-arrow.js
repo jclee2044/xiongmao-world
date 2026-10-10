@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 import { Store, newState } from "../server/store.js";
 import { createApp } from "../server/index.js";
 import { scenes, interactionPoint } from "../public/game/world.js";
-import { exitArrow } from "../public/game/exit-arrow.js";
+import { exitArrow, hitExitArrow } from "../public/game/exit-arrow.js";
 import { enterWorld } from "./browser-helpers.js";
 
 const server = createApp({
@@ -20,20 +20,42 @@ const browser = await chromium.launch({
 const errors = [];
 try {
   assert.equal(exitArrow(scenes.shanghai, scenes.shanghai.spawn), null);
+  const courtyards = [
+    "humble-garden",
+    "lion-grove",
+    "tiger-court",
+    "silk-room",
+  ];
+  const canalExit = scenes.shantang.interactables.find(
+    (o) => o.type === "door",
+  );
+  assert.equal(exitArrow(scenes.shantang, interactionPoint(canalExit)), null);
+  for (const entrance of scenes.shanghai.interactables.filter(
+    (o) => o.type === "door" || o.id === "bamboo-grove",
+  ))
+    assert.equal(exitArrow(scenes.shanghai, interactionPoint(entrance)), null);
   for (const scene of Object.values(scenes).filter(
-    (s) => s.interior || s.id === "home",
+    (s) => s.interior || s.id === "home" || courtyards.includes(s.id),
   )) {
     const door = scene.interactables.find(
       (o) => o.type === "door" && o.target === "shanghai",
     );
     if (!door) continue;
     assert.equal(exitArrow(scene, { x: door.x + 500, y: door.y }), null);
-    assert.equal(exitArrow(scene, interactionPoint(door)).door, door);
+    const player = interactionPoint(door);
+    const arrow = exitArrow(scene, player);
+    assert.equal(arrow.door, door);
+    assert.equal(
+      hitExitArrow(scene, player, arrow.x + arrow.w / 2, arrow.y + arrow.h / 2),
+      door,
+    );
+    assert.equal(hitExitArrow(scene, player, arrow.x - 1, arrow.y), null);
   }
   for (const [id, mobile] of [
     ["home", false],
     ["bakery", false],
     ["bookshop", true],
+    ...courtyards.map((id, i) => [id, i % 2 === 0]),
   ]) {
     const context = await browser.newContext({
       viewport: mobile
@@ -93,11 +115,22 @@ try {
     await page.waitForFunction(
       () => document.getElementById("world").dataset.scene === "shanghai",
     );
+    const returned = await page.locator("#world").evaluate((canvas) => ({
+      x: +canvas.dataset.x,
+      y: +canvas.dataset.y,
+    }));
+    assert.ok(
+      Math.hypot(
+        returned.x - door.returnPoint.x,
+        returned.y - door.returnPoint.y,
+      ) < 5,
+      id,
+    );
     await context.close();
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Indoor exit arrows: proximity, desktop clicks, and mobile taps passed.",
+    "Indoor and gated courtyard exit arrows: proximity, desktop clicks, mobile taps, and return locations passed.",
   );
 } finally {
   await browser.close();

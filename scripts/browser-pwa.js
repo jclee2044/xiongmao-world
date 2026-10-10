@@ -84,11 +84,29 @@ try {
     ),
   );
   assert.ok(!cache.requests.some((x) => x.startsWith("/api")));
+  assert.ok(cache.requests.includes("/assets/audio/hana-daria-semikina.mp3"));
   results.cache = cache;
   await context.setOffline(true);
   await page.reload();
+  assert.equal(
+    await page.evaluate(async () => {
+      const response = await fetch("/assets/audio/hana-daria-semikina.mp3");
+      const audio = new AudioContext();
+      try {
+        const buffer = await audio.decodeAudioData(
+          await response.arrayBuffer(),
+        );
+        return response.ok && buffer.duration > 201 && buffer.duration < 203;
+      } finally {
+        await audio.close();
+      }
+    }),
+    true,
+    "The selected Home recording is available and decodable offline",
+  );
   await page.getByRole("button", { name: "和熊猫一起走走" }).click();
   await page.locator("canvas").waitFor({ state: "visible" });
+  await page.locator("#panda-toggle").click();
   await page.locator("#practice").click();
   assert.equal(await page.locator("[data-activity]").count(), 17);
   await page.locator('[data-close="panel"]').click();

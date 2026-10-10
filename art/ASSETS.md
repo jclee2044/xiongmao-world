@@ -1,5 +1,33 @@
 # Painted assets — versions 0.2.0–0.4.0
 
+The enclosed gardens use `public/assets/characters/garden-workers.png`: a bamboo
+worker tying harvested canes into a bundle, a rock-garden groundskeeper raking
+weeds and leaves, and a Tiger Hill caretaker sweeping leaves. Generated with the
+built-in image tool using `neighbors.webp` as the watercolor style reference.
+The alpha-preserving browser copy is `public/assets/optimized/garden-workers.webp`;
+the exact prompt and provenance are in [prompts/garden-workers.json](prompts/garden-workers.json).
+Each keeper has a separate work conversation, with the bamboo worker placed
+beside the planting and an approach point on the clear path.
+
+`public/assets/characters/garden-workers-work.png` extends the same workers to
+four painted poses each: tightening a bamboo bundle, pulling a rake, and sweeping
+with a straw broom. The browser uses `public/assets/optimized/garden-workers-work.webp`.
+The two-second work loops pause briefly at each end of the stroke, with separate
+phases for each worker. Row-wide crop bounds keep each frame's scale and anchor
+fixed; reduced motion and paused scenes use the first pose. The built-in image
+generation prompts and layout correction are recorded in
+[prompts/garden-workers-work.json](prompts/garden-workers-work.json).
+`node scripts/browser-garden-workers.js` checks the four distinct rendered poses,
+fixed dimensions, repeating loops, reduced motion, navigation and conversations.
+
+The dedicated clothing storefront is `public/assets/world/clothing-store-exterior.png`,
+generated with the built-in image tool using the existing storefront atlas as a
+style reference. Its cream fabric sign, garment displays and open doorway are
+part of the painting. Exact prompt and provenance are recorded in
+[prompts/clothing-store-exterior.json](prompts/clothing-store-exterior.json).
+The alpha-preserving WebP encoding is `public/assets/optimized/clothing-store-exterior.webp`.
+It renders at the bookstore's height, using the cropped artwork's natural aspect ratio.
+
 Created with the **built-in image-generation tool**, using the supplied third Suzhou illustration as the composition target for Canal Lane and as a style/identity reference for the other assets. The selected environment retains the reference's framing and detail; separately generated characters and the outer streets are adaptations, not pixel-identical copies of the whole reference.
 
 The complete exact prompt set, input paths, transparency flags and 16 generation calls are saved in [prompts/generation-calls.json](prompts/generation-calls.json). Calls are recorded chronologically, including player spacing and vendor transparency corrections. The standalone environment specification is [prompts/canal-lane.txt](prompts/canal-lane.txt). These are provenance records, not scripts to execute automatically.
@@ -75,7 +103,7 @@ The six selected assets below were generated with the **built-in image-generatio
 | `public/assets/world/museum-interior.png`     | `exec-b9185f96-6ad3-4c58-971f-96c0eb55b1ca.png` | Walkable illustrative museum interior                        |
 | `public/assets/world/restaurant-interior.png` | `exec-2d10d774-ce9f-4dcd-9ba3-a65531ebbb69.png` | Walkable restaurant and hot-pot interior                     |
 
-The Panda sheet crops six equal cells. The neighbor walking atlas has three columns and six rows. Museum and restaurant pictures show simplified exhibits and furnishings. Suzhou collection sources are in [SUZHOU_RESEARCH.md](../SUZHOU_RESEARCH.md). Source PNGs remain outside the public source tree; shipped PNG assets are cached for offline exploration.
+The Panda sheet uses six uneven cell boundaries in transparent gaps, with tight artwork crops centered and aligned at the ground. The hop cycle follows Panda’s traveled distance. The neighbor walking atlas has three columns and six rows. Museum and restaurant pictures show simplified exhibits and furnishings. Suzhou collection sources are in [SUZHOU_RESEARCH.md](../SUZHOU_RESEARCH.md). Source PNGs remain outside the public source tree; shipped PNG assets are cached for offline exploration.
 
 ## Xiongmao World 0.7
 
@@ -108,7 +136,7 @@ Original generation files remain in `/home/jlrj/.codex/generated_images/01a10ec6
 
 All assets below were made with the built-in `image_gen.imagegen` tool and copied into the project. The exact prompt sets are [character](prompts/v0.8-character-consistency.json), [player](prompts/v0.8-player-consistency.json), [diners](prompts/v0.8-diner-consistency.json), [shop scenes](prompts/v0.9.json), and [final water refinement](prompts/v0.9-water-refinement.json).
 
-- `public/assets/characters/player-walk-v2.png`: four distinct walking poses per hairstyle, matching the idle sheet. Idle, walking and seated clothing all use the same normalized color palette.
+- `public/assets/characters/player-walk-v2.png`: four distinct walking poses per hairstyle, matching the idle sheet. Idle, walking and seated clothing all use the same normalized color palette. The walking heads were reduced with the built-in tool, then the renderer was corrected to reuse the exact idle head and neck at the same scale in every walking frame for both hairstyles. The correction and original prompt are recorded in [player head consistency](prompts/player-head-consistency.json). The optimized WebP was rebuilt and the offline cache version updated.
 - `public/assets/characters/lian-poses.png`: one idle, four walking and one seated pose preserving Lian’s bob, sage cardigan and peach skirt.
 - `public/assets/world/restaurant-interior-v3.png`: seated diners match the street characters’ clothing and identities.
 - `public/assets/world/shop-breakfast.png`, `shop-snacks.png`, `shop-produce.png`, `shop-souvenirs.png`, `shop-streetfood.png`: first-person counters with matching seller identities, merchandise and watercolor canal-town settings.

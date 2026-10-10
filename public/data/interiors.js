@@ -17,12 +17,12 @@ export const interiors = {
       { id: "clothing-exit", type: "door", name: "出门", x: 600, y: 715, target: "shanghai", returnDoor: "clothing-store" },
       { id: "clothing-rack", type: "inspect", shopId: "clothing", name: "选择衣服", x: 305, y: 420 },
       { id: "clothing-dresses", type: "inspect", shopId: "clothing", name: "看看裙子", x: 645, y: 365 },
-      { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "Aning", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真漂亮。", "你喜欢什么颜色？"] },
-      { id: "clothing-seller", type: "npc", dialogueId: "clothing-seller", shopId: "clothing", name: "Xiaoya", appearance: "lan", x: 850, y: 405, artHeight: 170, bubbles: ["欢迎衣服店！", "喜欢哪件衣服？"] },
+      { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "安宁", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真漂亮。", "你喜欢什么颜色？"] },
+      { id: "clothing-seller", type: "npc", dialogueId: "clothing-seller", shopId: "clothing", name: "Xiaoya", appearance: "lan", x: 850, y: 405, artHeight: 170, bubbles: ["欢迎来到衣服店！", "喜欢哪件衣服？"] },
     ],
   },
   bakery: {
-    id: "bakery", title: "Bakery", chinese: "蛋糕店", interior: true,
+    id: "bakery", title: "蛋糕店", chinese: "蛋糕店", interior: true,
     backgroundPath: "/assets/world/bakery-interior.webp", width: 1200, height: 800,
     spawn: { x: 600, y: 620 }, scenery: [], solids: [],
     walkableFloor: [[200, 510], [330, 340], [700, 370], [815, 365], [1000, 410], [1040, 550], [980, 585], [705, 545], [645, 545], [645, 740], [455, 730], [455, 550], [200, 520]],
@@ -37,7 +37,7 @@ export const interiors = {
       { id: "bakery-exit", type: "door", name: "出门", x: 600, y: 710, target: "shanghai", returnDoor: "bakery" },
       { id: "bakery-workbench", type: "practice", activity: "bakery-recipe", name: "做蛋糕", x: 900, y: 440 },
       { id: "bakery-order", type: "practice", activity: "shop-sentences", name: "买蛋糕", x: 525, y: 420 },
-      { id: "bakery-display", type: "inspect", name: "cake counter", x: 425, y: 405, zh: "这些蛋糕很好吃。", pinyin: "zhè xiē dàn gāo hěn hǎo chī 。", meaning: "These pastries smell lovely." },
+      { id: "bakery-display", type: "inspect", name: "蛋糕", x: 425, y: 405, zh: "这些蛋糕很好吃。", pinyin: "zhè xiē dàn gāo hěn hǎo chī 。", meaning: "These cakes are delicious." },
     ],
     roomForeground: [
       [[400, 500], [465, 500], [463, 720], [405, 712]],
@@ -68,7 +68,7 @@ export const interiors = {
       { id: "teahouse-exit", type: "door", name: "出门", x: 600, y: 700, target: "shanghai", returnDoor: "tea" },
       { id: "teahouse-counter", type: "practice", activity: "tea-listen-order", name: "准备饮料", x: 795, y: 480 },
       { id: "teahouse-order", type: "practice", activity: "shop-sentences", name: "点茶", x: 700, y: 460 },
-      { id: "teahouse-table", type: "inspect", name: "茶桌子", x: 355, y: 430, zh: "茶有点热，我们慢慢喝。", pinyin: "chá yǒu diǎn rè ， wǒ men màn màn hē 。", meaning: "The tea is a little hot. Let's drink slowly." },
+      { id: "teahouse-table", type: "inspect", name: "茶桌子", x: 355, y: 430, zh: "茶还有点热，等一会儿再喝吧。", pinyin: "chá hái yǒu diǎn rè ， děng yí huì er zài hē ba 。", meaning: "The tea is still a little hot. Let us wait a moment before drinking it." },
     ],
   },
   bookshop: {
@@ -93,7 +93,7 @@ export const interiors = {
       { id: "bookshop-exit", type: "door", name: "出门", x: 475, y: 695, target: "shanghai", returnDoor: "books" },
       { id: "bookshop-table", type: "practice", activity: "book-memory", name: "找一样的词", x: 795, y: 480 },
       { id: "bookshop-order", type: "practice", activity: "shop-sentences", name: "选择一本书", x: 500, y: 470 },
-      { id: "bookshop-shelves", type: "inspect", name: "bookshelf", x: 450, y: 420, zh: "你喜欢看故事书，还是 comics？", pinyin: "nǐ xǐ huan kàn gù shì shū ， hái shì  comics？", meaning: "Do you like storybooks or comics?" },
+      { id: "bookshop-shelves", type: "inspect", name: "书", x: 450, y: 420, zh: "你喜欢看故事书，还是漫画？", pinyin: "nǐ xǐ huan kàn gù shi shū ， hái shì màn huà ？", meaning: "Do you like storybooks or comics?" },
     ],
   },
 };

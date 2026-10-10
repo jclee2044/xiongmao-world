@@ -1,4 +1,5 @@
 import { MusicOwnership } from "./music-ownership.js";
+import { MusicTrack } from "./music-track.js";
 
 const melody = [
   62,
@@ -39,7 +40,15 @@ export const indoorTrack = {
   license: "https://pixabay.com/service/license-summary/",
 };
 
-// The licensed recording is bundled locally. The original pentatonic score
+export const homeTrack = {
+  url: "/assets/audio/hana-daria-semikina.mp3",
+  title: "花 / Hana (Flower)",
+  artist: "Daria Semikina",
+  composer: "Masaaki Kishibe",
+  source: "https://www.youtube.com/watch?v=-KrlR5UM6dI",
+};
+
+// Recordings play locally. The original pentatonic score
 // remains available when the recording cannot load or decode.
 export class Music {
   constructor(settings = {}) {
@@ -83,12 +92,13 @@ export class Music {
     }
     this.enabled = true;
     this.wanted = true;
-    // Mobile browsers need both the context and media element unlocked inside
-    // the Start tap, before settings or the ownership request finish loading.
-    // The master gain stays silent until sync() has permission to play.
+    // Unlock the one playback clock inside the Start tap, before settings or
+    // ownership finish loading. Decoded tracks need no separate media gesture.
     this.context.resume().catch(() => {});
     this.createTrack();
-    this.audio?.play().catch(() => {});
+    // Prepare only Home's recording after the Start gesture. Keep its decoded
+    // buffer across room changes so entering Home needs no fetch or decode.
+    this.audio?.preload(homeTrack.url).catch(() => {});
     this.claiming = this.ownership.claim();
     this.channel?.postMessage("takeover");
     await this.sync();
@@ -130,17 +140,18 @@ export class Music {
 
   setScene(scene) {
     const track =
-      scene?.interior || scene?.id === "home" ? indoorTrack : backgroundTrack;
+      scene?.id === "home"
+        ? homeTrack
+        : scene?.interior
+          ? indoorTrack
+          : backgroundTrack;
     if (track === this.track) return;
     this.track = track;
     ++this.version;
     this.stopNotes();
     if (this.audio) {
       this.audio.pause();
-      // A scene change replaces the source of the one player. It never leaves
-      // a previous media element (or pending play request) behind.
-      this.source?.disconnect();
-      this.source?.connect(this.master);
+      // Replace the one player and cancel any pending load from the old scene.
       this.audio.src = track.url;
       this.audio.load();
     }
@@ -153,7 +164,7 @@ export class Music {
     this.sync();
   }
 
-  setGain() {
+  setGain(starting = false) {
     if (!this.master) return;
     const now = this.context.currentTime;
     const gain = this.master.gain;
@@ -161,7 +172,7 @@ export class Music {
     gain.setTargetAtTime(
       this.audible() ? this.volume * (this.ducked ? 0.1 : 1) : 0,
       now,
-      this.ducked ? 0.035 : 0.3,
+      this.ducked ? 0.035 : starting ? 0.005 : 0.3,
     );
   }
 
@@ -178,9 +189,8 @@ export class Music {
   createTrack() {
     if (this.audio || this.trackFailed) return;
     try {
-      this.audio = new Audio(this.track.url);
+      this.audio = new MusicTrack(this.context, this.track.url, this.master);
       this.audio.loop = true;
-      this.audio.preload = "auto";
       this.audio.onplay = () => {
         // A pending play must not outlive a mute, pause, or hidden page.
         if (!this.audible() || !this.ownership.allowed || this.trackFailed)
@@ -189,8 +199,6 @@ export class Music {
       this.audio.onerror = () => {
         if (this.audio.error) this.failTrack();
       };
-      this.source = this.context.createMediaElementSource(this.audio);
-      this.source.connect(this.master);
     } catch {
       this.failTrack();
     }
@@ -200,7 +208,6 @@ export class Music {
     if (this.trackFailed || this.disposed) return;
     this.trackFailed = true;
     this.audio?.pause();
-    this.source?.disconnect();
     this.sync();
   }
 
@@ -238,7 +245,7 @@ export class Music {
       )
         return;
     }
-    this.setGain();
+    this.setGain(this.audio?.paused !== false);
     try {
       await this.context.resume();
     } catch {
@@ -309,13 +316,7 @@ export class Music {
     this.disposed = true;
     if (window[musicOwner] === this) delete window[musicOwner];
     await this.pause();
-    if (this.audio) {
-      this.audio.onplay = null;
-      this.audio.onerror = null;
-      this.audio.removeAttribute("src");
-      this.audio.load();
-    }
-    this.source?.disconnect();
+    this.audio?.dispose();
     await this.context?.close();
   }
 }

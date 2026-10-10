@@ -1,4 +1,5 @@
 import { decoratePond } from "./ponds.js";
+import artBounds from "./art-bounds.js";
 // Shared clearance for the market crossing and the adjoining western yard.
 export const WEST_CANAL_WIDENING = 60;
 const WEST_BANK_EXTRA = 560 / 3; // 168 final units: seven navigation-grid cells.
@@ -146,15 +147,18 @@ export function expandTown(scene) {
     width: 170,
   });
   addEnclosures(scene);
-  // The west building is a clothing shop; its doorway opens onto the promenade.
+  // A dedicated clothing storefront matches the bookstore's height, with its
+  // doorway opening onto the promenade. Keep the painted sprite's proportions.
   for (const [id, x, h, flip] of [
-    ["clothing-store", 1640, 330, false],
+    ["clothing-store", 1640, 440, false],
     ["south-home-east", 2160, 310, true],
   ]) {
-    scene.scenery.push({ id: `building-${id}`, type: "house", x, y: 3590,
-      w: h * 1.25, h, flip, ...(id === "clothing-store" ? { label: "衣服店", doorId: id } : {}) });
-    scene.groundZones.push({ type: "courtyard", x: x - h * .625 - 25,
-      y: 3550, w: h * 1.25 + 50, h: 110 });
+    const clothing = id === "clothing-store";
+    const w = h * (clothing ? artBounds.clothingStore.w / artBounds.clothingStore.h : 1.25);
+    scene.scenery.push({ id: `building-${id}`, type: clothing ? "storefront" : "house", x, y: 3590,
+      w, h, flip, ...(clothing ? { storefront: "clothing-store", label: "衣服店", doorId: id } : {}) });
+    scene.groundZones.push({ type: "courtyard", x: x - w / 2 - 25,
+      y: 3550, w: w + 50, h: 110 });
   }
   scene.paths.push({ points: [[1420, 3650], [2410, 3650]], width: 120 });
   scene.interactables.push({ id: "clothing-store", type: "door", target: "clothing-store",
@@ -172,7 +176,19 @@ export function expandTown(scene) {
   relocate("bo", books.x + 120, books.y + 15);
   relocate("yun", 570, 1330);
   relocate("pingjiang", 710, 1390);
-  relocate("garden-rabbit",600,2250);
+  // Give the rabbit a broad clearing in front of Huqiu, away from the wall
+  // corner and the canal promenade. Dimensions travel with the town scale.
+  scene.groundZones.push({ type: "garden", x: 185, y: 2310, w: 415, h: 240 });
+  relocate("garden-rabbit",390,2430);
+  Object.assign(scene.interactables.find((o) => o.id === "garden-rabbit"), {
+    roam: { w: 290, h: 110 },
+  });
+  // The northeast rabbit hops on the open lawn below the eastern bridge,
+  // directly northwest of the pond, clear of the shop and waterside path.
+  relocate("garden-rabbit-two",3180,1150);
+  Object.assign(scene.interactables.find((o) => o.id === "garden-rabbit-two"), {
+    roam: { w: 240, h: 180 },
+  });
   relocate("lost-flowers",660,2280);
   // This public learning stop must remain outside the gated Tiger Hill scene.
   relocate("rock-study",110,2365);
@@ -186,6 +202,16 @@ export function expandTown(scene) {
     ["boat-dock", "passenger-boat"].includes(o.type),
   ))
     o.y += 70;
+  // The deck is ground; only its upright mooring posts have solid footprints.
+  for (const dock of scene.scenery.filter((o) => o.type === "boat-dock"))
+    for (const dx of [-dock.w / 2, dock.w / 2])
+      scene.scenery.push({
+        type: "boat-dock-post",
+        x: dock.x + dx,
+        y: dock.y + 6,
+        w: 8,
+        h: 32,
+      });
   // The dock meets the south-bank promenade directly.
   scene.paths.push({
     points: [
@@ -197,12 +223,18 @@ export function expandTown(scene) {
   // Rebuild exterior footprints from actual artwork after translation and gates.
   scene.solids = scene.scenery
     .filter((o) => o.id?.startsWith("building-") && o.landmark !== "moon-gate")
-    .map((o) => ({
-      x: o.x - o.w * 0.43,
-      y: o.y - o.h * 0.89,
-      w: o.w * 0.86,
-      h: o.h * 0.91,
-    }));
+    .map((o) => {
+      // These freestanding shops sort by their front edge when rendered.
+      // Collide with the walls below the roof, leaving the rear overhang
+      // walkable while keeping the entire facade and interior solid.
+      const depth = ["bakery", "books", "tea", "clothing-store"].includes(o.doorId) ? 0.6 : 0.89;
+      return {
+        x: o.x - o.w * 0.43,
+        y: o.y - o.h * depth,
+        w: o.w * 0.86,
+        h: o.h * (depth + 0.02),
+      };
+    });
   for (const o of scene.scenery.filter((o) =>
     ["tea-table", "well", "market", "bench"].includes(o.type),
   ))
@@ -213,6 +245,13 @@ export function expandTown(scene) {
       h: o.h * 0.68,
     });
   scene.solids.push(...scene.enclosures.flatMap((e) => e.walls));
+  for (const post of scene.scenery.filter((o) => o.type === "boat-dock-post"))
+    scene.solids.push({
+      x: post.x - post.w / 2,
+      y: post.y - post.w,
+      w: post.w,
+      h: post.w,
+    });
   // Separate scenes are entered by interacting with their gate, never by
   // walking into a second copy of their grounds in the main town.
   for (const e of scene.enclosures) {
@@ -290,9 +329,9 @@ function addEnclosures(scene) {
         y: fountainY + 20, w: 500, h: 340 });
       const square = stop(e.id);
       Object.assign(square, {
-        type: "inspect", name: "Canal square",
-        zh: "这里是 Canal square。我们可以在这里走走、休息。",
-        pinyin: "zhè lǐ shì  Canal square。 wǒ men kě yǐ zài zhè lǐ zǒu zǒu 、 xiū xi 。",
+        type: "inspect", name: "河边",
+        zh: "这里是河边。我们可以在这里走走、休息。",
+        pinyin: "zhè lǐ shì hé biān 。 wǒ men kě yǐ zài zhè lǐ zǒu zǒu 、 xiū xi 。",
         meaning: "This is the canal square. We can walk and rest here.",
       });
       delete square.target;
@@ -307,6 +346,16 @@ function addEnclosures(scene) {
       { x: gateX + gap / 2, y: gateY - 18, w: (e.w - gap) / 2, h: thick },
     ];
     scene.enclosures.push({ ...e, gateX, gateY, walls });
+    if (e.id === "bamboo-grove") {
+      // The bamboo completely conceals the plush until searched up close.
+      scene.interactables.push({
+        id: "fox-plush", enclosureId: e.id,
+        x: e.x + e.w - 100, y: e.y + 190,
+        appearance: "Orange ribbed corduroy fox plush with cream cheeks and ear tips, black bead eyes and a black nose.",
+        type: "stuffy", collectible: "fox-plush",
+        name: "竹子后面", hidden: true,
+      });
+    }
     for (const wall of walls)
       scene.scenery.push(
         wall.w > wall.h

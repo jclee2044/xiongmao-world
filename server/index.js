@@ -8,6 +8,7 @@ import { resolve, extname, sep } from "node:path";
 import { Store } from "./store.js";
 import { coachReply } from "./coach.js";
 import { reply } from "./dialogue.js";
+import { varyDialogue } from "./dialogue-variation.js";
 import { speechAvailable, neuralAvailable, synthesize } from "./speech.js";
 import { createMusicOwnership } from "./music-ownership.js";
 
@@ -19,6 +20,7 @@ const types = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
   ".txt": "text/plain; charset=utf-8",
   ".md": "text/plain; charset=utf-8",
   ".svg": "image/svg+xml",
@@ -77,6 +79,9 @@ export function createApp({
           version: "0.9.0",
           provider: providerConfig.provider || process.env.PROVIDER || "story",
           microphone: transcriptionAvailable(),
+          pandaVoice: neuralAvailable("panda")
+            ? "kokoro-light-nasal-playful"
+            : "unavailable",
           speech: neuralAvailable()
             ? "vits-wnj-neural-male"
             : speechAvailable()
@@ -123,7 +128,11 @@ export function createApp({
             ? 8
             : pathname === "/api/music-owner"
               ? 160
-              : ["/api/dialogue", "/api/coach"].includes(pathname)
+              : [
+                    "/api/dialogue",
+                    "/api/coach",
+                    "/api/dialogue-variation",
+                  ].includes(pathname)
                 ? 16
                 : 80)
         )
@@ -169,7 +178,11 @@ export function createApp({
           cookie(next);
           return json(200, { ok: true });
         }
-        if (pathname === "/api/dialogue" || pathname === "/api/coach") {
+        if (
+          ["/api/dialogue", "/api/coach", "/api/dialogue-variation"].includes(
+            pathname,
+          )
+        ) {
           if (modelBusy)
             return json(429, {
               error:
@@ -183,29 +196,39 @@ export function createApp({
           try {
             return json(
               200,
-              pathname === "/api/coach"
-                ? await coachReply(body, {
+              pathname === "/api/dialogue-variation"
+                ? await varyDialogue(body.line, {
                     ...providerConfig,
-                    state: store.read(identity).state,
+                    generateOnly: true,
                     signal: AbortSignal.any([
                       controller.signal,
                       AbortSignal.timeout(60000),
                     ]),
                   })
-                : await reply(
-                    body.npcId,
-                    body.text,
-                    body.history || [],
-                    store.read(identity).state,
-                    {
+                : pathname === "/api/coach"
+                  ? await coachReply(body, {
                       ...providerConfig,
-                      shopId: body.shopId,
+                      state: store.read(identity).state,
                       signal: AbortSignal.any([
                         controller.signal,
                         AbortSignal.timeout(60000),
                       ]),
-                    },
-                  ),
+                    })
+                  : await reply(
+                      body.npcId,
+                      body.text,
+                      body.history || [],
+                      store.read(identity).state,
+                      {
+                        ...providerConfig,
+                        shopId: body.shopId,
+                        currentLine: body.currentLine,
+                        signal: AbortSignal.any([
+                          controller.signal,
+                          AbortSignal.timeout(60000),
+                        ]),
+                      },
+                    ),
             );
           } finally {
             modelBusy = false;
@@ -227,19 +250,31 @@ export function createApp({
           if (speechPending >= 4)
             return json(429, { error: "Speech is busy. Please try again." });
           speechPending++;
-          const previous = speechQueue;
-          let release;
-          speechQueue = new Promise((resolve) => (release = resolve));
+          const voice = normalizeVoice(body.voice);
+          // Panda has his own queue, so an uncached line does not delay NPCs.
+          const previous = voice === "panda" ? Promise.resolve() : speechQueue;
+          let release = () => {};
+          if (voice !== "panda")
+            speechQueue = new Promise((resolve) => (release = resolve));
           await previous;
           try {
             if (res.destroyed) return;
-            const voice = normalizeVoice(body.voice);
-            const wav = await synthesize(body.text, body.slow === true, voice);
+            const wav = await synthesize(
+              body.text,
+              body.slow === true,
+              voice,
+              body.context,
+            );
             if (res.destroyed) return;
             res.writeHead(200, {
               "Content-Type": "audio/wav",
               "Cache-Control": "no-store",
-              "X-Speech-Engine": neuralAvailable(voice) ? "neural" : "basic",
+              "X-Speech-Engine":
+                voice === "panda"
+                  ? "kokoro"
+                  : neuralAvailable(voice)
+                    ? "neural"
+                    : "basic",
               "X-Speech-Voice": voice,
             });
             return res.end(wav);
@@ -298,11 +333,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   server.listen(
     Number(process.env.PORT || 3210),
     process.env.HOST || "127.0.0.1",
-    () =>
+    () => {
       console.log(
         `Panda’s Little World: http://${process.env.HOST || "127.0.0.1"}:${process.env.PORT || 3210}`,
-      ),
+      );
+    },
   );
   for (const signal of ["SIGINT", "SIGTERM"])
-    process.on(signal, () => server.close(() => process.exit(0)));
+    process.on(signal, () => {
+      server.close(() => process.exit(0));
+    });
 }

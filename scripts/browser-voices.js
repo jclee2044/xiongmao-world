@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 import { writeFile, mkdir } from "node:fs/promises";
 import { createApp } from "../server/index.js";
 import { Store, newState } from "../server/store.js";
-import { voiceProfiles } from "../public/data/voices.js";
+import { voiceProfiles, voiceForNpc } from "../public/data/voices.js";
 import { scenes, interactionPoint } from "../public/game/world.js";
 import { enterWorld } from "./browser-helpers.js";
 
@@ -83,12 +83,26 @@ try {
   await context.close();
 
   // Exercise real conversations and replay rather than just the mapping helper.
-  for (const [sceneId, dialogueId, voice] of [
-    ["bookshop", "reader", "young-male"],
-    ["bookshop", "bo", "older-male"],
-    ["bakery", "baker", "older-female"],
-    ["museum", "guide", "young-female"],
+  for (const [sceneId, dialogueId] of [
+    ["bookshop", "reader"],
+    ["bookshop", "bo"],
+    ["bakery", "baker"],
+    ["museum", "guide"],
+    ["shanghai", "wei"],
+    ["shanghai", "lin"],
+    ["shanghai", "hao"],
+    ["teahouse", "diner"],
+    ["humble-garden", "bamboo-worker"],
+    ["teahouse", "qiao"],
+    ["shanghai", "kid-one"],
+    ["shanghai", "kid-two"],
+    ["restaurant", "reader"],
+    ["clothing-store", "clothing-customer"],
   ]) {
+    const actor = scenes[sceneId].interactables.find(
+      (o) => (o.dialogueId || o.id) === dialogueId,
+    );
+    const voice = voiceForNpc(dialogueId, actor?.appearance);
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
       isMobile: true,
@@ -141,11 +155,41 @@ try {
       r: c.getBoundingClientRect().toJSON(),
       d: { ...c.dataset },
     }));
+    let tap = { x: person.x, y: person.y - 70 };
+    if (dialogueId === "bamboo-worker") {
+      // Select an exposed part of the worker when a stationary passerby overlaps him.
+      tap = await page.evaluate(
+        async ({ sceneId, person }) => {
+          const { scenes } = await import("/game/world.js");
+          const { lifeActors } = await import("/game/life.js");
+          const scene = scenes[sceneId];
+          const actors = [
+            ...lifeActors(scene, 0, { x: 575, y: 665 }, false).filter(
+              (o) => o.type === "passerby",
+            ),
+            ...scene.interactables.filter((o) => o.type === "npc"),
+          ].sort((a, b) => b.y - a.y);
+          for (const dx of [-40, -25, 0, 25, 40])
+            for (const dy of [-15, -45, -75, -105, -135, -165]) {
+              const x = person.x + dx,
+                y = person.y + dy;
+              const hit = actors.find(
+                (o) =>
+                  x > o.x - 43 &&
+                  x < o.x + 43 &&
+                  y > o.y - (o.artHeight || 235) &&
+                  y < o.y + 8,
+              );
+              if (hit?.id === person.id) return { x, y };
+            }
+          throw Error("Worker has no exposed tap target");
+        },
+        { sceneId, person },
+      );
+    }
     await page.touchscreen.tap(
-      c.r.x +
-        (person.x - Number(c.d.camX) + Number(c.d.ox)) * Number(c.d.scale),
-      c.r.y +
-        (person.y - 70 - Number(c.d.camY) + Number(c.d.oy)) * Number(c.d.scale),
+      c.r.x + (tap.x - Number(c.d.camX) + Number(c.d.ox)) * Number(c.d.scale),
+      c.r.y + (tap.y - Number(c.d.camY) + Number(c.d.oy)) * Number(c.d.scale),
     );
     await page.locator("#npc-name").waitFor({ state: "visible" });
     // A touch can also expose the optional coaching dialog; close it before replay.
@@ -172,7 +216,9 @@ try {
     assert.equal(requests.at(-1).voice, voice, dialogueId);
     await context.close();
   }
-  console.log("Phone NPC conversations/replay select all four profiles. Audio samples are in test-results/voices/.");
+  console.log(
+    "Phone NPC conversations/replay select the expanded cast, children and older reader appearance. Audio samples are in test-results/voices/.",
+  );
 } finally {
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

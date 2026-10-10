@@ -1,10 +1,11 @@
-import { isBeginnerChinese, dialogueLanguageRule } from "../public/data/language.js";
+import { landmarkReply } from "./panda-landmarks.js";
+import { isChineseDialogue, isBeginnerChinese, dialogueLanguageRule } from "../public/data/language.js";
 import {
   navigationContext,
   requestedPlace,
   directionsTo,
 } from "../public/data/navigation.js";
-import { pinyin } from "pinyin-pro";
+import { pinyin } from "./pronunciation.js";
 import { geminiGenerate } from "./gemini.js";
 
 // Use simple Chinese by default; English explanations are an explicit help preference.
@@ -21,8 +22,10 @@ export async function coachReply(
     geminiModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
   } = {},
 ) {
+  if (body.kind === "landmark")
+    return landmarkReply(body, { provider, url, model, fetcher, signal, apiKey, geminiModel });
   const { question, context = "" } = body;
-  const english = state.settings?.translation === true;
+  const english = body.explanationLanguage === "en" || state.settings?.translation === true;
   if (
     typeof question !== "string" ||
     !question.trim() ||
@@ -112,7 +115,7 @@ export async function coachReply(
         /[<>\u0000-\u001f]/.test(data.explanation + data.chinese)
       )
         throw Error("Invalid tutor reply");
-      if (!isBeginnerChinese(data.chinese) || !isBeginnerChinese(data.explanation))
+      if (!isChineseDialogue(data.chinese) || !isBeginnerChinese(data.explanation))
         throw Error("Tutor reply exceeds the old HSK 3 vocabulary limit");
       return {
         explanation: data.explanation,
@@ -134,8 +137,8 @@ export async function coachReply(
     [
       /\ble\b|了|past|completed/i,
       "了 can show that an action is complete. It can also mark a new situation; it is not simply a past-tense ending. Here 吃了 means the eating is complete.",
-      "我吃了hot pot。",
-      "“了”可以说一个事情做完了，也可以说现在和以前不一样。“我吃了hot pot”是说已经吃过了。",
+      "我吃了火锅。",
+      "“了”可以说一个事情做完了，也可以说现在和以前不一样。“我吃了火锅”是说已经吃过了。",
     ],
     [
       /\bba\b|吧|suggest/i,

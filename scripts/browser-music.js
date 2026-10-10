@@ -81,7 +81,7 @@ try {
   await page.route("**/music-check", (route) =>
     route.fulfill({
       contentType: "text/html",
-      body: '<button id="start">Start music</button><div id="panel-content"></div>',
+      body: '<button id="start">Start music</button><span id="save-status">Journal saved</span><div id="panel-content"></div>',
     }),
   );
   await page.goto(base + "/music-check");
@@ -210,22 +210,33 @@ try {
   await page.evaluate(() => check.music.setScene({ id: "home" }));
   await page.waitForFunction(
     () =>
-      check.music.audio?.src.endsWith(
-        "sonican-asian-music-magical-dream.mp3",
-      ) && check.music.audio.currentTime > 0.1,
+      check.music.audio?.src.endsWith("hana-daria-semikina.mp3") &&
+      check.music.audio.currentTime > 0.1,
   );
-  const indoor = await page.evaluate(async () => {
-    const response = await fetch(
-      "/assets/audio/sonican-asian-music-magical-dream.mp3",
-    );
+  const home = await page.evaluate(async () => {
+    const response = await fetch("/assets/audio/hana-daria-semikina.mp3");
     const buffer = await check.music.context.decodeAudioData(
       await response.arrayBuffer(),
     );
     return { duration: buffer.duration, channels: buffer.numberOfChannels };
   });
-  assert.ok(indoor.duration > 78 && indoor.duration < 80);
-  assert.equal(indoor.channels, 2);
+  assert.ok(home.duration > 201 && home.duration < 203);
+  assert.equal(home.channels, 2);
   assert.equal(await page.evaluate(() => check.music.audio.loop), true);
+  await page.evaluate(() => {
+    check.music.audio.currentTime = check.music.audio.duration - 0.2;
+  });
+  await page.waitForFunction(() => check.music.audio.currentTime < 1);
+  assert.equal(await page.evaluate(() => check.music.audio.paused), false);
+  await page.evaluate(() =>
+    check.music.setScene({ id: "home", interior: true }),
+  );
+  assert.ok(
+    await page.evaluate(() =>
+      check.music.audio.src.endsWith("hana-daria-semikina.mp3"),
+    ),
+    "Home retains its own soundtrack even when marked as an interior",
+  );
   await page.evaluate(() =>
     check.music.setScene({ id: "bakery", interior: true }),
   );
@@ -234,6 +245,13 @@ try {
       check.music.audio.src.endsWith("sonican-asian-music-magical-dream.mp3"),
     ),
   );
+  await page.waitForFunction(() => check.music.audio.currentTime > 0.1);
+  assert.ok(
+    await page.evaluate(
+      () => check.music.audio.duration > 78 && check.music.audio.duration < 80,
+    ),
+    "Other interiors still decode and play the Sonican recording",
+  );
   await page.evaluate(() => check.music.setScene({ id: "shanghai" }));
   await page.waitForFunction(
     () =>
@@ -241,7 +259,7 @@ try {
       check.music.audio.currentTime > 0.1,
   );
 
-  // The Web Audio device and HTMLAudioElement are real. This one-second local
+  // Music uses real Web Audio; speech uses a real HTMLAudioElement. This local
   // WAV fixture exercises playback lifecycle without depending on an OS voice.
   await page.evaluate(async () => {
     window.fetch = async () =>
@@ -313,6 +331,12 @@ try {
   assert.equal(await page.evaluate(() => check.music.ducked), false);
 
   await page.evaluate(() => check.panels.settings());
+  await page.getByText("Music credits", { exact: true }).click();
+  assert.ok((await page.locator("#panel-content").textContent()).includes("Masaaki Kishibe"));
+  assert.equal(
+    await page.getByRole("link", { name: "花 / Hana (Flower)", exact: true }).getAttribute("href"),
+    "https://www.youtube.com/watch?v=-KrlR5UM6dI",
+  );
   await page.locator("#music-toggle").selectOption("off");
   await page.waitForFunction(() => check.music.context.state === "suspended");
   assert.equal(await page.evaluate(() => check.music.audio.paused), true);
@@ -461,7 +485,7 @@ try {
       const graph = new OriginalContext(...args),
         createGain = graph.createGain.bind(graph),
         createOscillator = graph.createOscillator.bind(graph),
-        createMediaElementSource = graph.createMediaElementSource.bind(graph);
+        createBufferSource = graph.createBufferSource.bind(graph);
       graph.createdNotes = 0;
       graph.musicTracks = [];
       graph.createGain = () => {
@@ -473,9 +497,10 @@ try {
         graph.createdNotes++;
         return createOscillator();
       };
-      graph.createMediaElementSource = (audio) => {
-        graph.musicTracks.push(audio);
-        return createMediaElementSource(audio);
+      graph.createBufferSource = () => {
+        const node = createBufferSource();
+        graph.musicTracks.push(node);
+        return node;
       };
       musicGraphs.push(graph);
       return graph;
@@ -495,7 +520,8 @@ try {
     () =>
       musicGraphs[0]?.state === "running" &&
       musicGraphs[0]?.musicMaster.gain.value > 0.1 &&
-      musicGraphs[0]?.musicTracks[0]?.currentTime > 0.1,
+      musicGraphs[0]?.musicTracks.length > 0 &&
+      musicGraphs[0].currentTime > 0.1,
   );
   await game.locator("#settings").click();
   await game.locator("#music-toggle").selectOption("off");
@@ -534,7 +560,6 @@ try {
     maximumGain: Math.max(...musicGainSamples),
     createdNotes: musicGraphs[0].createdNotes,
     createdTracks: musicGraphs[0].musicTracks.length,
-    trackPaused: musicGraphs[0].musicTracks[0]?.paused,
     state: musicGraphs[0].state,
   }));
   assert.equal(
@@ -554,10 +579,9 @@ try {
   );
   assert.equal(
     pendingMute.createdTracks,
-    1,
-    "The Start tap primes one silent recording for mobile playback",
+    0,
+    "Muted loading must not start a recording",
   );
-  assert.equal(pendingMute.trackPaused, true);
   assert.equal(pendingMute.state, "suspended");
   releaseState();
   await game.locator("#world").waitFor({ state: "visible" });
@@ -584,6 +608,7 @@ try {
   const result = {
     noAudioBeforeGesture: true,
     licensedLocalRecording: recordedSound,
+    personalHomeRecording: home,
     realRecordingPlaybackAndLoop: true,
     bufferedRecordingResumesOffline: true,
     pendingRecordingMuteStaysSilent: true,

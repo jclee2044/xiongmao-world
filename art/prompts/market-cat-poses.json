@@ -1,0 +1,5 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "public/assets/characters/market-cat-poses.png",
+  "prompt": "Use case: identity-preserve. Asset: transparent game cat animation atlas. Reference image: match ONLY the orange-and-white kitten in the TOP ROW; preserve its face, body size, markings, creamy paws, upright fluffy tail, warm watercolor/gouache style. Create one 3-column by 3-row sprite sheet with nine equal cells and broad transparent gutters. Cells reading order 0 through 7 are EIGHT distinct successive smooth WALK-cycle frames: left front paw contact, weight transfer, passing, lift, opposite right front contact, weight transfer, passing, lift. Natural alternating four-legged gait, no running or jumping; subtle tail variation. Cell8 bottom right is STANDING IDLE with all four paws grounded. Every cat faces RIGHT in same raised three-quarter perspective, full body including tail, same proportions and scale, feet on SAME relative baseline, head same height. Fully transparent alpha background, no shadows, no floor, no labels or lines. Exactly nine cats; ONLY cats, no ducks/rabbits/birds. Keep each silhouette well within its equal cell."
+}

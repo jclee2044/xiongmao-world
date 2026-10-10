@@ -1,0 +1,32 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "edits": [
+    {
+      "shop": "breakfast",
+      "reference": "public/assets/characters/indoor-npcs.png",
+      "saved_asset": "public/assets/world/shop-breakfast.png",
+      "prompt": "Use case: identity-preserve. Edit target is image 1, an existing first-person shop interaction scene. Image 2 is the authoritative town NPC identity reference sprite sheet. Replace ONLY the shopkeeper in image 1 with this exact character from image 2: TOP LEFT older woman: grey hair in a high bun, mustard golden traditional blouse with frog closures, ivory floral apron, warm older face, no glasses. Adapt that existing NPC naturally into the same close-up behind the counter, facing the customer. Match face, hair, age, clothing colors and identifying accessories accurately. Preserve image 1's landscape 1536x1024 composition, watercolor storybook style, all shop goods, foreground counter, architecture, decorations, background and lighting. Keep the original shopkeeper hand action, adjusting hands naturally. Exactly one shopkeeper, no extra people, no text or watermarks. This is a single finished shop scene, not a sprite sheet or comparison."
+    },
+    {
+      "shop": "snacks",
+      "reference": "public/assets/characters/market-npcs.png",
+      "saved_asset": "public/assets/world/shop-snacks.png",
+      "prompt": "Use case: identity-preserve. Edit target is image 1, an existing first-person shop interaction scene. Image 2 is the authoritative town NPC identity reference sprite sheet. Replace ONLY the shopkeeper in image 1 with this exact character from image 2: LEFT young woman: dark hair in TWO side buns decorated with tiny yellow flowers, coral red traditional blouse with rolled sleeves, pale blue apron with ivory straps and floral pocket. Adapt that existing NPC naturally into the same close-up behind the counter, facing the customer. Match face, hair, age, clothing colors and identifying accessories accurately. Preserve image 1's landscape 1536x1024 composition, watercolor storybook style, all shop goods, foreground counter, architecture, decorations, background and lighting. Keep the original shopkeeper hand action, adjusting hands naturally. Exactly one shopkeeper, no extra people, no text or watermarks. This is a single finished shop scene, not a sprite sheet or comparison."
+    },
+    {
+      "shop": "souvenirs",
+      "reference": "public/assets/characters/market-npcs.png",
+      "saved_asset": "public/assets/world/shop-souvenirs.png",
+      "prompt": "Use case: identity-preserve. Edit target is image 1, an existing first-person shop interaction scene. Image 2 is the authoritative town NPC identity reference sprite sheet. Replace ONLY the shopkeeper in image 1 with this exact character from image 2: RIGHT mature woman: salt and pepper grey hair pinned back with wooden hairpin, round brown glasses, green earrings, dusty mauve floral traditional blouse, deep plum skirt. Keep her recognizable mature face. Adapt that existing NPC naturally into the same close-up behind the counter, facing the customer. Match face, hair, age, clothing colors and identifying accessories accurately. Preserve image 1's landscape 1536x1024 composition, watercolor storybook style, all shop goods, foreground counter, architecture, decorations, background and lighting. Keep the original shopkeeper hand action, adjusting hands naturally. Exactly one shopkeeper, no extra people, no text or watermarks. This is a single finished shop scene, not a sprite sheet or comparison."
+    },
+    {
+      "shop": "streetfood",
+      "reference": "public/assets/characters/indoor-npcs.png",
+      "saved_asset": "public/assets/world/shop-streetfood.png",
+      "prompt": "Use case: identity-preserve. Edit target is image 1, an existing first-person shop interaction scene. Image 2 is the authoritative town NPC identity reference sprite sheet. Replace ONLY the shopkeeper in image 1 with this exact character from image 2: BOTTOM RIGHT adult man: very short cropped black hair, small black moustache, cream collared shirt with rolled sleeves, reddish brown bib apron. No green jacket or shoulder bag. Adapt that existing NPC naturally into the same close-up behind the counter, facing the customer. Match face, hair, age, clothing colors and identifying accessories accurately. Preserve image 1's landscape 1536x1024 composition, watercolor storybook style, all shop goods, foreground counter, architecture, decorations, background and lighting. Keep the original shopkeeper hand action, adjusting hands naturally. Exactly one shopkeeper, no extra people, no text or watermarks. This is a single finished shop scene, not a sprite sheet or comparison."
+    }
+  ],
+  "verified_unchanged": {
+    "produce": "Wei matches the bottom-left town character in neighbors.webp."
+  }
+}

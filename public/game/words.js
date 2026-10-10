@@ -1,3 +1,4 @@
+import { voiceProfiles } from "../data/voices.js";
 import { api } from "./persistence.js";
 import { lexicon } from "../data/content.js";
 export function createWordHelp({ discover, speech }) {
@@ -41,7 +42,11 @@ export function createWordHelp({ discover, speech }) {
   }
   async function show(word, anchor) {
     const token = ++generation;
-    const list = word.meaning ? [word] : await tokens(word.zh);
+    const voices = Object.keys(voiceProfiles);
+    const voice = voices[Math.floor(Math.random() * voices.length)];
+    speech.speak(word.zh, false, voice, word.context);
+    const list = word.meaning && word.pinyin && !word.meaning.includes("unavailable")
+      ? [word] : await tokens(word.zh);
     if (token !== generation || !anchor.isConnected) return;
     callout.replaceChildren();
     for (const w of list.filter((w) => !w.punctuation)) {
@@ -67,7 +72,7 @@ export function createWordHelp({ discover, speech }) {
       listen = document.createElement("button"),
       close = document.createElement("button");
     listen.textContent = "听一听";
-    listen.onclick = () => speech.speak(word.zh);
+    listen.onclick = () => speech.speak(word.zh, false, voice, word.context);
     close.textContent = "×";
     close.setAttribute("aria-label", "关");
     close.onclick = hide;
@@ -80,7 +85,11 @@ export function createWordHelp({ discover, speech }) {
     const r = anchor.getBoundingClientRect(),
       b = callout.getBoundingClientRect();
     callout.style.left = `${Math.max(10, Math.min(innerWidth - b.width - 10, r.left + r.width / 2 - b.width / 2))}px`;
-    callout.style.top = `${Math.max(10, r.top - b.height - 12)}px`;
+    const above = r.top - b.height - 12;
+    const top = anchor.matches(".map-pin") && above < 10
+      ? Math.min(innerHeight - b.height - 10, r.bottom + 12)
+      : Math.max(10, above);
+    callout.style.top = `${top}px`;
   }
   async function annotate(el) {
     const text = el.textContent;
@@ -100,29 +109,54 @@ export function createWordHelp({ discover, speech }) {
     el.replaceChildren(
       ...list.map((w) => {
         if (w.punctuation) return document.createTextNode(w.zh);
-        const b = document.createElement("button");
-        b.type = "button";
+        const interactive = el.closest("button,a");
+        const b = document.createElement(interactive ? "span" : "button");
+        if (interactive) {
+          b.setAttribute("role", "button");
+          b.tabIndex = 0;
+        } else b.type = "button";
         b.className = "help-word";
         b.textContent = w.zh;
-        b.setAttribute("aria-label", `看看“${w.zh}”的意思`);
-        b.onclick = () => show(w, b);
+        // Keep the spoken word and dictionary anchor together when the line wraps.
+        if (el.id === "npc-zh" && w.pinyin) b.dataset.pinyin = w.pinyin;
+        if (!interactive) b.setAttribute("aria-label", `看看“${w.zh}”的意思`);
+        b.onclick = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          show(w, b);
+        };
+        b.onkeydown = (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            show(w, b);
+          }
+        };
         return b;
       }),
     );
   }
-  const observer = new MutationObserver(() =>
-    document
-      .querySelectorAll(
-        "dialog[open] .chinese, #game:not([hidden]) #panda-message",
-      )
-      .forEach(annotate),
-  );
-  for (const dialog of document.querySelectorAll("dialog"))
-    observer.observe(dialog, { childList: true, subtree: true });
-  observer.observe(document.getElementById("panda-message"), {
-    childList: true,
-    subtree: true,
-  });
+  // Annotate text leaves, preserving surrounding controls and their handlers.
+  function scan() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const leaves = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode, parent = node.parentElement;
+      if (!parent || !/\p{Script=Han}/u.test(node.textContent) ||
+          parent.closest("script,style,textarea,select,option,svg,canvas,#word-callout,.help-word,[data-map-stop],[data-coach-prompt],[data-conversation-subject],[data-word-leaf],.pinyin,[hidden],dialog:not([open])")) continue;
+      leaves.push(node);
+    }
+    for (const node of leaves) {
+      const wrapper = document.createElement("span");
+      wrapper.dataset.wordLeaf = "";
+      node.replaceWith(wrapper);
+      wrapper.append(node);
+      annotate(wrapper);
+    }
+  }
+  const observer = new MutationObserver(scan);
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["open", "hidden"] });
+  scan();
   document.addEventListener(
     "keydown",
     (e) => {
@@ -139,5 +173,10 @@ export function createWordHelp({ discover, speech }) {
   });
   for (const d of document.querySelectorAll("dialog"))
     d.addEventListener("close", hide);
-  return { annotate, hide };
+  async function showText(text, anchor) {
+    const words = (await tokens(text)).filter((w) => !w.punctuation);
+    if (words.length === 1) return show(words[0], anchor);
+    return show({ zh: text }, anchor);
+  }
+  return { annotate, hide, showText };
 }

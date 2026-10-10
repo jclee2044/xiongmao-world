@@ -1,4 +1,6 @@
 .env
+# Personal Home soundtrack; redistribution permission has not been verified.
+/public/assets/audio/hana-daria-semikina.mp3
 /data/
 node_modules/
 test-results/
@@ -16,3 +18,5 @@ tools/huggingface/
 
 tools/vits-icefall-zh-aishell3/
 tools/vits-zh-hf-fanchen-wnj/
+tools/kokoro-multi-lang-v1_1/
+__pycache__/

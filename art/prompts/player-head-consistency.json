@@ -1,0 +1,12 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "prompts": [
+    "Use case: precise-object-edit. Asset type: transparent watercolor game character walking sprite atlas. Input image 1 is the EDIT TARGET, the existing walking sheet; input image 2 is the idle sheet and is a REFERENCE for correct head size and exact identity. Fix only the oversized heads in ALL EIGHT walking sprites in image 1 so their head-to-body proportions match image 2 when full-body sprites are rendered at the same height. Reduce the heads including hair, faces and bun/bob by about 13 percent around the neck, making an invisible natural neck join. Preserve the face identity, open eyes, hairstyle, watercolor texture and edges. Keep every walking body, sweatshirt, green bag, ivory trousers, shoes, arm and leg pose, sprite center, foot baseline and transparent gutters unchanged. Exact same four-column by two-row layout, bun hairstyle on top, short bob on bottom. Preserve the four existing contact/pass/opposite contact/opposite pass poses. Keep the full body height essentially unchanged by a natural small neck adjustment if necessary, because the renderer normalizes height and must not undo the smaller head. Landscape atlas 1983 by 793 pixels matching the target. Genuine transparent alpha, no matte, shadows, background, text or added objects. This is a small proportion correction, not a redesign. The rendered head must be the same size whether idle or walking."
+  ],
+  "editTarget": "public/assets/characters/player-walk-v2.png",
+  "reference": "public/assets/characters/player-idle.png",
+  "source": "exec-ce8e96b3-3153-4406-96af-1c849a923b2b.png",
+  "destination": "public/assets/characters/player-walk-v2.png",
+  "optimized": "public/assets/optimized/player-walk-v2.webp",
+  "runtimeCorrection": "The generated face still differed from idle. public/game/render.js now composites the original idle head and neck into each cached walking pose at the idle sheet's exact scale. Head and body masks follow the actual collar silhouette, preserving the walking shoulders; neck anchors align the body with the idle head while keeping the feet on the same baseline. scripts/browser-character-consistency.js verifies the face pixels above the collar for both hairstyles, all four outfits, all four walking frames and both facing directions."
+}

@@ -43,7 +43,7 @@ export function validateState(s) {
     throw new Error("Invalid save position.");
   if (
     !Array.isArray(s.found) ||
-    s.found.some((id) => id !== "momo") ||
+    s.found.some((id) => !["momo", "fox-plush"].includes(id)) ||
     new Set(s.found).size !== s.found.length
   )
     throw new Error("Invalid discoveries.");

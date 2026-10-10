@@ -107,7 +107,7 @@ try {
       /\p{Script=Han}/u,
     );
     assert.equal(await page.locator("#npc-name").textContent(), npcs[id].name);
-    assert.equal(await page.locator("#neighbor-practice").isVisible(), true);
+    assert.ok(await page.locator("[data-npc-activity], #npc-quest, #directions-quest").count() > 0);
     await page.locator("#reply").fill("你今天忙吗？");
     await page.locator("#send").click();
     await page.waitForFunction(() =>

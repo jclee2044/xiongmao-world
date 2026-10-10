@@ -25,7 +25,7 @@ export function createDirections({
         : "饭店在湖的下面。跟着市场右边的石头路走。不要走进水里，要走桥啊。";
     openPanel(
       "问路",
-      `<p class="chinese" lang="zh-CN">${zh}</p><p>听Lin说怎么走，再去找饭店。可以看看地图，或者跟着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一次</button><button id="directions-go" class="primary">我去找找！</button></div>`,
+      `<p class="chinese" lang="zh-CN">${zh}</p><p>听小林说怎么走，再去找饭店。可以看看地图，或者跟着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一次</button><button id="directions-go" class="primary">我去找找！</button></div>`,
     );
     $("directions-listen").onclick = () => say(zh);
     $("directions-go").onclick = () => {
@@ -57,8 +57,8 @@ export function createDirections({
     if (a.directionsGive === "done") {
       const zh = "谢谢你！我知道怎么去书店了。";
       openPanel(
-        "帮Hao说怎么走",
-        `<p class="chinese">${zh}</p><p>✓ Hao知道怎么去书店了。</p>`,
+        "帮小好说怎么走",
+        `<p class="chinese">${zh}</p><p>✓ 小好知道怎么去书店了。</p>`,
       );
       say(zh);
       return;
@@ -68,8 +68,8 @@ export function createDirections({
     const step = steps[Math.min(1, a.directionsStep)],
       order = a.directionsStep ? [1, 0, 2] : [0, 2, 1];
     openPanel(
-      "帮Hao找书店",
-      `<p class="chinese">我想去书店。你能告诉我怎么走吗？</p><p>${a.directionsStep + 1} / 2 · 看看地图，帮Hao找路。</p><p class="chinese">${step.zh}</p><div id="direction-choices" class="direction-choices">${order.map((i) => `<button data-direction="${i}">${step.options[i]}</button>`).join("")}</div><p id="directions-feedback" role="status"></p><button id="directions-hint">问熊猫</button>`,
+      "帮小好找书店",
+      `<p class="chinese">我想去书店。你能告诉我怎么走吗？</p><p>${a.directionsStep + 1} / 2 · 看看地图，帮小好找路。</p><p class="chinese">${step.zh}</p><div id="direction-choices" class="direction-choices">${order.map((i) => `<button data-direction="${i}">${step.options[i]}</button>`).join("")}</div><p id="directions-feedback" role="status"></p><button id="directions-hint">问熊猫</button>`,
     );
     $("directions-hint").onclick = () => {
       $("directions-feedback").textContent = step.hint;
@@ -104,8 +104,8 @@ export function createDirections({
     if (a.flowerDirections === "done") {
       const zh = "谢谢你！先往右边走，过桥，再往右边走。花店在湖的上面。我知道了！";
       openPanel(
-        "帮Xiaoyu说怎么走",
-        `<p class="chinese" lang="zh-CN">${zh}</p><p>✓ Xiaoyu知道怎么去花店了。+40 XP</p>`,
+        "帮小雨说怎么走",
+        `<p class="chinese" lang="zh-CN">${zh}</p><p>✓ 小雨知道怎么去花店了。+40 XP</p>`,
       );
       sayFlower(zh);
       return;
@@ -136,7 +136,7 @@ export function createDirections({
     ];
     const step = steps[Math.min(1, a.flowerDirectionsStep)];
     openPanel(
-      "帮Xiaoyu找花店",
+      "帮小雨找花店",
       `<p class="chinese" lang="zh-CN">我在找花店。你能告诉我怎么走吗？</p><p>${a.flowerDirectionsStep + 1} / 2</p><p class="chinese" lang="zh-CN">${step.zh}</p><div id="flower-direction-choices" class="direction-choices">${step.options.map((text, i) => `<button data-direction="${i}">${text}</button>`).join("")}</div><p id="flower-directions-feedback" role="status"></p><button id="flower-directions-hint">问熊猫</button>`,
     );
     const hint = () => {

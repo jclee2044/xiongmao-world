@@ -1,9 +1,23 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { pinyin } from "pinyin-pro";
+import { pinyin, pronunciationFor } from "./pronunciation.js";
+import { needsPronunciationContext } from "../public/data/pronunciation.js";
 import { lexicon } from "../public/data/content.js";
 import { isBeginnerChinese } from "../public/data/language.js";
 let dictionary;
+const contextualDefinitions = {
+  "长:zhǎng": "to grow; to become bigger or older",
+  "只:zhī": "measure word for animals and some objects",
+  "得:de": "particle linking an action to how well or how much it is done",
+  "得:děi": "must; to have to",
+  "地:de": "particle linking a description to an action",
+  "觉:jiào": "sleep; a period of sleep",
+  "乐:yuè": "music",
+  "还:huán": "to return; to give back",
+  "种:zhòng": "to plant; to grow crops",
+  "行:háng": "a row; a line; a trade or business",
+  "重:chóng": "again; to repeat",
+};
 function load() {
   if (dictionary) return dictionary;
   dictionary = new Map();
@@ -25,6 +39,21 @@ function load() {
     }
   } catch {}
   for (const word of lexicon) dictionary.set(word.zh, word);
+  // Short, contextual definitions for common game words and proper names.
+  for (const [zh, pronunciation, meaning] of [
+    ["火锅", "huǒ guō", "hot pot; a shared pot of hot soup in which you cook food"],
+    ["橘子", "jú zi", "tangerine; mandarin orange"],
+    ["苏州", "sū zhōu", "Suzhou; a city in China"],
+    ["苏州博物馆", "sū zhōu bó wù guǎn", "Suzhou Museum"],
+    ["虎丘", "hǔ qiū", "Tiger Hill; a famous hill in Suzhou"],
+    ["画画", "huà huà", "to draw; to paint"],
+    ["小屋", "xiǎo wū", "a small house"],
+    ["故事书", "gù shi shū", "storybook"],
+    ["小说", "xiǎo shuō", "novel; a fictional story"],
+    ["红茶", "hóng chá", "black tea"],
+    ["蔬菜面", "shū cài miàn", "vegetable noodles"],
+    ["牛肉", "niú ròu", "beef"],
+  ]) dictionary.set(zh, { zh, pinyin: pronunciation, meaning });
   return dictionary;
 }
 export function defineText(text) {
@@ -32,6 +61,23 @@ export function defineText(text) {
     throw Error("Choose a short passage.");
   const d = load(),
     tokens = [];
+  const readings = pronunciationFor(text);
+  let position = 0;
+  const indexedReadings = readings.map((row) => {
+    const start = position;
+    position += row.origin.length;
+    return { ...row, start };
+  });
+  const contextual = (zh, start) => {
+    if (!needsPronunciationContext(zh)) return {};
+    const rows = indexedReadings.filter((row) => row.start >= start && row.start < start + zh.length);
+    const meaning = contextualDefinitions[`${zh}:${rows[0]?.pinyin}`];
+    return {
+      pinyin: rows.map((row) => row.pinyin || row.origin).join(" "),
+      context: { source: text, start },
+      ...(meaning ? { meaning } : {}),
+    };
+  };
   let i = 0;
   while (i < text.length) {
     const english = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*/.exec(text.slice(i));
@@ -52,6 +98,7 @@ export function defineText(text) {
           isBeginnerChinese(word) ? word : "(Chinese term)",
         ),
         pinyin: entry.pinyin || pinyin(entry.zh),
+        ...contextual(entry.zh, i),
       });
       i += entry.zh.length;
     } else {
@@ -63,6 +110,7 @@ export function defineText(text) {
           ? "No dictionary entry; this may be a name."
           : "",
         punctuation: !/[\p{Letter}\p{Number}]/u.test(zh),
+        ...contextual(zh, i),
       });
       i += zh.length;
     }

@@ -1,9 +1,14 @@
+import { mapDestinations } from "./interactions.js";
+import { activities } from "../data/activities.js";
+import { activityGuide } from "./activity-guide.js";
+import { goalCards } from "./goals.js";
+import { mountMap, mapMarkup } from "./map.js";
 import { isBeginnerChinese } from "../data/language.js";
 import { api } from "./persistence.js";
 import { shops } from "../data/shops.js";
 import { npcs } from "../data/content.js";
 import { validatePatch, parseCustomization } from "../data/settings.js";
-import { backgroundTrack, indoorTrack } from "./music.js";
+import { backgroundTrack, indoorTrack, homeTrack } from "./music.js";
 const $ = (id) => document.getElementById(id);
 const escape = (text) =>
   String(text).replace(
@@ -20,7 +25,11 @@ export function createPanels({
   applySettings,
   restoreWorld,
   getWorld,
-  navigate,
+  showMapWord,
+  openPractice,
+  browsePractice,
+  guideTo,
+  annotateWords,
 }) {
   let musicVolume = 0.15;
   function refreshMusicControls() {
@@ -35,20 +44,13 @@ export function createPanels({
   function map() {
     const world = getWorld(),
       scene = world.scene;
-    const stops = world
-      .destinations()
-      .filter(
-        (o) =>
-          !(o.id === "momo" && persistence.state.found.includes("momo")) &&
-          !(o.id === "momo-home" && !persistence.state.found.includes("momo")),
-      );
-    openPanel(
-      "地图",
-      `<svg class="district-map" viewBox="0 0 ${scene.width} ${scene.height}" role="img" aria-label="地图和你现在的地方"><rect width="100%" height="100%" fill="#eee1c4"/>${(scene.districts || []).map((d) => `<rect x="${d.x + 8}" y="${d.y + 8}" width="${d.w - 16}" height="${d.h - 16}" rx="70" fill="#ded2b3"/><text x="${d.x + d.w / 2}" y="${d.y + d.h / 2}" text-anchor="middle" fill="#64543b" font-size="110">${d.zh}</text>`).join("")}${(scene.canals || []).map((z) => `<polygon points="${z.polygon.map((p) => p.join(",")).join(" ")}" fill="#659b96"/>`).join("")}${(scene.bridges || []).map((b) => `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#ead9b6"/>`).join("")}${scene.landmark ? `<image href="/assets/optimized/canal-lane.webp" x="${scene.landmark.x}" y="${scene.landmark.y}" width="${scene.landmark.w}" height="${scene.landmark.h}"/>` : ""}<circle cx="${world.player.x}" cy="${world.player.y}" r="70" fill="#986748" stroke="#fff8eb" stroke-width="24"/></svg><p lang="zh-CN">想去哪里？</p><div class="map-stops">${stops.map((o) => `<button data-map-stop="${o.id}">${escape(o.name)}</button>`).join("")}</div>`,
+    const stops = mapDestinations(scene, world.destinations()).filter(
+      (o) =>
+        !(o.id === "momo" && persistence.state.found.includes("momo")) &&
+        !(o.id === "momo-home" && !persistence.state.found.includes("momo")),
     );
-    for (const button of document.querySelectorAll("[data-map-stop]"))
-      button.onclick = () =>
-        navigate(stops.find((o) => o.id === button.dataset.mapStop));
+    openPanel("地图", mapMarkup(scene, stops));
+    mountMap(world, persistence.state, stops, showMapWord);
   }
   function refreshHistory() {
     if ($("settings-history"))
@@ -56,7 +58,10 @@ export function createPanels({
         persistence.state.settingsHistory
           .slice(-5)
           .reverse()
-          .map((h) => `<li>${escape(/\p{Script=Han}/u.test(h.label) ? "Earlier settings change" : h.label)}</li>`)
+          .map(
+            (h) =>
+              `<li>${escape(/\p{Script=Han}/u.test(h.label) ? "Earlier settings change" : h.label)}</li>`,
+          )
           .join("") || "<li>No changes yet.</li>";
     if ($("pending-feedback"))
       $("pending-feedback").innerHTML =
@@ -85,39 +90,105 @@ export function createPanels({
     toast("Settings updated.");
   }
   function journalText(entry) {
-    if (!isBeginnerChinese(entry)) return "Earlier journal entry.";
-    if (entry === "Met Momo beside the canal and brought Momo home.")
-      return "在河边认识了Momo，带Momo回家了。";
-    const purchase = /^Bought (.+) at (.+) for ¥(\d+)\.$/.exec(entry);
+    if (
+      entry === "在河边认识了猫猫，带猫猫回家了。" ||
+      entry === "Met Momo beside the canal and brought Momo home."
+    )
+      return "Momo came home with you. You met Momo beside the canal.";
+    const purchase = /^在(.+)买了(.+)，花了(\d+)元。(.*)$/.exec(entry);
     if (purchase) {
-      const [, item, shop, price] = purchase;
-      return `在${shop.split(" · ")[0]}买了${item}，花了${price}元。`;
+      const item = Object.values(shops)
+        .flatMap((shop) => shop.items)
+        .find((item) => item.zh === purchase[2]);
+      if (item)
+        return `Bought ${item.en} for ¥${purchase[3]}. ${purchase[4]}`.trim();
     }
-    return entry;
+    return /\p{Script=Han}/u.test(entry) ? null : entry;
   }
-  function journal() {
+  function journal(tab = "next") {
+    if (typeof tab !== "string") tab = "next";
     const s = persistence.state;
-    const memories = Object.entries(s.memories)
-      .flatMap(([id, items]) =>
-        items.map((x) => `<li>${escape(npcs[id].name)}记得：${escape(x)}</li>`),
-      )
-      .join("");
-    openPanel(
-      "今天的Journal",
-      `<div class="panel-section"><h3>Canal journal</h3><p>${s.adventure.xp} / 500 XP</p><p lang="zh-CN">Lan的花：${{ new: "还没有问过Lan", accepted: "去河其他一边的石头找花", found: "把花还给Lan", done: "已经还给Lan了" }[s.adventure.flowers]}<br>和Qiao喝茶：${{ new: "请Qiao喝茶", invited: "Qiao正在去茶桌子的路上", seated: "Qiao在茶桌子等你", done: "一起喝过茶了" }[s.adventure.tea]}</p></div><div class="panel-section"><h3>今天的事情</h3>${s.journal.length ? "<ul>" + s.journal.map((x) => `<li>${escape(journalText(x))}</li>`).join("") + "</ul>" : "<p>Journal还是没有东西。去认识Mei，再去河边走走吧。</p>"}${memories ? `<ul>${memories}</ul>` : ""}</div><div class="panel-section"><h3>说说中文</h3><p lang="zh-CN">你今天忙吗？ · 我们一起喝茶吧。</p><p>问问邻居今天怎么样，或者请他们一起喝茶。</p><p>熊猫记得你在哪里看见过这些词。多说几次就好。可以在Settings里选择难一点或者简单一点，也可以现在问熊猫。</p></div><div class="panel-section"><h3>我的Journal</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry save</button><button id="export-save">Export journal</button></div>${persistence.conflict ? "<p class=\"notice\">Another device has a newer journal. Choose which save to use. New words and discoveries from both saves will be kept.</p><div class=\"small-actions\"><button id=\"use-server\">Use server save</button><button id=\"use-local\">Use this device’s save</button></div>" : ""}</div><div class="panel-section"><h3>Play on another device</h3><p>Open this game’s HTTPS address on your phone. Enter the code to share your journal. Codes expire after five minutes and can be used once.</p><button id="pair-code">Get a pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from another device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Connect</button></div></div>`,
+    const active = s.practice.active;
+    const recommended =
+      active?.id ||
+      activities.find((a) => !s.practice.completed.includes(a.id))?.id ||
+      "mei-order";
+    const guide = activityGuide(recommended, active);
+    const card = `<section class="journal-next"><small>${active ? "CONTINUE YOUR ACTIVITY" : "START HERE"}</small><h3>${escape(guide.english)}</h3><p>${escape(guide.next)}</p>${guide.next !== guide.how ? `<p>${escape(guide.how)}</p>` : ""}${guide.progress ? `<p>${escape(guide.progress)}</p>` : ""}<p><strong>Complete when:</strong> ${escape(guide.complete)}</p><button id="journal-start" class="primary">${active ? "Continue activity" : "Start practice"}</button><p class="muted">Practice does not spend coins or buy items.</p></section>`;
+    const goals = goalCards(s.adventure).filter((g) => g.target);
+    const words = s.adventure.vocabulary.filter(isBeginnerChinese);
+    const readable = s.journal.map(journalText).filter(Boolean).reverse();
+    const older = s.journal.filter((entry) => journalText(entry) === null);
+    const completed = activities.filter((a) =>
+      s.practice.completed.includes(a.id),
     );
+    const items = s.adventure.purchases
+      .map((id) =>
+        Object.values(shops)
+          .flatMap((shop) => shop.items)
+          .find((item) => item.id === id),
+      )
+      .filter(Boolean);
+    const list = (rows) =>
+      `<ul>${rows.map((x) => `<li>${escape(x)}</li>`).join("")}</ul>`;
+    const content =
+      tab === "next"
+        ? `${card}<p><button id="journal-browse">Browse all activities</button></p><details><summary>Explore town and help neighbors</summary><div class="activity-catalog">${goals.map((g) => `<button data-journal-goal="${escape(g.target)}"><strong>${escape(g.title)}</strong><span>${escape(g.detail)}</span><small>Show me where →</small></button>`).join("")}</div></details><p class="muted">Boat travel unlocks at 500 XP · ${s.adventure.xp} / 500 XP</p>`
+        : tab === "words"
+          ? `<h3>My words</h3><p>Tap a word to hear it and see its meaning and pinyin.</p>${words.length ? `<div class="journal-words">${words.map((word) => `<p class="journal-word" lang="zh-CN">${escape(word)}</p>`).join("")}</div>` : `<p>No words yet. Talk to someone and tap a Chinese word to discover it.</p><button id="journal-browse">Find an activity</button>`}`
+          : `<h3>Memories</h3><p>Your adventures are recorded here automatically. You do not need to write an entry.</p>${readable.length ? list(readable) : ""}${completed.length ? `<h3>Activities practiced</h3>${list(completed.map((a) => a.english))}` : ""}${s.adventure.met.length ? `<h3>People you have met</h3>${list(s.adventure.met.map((id) => npcs[id]?.identity?.split(",")[0] || npcs[id]?.name || id))}` : ""}${items.length ? `<h3>My belongings</h3>${list(items.map((item) => item.en))}` : ""}<p>Coins: ¥${s.adventure.coins}</p>${s.adventure.hungry === "done" ? "<p>You shared hotpot with Lian. Your sheep keepsake is waiting at home.</p>" : ""}${s.adventure.flowers === "done" ? "<p>You returned Lan’s missing flowers.</p>" : ""}${s.adventure.tea === "done" ? "<p>You shared tea with Qiao.</p>" : ""}${!readable.length && !completed.length && !s.adventure.met.length ? '<p>Your story starts with a conversation or activity.</p><button id="journal-browse">Choose an activity</button>' : ""}${older.length ? `<details><summary>Older memories · ${older.length}</summary><p>Original entries from your saved journal.</p>${list(older)}</details>` : ""}${
+              Object.keys(s.memories).length
+                ? `<details><summary>Conversation memories</summary>${Object.entries(
+                    s.memories,
+                  )
+                    .map(
+                      ([id, entries]) =>
+                        `<h4>${escape(npcs[id]?.name || id)}</h4>${list(entries)}`,
+                    )
+                    .join("")}</details>`
+                : ""
+            }`;
+    openPanel(
+      "Journal",
+      `<p>Choose something to do. Your progress is saved automatically.</p><nav class="journal-tabs" aria-label="Journal sections">${[
+        ["next", "What to do"],
+        ["words", "My words"],
+        ["memories", "Memories"],
+      ]
+        .map(
+          ([id, label]) =>
+            `<button data-journal-tab="${id}" aria-pressed="${tab === id}">${label}</button>`,
+        )
+        .join(
+          "",
+        )}</nav><div id="journal-section">${content}</div><p class="journal-save" role="status">${escape($("save-status").textContent)}${persistence.conflict ? " · A newer save needs your attention." : ""} <button id="journal-settings">${persistence.conflict ? "Resolve save conflict" : "Save and device settings"}</button></p>`,
+      "en",
+    );
+    for (const button of document.querySelectorAll("[data-journal-tab]"))
+      button.onclick = () => {
+        journal(button.dataset.journalTab);
+        document
+          .querySelector(`[data-journal-tab="${button.dataset.journalTab}"]`)
+          .focus();
+      };
+    if ($("journal-start"))
+      $("journal-start").onclick = () => openPractice(recommended);
+    if ($("journal-browse")) $("journal-browse").onclick = browsePractice;
+    for (const button of document.querySelectorAll("[data-journal-goal]"))
+      button.onclick = () => guideTo(button.dataset.journalGoal);
+    $("journal-settings").onclick = () => {
+      settings();
+      $("save-tools").open = true;
+      $("save-tools").scrollIntoView({ block: "start" });
+    };
+    for (const word of document.querySelectorAll(".journal-word"))
+      annotateWords(word);
+  }
+  function saveTools() {
+    const s = persistence.state;
     $("panel-content").insertAdjacentHTML(
-      "afterbegin",
-      `<div class="panel-section"><h3>新词</h3><p class="chinese">${s.adventure.vocabulary.filter(isBeginnerChinese).map(escape).join(" · ") || "还没有新词"}</p><h3>我的包</h3><p>${
-        s.adventure.purchases
-          .map(
-            (id) =>
-              Object.values(shops)
-                .flatMap((shop) => shop.items)
-                .find((item) => item.id === id)?.zh || "小礼物",
-          )
-          .join(" · ") || "包里还没有东西。"
-      } · ¥${s.adventure.coins}</p><p>和Lian吃hot pot： ${s.adventure.hungry === "done" ? "✓ 一起吃过饭了" : s.adventure.hungry === "new" ? "去市场找Lian" : "带Lian去饭店，一起吃hot pot。"}</p></div>`,
+      "beforeend",
+      `<details id="save-tools"><summary>Save and devices</summary><div class="panel-section"><h3>Save and devices</h3><p>${escape($("save-status").textContent)}</p><div class="small-actions"><button id="retry-save">Retry save</button><button id="export-save">Export save</button></div>${persistence.conflict ? '<p class="notice">Another device has a newer save. Choose which save to use. New words and discoveries from both saves will be kept.</p><div class="small-actions"><button id="use-server">Use server save</button><button id="use-local">Use this device’s save</button></div>' : ""}</div><div class="panel-section"><h3>Play on another device</h3><p>Open this game’s HTTPS address on your phone. Enter the code to share your progress. Codes expire after five minutes and can be used once.</p><button id="pair-code">Get a pairing code</button><p id="code-output"></p><label for="pair-input">Or enter a code from another device</label><div class="reply-row"><input id="pair-input" maxlength="10" autocomplete="off"><button id="pair-submit">Connect</button></div></div></details>`,
     );
     $("retry-save").onclick = () => persistence.flush();
     $("export-save").onclick = () => {
@@ -139,7 +210,8 @@ export function createPanels({
           try {
             await persistence.choose(source);
             restoreWorld();
-            journal();
+            settings();
+            $("save-tools").open = true;
           } catch (e) {
             toast(e.message);
           }
@@ -148,9 +220,12 @@ export function createPanels({
       try {
         await persistence.flush();
         if (persistence.conflict)
-          throw new Error("请先选择好要用哪本Journal，再Connect。");
+          throw new Error(
+            "Choose which save to use before connecting another device.",
+          );
         const result = await api("/api/pair-code", {});
-        $("code-output").textContent = `${result.code} · Valid for five minutes`;
+        $("code-output").textContent =
+          `${result.code} · Valid for five minutes`;
       } catch (e) {
         toast(e.message);
       }
@@ -213,7 +288,10 @@ export function createPanels({
         persistence.state.settingsHistory
           .slice(-5)
           .reverse()
-          .map((h) => `<li>${escape(/\p{Script=Han}/u.test(h.label) ? "Earlier settings change" : h.label)}</li>`)
+          .map(
+            (h) =>
+              `<li>${escape(/\p{Script=Han}/u.test(h.label) ? "Earlier settings change" : h.label)}</li>`,
+          )
           .join("") || "<li>No changes yet.</li>"
       }</ul><h3>Saved ideas</h3><ul id="pending-feedback">${
         persistence.state.feedback
@@ -224,9 +302,10 @@ export function createPanels({
       }</ul><p>New maps, artwork, and game features cannot be changed here yet. Your ideas will be saved.</p></div>`,
       "en",
     );
+    saveTools();
     const credit = document.createElement("details");
     credit.className = "muted";
-    credit.innerHTML = `<summary>Music credits</summary><p>Outdoors： <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Indoors： <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor music)。</p>`;
+    credit.innerHTML = `<summary>Music credits</summary><p>Home： <a href="${homeTrack.source}" target="_blank" rel="noopener">${homeTrack.title}</a> — composed by ${homeTrack.composer}, guitar by ${homeTrack.artist}. Outdoors： <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Other indoor rooms： <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor music)。</p>`;
     $("music-volume").after(credit);
     for (const select of document.querySelectorAll("[data-setting]"))
       select.onchange = () => {
@@ -272,7 +351,8 @@ export function createPanels({
           });
           state.feedback = state.feedback.slice(-40);
         });
-        $("custom-result").textContent = "Idea saved. The game has not changed yet.";
+        $("custom-result").textContent =
+          "Idea saved. The game has not changed yet.";
         refreshHistory();
       } else {
         applyPatch(parsed.patch, text);

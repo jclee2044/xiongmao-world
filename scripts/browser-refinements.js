@@ -114,12 +114,12 @@ try {
   await page.locator("#coach-question").fill("Why is 吗 at the end?");
   await page.click("#coach-send");
   await page.waitForFunction(() =>
-    document.querySelector("#coach-tip").textContent.includes("句子后面加“吗”"),
+    document.querySelector("#coach-tip").textContent.includes("yes/no question"),
   );
   assert.ok((await page.locator(".coach-portrait").boundingBox()).width <= 130);
   await page.waitForTimeout(400);
   await page.screenshot({ path: "test-results/refined-panda-coach.png" });
-  await page.click('[data-close="panda-coach"]');
+  await page.locator('[data-close="panda-coach"]').first().click();
   assert.equal(
     await page.locator("#conversation").evaluate((e) => e.open),
     true,

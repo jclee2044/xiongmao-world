@@ -1,0 +1,11 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Use case: stylized-concept. Generate ONE complete transparent game sprite of a traditional Suzhou clothing boutique. The attached storefront sprite sheet is ONLY a style, camera and scale reference; create a new standalone shop, not a sheet. Match its cozy detailed hand-painted watercolor/gouache illustration, gray curved tiled roof, warm timber framing, ivory plaster, gentle warm window light, subtle flowering vines, and elevated three-quarter view showing the front and right side. A substantial two-story freestanding shop comparable in overall height and width to the reference bakery/bookshop, not a small stall. Make it unmistakably a CLOTHING shop: large front display windows with clearly visible cream linen shirts, indigo jackets and muted rose dresses on hangers, folded colorful textiles; central open doorway with dark interior and stone threshold, open wooden shutters. Clothing should be prominent and readable at game sprite size. Integrate an elegant small cream fabric shop banner with the exact Chinese text 衣服店 into the actual architecture above the entrance, not a floating brown rectangle or overlay. Roof, clothing windows, door and steps form one cohesive illustrated building. Two warm lanterns and modest potted flowers. Entire sprite fully visible with small transparent margin around every edge, centered, bottom step at horizontal center, front/right isometric orientation matching reference. True transparent alpha background, no ground plane or surrounding landscape, no people, animals, UI, additional text, logos, collage or multiple buildings.",
+  "reference_images": [
+    "public/assets/world/storefronts.webp"
+  ],
+  "transparent_background": true,
+  "original": "/home/jlrj/.codex/generated_images/01a12663-9f77-74d1-98a5-1d72af9fa0fb/exec-f17c1b67-41c4-4f8f-b837-9787bc8ba5f6.png",
+  "asset": "public/assets/world/clothing-store-exterior.png",
+  "optimized": "public/assets/optimized/clothing-store-exterior.webp"
+}

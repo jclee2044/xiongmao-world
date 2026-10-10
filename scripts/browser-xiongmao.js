@@ -89,7 +89,7 @@ await page.waitForFunction(
 );
 assert.equal(await page.locator("#npc-name").innerText(), "莲");
 assert.ok(await page.locator("#npc-meaning").isHidden());
-assert.ok(await page.locator("#npc-pinyin").isHidden());
+assert.equal(await page.locator("#npc-zh").getAttribute("data-pinyin"), "false");
 await page.locator("#npc-zh .help-word").first().waitFor();
 await page.locator("#npc-zh .help-word").first().click();
 await page.waitForFunction(() =>

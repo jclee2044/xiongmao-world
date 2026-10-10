@@ -75,6 +75,10 @@ async function openSeller(page) {
 }
 try {
   let page = await seed("shanghai", { x: door.x, y: door.y });
+  await screenshot(page, "clothing-store-exterior");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await screenshot(page, "clothing-store-exterior-mobile");
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.locator("#world").focus();
   await page.keyboard.press("Space");
   await page.waitForFunction(

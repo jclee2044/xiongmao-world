@@ -1,4 +1,5 @@
 import { townRooms, homeObjects } from "../data/town-rooms.js";
+import { collectibleAvailable } from "./collectibles.js";
 import { validateAdventure } from "../data/adventure.js";
 import { integrateMarket } from "../data/market-integration.js";
 import { expandTown, widenWestBank, westBankX } from "../data/town-layout.js";
@@ -49,7 +50,7 @@ const bridge = [
 const houses = [
   [470, 810, 580, "小家"],
   [3550, 2785, 400, "宾馆"],
-  [2040, 2780, 640, "Silk workshop"],
+  [2040, 2780, 640, "画画小屋"],
 ].map(([x, y, w, label]) => ({
   type: "house",
   x,
@@ -78,9 +79,9 @@ const storefronts = [
   };
 });
 const landmarks = [
-  [1710, 2360, 460, "pagoda", "Tiger Hill"],
-  [2960, 2830, 530, "museum", "Museum"],
-  [3080, 2090, 300, "moon-gate", "Moon gate"],
+  [1710, 2360, 460, "pagoda", "虎丘"],
+  [2960, 2830, 530, "museum", "博物馆"],
+  [3080, 2090, 300, "moon-gate", "门"],
   [3510, 2270, 210, "rockery", "石头"],
 ].map(([x, y, h, landmark, label]) => {
   const source = artBounds.landmarks?.[landmark] || {
@@ -359,19 +360,19 @@ const smallScenery = [
   { type: "planter", x: 2990, y: 2130, h: 105, flowers: true },
   { type: "planter", x: 1800, y: 3050, h: 105, flowers: true },
   { type: "planter", x: 3170, y: 3080, h: 105, flowers: true },
-  { type: "sign", x: 2070, y: 1150, h: 130, label: "书店旁边 ↑" },
-  { type: "sign", x: 2330, y: 2110, h: 130, label: "公园 →" },
+  { type: "sign", x: 2070, y: 1150, h: 130, label: "书店旁边↑" },
+  { type: "sign", x: 2330, y: 2110, h: 130, label: "公园→" },
 ].map((o) => {
   const source = artBounds.props[o.type];
   return { ...o, w: Math.round((o.h * source.w) / source.h) };
 });
 const newNeighbors = [
-  ["qiao", "Qiao", 1360, 900, "tea"],
-  ["bo", "Bo", 2330, 900, "books"],
-  ["lan", "Lan", 3380, 900, "flowers"],
+  ["qiao", "小乔", 1360, 900, "tea"],
+  ["bo", "小博", 2330, 900, "books"],
+  ["lan", "小兰", 3380, 900, "flowers"],
   ["wei", "Wei", 1540, 1880, "fruit"],
-  ["an", "An", 2750, 2200, "art"],
-  ["hao", "Hao", 2940, 2930, "directions"],
+  ["an", "小安", 2750, 2200, "art"],
+  ["hao", "小好", 2940, 2930, "directions"],
 ].map(([id, name, x, y, topic]) => ({
   id,
   name,
@@ -402,8 +403,8 @@ export const scenes = {
   // Keep the saved scene identifier so existing journals and sessions survive.
   shanghai: {
     id: "shanghai",
-    title: "Suzhou · 河边",
-    chinese: "Suzhou · 河边",
+    title: "苏州·河边",
+    chinese: "苏州·河边",
     width: 4000,
     height: 3300,
     spawn: { x: 590, y: landmark.y + 720 },
@@ -470,13 +471,13 @@ export const scenes = {
       { name: "花店旁边", zh: "花店旁边", x: 3000, y: 0, w: 1000, h: 1040 },
       { name: "市场", zh: "市场", x: 0, y: 1040, w: 2100, h: 1006 },
       { name: "花园", zh: "花园", x: 2100, y: 1040, w: 1900, h: 1300 },
-      { name: "Lantern Street", zh: "Lantern street", x: 1254, y: 2340, w: 2746, h: 960 },
+      { name: "河边的灯", zh: "河边的灯", x: 1254, y: 2340, w: 2746, h: 960 },
     ],
     interactables: [
       {
         id: "mei",
         type: "npc",
-        name: "Mei",
+        name: "小美",
         x: 1010,
         y: landmark.y + 685,
         artX: 1070,
@@ -487,7 +488,7 @@ export const scenes = {
       {
         id: "lin",
         type: "npc",
-        name: "Lin",
+        name: "小林",
         x: 1155,
         y: landmark.y + 932,
         artHeight: 260,
@@ -498,7 +499,7 @@ export const scenes = {
       {
         id: "yun",
         type: "npc",
-        name: "Yun 奶奶",
+        name: "云奶奶",
         x: 387,
         y: landmark.y + 346,
         artHeight: 230,
@@ -517,7 +518,8 @@ export const scenes = {
       {
         id: "momo",
         type: "stuffy",
-        name: "Momo",
+        concealed: true,
+        name: "树旁边",
         x: 756,
         y: landmark.y + 825,
       },
@@ -570,7 +572,7 @@ export const scenes = {
         y: 1725,
         zh: "我想买一点蛋糕。",
         pinyin: "wǒ xiǎng mǎi yì diǎn dàn gāo 。",
-        meaning: "I’d like to buy some pastries.",
+        meaning: "I’d like to buy some cake.",
       },
       {
         id: "garden",
@@ -580,13 +582,13 @@ export const scenes = {
         y: 2210,
         zh: "我们去公园走走吧。",
         pinyin: "wǒ men qù gōng yuán zǒu zǒu ba 。",
-        meaning: "Let’s go for a walk in the garden.",
+        meaning: "Let’s go for a walk in the park.",
       },
       {
         id: "fabric",
         type: "practice",
         activity: "silk-workshop",
-        name: "Silk workshop",
+        name: "画画小屋",
         x: 2040,
         y: 2855,
         zh: "我喜欢这个颜色。",
@@ -622,7 +624,7 @@ export const scenes = {
       {
         id: "tea-table",
         type: "inspect",
-        name: "Tea courtyard",
+        name: "Tea 花园",
         x: 1760,
         y: 1180,
         zh: "我们坐下来喝茶吧。",
@@ -632,12 +634,12 @@ export const scenes = {
       {
         id: "well",
         type: "inspect",
-        name: "well",
+        name: "小湖",
         x: 1850,
         y: 1325,
-        zh: "这是一个很老的well。",
-        pinyin: "zhè shì yí gè hěn lǎo de well。",
-        meaning: "This is a very old well.",
+        zh: "这是一个很老的小湖。",
+        pinyin: "zhè shì yí gè hěn lǎo de xiǎo hú 。",
+        meaning: "This is a very old little lake.",
       },
       {
         id: "garden-bench",
@@ -655,9 +657,9 @@ export const scenes = {
         name: "Dumpling stall",
         x: 1660,
         y: 1775,
-        zh: "我想吃一盘dumplings。",
-        pinyin: "wǒ xiǎng chī yì pán dumplings。",
-        meaning: "I'd like a plate of dumplings.",
+        zh: "我想吃一碗米饭。",
+        pinyin: "wǒ xiǎng chī yì wǎn mǐ fàn 。",
+        meaning: "I would like a bowl of rice.",
       },
       {
         id: "lake",
@@ -665,20 +667,20 @@ export const scenes = {
         name: "湖旁边",
         x: 2320,
         y: 1720,
-        zh: "我们跟着湖旁边慢慢走。",
-        pinyin: "wǒ men gēn zhe hú páng biān màn màn zǒu 。",
+        zh: "我们在湖边慢慢走吧。",
+        pinyin: "wǒ men zài hú biān màn màn zǒu ba 。",
         meaning: "Let's walk slowly along the lake.",
       },
       {
         id: "tiger-hill",
         type: "inspect",
         culture: "tiger-hill",
-        name: "Tiger Hill",
+        name: "虎丘",
         x: 1710,
         y: 2440,
-        zh: "这是Tiger Hill。你喜欢吗？",
-        pinyin: "zhè shì Tiger Hill。 nǐ xǐ huan ma ？",
-        meaning: "This pagoda reminds me of Tiger Hill.",
+        zh: "这是虎丘。你喜欢吗？",
+        pinyin: "zhè shì hǔ qiū 。 nǐ xǐ huan ma ？",
+        meaning: "This is Tiger Hill. Do you like it?",
       },
       {
         id: "classical-garden",
@@ -687,30 +689,30 @@ export const scenes = {
         name: "公园",
         x: 3080,
         y: 2160,
-        zh: "我们从Moon gate走进公园吧。",
-        pinyin: "wǒ men cóng Moon gate zǒu jìn gōng yuán ba 。",
-        meaning: "Let's enter the garden through the moon gate.",
+        zh: "我们从门走进公园吧。",
+        pinyin: "wǒ men cóng mén zǒu jìn gōng yuán ba 。",
+        meaning: "Let us walk through the gate into the park.",
       },
       {
         id: "suzhou-museum",
         type: "inspect",
         culture: "suzhou-museum",
-        name: "Suzhou Museum",
+        name: "苏州博物馆",
         x: 3200,
         y: 2915,
-        zh: "我们一起看看Suzhou的故事吧。",
-        pinyin: "wǒ men yì qǐ kàn kàn Suzhou de gù shì ba 。",
+        zh: "我们一起看看苏州的故事吧。",
+        pinyin: "wǒ men yì qǐ kàn kàn sū zhōu de gù shi ba 。",
         meaning: "Let's explore Suzhou's stories together.",
       },
       {
         id: "pingjiang",
         type: "inspect",
         culture: "pingjiang",
-        name: "PingjiangCanal lane",
+        name: "平江路",
         x: 515,
         y: landmark.y + 650,
-        zh: "我们跟着河边走一走。",
-        pinyin: "wǒ men gēn zhe hé biān zǒu yi zǒu 。",
+        zh: "我们在河边走一走吧。",
+        pinyin: "wǒ men zài hé biān zǒu yi zǒu ba 。",
         meaning: "Let's take a walk beside the canal.",
       },
       {
@@ -728,24 +730,24 @@ export const scenes = {
         id: "lake-duck",
         type: "animal",
         animal: "duck",
-        name: "duck",
+        name: "鸭子",
         x: 3550,
         y: 1470,
         approachX: 3590,
         approachY: 1480,
-        zh: "duck在水里游泳。",
-        pinyin: "duck zài shuǐ lǐ yóu yǒng 。",
+        zh: "鸭子在水里游泳。",
+        pinyin: "yā zi zài shuǐ lǐ yóu yǒng 。",
         meaning: "The duck is swimming in the water.",
       },
       {
         id: "garden-rabbit",
         type: "animal",
         animal: "rabbit",
-        name: "rabbit",
+        name: "兔子",
         x: 1650,
         y: 2190,
-        zh: "rabbit在竹林旁边。",
-        pinyin: "rabbit zài zhú lín páng biān 。",
+        zh: "兔子在竹林旁边。",
+        pinyin: "tù zi zài zhú lín páng biān 。",
         meaning: "The rabbit is beside the bamboo grove.",
       },
       ...newNeighbors,
@@ -787,7 +789,7 @@ export const scenes = {
   },
   home: {
     id: "home",
-    title: "Home",
+    title: "小家",
     chinese: "小家",
     width: 1200,
     height: 800,
@@ -895,11 +897,12 @@ export const scenes = {
       {
         id: "journal",
         type: "journal",
-        name: "travelJournal",
+        name: "我的故事",
         x: 596,
         y: 418,
       },
-      { id: "momo-home", type: "friend", name: "Momo", x: 940, y: 520 },
+      { id: "momo-home", collectible: "momo", type: "friend", name: "小熊", x: 940, y: 520 },
+      { id: "fox-plush-home", collectible: "fox-plush", type: "friend", name: "小狐狸", x: 855, y: 520 },
     ],
   },
   ...interiors,
@@ -1016,14 +1019,14 @@ scenes.home.interactables.push(...homeObjects, {
   id: "sheep-keepsake",
   hitRect: { x: 775, y: 408, w: 65, h: 70 },
   type: "inspect",
-  name: "sheep",
+  name: "羊",
   x: 805,
   y: 475,
   approachX: 800,
   approachY: 555,
-  zh: "这是Lian送我的sheep。我们一起吃了hot pot。谢谢你，Lian！",
+  zh: "这是小莲送我的羊。我们一起吃了火锅。谢谢你，小莲！",
   pinyin:
-    "zhè shì Lian sòng wǒ de sheep。 wǒ men yì qǐ chī le hot pot。 xiè xiè nǐ ，Lian！",
+    "zhè shì xiǎo lián sòng wǒ de yáng 。 wǒ men yì qǐ chī le huǒ guō 。 xiè xiè nǐ ， xiǎo lián ！",
   meaning:
     "A stuffed sheep from Lian, earned by treating her to hotpot. A memory of our first meal together.",
 });
@@ -1178,7 +1181,7 @@ export function move(scene, position, dx, dy) {
 export function nearest(scene, position, found = false) {
   return scene.interactables
     .filter(
-      (o) => !(o.id === "momo" && found) && !(o.id === "momo-home" && !found),
+      (o) => collectibleAvailable(scene, o, found, position),
     )
     .map((o) => ({
       ...o,

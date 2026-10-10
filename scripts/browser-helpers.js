@@ -19,7 +19,7 @@ export async function walkToStop(page, id) {
     scene.interactables.find((o) => o.id === id),
   );
   await page.getByRole("button", { name: "地图", exact: true }).click();
-  await page.locator(`[data-map-stop="${id}"]`).click();
+  await page.locator(`[data-map-stop="${id}"]`).last().click();
   await page.waitForFunction(
     ({ x, y }) => {
       const c = document.getElementById("world");

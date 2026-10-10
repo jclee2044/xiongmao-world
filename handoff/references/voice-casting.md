@@ -1,33 +1,28 @@
-# Four Mandarin character voices
+# Mandarin character voices
 
-The approved baseline is commit `9d54479`. The new cast keeps its native female voice selection / AISHELL3 speaker 0 fallback for younger women and its WNJ male voice for older men. No pitch shifting, new model downloads, remote inference, or save-schema changes.
+The user approved the Kokoro male auditions, female auditions zf_001 and zf_026, and Panda audition A on 2026-10-10. Every NPC has a fixed voice. Source speaker gender follows the [official sherpa speaker mapping](https://k2-fsa.github.io/sherpa/onnx/tts/all/Chinese-English/kokoro-multi-lang-v1_1.html); age placement is a casting judgment based on the rendered characters, not a source age guarantee.
 
-## Research and candidates
+| Speaker | Index | NPCs |
+| --- | --- | --- |
+| Kokoro zf_001 | 3 | Mei, Lan, An, Lian, museum guide, clothing seller, snack seller, visitors 1 and 3 |
+| Kokoro zf_026 | 17 | Qiao, Suyin, diner Xiao Tao, rock gardener Shulan |
+| Kokoro zm_009 | 58 | Lin |
+| Kokoro zm_014 | 63 | Hao |
+| Kokoro zm_020 | 66 | Diner A Le |
+| Kokoro zm_055 | 81 | Young reader, clothing customer |
+| Kokoro zm_068 | 91 | Bamboo worker Zhusheng |
+| WNJ | 0 | Bo, waiter, visitors 0 and 4 |
+| Kokoro zm_015 | 64 | Wei, gardener, visitor 2, courtyard caretaker |
+| AISHELL3 SSB0354 | 38 | Grandma Yun, baker Gui, embroidery artisan, weaving visitor 5 |
+| AISHELL3 SSB0966 | 107 | Child Xiaodou |
+| Native female / AISHELL3 SSB0005 | 0 | Child Xiaomi |
 
-The [sherpa model documentation](https://k2-fsa.github.io/sherpa/onnx/tts/pretrained_models/vits.html#aishell3-chinese-multi-speaker-174-speakers) describes 174 selectable AISHELL3 speakers. The [publisher's speaker metadata](https://huggingface.co/datasets/AISHELL/AISHELL-3/blob/main/spk-info.txt) defines group B as 14–25 and D as over 41. These are broad source age groups, not a guarantee of perceived age. Speaker indices come from the installed model's `speakers.txt`, not the publisher's file order.
+The eight older male identities stay evenly split, four per voice. The reader uses Bo's older portrait in the restaurant and silk studio and takes the WNJ voice there. Other shared sprites do not overwrite a person's voice: the diner, clothing customer and children retain their own assignments. Normal/slow replay and host-led practice use the same cast; word-help pronunciation can choose from the NPC profiles.
 
-| Cast | Source | Model index | Selection |
-| --- | --- | --- | --- |
-| Young woman | Existing native female voice, else SSB0005 (B, female) | 0 | Preserved approved voice |
-| Young man | SSB0966 (B, male) | 107 | New distinct speaker |
-| Older woman | SSB0354 (D, female) | 38 | New distinct speaker |
-| Older man | Existing WNJ male | 0 | Preserved approved voice, user's age casting |
+The AISHELL3 SSB0354 older female voice uses gain 3.2 (twice its previous 1.6 gain), including baker Gui at the breakfast shop. Synthesis caps peaks at 0.95 to preserve headroom; both normal and slow playback use the same gain.
 
-Local Whisper/base transcription screened 14 candidates on the same greeting, two questions and invitation. SSB0966 and SSB0354 retained the question wording better than the alternatives tested. Recognition still confuses 你/您 and some endings; this is only an intelligibility screen, not listening approval or proof of pronunciation accuracy. Perceived age and naturalness need user testing. Normal/slow playback retains the existing punctuation normalization, trailing-silence trim and final fade.
+Kokoro shares the installed `tools/asr-venv` runtime and `tools/kokoro-multi-lang-v1_1` model. Additional speaker IDs do not install additional models. Preserve the bundled Apache-2.0 license. Contextual pinyin decisions are translated to numeric tone tokens and temporary Hanzi keys; model weights and the original lexicon remain unchanged. A new line still incurs CPU synthesis latency. Browser decoding and ASR checks test playback/intelligibility, not all Mandarin tones or perceived age.
 
-## Appearance assignments
+Panda's separate profile uses zm_009 plus the exact audition A effects; see [Panda voice](panda-voice.md).
 
-Reviewed the actual character atlases and their art prompts. No character art changes.
-
-- Young woman: Mei, Lan, An, Lian, museum guide, clothing seller, snack seller, visitors 1 and 3, Xiaomi.
-- Young man: Lin, Hao, young reader, clothing customer, diner A Le, Xiaodou.
-- Older woman: Grandma Yun, baker Gui, embroidery artisan, Qiao, Suyin, diner Xiao Tao, weaving visitor 5.
-- Older man: Bo, Wei, gardener, waiter, visitors 0, 2 and 4.
-
-The children share the younger profiles to keep exactly four voice categories. Mature, nongray adults are casting judgments. Visitor 0's gray-haired sprite takes precedence over his student description. The reader uses a young sprite in the museum/bookshop but Bo's older sprite in the silk studio and the painted restaurant: conversation/replay follows the clicked appearance. Practice uses the host's canonical cast.
-
-## Rollback
-
-For an immediate voice-only rollback, set `CHARACTER_VOICES_ENABLED = false` in `public/data/voices.js`, bump `CACHE` in `public/sw.js`, then restart `panda-world.service`. The browser and server collapse all four profile IDs back to the approved female/male voices. Tests exercise this mapping. No saved progress is changed.
-
-The implementation is committed separately so it can also be reverted independently of other game work. Do not reset the whole repository to the baseline: other changes may coexist. A full revert also needs a fresh service-worker cache version and server restart so installed phone clients receive it.
+For a voice-only rollback, set `CHARACTER_VOICES_ENABLED = false` in `public/data/voices.js`, bump the service-worker cache, then restart `panda-world.service`. All NPC IDs map back to the existing female/male baseline. Panda keeps his selected voice. No save schema changes are needed; do not reset unrelated game work.

@@ -1,5 +1,20 @@
 # Music attribution
 
+## Personal Home recording
+
+**花 / Hana (Flower)** — composed by **Masaaki Kishibe**, performed on guitar by **Daria Semikina**.
+
+- Selected performance: https://www.youtube.com/watch?v=-KrlR5UM6dI
+- Local file: `hana-daria-semikina.mp3` (excluded from source control).
+- Duration: 201.37 seconds; 48 kHz stereo MP3, approximately 120 kbps.
+- Retrieved on: 2026-10-10 from the performer's published YouTube video.
+- Changes: converted the audio to MP3, removed the first 0.6 seconds of quiet lead-in, and added composer, performer and source metadata; no arrangement, pitch or tempo changes. The first guitar attack is preserved and begins about 0.017 seconds into the local file.
+- SHA-256: `4d4e45dbbae3e9066691b391f53407aec013d1130e5bd405d43c2764bf7e22fb`
+
+Selected by the user for their local Home soundtrack. No game-use or redistribution license has been verified for the composition or recording; this is not a royalty-free asset. Obtain appropriate permission before distributing it. Home loops this recording, quiets it during speech and pauses it when the page is hidden. It is cached for this installation's offline use when present; an installation without the file uses the procedural fallback.
+
+## Other indoor rooms
+
 **Asian Music – Magical Dream — Sonican**
 
 - Track and authorized download: https://pixabay.com/music/china-asian-music-magical-dream-321895/
@@ -9,7 +24,7 @@
 - Downloaded on: 2026-10-06 from Pixabay's published CDN URL: https://cdn.pixabay.com/download/audio/2025/04/02/audio_84a4440c17.mp3?filename=sonican-asian-music-magical-dream-321895.mp3
 - SHA-256: `7f8404dbafe5de1ff1db11b30080ce774e4e7b5cc8aecf32a9e241739abce320`
 
-This is the indoor recording selected by the user. Credit is shown in Settings even though Pixabay does not require attribution. The track page labels it Content ID registered; retain the source and license record when publishing gameplay videos.
+This is the recording for indoor rooms other than Home. Credit is shown in Settings even though Pixabay does not require attribution. The track page labels it Content ID registered; retain the source and license record when publishing gameplay videos.
 
 ## Outdoor recording
 

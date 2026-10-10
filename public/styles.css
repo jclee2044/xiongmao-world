@@ -11,6 +11,8 @@
 }
 * {
   box-sizing: border-box;
+  /* Keep touch scrolling, but do not turn taps or pinches into page zoom. */
+  touch-action: pan-x pan-y;
 }
 body {
   margin: 0;
@@ -128,6 +130,11 @@ button:hover {
   font-size: 20px;
   padding: 8px 13px;
 }
+.map-button-icon {
+  width: 28px;
+  height: 28px;
+  vertical-align: middle;
+}
 .topbar nav span {
   font:
     12px system-ui,
@@ -148,6 +155,9 @@ canvas {
   width: 100%;
   height: 100%;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   outline-offset: -5px !important;
 }
 .scene-note {
@@ -1673,22 +1683,28 @@ dialog .primary {
   animation: word-arrives 0.35s ease-out;
 }
 
-/* Panda remains in the dialogue foreground; the coach opens above it. */
+/* Keep Panda beside the other dialogue controls. */
 #foreground-panda {
-  float: right;
-  border: 0;
-  background: #fff3da;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 8px 12px;
-  border-radius: 30px;
-  padding: 5px 12px 5px 4px;
+  gap: 7px;
+  background: #fff3da;
 }
 #foreground-panda img {
-  width: 60px;
-  height: 60px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
+}
+#coach-presets {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+#coach-presets button {
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  min-height: 44px;
 }
 #coach-form {
   margin-top: 18px;
@@ -1708,6 +1724,42 @@ dialog .primary {
   font-size: 13px;
   color: #76634f;
   min-height: 1em;
+}
+#conversation-feedback {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid #c8b993;
+  border-radius: 16px;
+  background: #f3efd9;
+  overflow-wrap: anywhere;
+}
+.feedback-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.feedback-heading img {
+  flex: 0 0 36px;
+  object-fit: contain;
+}
+#feedback-dismiss {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 24px;
+}
+#feedback-explanation {
+  line-height: 1.55;
+  margin: 8px 0;
+}
+#feedback-zh {
+  font-size: clamp(20px, 3vw, 28px);
+  margin: 12px 0;
 }
 #panel.seated-panel::backdrop,
 #panel:has(.hotpot-view)::backdrop {
@@ -1874,8 +1926,16 @@ dialog .primary {
 }
 
 .coach-bubble {
-  max-height: calc(100dvh - 160px);
+  max-height: min(calc(80dvh - 64px), calc(100dvh - 180px));
   overflow: auto;
+}
+@media (max-height: 500px) {
+  .coach-portrait {
+    width: 70px;
+    height: 70px;
+    top: -24px;
+    left: 12px;
+  }
 }
 
 .departure-portrait {
@@ -2019,4 +2079,168 @@ dialog .primary {
     user-select: none !important;
     -webkit-touch-callout: none;
   }
+}
+
+#panel:has(.map-atlas) {
+  width: min(940px, calc(100vw - 28px));
+}
+.map-caption { margin-top: 0; }
+.map-picture {
+  position: relative;
+  width: 100%;
+  max-height: 62dvh;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid #c8b48e;
+  border-radius: 15px;
+  background: #e9d7b5;
+}
+.map-picture .district-map { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; }
+.map-markers { position: absolute; inset: 0; pointer-events: none; }
+.map-pin, .map-you {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.map-markers .map-pin {
+  pointer-events: auto;
+  width: 25px; height: 25px; min-height: 0;
+  padding: 0; border: 2px solid #fff9e9;
+  background: #315f5b; color: white;
+  font: 700 11px system-ui;
+  box-shadow: 0 1px 5px #263d3866;
+}
+.map-pin:hover, .map-pin:focus-visible { z-index: 2; scale: 1.25; }
+.map-you, .map-you-key {
+  width: 15px; height: 15px; background: #c75c35;
+  border: 3px solid white; box-shadow: 0 0 0 2px #c75c35;
+}
+.map-you { pointer-events: none; z-index: 3; }
+.map-legend { display: flex; align-items: center; gap: 10px; font-size: .85rem; }
+.map-you-key { display: inline-block; border-radius: 50%; }
+.map-place-key, .map-number { background: #315f5b; color: white; border-radius: 50%; padding: 2px 7px; font: 700 12px system-ui; }
+.map-place-key { margin-left: 12px; }
+.map-stops button { text-align: left; }
+.map-stops button[hidden], #map-status:empty { display: none; }
+.map-marker-toggle { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; font-size: .85rem; }
+.map-marker-toggle input { width: auto; margin: 0; }
+
+/* A journal that starts with an action, with reference material behind tabs. */
+.journal-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.journal-tabs button[aria-pressed="true"] { background: #685343; color: #fff9ec; }
+.journal-next, .activity-guide { padding: 1rem; background: #f4ebd9; border: 1px solid #b7a58b; border-radius: 12px; margin: .8rem 0; }
+.journal-next h3 { margin-top: .4rem; }
+.activity-catalog { display: grid; gap: .65rem; margin: 1rem 0; }
+.activity-catalog button { text-align: left; white-space: normal; padding: .85rem; }
+.activity-catalog strong, .activity-catalog span, .activity-catalog small { display: block; }
+.activity-catalog span { margin: .4rem 0; }
+.journal-words { display: flex; flex-wrap: wrap; gap: .75rem; }
+.journal-word { margin: .25rem; }
+.journal-save { border-top: 1px solid #b7a58b; padding-top: 1rem; margin-top: 1.5rem; }
+#activity-tracker { padding: .65rem; background: #fff6e5; color: #483b30; border-radius: 9px; }
+#activity-tracker strong { display: block; }
+#activity-tracker p { margin: .4rem 0; font-size: .85rem; }
+#activity-tracker button { min-height: 36px; }
+#goals { max-height: 45vh; overflow-y: auto; }
+@media (max-width: 600px) {
+  #activity-tracker { padding: .45rem; }
+  #activity-tracker p { font-size: .8rem; }
+}
+.journal-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.journal-tabs button { padding: .55rem .3rem; font-size: .85rem; min-width: 0; }
+@media (max-width: 650px) {
+  #activity-tracker strong, #goals summary { font-size: 14px; }
+  #activity-tracker button { font-size: 14px; padding: 8px; min-height: 44px; width: 100%; }
+}
+.map-markers .map-pin {
+  width: auto;
+  max-width: 112px;
+  height: auto;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.map-markers .map-pin { white-space: nowrap; }
+.map-overview .map-markers .map-pin {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
+}
+.map-stops button.is-selected {
+  background: #315f5b;
+  color: #fff9e9;
+  outline: 3px solid #c75c35;
+  outline-offset: 2px;
+}
+.map-markers .map-pin.is-selected {
+  z-index: 4;
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+  background: #c75c35;
+  box-shadow: 0 0 0 4px #fff9e9, 0 0 0 7px #c75c35;
+}
+.map-picture, .map-stops button { scroll-margin-block: 16px; }
+
+/* Quiet guidance leaves the town itself clear. */
+#goals { width: 245px; padding: 10px 12px; }
+#goals:not(:has(details[open])) { width: auto; max-width: 180px; overflow: visible; }
+#goals #panda-hints > summary { font-size: 14px; }
+#panda-speech {
+  position: absolute;
+  z-index: 4;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: max-content;
+  max-width: min(520px, calc(100% - 200px));
+  padding: 8px 14px 8px 9px;
+  border: 1px solid #c8ae84;
+  border-radius: 18px;
+  background: #fff7e8ed;
+  color: #6b4e38;
+  box-shadow: 0 3px 12px #65442618;
+}
+#panda-speech img { width: 30px; height: 34px; object-fit: contain; }
+#panda-speech #panda-message { margin: 0; font-size: 14px; line-height: 1.5; }
+@media (max-width: 650px) {
+  #panda-speech { left: 14px; right: 84px; bottom: 74px; transform: none; width: auto; max-width: none; padding: 7px 10px; }
+  #panda-speech #panda-message { font-size: 13px; }
+}
+
+#panda-speech[hidden] { display: none; }
+
+.collectible-discovery { text-align: center; }
+#panel:has(.collectible-discovery) .dialog-heading {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+#panel:has(.collectible-discovery) #panel-title { grid-column: 2; text-align: center; }
+#panel:has(.collectible-discovery) .close { grid-column: 3; }
+.collectible-reveal { display: block; width: min(220px, 70%); height: 220px; object-fit: contain; margin: 0 auto 14px; }
+
+/* Pronunciation sits above its dictionary word and wraps with that word. */
+#npc-zh[data-pinyin="true"] .help-word {
+  display: inline-block;
+  text-align: center;
+  vertical-align: baseline;
+  margin: 0 3px 8px !important;
+}
+#npc-zh[data-pinyin="true"] .help-word::before {
+  content: attr(data-pinyin);
+  display: block;
+  color: #8b806b;
+  font: 0.48em/1.6 system-ui, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
 }

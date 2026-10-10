@@ -147,5 +147,5 @@ test("every original strolling character remains present, with the tangerine vis
   assert.ok(
     tangerines.x < scene.width * 0.2 && tangerines.y > scene.height * 0.8,
   );
-  assert.match(tangerines.bubble, /tangerines\s*很甜/);
+  assert.match(tangerines.bubble, /橘子\s*很甜/);
 });

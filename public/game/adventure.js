@@ -54,7 +54,7 @@ export function createAdventure({
     const a = state();
     if (a.flowers === "done")
       return line(
-        "Lan",
+        "小兰",
         "谢谢你！这些花是送给奶奶的。你想给谁送花？",
         "xiè xiè nǐ ！ zhè xiē huā shì sòng gěi nǎi nai de 。 nǐ xiǎng gěi shuí sòng huā ？",
         "Thank you! These flowers are for Grandma. Who would you give flowers to?",
@@ -63,7 +63,7 @@ export function createAdventure({
       );
     if (a.flowers === "found")
       return line(
-        "Lan",
+        "小兰",
         "你找到我的花了！谢谢你帮我。",
         "nǐ zhǎo dào wǒ de huā le ！ xiè xiè nǐ bāng wǒ 。",
         "You found my flowers! Thank you for helping.",
@@ -85,10 +85,10 @@ export function createAdventure({
         "female",
       );
     line(
-      "Lan",
-      "不好了，我的花没有了！我刚才去过河其他一边的石头。你能帮我找找吗？",
-      "bù hǎo le ， wǒ de huā méi yǒu le ！ wǒ gāng cái qù guò hé qí tā yì biān de shí tou 。 nǐ néng bāng wǒ zhǎo zhǎo ma ？",
-      "I dropped my flowers! I was near the rockery across the canal. Could you look for them?",
+      "小兰",
+      "我的花不见了！我刚才去过河那边的石头旁边。你能帮我找找吗？",
+      "wǒ de huā bú jiàn le ！ wǒ gāng cái qù guò hé nà biān de shí tou páng biān 。 nǐ néng bāng wǒ zhǎo zhǎo ma ？",
+      "My flowers are missing! I was just by the rocks across the canal. Could you help me look for them?",
       [
         [
           a.flowers === "new" ? "accept-flowers" : "continue-flowers",
@@ -125,16 +125,16 @@ export function createAdventure({
     if (atTable && a.tea === "new")
       return line(
         "茶桌子",
-        "桌子上有两只杯子。去找一位想喝茶的朋友吧。Qiao 就在茶馆门口。",
-        "zhuō zi shàng yǒu liǎng zhī bēi zi 。 qù zhǎo yí wèi xiǎng hē chá de péng yǒu ba 。Qiao  jiù zài chá guǎn mén kǒu 。",
-        "Two cups are waiting. Find someone who wants tea; Qiao is at the teahouse.",
+        "桌子上有两只杯子。去找一位想喝茶的朋友吧。小乔就在茶馆门口。",
+        "zhuō zi shàng yǒu liǎng zhī bēi zi 。 qù zhǎo yí wèi xiǎng hē chá de péng yǒu ba 。 xiǎo qiáo jiù zài chá guǎn mén kǒu 。",
+        "There are two cups on the table. Go and find a friend who would like tea. Qiao is right at the teahouse entrance.",
       );
     if (a.tea === "new")
       return line(
-        "Qiao",
-        "今天不忙，想和朋友说话。你想和我一起喝茶吗？",
-        "jīn tiān bù máng ， xiǎng hé péng yǒu shuō huà 。 nǐ xiǎng hé wǒ yì qǐ hē chá ma ？",
-        "It is quiet today. I am a little bored. Would you have tea with me?",
+        "小乔",
+        "今天不忙，我想和朋友聊聊天。你愿意和我一起喝茶吗？",
+        "jīn tiān bù máng ， wǒ xiǎng hé péng yǒu liáo liáo tiān 。 nǐ yuàn yì hé wǒ yì qǐ hē chá ma ？",
+        "I am not busy today. I would like to chat with a friend. Would you like to have tea with me?",
         [
           [
             "invite-tea",
@@ -142,7 +142,7 @@ export function createAdventure({
             () => {
               change((a) => (a.tea = "invited"));
               $("panel").close();
-              panda("Qiao 同意了！我们一起去茶桌子吧。");
+              panda("小乔同意了！我们一起去茶桌子吧。");
             },
           ],
         ],
@@ -150,18 +150,18 @@ export function createAdventure({
       );
     if (a.tea === "invited")
       return line(
-        "Qiao",
-        "我这就过去。我们在 courtyard 里的茶桌子见面！",
-        "wǒ zhè jiù guò qù 。 wǒ men zài  courtyard  lǐ de chá zhuō zi jiàn miàn ！",
-        "I am on my way. Meet me at the courtyard tea table!",
+        "小乔",
+        "我马上过去。我们在花园里的茶桌子旁边见面吧！",
+        "wǒ mǎ shàng guò qù 。 wǒ men zài huā yuán lǐ de chá zhuō zi páng biān jiàn miàn ba ！",
+        "I will come over right away. Let us meet beside the tea table in the garden!",
         [],
         voiceForNpc("qiao"),
       );
     line(
       "一起喝茶",
-      "你来给我茶，我来拿杯子。你今天过得怎么样？",
-      "nǐ lái gěi wǒ chá ， wǒ lái ná bēi zi 。 nǐ jīn tiān guò dé zěn me yàng ？",
-      "You pour; I will take the cups. How was your day?",
+      "我来拿杯子。你今天过得怎么样？",
+      "wǒ lái ná bēi zi 。 nǐ jīn tiān guò de zěn me yàng ？",
+      "I will get the cups. How has your day been?",
       [
         ["tea-happy", "今天很高兴，因为认识了你。", () => finishTea()],
         ["tea-tired", "有一点累，但是喝茶很舒服。", () => finishTea()],
@@ -181,25 +181,25 @@ export function createAdventure({
   function hungryQuest() {
     const a = state();
     line(
-      "Lian · 一起吃 hot pot",
+      "小莲·一起吃火锅",
       a.hungry === "done"
-        ? "谢谢你请我吃 hot pot！sheep 在你家里。"
-        : "我有点饿了。我们一起去吃 hot pot，好吗？",
+        ? "谢谢你请我吃火锅！羊在你家里。"
+        : "我有点饿了。我们一起去吃火锅，好吗？",
       a.hungry === "done"
-        ? "Xièxie nǐ qǐng wǒ chī huǒguō! Xiǎoyáng zài nǐ jiālǐ."
+        ? "xiè xiè nǐ qǐng wǒ chī huǒ guō ！ yáng zài nǐ jiā lǐ 。"
         : "Wǒ yǒudiǎn è le. Wǒmen yìqǐ qù chī huǒguō, hǎo ma?",
       a.hungry === "done"
-        ? "Thank you for treating me to hotpot! Your stuffed sheep is at home."
-        : "I am hungry. Shall we have hotpot together?",
+        ? "Thank you for treating me to hotpot! The sheep is in your home."
+        : "I am a little hungry. Shall we go and have hotpot together?",
       a.hungry === "new"
         ? [
             [
               "invite-hotpot",
-              "我请你吃 hot pot 吧！",
+              "我请你吃火锅吧！",
               () => {
                 change((a) => (a.hungry = "invited"));
                 $("panel").close();
-                panda("Lian 同意了！她会跟着我们，去饭店吃 hot pot 吧。");
+                panda("小莲同意了！她会跟着我们，去饭店吃火锅吧。");
               },
             ],
           ]
@@ -224,7 +224,7 @@ export function createAdventure({
                 `买一个 · ¥${o.price}`,
                 () => {
                   if (state().coins < o.price) {
-                    panda("钱太少了了，先看看别的吧。");
+                    panda("钱不够，先看看别的吧。");
                     return;
                   }
                   change((a) => {
@@ -233,7 +233,7 @@ export function createAdventure({
                     a.purchases.push(o.id);
                     award(a, 10);
                   });
-                  panda(`买好了！${o.item}放进包了。`);
+                  panda(`买好了！${o.item}放进包里了。`);
                   interact(o);
                 },
               ],
@@ -256,16 +256,16 @@ export function createAdventure({
       if (o.id === "lost-flowers") {
         if (state().flowers === "accepted") {
           change((a) => (a.flowers = "found"));
-          panda("找到了！把花还给 Lan 吧。");
+          panda("找到了！把花还给小兰吧。");
         }
         line(
           "花",
           state().flowers === "found"
-            ? "这一定是 Lan 的花。带回去给她吧。"
-            : "几个花在石头旁边。",
+            ? "这一定是小兰的花。带回去给她吧。"
+            : "石头旁边有几朵花。",
           state().flowers === "found"
-            ? "Zhè yídìng shì Lán de huā. Dài huíqu gěi tā ba."
-            : "Jǐ duǒ huā cáng zài shítou pángbiān.",
+            ? "zhè yí dìng shì xiǎo lán de huā 。 dài huí qù gěi tā ba 。"
+            : "shí tou páng biān yǒu jǐ duǒ huā 。",
           state().flowers === "found"
             ? "These must be Lan’s flowers. Take them back to her."
             : "A few flowers lie beside the rocks.",
@@ -289,7 +289,7 @@ export function createAdventure({
               m.name,
               "你看到了什么颜色？它像什么？",
               "nǐ kàn dào le shén me yán sè ？ tā xiàng shén me ？",
-              "Which colors do you see? What does its shape remind you of?",
+              "What colors did you notice? What does it look like?",
             );
           },
         ],
@@ -303,14 +303,14 @@ export function createAdventure({
     if (o.type === "gate") {
       const unlocked = state().xp >= AREA_XP;
       line(
-        "Boat dock",
+        "河边的大船",
         unlocked
-          ? "XP 已经有500了！上船吧，我们去下一站。"
+          ? "已经有500点XP了！上船吧，我们去下一站。"
           : `还差${AREA_XP - state().xp}点XP。先去聊天、帮帮朋友吧。船在这里等你！`,
-        unlocked ? "Jīngyàn mǎn le! Shàng chuán ba, wǒmen qù xià yí zhàn." : "",
+        unlocked ? "yǐ jīng yǒu 500 diǎn XP liǎo ！ shàng chuán ba ， wǒ men qù xià yí zhàn 。" : "",
         unlocked
-          ? "Your XP is full. Board the boat for the next stop. You can return to Suzhou afterward."
-          : `The boat leaves once you reach ${AREA_XP} XP. Keep chatting, exploring and helping your neighbors.`,
+          ? "You have reached 500 XP! Come aboard, and let us go to the next stop."
+          : `You need ${AREA_XP - state().xp} more XP. Chat and help your friends first. The boat will wait for you here!`,
         unlocked
           ? [
               [
@@ -355,8 +355,8 @@ export function createAdventure({
     close();
     const chosen = hotpotItems.filter((i) => meal.selected.includes(i.id));
     openPanel(
-      meal.withLian ? "和 Lian 一起吃 hot pot" : "Canal hot pot",
-      `${meal.withLian ? "<div class=\"meal-friend\"><span class=\"seated-lian\" role=\"img\" aria-label=\"Lian 坐在桌子前面\"></span><p class=\"chinese\">我们一起吃吧！</p></div>" : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">Canal restaurant</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<output id="food-name" aria-live="polite"></output><div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="我的碗">${meal.eaten.length ? "吃过 " + meal.eaten.length + " 口" : "我的碗"}</div></div><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
+      meal.withLian ? "和小莲一起吃火锅" : "河边火锅",
+      `${meal.withLian ? "<div class=\"meal-friend\"><span class=\"seated-lian\" role=\"img\" aria-label=\"Lian 坐在桌子前面\"></span><p class=\"chinese\">我们一起吃吧！</p></div>" : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">Canal restaurant</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<output id="food-name" aria-live="polite"></output><div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="我的碗">${meal.eaten.length ? "吃过" + meal.eaten.length + "口" : "我的碗"}</div></div><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
     );
     document.querySelectorAll("[data-learn-food]").forEach(
       (b) =>
@@ -372,10 +372,10 @@ export function createAdventure({
       work.innerHTML =
         text(
           "你好！你想吃什么？请说：我要……。",
-          "nǐ hǎo ！ nǐ xiǎng chī shén me ？ qǐng shuō ： wǒ yào ……。",
+          "nǐ hǎo ！ nǐ xiǎng chī shén me ？ qǐng shuō ： wǒ yào … … 。",
           "What would you like? Say: I would like…",
         ) +
-        `<div class="ingredients">${hotpotItems.map((i) => `<button data-ingredient="${i.id}" aria-pressed="${meal.selected.includes(i.id)}">${i.zh}${settings().pinyin ? `<small>${i.pinyin}</small>` : ""}${settings().translation ? `<small>${i.en}</small>` : ""}</button>`).join("")}</div><label for="hotpot-order">我要吃什么</label><textarea id="hotpot-order" rows="2" maxlength="300" placeholder="我要tofu和菜。">${escape(meal.order || "")}</textarea><div class="small-actions"><button id="hotpot-mic">🎙 说说要吃什么</button><button id="hotpot-read">听一听</button><button id="hotpot-review" class="primary">看看我要吃什么</button></div><p class="notice">Microphone recording lasts up to 15 seconds. Audio is transcribed on your game computer and discarded.${settings().translation ? "Microphone audio is transcribed on your game PC and discarded. Review it before ordering." : ""}</p>`;
+        `<div class="ingredients">${hotpotItems.map((i) => `<button data-ingredient="${i.id}" aria-pressed="${meal.selected.includes(i.id)}">${i.zh}${settings().pinyin ? `<small>${i.pinyin}</small>` : ""}${settings().translation ? `<small>${i.en}</small>` : ""}</button>`).join("")}</div><label for="hotpot-order">我要吃什么</label><textarea id="hotpot-order" rows="2" maxlength="300" placeholder="我要豆腐和菜。">${escape(meal.order || "")}</textarea><div class="small-actions"><button id="hotpot-mic">🎙 说说要吃什么</button><button id="hotpot-read">听一听</button><button id="hotpot-review" class="primary">看看我要吃什么</button></div><p class="notice">Microphone recording lasts up to 15 seconds. Audio is transcribed on your game computer and discarded.${settings().translation ? "Microphone audio is transcribed on your game PC and discarded. Review it before ordering." : ""}</p>`;
       document.querySelectorAll("[data-ingredient]").forEach(
         (b) =>
           (b.onclick = () => {
@@ -397,14 +397,14 @@ export function createAdventure({
           }),
       );
       $("hotpot-read").onclick = () =>
-        speech.speak("我要 tofu、菜和 mushrooms。不要 spicy。");
+        speech.speak("我要豆腐、菜和蘑菇。不要辣。");
       $("hotpot-review").onclick = () => {
         meal.order = $("hotpot-order").value.trim();
         meal.selected = parseOrder(meal.order);
         meal.spicy = !/不.*辣/.test(meal.order) && /辣/.test(meal.order);
         if (!meal.selected.length) {
           $("mic-status").textContent =
-            "请说出菜单上的一种东西，或者点选择东西。";
+            "请说出菜单上的一种吃的，或者点一下，选择你想吃的。";
           return;
         }
         meal.phase = "review";
@@ -431,8 +431,8 @@ export function createAdventure({
     } else if (meal.phase === "serve") {
       work.innerHTML =
         text(
-          "菜来了！把东西放进 hot pot 里吧。",
-          "cài lái le ！ bǎ dōng xī fàng jìn  hot pot  lǐ ba 。",
+          "菜来了！把东西放进火锅里吧。",
+          "cài lái le ！ bǎ dōng xī fàng jìn huǒ guō lǐ ba 。",
           "Your ingredients have arrived. Put them in the pot.",
         ) +
         `<div class="ingredients serving-tray">${chosen
@@ -442,7 +442,7 @@ export function createAdventure({
           .map((i) => `<button data-cook="${i.id}">放进${i.zh}</button>`)
           .join(
             "",
-          )}</div><p class="notice">点一下 hot pot 里的东西，尝一口。${settings().translation ? "Tap an ingredient in the pot to taste it." : ""}</p>`;
+          )}</div><p class="notice">点一下火锅里的东西，尝一口。${settings().translation ? "Tap an ingredient in the pot to taste it." : ""}</p>`;
       document.querySelectorAll("[data-cook]").forEach(
         (b) =>
           (b.onclick = () => {
@@ -470,7 +470,7 @@ export function createAdventure({
               });
               panda(
                 state().hungry === "done"
-                  ? "sheep 真可爱！我们把它放在家里吧。"
+                  ? "羊真可爱！我们把它放在家里吧。"
                   : "你用中文点了吃的东西！",
               );
             }
@@ -479,20 +479,20 @@ export function createAdventure({
       );
     } else {
       work.innerHTML = meal.gift
-        ? `<div class="gift-reward"><img src="/assets/optimized/sheep-gift.webp" alt="Lian送的sheep" />${text("谢谢你请我吃 hot pot！这只 sheep 送给你。", "xiè xiè nǐ qǐng wǒ chī  hot pot！ zhè zhī  sheep  sòng gěi nǐ 。", "Thank you for treating me to hotpot! This little sheep is for you.")}<p class="notice">熊猫：把sheep放在家里吧。看到它，就会记得和Lian一起吃东西的这一天。</p><button id="gift-thanks">谢谢你，Lian！</button><p class="xp-award">sheep放在家里了 · +85 XP</p></div>`
+        ? `<div class="gift-reward"><img src="/assets/optimized/sheep-gift.webp" alt="小莲送的羊" />${text("谢谢你请我吃火锅！这只羊送给你。", "xiè xiè nǐ qǐng wǒ chī huǒ guō ！ zhè zhī yáng sòng gěi nǐ 。", "Thank you for treating me to hotpot! This little sheep is for you.")}<p class="notice">熊猫：把羊放在家里吧。看到它，就会记得和小莲一起吃东西的这一天。</p><button id="gift-thanks">谢谢你，小莲！</button><p class="xp-award">羊放在家里了 · +85 XP</p></div>`
         : text(
             "吃饱了！真好吃。",
             "chī bǎo le ！ zhēn hǎo chī 。",
             "I am full! That was delicious.",
           ) + "<p class=\"xp-award\">+25 XP</p>";
       if (meal.gift) {
-        speech.speak("谢谢你请我吃 hot pot！这只 sheep 送给你。", false, "female");
+        speech.speak("谢谢你请我吃火锅！这只羊送给你。", false, "female");
         $("gift-thanks").onclick = () => {
           line(
-            "熊猫 · sheep 的新家",
-            "sheep 真可爱！我们把它放在家里吧。",
-            "sheep  zhēn kě ài ！ wǒ men bǎ tā fàng zài jiā lǐ ba 。",
-            "What a sweet sheep! We can keep it at our house.",
+            "熊猫·羊的新家",
+            "这只羊真可爱！我们把它放在家里吧。",
+            "zhè zhī yáng zhēn kě ài ！ wǒ men bǎ tā fàng zài jiā lǐ ba 。",
+            "This sheep is so cute! Let us put it in our home.",
             [["gift-finish", "好！", () => $("panel").close()]],
           );
         };
@@ -558,13 +558,13 @@ export function createAdventure({
         } finally {
           if (token === generation && $("hotpot-mic")) {
             $("hotpot-mic").disabled = false;
-            $("hotpot-mic").textContent = "🎙 再说一次";
+            $("hotpot-mic").textContent = "🎙再说一次";
           }
         }
       };
       onRecording(true);
       recorder.start();
-      $("hotpot-mic").textContent = "■ 说完了";
+      $("hotpot-mic").textContent = "■说完了";
       $("mic-status").textContent = "正在听…";
       recordTimer = setTimeout(() => {
         if (recorder?.state === "recording") recorder.stop();

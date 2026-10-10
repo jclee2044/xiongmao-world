@@ -4,6 +4,7 @@ import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { scenes, interactionPoint, MAP_VERSION } from "../public/game/world.js";
 import { newState } from "../server/store.js";
+import { goalCards } from "../public/game/goals.js";
 import { mkdir } from "node:fs/promises";
 await mkdir("test-results", { recursive: true });
 const server = createApp({
@@ -54,15 +55,42 @@ async function clickWorld(x, y) {
     c.rect.y + (y - c.camY + Number(c.oy)) * c.scale,
   );
 }
-async function worldStop(id) {
-  await page.getByRole("button", { name: "地图", exact: true }).click();
-  await page.locator(`[data-map-stop="${id}"]`).click();
-}
 const cached = () =>
   page.evaluate(() => JSON.parse(localStorage.getItem("panda-world-v1")).state);
 try {
   const boat = scenes.shanghai.interactables.find((o) => o.id === "next-area");
   const dock = interactionPoint(boat);
+  const pier = scenes.shanghai.scenery.find((o) => o.type === "boat-dock");
+  await seed("shanghai", { x: pier.x - pier.w, y: pier.y - 18 });
+  await page.locator("#world").focus();
+  await page.keyboard.down("ArrowRight");
+  await page.waitForFunction(
+    (x) => Number(document.querySelector("#world").dataset.x) >= x,
+    pier.x,
+  );
+  await page.keyboard.up("ArrowRight");
+  await page.screenshot({ path: "test-results/boat-pier-deck.png" });
+  await page.keyboard.down("ArrowRight");
+  await page.waitForFunction(
+    (x) => Number(document.querySelector("#world").dataset.x) >= x,
+    pier.x + pier.w,
+  );
+  await page.keyboard.up("ArrowRight");
+  for (const post of scenes.shanghai.scenery.filter(
+    (o) => o.type === "boat-dock-post",
+  )) {
+    await seed("shanghai", { x: post.x, y: post.y + 70 });
+    await page.locator("#world").focus();
+    await page.keyboard.down("ArrowUp");
+    await page.waitForTimeout(700);
+    await page.keyboard.up("ArrowUp");
+    const y = Number(await page.locator("#world").getAttribute("data-y"));
+    assert.ok(
+      y >= post.y + 14,
+      "The character stops in front of the pier post",
+    );
+    assert.ok(y < post.y + 40, "The character walked up to the post");
+  }
   for (const xp of [0, 499, 500]) {
     await seed("shanghai", { x: dock.x - 145, y: dock.y + 45 }, { xp });
     await page.waitForTimeout(800);
@@ -94,25 +122,23 @@ try {
     await page.locator("#panel").waitFor({ state: "visible" });
     assert.equal(await page.locator("#enter-next").count(), xp >= 500 ? 1 : 0);
     if (xp === 500) {
-      assert.match(await page.locator("#goals-list").innerText(), /可以上船了/);
-      await page.click("#enter-next");
+      assert.ok(
+        goalCards((await cached()).adventure).some(
+          (goal) => goal.target === "next-area",
+        ),
+      );
+      await page.locator("#enter-next").focus();
+      await page.keyboard.press("Enter");
       await page.waitForFunction(
         () => document.querySelector("#world").dataset.scene === "shantang",
       );
-      await worldStop("back-town");
       await page.waitForFunction(
-        () => {
-          const d = document.querySelector("#world").dataset;
-          return (
-            d.routeLength === "0" &&
-            Math.hypot(Number(d.x) - 250, Number(d.y) - 800) < 50
-          );
-        },
-        null,
-        { timeout: 45000 },
+        () => document.querySelector("#world").dataset.artReady === "true",
       );
-      await page.locator("#world").focus();
-      await page.keyboard.press("Space");
+      const exit = interactionPoint(
+        scenes.shantang.interactables.find((o) => o.id === "back-town"),
+      );
+      await clickWorld(exit.x, exit.y);
       await page.waitForFunction(
         () => document.querySelector("#world").dataset.scene === "shanghai",
       );
@@ -125,8 +151,12 @@ try {
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Boat click-to-walk, Space, 0/499 XP locks, 500 XP boarding, goal and dock return passed.",
+    "Pier crossing and post collisions, boat click-to-walk, Space, 0/499 XP locks, 500 XP boarding, goal and dock return passed.",
   );
+} catch (error) {
+  await page?.screenshot({ path: "test-results/boat-failure.png" });
+  console.error({ errors });
+  throw error;
 } finally {
   await browser.close();
   await new Promise((r) => server.close(r));

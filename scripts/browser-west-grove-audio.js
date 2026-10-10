@@ -114,7 +114,7 @@ try {
   });
   await page.waitForFunction(
     () =>
-      createdAudio[0].src.includes("sonican") &&
+      createdAudio[0].src.includes("hana-daria-semikina") &&
       createdAudio[0].currentTime > 0.1,
   );
   assert.equal(

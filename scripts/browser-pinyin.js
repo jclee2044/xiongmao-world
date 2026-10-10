@@ -35,14 +35,14 @@ try {
       () => document.getElementById("save-status").textContent === "Journal saved",
     );
   const shown = async (enabled) => {
-    assert.equal(await page.locator("#npc-pinyin").isVisible(), enabled);
+    assert.equal(await page.locator("#npc-zh").getAttribute("data-pinyin"), String(enabled));
     assert.equal(
       await page.locator("#toggle-pinyin").getAttribute("aria-pressed"),
       String(enabled),
     );
     assert.equal(
       await page.locator("#toggle-pinyin").textContent(),
-      enabled ? "不看 Pinyin" : "看 Pinyin",
+      enabled ? "Hide pinyin" : "Show pinyin",
     );
   };
   await page.goto(base);
@@ -50,9 +50,9 @@ try {
   await walkToStop(page, "mei");
   await talk();
   await shown(false);
-  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
-  await page.getByRole("button", { name: "不看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();
   await shown(false);
   await page
     .getByRole("button", { name: "看看“吃”的意思", exact: true })
@@ -74,7 +74,7 @@ try {
   await enter();
   await talk();
   await shown(false);
-  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
   await page
     .getByRole("button", { name: "看看“吃”的意思", exact: true })
@@ -82,7 +82,7 @@ try {
   assert.ok(
     (await page.locator("#word-callout").textContent()).includes("chī"),
   );
-  await page.getByRole("button", { name: "不看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Hide pinyin", exact: true }).click();
   await shown(false);
   assert.ok(
     !(await page.locator("#panda-message").textContent()).includes("chī"),
@@ -90,7 +90,7 @@ try {
   assert.ok(
     !(await page.locator("#dialog-status").textContent()).includes("chī"),
   );
-  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await page.getByRole("button", { name: "结束聊天" }).click();
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   assert.equal(
@@ -106,7 +106,7 @@ try {
   await talk();
   await shown(false);
   await page.screenshot({ path: "test-results/pinyin-hidden-mobile.png" });
-  await page.getByRole("button", { name: "看 Pinyin", exact: true }).click();
+  await page.getByRole("button", { name: "Show pinyin", exact: true }).click();
   await shown(true);
   await saved();
   await page.screenshot({ path: "test-results/pinyin-shown-mobile.png" });

@@ -1,3 +1,4 @@
+import { activityGuide } from "./activity-guide.js";
 import { npcs } from "../data/content.js";
 import {
   activities,
@@ -46,8 +47,8 @@ export function createPractice({
   function line(text, className = "chinese") {
     return `<p class="${className}" lang="zh-CN">${escape(text.zh)}</p>${settings().pinyin ? `<p class="pinyin">${escape(text.pinyin)}</p>` : ""}${settings().translation ? `<p class="meaning">${escape(text.meaning)}</p>` : ""}`;
   }
-  function label(zh) {
-    return zh;
+  function label(zh, english) {
+    return english || zh;
   }
   function cardText(text) {
     return `<span lang="zh-CN">${escape(text.zh)}</span>${settings().pinyin ? `<small class="pinyin">${escape(text.pinyin)}</small>` : ""}${settings().translation ? `<small class="meaning">${escape(text.meaning)}</small>` : ""}`;
@@ -77,8 +78,16 @@ export function createPractice({
     const progress = state(),
       choices = npc ? activities.filter((a) => a.npc === npc) : activities;
     openPanel(
-      label("中文练习", "Chinese errands"),
-      `<p lang="zh-CN">听一听，说一说，去找邻居。现在也可以不做。</p>${settings().translation ? '<p class="muted">Listen, share an idea, and meet your neighbors. Replay and hints are always welcome.</p>' : ""}${progress.active ? `<p><button id="practice-resume">${escape(label("再", "Continue"))}：${escape(activityById[progress.active.id].title)}</button></p>` : ""}<div class="map-stops">${choices.map((a) => `<button data-activity="${a.id}">${progress.completed.includes(a.id) ? "✓ " : ""}${escape(a.title)}</button>`).join("")}</div>${npc ? `<p><button id="practice-all">${escape(label("其他练习", "All errands"))}</button></p>` : ""}`,
+      label("中文练习", "Practice activities"),
+      `<p>Choose a short practice activity. These exercises do not spend your coins or buy items.</p>${progress.active ? "<p>Starting a different activity replaces your unfinished practice. Continue below to keep working on it.</p>" : ""}${progress.active ? `<p><button id="practice-resume">Continue: ${escape(activityById[progress.active.id].english)}</button></p>` : ""}<div class="activity-catalog">${choices
+        .map((a) => {
+          const guide = activityGuide(a.id);
+          return `<button data-activity="${a.id}"><strong>${progress.completed.includes(a.id) ? "✓ Practiced · " : ""}${escape(a.english)}</strong><span>${escape(guide.how)}</span><small>Start practice →</small></button>`;
+        })
+        .join(
+          "",
+        )}</div>${npc ? `<p><button id="practice-all">All activities</button></p>` : ""}`,
+      "en",
     );
     for (const button of document.querySelectorAll("[data-activity]"))
       button.onclick = () => start(button.dataset.activity);
@@ -135,9 +144,10 @@ export function createPractice({
     const prompt = a.steps?.[step]?.clue || a.prompt;
     const listenFirst =
       a.listenFirst || a.type === "listening" || a.type === "visit";
+    const guide = activityGuide(id, active?.id === id ? active : null);
     let html = done
-      ? `${line(a.response)}${controls()}<p lang="zh-CN">${escape(label("练习做好了。也可以再和邻居聊天。", "This practice is recorded. You can keep chatting with your neighbor."))}</p><div class="small-actions"><button id="practice-talk">${escape(label("说说话", "Keep chatting"))}</button><button id="practice-again">${escape(label("再来一次", "Try again"))}</button></div>`
-      : `${a.steps ? `<p class="muted">${step + 1} / ${a.steps.length}</p>` : ""}${listenFirst ? `<p lang="zh-CN">${escape(label("先听一听，再去回答。也可以看字。", "Listen for the clue. You can reveal the words whenever you like."))}</p><button id="practice-transcript" aria-expanded="${transcript}">${escape(label(transcript ? "Hide 字" : "看字", transcript ? "Hide words" : "Show words"))}</button><div id="practice-transcript-content" ${transcript ? "" : "hidden"}>${line(prompt)}</div>` : a.type === "riddle" ? `<div id="practice-riddle-clue" tabindex="-1">${line(prompt)}</div>` : line(prompt)}${stitchClue ? `<div id="practice-current-clue" class="notice" tabindex="-1">${line(stitchClue.clue)}</div>` : ""}${controls()}${a.question ? line(a.question) : ""}`;
+      ? `${line(a.response)}${controls()}<p lang="en">${escape(label("练习做好了。也可以再和邻居聊天。", "This practice is recorded. You can keep chatting with your neighbor."))}</p><div class="small-actions"><button id="practice-talk">${escape(label("说说话", "Keep chatting"))}</button><button id="practice-again">${escape(label("再来一次", "Try again"))}</button></div>`
+      : `${a.steps ? `<p class="muted">${step + 1} / ${a.steps.length}</p>` : ""}${listenFirst ? `<p lang="en">${escape(label("先听一听，再去回答。也可以看字。", "Listen for the clue. You can reveal the words whenever you like."))}</p><button id="practice-transcript" aria-expanded="${transcript}">${escape(label(transcript ? "Hide 字" : "看字", transcript ? "Hide words" : "Show words"))}</button><div id="practice-transcript-content" ${transcript ? "" : "hidden"}>${line(prompt)}</div>` : a.type === "riddle" ? `<div id="practice-riddle-clue" tabindex="-1">${line(prompt)}</div>` : line(prompt)}${stitchClue ? `<div id="practice-current-clue" class="notice" tabindex="-1">${line(stitchClue.clue)}</div>` : ""}${controls()}${a.question ? line(a.question) : ""}`;
     if (!done && riddle)
       html += `<div class="riddle-cards">${pieceOrder(
         riddle.options.length,
@@ -154,7 +164,7 @@ export function createPractice({
         finishedStitches[instruction.cell] = instruction.color;
       if (done) html += cloth(a, finishedStitches, false);
       else
-        html += `${line(a.patternName)}<details class="silk-instructions" ${clothCluesOpen ? "open" : ""}><summary>${escape(label("听每一个要求", "Hear each square’s instruction"))}</summary><ol>${a.instructions.map((instruction) => `<li><button type="button" data-practice-cloth-clue="${instruction.cell}">${cardText(instruction.clue)}</button></li>`).join("")}</ol></details><p lang="zh-CN">${escape(label("Choose a color, then a square. You can change colors or remove a stitch.", "Choose a thread, then a square. You can replace a color or remove a stitch."))}</p><div class="thread-palette" role="group" aria-label="${escape(label("Choose thread", "Choose embroidery thread"))}">${a.palette.map((thread, i) => `<button type="button" data-practice-thread="${i}" aria-pressed="${selectedThread === i}"><span class="thread-swatch" data-thread-color="${i}" aria-hidden="true"></span>${cardText(thread)}</button>`).join("")}<button type="button" data-practice-thread="-1" aria-pressed="${selectedThread === -1}">${escape(label("Remove a stitch", "Remove a stitch"))}</button></div>${cloth(a, stitches, true)}<div class="small-actions"><button id="practice-stitch-undo" ${canUndo ? "" : "disabled"}>${escape(label("Undo last stitch", "Undo last stitch"))}</button><button id="practice-check-pattern" class="primary">${escape(label("看看画", "Check the pattern"))}</button></div><p id="practice-feedback" role="status"></p>`;
+        html += `${line(a.patternName)}<details class="silk-instructions" ${clothCluesOpen ? "open" : ""}><summary>${escape(label("听每一个要求", "Hear each square’s instruction"))}</summary><ol>${a.instructions.map((instruction) => `<li><button type="button" data-practice-cloth-clue="${instruction.cell}">${cardText(instruction.clue)}</button></li>`).join("")}</ol></details><p lang="en">${escape(label("Choose a color, then a square. You can change colors or remove a stitch.", "Choose a thread, then a square. You can replace a color or remove a stitch."))}</p><div class="thread-palette" role="group" aria-label="${escape(label("Choose thread", "Choose embroidery thread"))}">${a.palette.map((thread, i) => `<button type="button" data-practice-thread="${i}" aria-pressed="${selectedThread === i}"><span class="thread-swatch" data-thread-color="${i}" aria-hidden="true"></span>${cardText(thread)}</button>`).join("")}<button type="button" data-practice-thread="-1" aria-pressed="${selectedThread === -1}">${escape(label("Remove a stitch", "Remove a stitch"))}</button></div>${cloth(a, stitches, true)}<div class="small-actions"><button id="practice-stitch-undo" ${canUndo ? "" : "disabled"}>${escape(label("Undo last stitch", "Undo last stitch"))}</button><button id="practice-check-pattern" class="primary">${escape(label("看看画", "Check the pattern"))}</button></div><p id="practice-feedback" role="status"></p>`;
     }
     if (!done && a.type === "market") {
       const basket = marketResult(a, order);
@@ -163,11 +173,11 @@ export function createPractice({
     if (!done && (a.type === "choice" || a.type === "listening"))
       html += `<div class="map-stops">${a.options.map((o, i) => `<button data-practice-choice="${i}"><span lang="zh-CN">${escape(o.zh)}</span>${settings().pinyin ? `<small class="pinyin"> · ${escape(o.pinyin)}</small>` : ""}${settings().translation ? `<small class="meaning"> · ${escape(o.meaning)}</small>` : ""}</button>`).join("")}</div><p id="practice-feedback" role="status"></p>`;
     if (!done && (a.type === "basket" || a.type === "order"))
-      html += `<form id="practice-basket">${a.items.map((o, i) => `<label>${escape(o.zh)}${settings().pinyin ? ` · ${escape(o.pinyin)}` : ""}${settings().translation ? ` · ${escape(o.meaning)}` : ""}<select name="fruit-${i}" aria-label="${escape(o.zh)}">${[0, 1, 2, 3, 4, 5].map((n) => `<option value="${n}" ${active?.order?.[i] === n ? "selected" : ""}>${n}${a.type === "order" ? " 杯" : ""}</option>`).join("")}</select></label>`).join("")}<button class="primary">${escape(label(a.type === "order" ? "给大家饮料" : "就买这些", a.type === "order" ? "Serve these drinks" : "Choose this basket"))}</button></form><p id="practice-feedback" role="status"></p>`;
+      html += `<form id="practice-basket">${a.items.map((o, i) => `<label>${escape(o.zh)}${settings().pinyin ? ` · ${escape(o.pinyin)}` : ""}${settings().translation ? ` · ${escape(o.meaning)}` : ""}<select name="fruit-${i}" aria-label="${escape(o.zh)}">${[0, 1, 2, 3, 4, 5].map((n) => `<option value="${n}" ${active?.order?.[i] === n ? "selected" : ""}>${n}${a.type === "order" ? "杯" : ""}</option>`).join("")}</select></label>`).join("")}<button class="primary">${escape(label(a.type === "order" ? "给大家饮料" : "就买这些", a.type === "order" ? "Serve these drinks" : "Choose this basket"))}</button></form><p id="practice-feedback" role="status"></p>`;
     if (!done && (a.type === "expression" || a.type === "tiles"))
       html += `<div class="map-stops">${(a.starters || []).map((o, i) => `<button data-practice-starter="${i}"><span lang="zh-CN">${escape(o.zh)}</span>${settings().pinyin ? `<small class="pinyin"> · ${escape(o.pinyin)}</small>` : ""}${settings().translation ? `<small class="meaning"> · ${escape(o.meaning)}</small>` : ""}</button>`).join("")}</div><form id="practice-share"><label for="practice-own">${escape(label("你想说什么", "Your idea"))}</label><textarea id="practice-own" maxlength="160" rows="2"></textarea><button class="primary">${escape(label("说说", "Share"))}</button></form><p class="muted">${escape(label("说说你想说的就好。", "Share your own idea. This is not scored or used to assess pronunciation."))}</p>`;
     if (!done && (a.type === "sequence" || a.type === "tiles")) {
-      html += `<p lang="zh-CN">${escape(label(a.type === "sequence" ? "点一下，先做什么。" : "点词，做一个句子。", "Tap the cards in order. You can remove a card and try again."))}</p><div class="map-stops">${pieceOrder(
+      html += `<p lang="en">${escape(label(a.type === "sequence" ? "点一下，先做什么。" : "点词，做一个句子。", "Tap the cards in order. You can remove a card and try again."))}</p><div class="map-stops">${pieceOrder(
         a.pieces.length,
         round,
       )
@@ -177,7 +187,7 @@ export function createPractice({
         )
         .join(
           "",
-        )}</div><p lang="zh-CN">${escape(label("你选择的东西：", "Your order:"))}</p><div class="small-actions">${tiles.map((i, slot) => `<button data-practice-remove="${slot}">${slot + 1}. ${escape(a.pieces[i].zh)} ×</button>`).join("")}</div><button id="practice-check-pieces" class="primary">${escape(label(a.type === "sequence" ? "做好了" : "说出来", "Try this order"))}</button><p id="practice-feedback" role="status"></p>`;
+        )}</div><p lang="en">${escape(label("你选择的东西：", "Your order:"))}</p><div class="small-actions">${tiles.map((i, slot) => `<button data-practice-remove="${slot}">${slot + 1}. ${escape(a.pieces[i].zh)} ×</button>`).join("")}</div><button id="practice-check-pieces" class="primary">${escape(label(a.type === "sequence" ? "做好了" : "说出来", "Try this order"))}</button><p id="practice-feedback" role="status"></p>`;
     }
     if (!done && a.type === "matching") {
       html += `<div class="map-stops" aria-label="${escape(label("中文词", "Chinese word cards"))}">${pieceOrder(
@@ -190,7 +200,7 @@ export function createPractice({
         )
         .join(
           "",
-        )}</div><p lang="zh-CN">${escape(label("再找一样的照片：", "Now find its picture:"))}</p><div class="map-stops">${pieceOrder(
+        )}</div><p lang="en">${escape(label("再找一样的照片：", "Now find its picture:"))}</p><div class="map-stops">${pieceOrder(
         a.pairs.length,
         round + 1,
       )
@@ -201,18 +211,23 @@ export function createPractice({
         .join("")}</div><p id="practice-feedback" role="status"></p>`;
     }
     if (!done && a.type === "visit")
-      html += `<p lang="zh-CN">${escape(label("到了的时候，选择“说你好”或者 E。", "When you arrive, use Say hello or E."))}</p><button id="practice-map">${escape(label("看地图", "Open map"))}</button>`;
+      html += `<p lang="en">${escape(label("到了的时候，选择“说你好”或者 E。", "Tap the person or animal to interact, or press Space / E nearby."))}</p><button id="practice-map">${escape(label("看地图", "Open map"))}</button>`;
     const fact = culture[a.culture];
     if (fact)
-      html += `<details><summary lang="zh-CN">${escape(label("文化小故事", "A cultural story"))}：${escape(settings().translation ? fact.title : fact.title.split(" · ")[0])}</summary>${line(fact)}<div class="small-actions"><button id="practice-culture-replay">${escape(label("听一听", "Listen"))}</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">${escape(label("Source", "Source"))} ↗</a></div></details>`;
-    html += `<p><button id="practice-list">${escape(label("其他练习", "All errands"))}</button>${!done ? ` <button id="practice-pause">${escape(label("先不做了", "Put this errand aside"))}</button>` : ""}</p>`;
-    openPanel(label(a.title, a.english), html);
+      html += `<details><summary lang="zh-CN">${escape(label("文化小故事", "A cultural story"))}：${escape(settings().translation ? fact.title : fact.title.split(" · ")[0])}</summary>${line(fact)}${fact.note ? `<p class="notice" lang="en">${escape(fact.note)}</p>` : ""}<div class="small-actions"><button id="practice-culture-replay">${escape(label("听一听", "Listen"))}</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">${escape(label("Source", "Source"))} ↗</a></div></details>`;
+    html += `<p><button id="practice-list">${escape(label("其他练习", "All activities"))}</button>${!done ? ` <button id="practice-pause">${escape(label("先不做了", "Save and return to town"))}</button>` : ""}</p>`;
+    html =
+      `<section class="activity-guide" lang="en"><strong>${done ? "Practice complete" : escape(guide.purpose)}</strong><p>${done ? "Your practice has been recorded. Keep chatting or try another activity." : escape(guide.how)}</p>${!done ? `${guide.next !== guide.how && a.type !== "visit" ? `<p><strong>Your task:</strong> ${escape(guide.next)}</p>` : ""}<p><strong>Complete when:</strong> ${escape(guide.complete)}</p>${guide.progress ? `<p>${escape(guide.progress)}</p>` : ""}<p class="muted">Practice only — no coins are spent and no items are purchased.</p>` : ""}</section>` +
+      html;
+    openPanel(label(a.title, a.english), html, "en");
     const spoken = done ? a.response.zh : stitchClue?.clue.zh || prompt.zh;
     $("practice-replay").onclick = () => speech.speak(spoken);
     $("practice-slow").onclick = () => speech.speak(spoken, true);
     $("practice-stop").onclick = () => speech.stop();
     $("practice-hint").onclick = () => {
-      $("practice-hint-content").innerHTML = line(riddle?.hint || a.hint);
+      const hint = riddle?.hint || a.hint;
+      $("practice-hint-content").innerHTML =
+        `<p>${escape(hint.meaning)}</p>` + line(hint);
       $("practice-hint-content").hidden = false;
     };
     $("practice-list").onclick = () => catalog();
@@ -220,8 +235,7 @@ export function createPractice({
       $("practice-culture-replay").onclick = () => speech.speak(fact.zh);
     if ($("practice-pause"))
       $("practice-pause").onclick = () => {
-        update({ ...state(), active: null });
-        catalog();
+        $("panel").close();
       };
     if ($("practice-transcript"))
       $("practice-transcript").onclick = () => {
@@ -260,7 +274,7 @@ export function createPractice({
     };
     const retry = (message) => {
       $("practice-feedback").innerHTML =
-        `${line(message || { zh: "再看看，也可以听一听或者看帮助。", pinyin: "zài kàn kàn ， yě kě yǐ tīng yi tīng huò zhě kàn bāng zhù 。", meaning: "Take another look. You can replay the clue or open a hint." }, "notice")}`;
+        `<p lang="en">${escape(message?.meaning || "Take another look. You can replay the clue or open a hint.")}</p>${line(message || { zh: "再看看，也可以听一听或者看帮助。", pinyin: "zài kàn kàn ， yě kě yǐ tīng yi tīng huò zhě kàn bāng zhù 。", meaning: "Take another look. You can replay the clue or open a hint." }, "notice")}`;
     };
     const changeActive = (patch, focusSelector) => {
       const progress = state();
@@ -375,7 +389,8 @@ export function createPractice({
         if (!basket.withinBudget)
           return retry({
             zh: "钱太少了。可以少买一点，再看看要买什么。",
-            pinyin: "qián tài shǎo le 。 kě yǐ shǎo mǎi yì diǎn ， zài kàn kàn yào mǎi shén me 。",
+            pinyin:
+              "qián tài shǎo le 。 kě yǐ shǎo mǎi yì diǎn ， zài kàn kàn yào mǎi shén me 。",
             meaning:
               "The basket costs more than you brought. You can buy less and check the shopping list.",
           });
@@ -473,7 +488,8 @@ export function createPractice({
     openForNpc: (id) => catalog(id),
     visit,
     refresh,
-    status: () => (state().active ? activityById[state().active.id].title : ""),
+    status: () =>
+      state().active ? activityById[state().active.id].english : "",
     newPractice,
   };
 }

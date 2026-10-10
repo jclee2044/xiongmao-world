@@ -1,3 +1,5 @@
+import { isCoreInteraction } from "./interactions.js";
+import { collectibleAvailable } from "./collectibles.js";
 import { scenes, move, nearest, canStand, interactionPoint } from "./world.js";
 import { draw, prepareArt } from "./render.js";
 import { hitExitArrow } from "./exit-arrow.js";
@@ -5,14 +7,18 @@ import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
 import { lifeActors } from "./life.js";
 import artBounds from "../data/art-bounds.js";
+const PANDA_FOLLOW_DELAY = 0.5;
+const MAX_FRAME_DT = 0.1;
 const animalHeights = { cat: 64, duck: 54, rabbit: 58 };
 export class World {
   constructor(
     canvas,
     {
+      varyBubble = text => text,
       onNear,
       onInteract,
       onMove,
+      onStep,
       getSettings = () => ({}),
       getFound = () => false,
       getAdventure = () => ({}),
@@ -22,9 +28,11 @@ export class World {
   ) {
     Object.assign(this, {
       canvas,
+      varyBubble,
       onNear,
       onInteract,
       onMove,
+      onStep,
       getSettings,
       getFound,
       getAdventure,
@@ -38,6 +46,9 @@ export class World {
     this.player = { ...this.scene.spawn };
     this.panda = { x: this.player.x + 65, y: this.player.y - 15 };
     this.trail = [];
+    this.pandaFollowTime = 0;
+    this.pandaTrailPoint = { ...this.player, time: 0 };
+    this.pandaWalkDistance = 0;
     this.route = [];
     this.facing = 1;
     this.walkDistance = 0;
@@ -80,6 +91,12 @@ export class World {
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) this.clear();
     });
+    // Safari can show its selection magnifier despite CSS and pointerdown guards.
+    // Movement uses pointer events; cancel the canvas's native touch gestures too.
+    for (const type of ["touchstart", "touchmove"])
+      canvas.addEventListener(type, (e) => e.preventDefault(), {
+        passive: false,
+      });
     canvas.addEventListener("contextmenu", (e) => e.preventDefault());
     canvas.addEventListener("pointerdown", (e) => {
       if (this.paused || this.artPending || !this.camera) return;
@@ -89,14 +106,13 @@ export class World {
         this.clear();
         this.heldPointer = {
           id: e.pointerId,
+          pointerType: e.pointerType,
           clientX: e.clientX,
           clientY: e.clientY,
           startX: e.clientX,
           startY: e.clientY,
           started: performance.now(),
           dragged: false,
-          origin: this.pointerPoint(e),
-          playerOrigin: { ...this.player },
         };
         canvas.setPointerCapture(e.pointerId);
         return;
@@ -181,6 +197,7 @@ export class World {
     return [
       ...this.scene.interactables.filter(
         (o) =>
+          collectibleAvailable(this.scene, o, this.getFound(), this.player) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
@@ -195,7 +212,7 @@ export class World {
       ...this.actors().filter((o) => o.type === "passerby"),
       ...(this.guest ? [this.guest] : []),
       ...(this.hungryGuest ? [this.hungryGuest] : []),
-    ];
+    ].filter(isCoreInteraction);
   }
   nearby() {
     const chosen = this.destinations().find(
@@ -241,7 +258,7 @@ export class World {
     const animal = this.animalPoses.find(
       (o) => Math.abs(x - o.x) < 45 && y > o.y - 70 && y < o.y + 10,
     );
-    if (animal) return this.scene.interactables.find((o) => o.id === animal.id);
+    if (animal) return this.destinations().find((o) => o.id === animal.id);
     const b = [...this.scene.scenery]
       .reverse()
       .find(
@@ -288,14 +305,14 @@ export class World {
     }
     if (state === "seated" || state === "done") {
       Object.assign(this.guest, {
-        x: teaTable.x - 80,
-        y: teaTable.y - 7,
+        x: teaTable.x - 108,
+        y: teaTable.y + 6,
         seated: true,
         moving: false,
       });
       return;
     }
-    const goal = { x: teaTable.x - 85, y: teaTable.y + 5 };
+    const goal = { x: teaTable.x - 108, y: teaTable.y + 6 };
     if (!this.guestRoute?.length)
       this.guestRoute = pathTo(this.scene, this.guest, goal);
     const target = this.guestRoute[0];
@@ -331,7 +348,7 @@ export class World {
         id: "lian",
         dialogueId: "lian",
         type: "guest",
-        name: "Lian",
+        name: "小莲",
         appearance: "lian",
         x: this.player.x - 50,
         y: this.player.y,
@@ -373,7 +390,7 @@ export class World {
   sitAt(table, kind) {
     this.seat =
       kind === "tea"
-        ? { kind, x: table.x + 80, y: table.y - 2, flip: true }
+        ? { kind, x: table.x + 108, y: table.y + 13, flip: true }
         : { kind, x: table.x - 128, y: table.y + 52, flip: false };
     if (kind === "hotpot" && this.hungryGuest)
       Object.assign(this.hungryGuest, {
@@ -409,21 +426,35 @@ export class World {
       y: (clientY - r.top) / c.scale + c.camY - c.oy,
     };
   }
-  pointerDirection(t) {
+  pointerDirection() {
     const held = this.heldPointer;
-    if (!held || (!held.dragged && t - held.started < 250))
-      return { dx: 0, dy: 0 };
-    // Anchor steering to the player's screen position at touch-down. Neither
-    // walking past the finger nor camera scrolling changes the held direction.
-    const dx =
-      held.origin.x -
-      held.playerOrigin.x +
-      (held.clientX - held.startX) / this.camera.scale;
-    const dy =
-      held.origin.y -
-      held.playerOrigin.y +
-      (held.clientY - held.startY) / this.camera.scale;
-    return Math.hypot(dx, dy) < 12 ? { dx: 0, dy: 0 } : { dx, dy };
+    if (!held) return { dx: 0, dy: 0 };
+    // Reproject the current finger every frame as the player and camera move.
+    const point = this.pointerPoint(held);
+    const dx = point.x - this.player.x;
+    const dy = point.y - this.player.y;
+    return Math.hypot(dx, dy) < 4 ? { dx: 0, dy: 0 } : { dx, dy };
+  }
+  pointerSpeedMultiplier() {
+    const held = this.heldPointer;
+    if (held?.pointerType !== "touch") return 1;
+    const r = this.canvas.getBoundingClientRect(),
+      c = this.camera,
+      viewport = this.canvas.ownerDocument.defaultView,
+      x = r.left + (this.player.x - c.camX + c.ox) * c.scale,
+      y = r.top + (this.player.y - c.camY + c.oy) * c.scale,
+      dx = held.clientX - x,
+      dy = held.clientY - y;
+    // Fraction of the distance along the finger's direction to the screen edge.
+    // This stays consistent across camera zoom, portrait and landscape layouts.
+    const fraction = Math.min(
+      1,
+      Math.max(
+        Math.abs(dx) / Math.max(1, dx < 0 ? x : viewport.innerWidth - x),
+        Math.abs(dy) / Math.max(1, dy < 0 ? y : viewport.innerHeight - y),
+      ),
+    );
+    return 0.75 + 0.5 * fraction;
   }
   walkTo(point, interactOnArrival = false) {
     this.pendingInteraction = interactOnArrival ? point.id : null;
@@ -466,6 +497,9 @@ export class World {
       this.player,
     ].find((p) => canStand(this.scene, p.x, p.y));
     this.trail = [];
+    this.pandaFollowTime = 0;
+    this.pandaTrailPoint = { ...this.player, time: 0 };
+    this.pandaWalkDistance = 0;
     this.clear();
     this.loadSceneArt();
     this.onMove?.(this.scene.id, this.player);
@@ -496,8 +530,66 @@ export class World {
     this.changeScene(door.target, door.returnPoint);
     return true;
   }
+  updatePanda(dt, playerSpeed) {
+    this.pandaFollowTime += dt;
+    const followTime = this.pandaFollowTime - PANDA_FOLLOW_DELAY;
+    // Spend the full catch-up budget along the player's traversable trail,
+    // including multiple short waypoints in one frame.
+    let remaining = playerSpeed * 1.6 * dt;
+    while (remaining > 0 && this.trail.length) {
+      const next = this.trail[0];
+      const reachedTime = next.time <= followTime + 1e-9;
+      let target = next;
+      if (!reachedTime) {
+        const previous = this.pandaTrailPoint;
+        if (
+          !previous ||
+          previous.time > followTime ||
+          // A gap between samples represents a stop, not a slow walk.
+          next.time - previous.time > MAX_FRAME_DT + 1e-9
+        )
+          break;
+        // Follow the delayed position between samples, rather than waiting for
+        // whole points and alternating between idle and catch-up on uneven frames.
+        const fraction =
+          (followTime - previous.time) / (next.time - previous.time);
+        target = {
+          x: previous.x + (next.x - previous.x) * fraction,
+          y: previous.y + (next.y - previous.y) * fraction,
+        };
+      }
+      if (Math.hypot(this.player.x - target.x, this.player.y - target.y) <= 65)
+        break;
+      const dist = Math.hypot(target.x - this.panda.x, target.y - this.panda.y);
+      if (dist < 0.01) {
+        if (!reachedTime) break;
+        this.pandaTrailPoint = this.trail.shift();
+        continue;
+      }
+      const step = Math.min(dist, remaining);
+      const previousPanda = this.panda;
+      this.panda = move(
+        this.scene,
+        this.panda,
+        ((target.x - this.panda.x) / dist) * step,
+        ((target.y - this.panda.y) / dist) * step,
+      );
+      this.pandaWalkDistance =
+        (this.pandaWalkDistance || 0) +
+        Math.hypot(
+          this.panda.x - previousPanda.x,
+          this.panda.y - previousPanda.y,
+        );
+      remaining -= step;
+      // A blocked waypoint must stay in the trail rather than cutting a corner.
+      if (Math.hypot(target.x - this.panda.x, target.y - this.panda.y) >= 0.01)
+        break;
+      if (!reachedTime) break;
+      this.pandaTrailPoint = this.trail.shift();
+    }
+  }
   frame(t) {
-    const dt = Math.min(0.1, (t - this.last) / 1000 || 0);
+    const dt = Math.min(MAX_FRAME_DT, (t - this.last) / 1000 || 0);
     this.last = t;
     if (this.artPending) {
       requestAnimationFrame((next) => this.frame(next));
@@ -521,7 +613,7 @@ export class World {
         this.route = [];
         this.pendingInteraction = null;
         this.navigationFocus = null;
-      } else ({ dx, dy } = this.pointerDirection(t));
+      } else ({ dx, dy } = this.pointerDirection());
       while (
         this.route.length &&
         Math.hypot(
@@ -540,17 +632,21 @@ export class World {
         dy = (destination.y - this.player.y) / d;
       }
       const len = Math.hypot(dx, dy),
-        speed = this.getSettings().pace === "slow" ? 184 : 264;
+        speed =
+          (this.getSettings().pace === "slow" ? 184 : 264) *
+          (this.scene.interior || this.scene.id === "home" ? 0.8 : 1);
       if (len) {
         if (Math.abs(dx) > 0.1) this.facing = Math.sign(dx);
         const step = Math.min(
-          speed * dt,
+          speed * this.pointerSpeedMultiplier() * dt,
           this.route.length
             ? Math.hypot(
                 this.route[0].x - this.player.x,
                 this.route[0].y - this.player.y,
               )
-            : Infinity,
+            : this.heldPointer
+              ? len
+              : Infinity,
         );
         const previous = this.player;
         this.player = move(
@@ -563,11 +659,12 @@ export class World {
           Math.hypot(this.player.x - previous.x, this.player.y - previous.y) >
           0.01;
         if (moving) {
+          this.onStep?.(this.scene.id, this.player);
           this.walkDistance += Math.hypot(
             this.player.x - previous.x,
             this.player.y - previous.y,
           );
-          this.trail.push({ ...this.player });
+          this.trail.push({ ...this.player, time: this.pandaFollowTime + dt });
           if (this.trail.length > 240) this.trail.shift();
           if (t - (this.lastMove || 0) > 500) {
             this.onMove?.(this.scene.id, this.player);
@@ -592,36 +689,14 @@ export class World {
           }
         }
       }
-      // Follow the player's actual traversable route, rather than cutting through buildings.
-      while (
-        this.trail.length &&
-        Math.hypot(
-          this.player.x - this.trail[0].x,
-          this.player.y - this.trail[0].y,
-        ) > 65
-      ) {
-        const target = this.trail[0],
-          dist = Math.hypot(target.x - this.panda.x, target.y - this.panda.y),
-          step = Math.min(dist, speed * 1.6 * dt);
-        if (dist < 4) {
-          this.trail.shift();
-          continue;
-        }
-        this.panda = move(
-          this.scene,
-          this.panda,
-          ((target.x - this.panda.x) / dist) * step,
-          ((target.y - this.panda.y) / dist) * step,
-        );
-        break;
-      }
+      this.updatePanda(dt, speed * this.pointerSpeedMultiplier());
     }
     if (this.wasMoving && !moving) this.onMove?.(this.scene.id, this.player);
     this.wasMoving = moving;
     const near = this.nearby();
     if (this.nearId !== near?.id) {
       this.nearId = near?.id;
-      this.onNear(near);
+      this.onNear?.(near);
     }
     this.canvas.dataset.x = this.player.x.toFixed(1);
     this.canvas.dataset.y = this.player.y.toFixed(1);
@@ -671,8 +746,10 @@ export class World {
         this.player,
         this.panda,
         {
+          varyBubble: this.varyBubble,
           time: this.ambientTime,
           walkDistance: this.walkDistance,
+          pandaWalkDistance: this.pandaWalkDistance,
           animate: !this.paused && settings.motion !== false,
           moving,
           facing: this.facing,

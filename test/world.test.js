@@ -590,7 +590,7 @@ test("market street keeps its painting undistorted and its waterfront walking ci
     [700, 450],
     [870, 490],
     [910, 550],
-    [850, 650],
+    [900, 650], // Keep clear of the bakery end pot and side table.
     [820, 750],
     [780, 850],
     [800, 950],
@@ -845,4 +845,25 @@ test("south buildings have solid footprints and the square fountain leaves a wal
         fountain.y - 20 + Math.sin(angle) * 165,
       ),
     );
+});
+
+test("the passage behind the noodle shop connects the central and eastern market lanes", () => {
+  const scene = scenes.shanghai;
+  const plate = scene.marketPlate;
+  const point = ([x, y]) => ({
+    x: plate.x + x * plate.w / 1536,
+    y: plate.y + y * plate.h / 1024,
+  });
+  const passage = [[940, 560], [1050, 570], [1100, 570], [1170, 600],
+    [1250, 640], [1350, 660], [1430, 660]].map(point);
+  for (const target of passage) {
+    assert.ok(canStand(scene, target.x, target.y), "The roof overhang is walkable");
+    const route = pathTo(scene, passage[0], target);
+    assert.ok(route.length);
+    assert.ok(Math.hypot(route.at(-1).x - target.x, route.at(-1).y - target.y) < 25);
+  }
+  for (const pixel of [[1100, 750], [1200, 800], [1000, 850]]) {
+    const p = point(pixel);
+    assert.equal(canStand(scene, p.x, p.y), false, "The noodle shop itself stays solid");
+  }
 });

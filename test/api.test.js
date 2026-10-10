@@ -85,3 +85,25 @@ test("authenticated APIs, origin checks, paired saves and stale-write conflicts"
   );
   assert.equal((await fetch(base + "/server/store.js")).status, 404);
 });
+
+test("scene dialogue variations use authenticated origin checks without changing progress", async (t) => {
+  const store = new Store(":memory:");
+  const server = createApp({ store, providerConfig: { provider: "story", random: () => 0 } });
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const first = await fetch(base + "/api/state");
+  const cookie = first.headers.get("set-cookie").split(";")[0];
+  const before = await first.json();
+  const line = { chinese: "你每天几点起床？", meaning: "What time do you get up every day?", topic: "activities" };
+  const post = (origin, body) => fetch(base + "/api/dialogue-variation", { method: "POST", headers: { cookie, Origin: origin, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  assert.equal((await post("https://foreign.example", { line })).status, 403);
+  const response = await post(base, { line });
+  assert.equal(response.status, 200);
+  const answer = await response.json();
+  assert.equal(answer.chinese, line.chinese);
+  assert.match(answer.pinyin, /qǐ chuáng/);
+  assert.equal((await post(base, { line: { chinese: "<script>" } })).status, 400);
+  const after = await (await fetch(base + "/api/state", { headers: { cookie } })).json();
+  assert.deepEqual(after.state, before.state);
+});
