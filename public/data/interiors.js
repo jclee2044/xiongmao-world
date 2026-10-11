@@ -15,6 +15,7 @@ export const interiors = {
     ],
     interactables: [
       { id: "clothing-exit", type: "door", name: "出门", x: 600, y: 715, target: "shanghai", returnDoor: "clothing-store" },
+      { id: "clothing-weather", type: "practice", name: "看天气，选衣服", x: 530, y: 495, activity: "weather-clothes" },
       { id: "clothing-rack", type: "inspect", shopId: "clothing", name: "选择衣服", x: 305, y: 420 },
       { id: "clothing-dresses", type: "inspect", shopId: "clothing", name: "看看裙子", x: 645, y: 365 },
       { id: "clothing-customer", type: "npc", dialogueId: "clothing-customer", name: "安宁", appearance: "reader", x: 420, y: 455, artHeight: 160, bubbles: ["这件衣服真漂亮。", "你喜欢什么颜色？"] },

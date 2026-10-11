@@ -1,0 +1,13 @@
+{
+  "mode": "built-in image_gen",
+  "useCase": "stylized-concept",
+  "reference": "public/assets/world/family-home.png",
+  "referenceRole": "style and camera",
+  "output": "public/assets/world/family-furniture.png",
+  "browserAsset": "public/assets/world/family-furniture.webp",
+  "grid": {
+    "columns": 3,
+    "rows": 2
+  },
+  "prompt": "Production transparent sprite atlas for a Suzhou family home in a warm painted watercolor/gouache storybook game. Supporting reference is the room image for STYLE and high oblique 3/4 dollhouse CAMERA matching only. Create exactly SIX separate full objects on a genuinely transparent RGBA background, arranged in a perfectly regular 3 columns by 2 rows grid on a 1536x1024 canvas (each cell 512x512). Objects centered in their own cells with generous transparent margin; absolutely no overlap between cells, no floor/background/gridlines/labels/text/people. All viewed from above at the same room-camera angle with visible top and front, lit softly from upper left. Restrained Suzhou Ming-style wooden furniture with slender linear members and modest joinery, no heavy dragon carving, in warm medium wood: top-left ONE square family table EMPTY top, four slender legs; top-middle ONE yoke-back wooden chair with woven seat; top-right ONE low two-door storage cabinet with folded cloth just visible on its top. Bottom-left ONE bamboo laundry basket containing rumpled pastel clothes; bottom-middle ONE small low open wooden toy-and-book box with two children's picture books and a few wooden blocks (no readable text); bottom-right ONE shallow pale-blue enamel washing basin with two small white cups sitting inside it, clearly readable as household washing. Each object alone, fully visible, equal visual quality. Keep every sprite inside its 512x512 cell. No cast shadows extending beyond the object's cell. Transparent background."
+}

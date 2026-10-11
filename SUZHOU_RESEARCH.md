@@ -2,6 +2,15 @@
 
 Research completed 5 October 2026. The game compresses several real Suzhou districts and attractions into a fictional walkable neighborhood; distances and landmark placement are illustrative.
 
+## Family home — 10 October 2026
+
+- [Suzhou municipal description of Zhouzhuang housing](https://english.suzhou.gov.cn/szsenglish/jnsxgzlm/201611/8aeb80281dd94d83ae02914ededadc0c.shtml) distinguishes large courtyard residences, merchant homes with living quarters behind or above shops, and modest waterside houses. The new southern home is an illustrative modern family living in a traditional building: plaster walls, wooden framing, courtyard views and practical appliances. It is not a reconstruction or a claim that all present-day Suzhou homes have this form.
+- [Suzhou municipal description of Su-style furniture](https://english.suzhou.gov.cn/szsenglish/sgy/201611/60a60728517d43639dd06320685da35d.shtml) informed restrained wooden furniture with clear structural lines. Separate transparent sprites supply a table, chair, low storage cabinet, bamboo laundry basket, toy/book box and enamel washing basin. Household appliances are painted into the room; furniture sprites have their own depth order and collision footprints.
+- [Suzhou Civil Affairs Bureau's 2020 elderly-care consultation](https://minzhengju.suzhou.gov.cn/mzj/zxft/202011/22dd21dc52ce4108be46d4c66ddfa90e.shtml) reports 34 of 98 elderly questionnaire respondents living with children. This small opt-in sample supports the plausibility of a multigenerational household, not a citywide prevalence estimate. Mr Chen lives with his two children and his own parents; chores and conversations are shared across the family.
+- Spring Festival dialogue describes this fictional family's preparations, shared food, good wishes and red envelopes. It explicitly allows different family traditions, and replaying a preparation task does not imply today is the festival. Weather forecasts are labeled practice examples rather than live weather.
+
+Room and furniture art were generated with the built-in image generation tool. Reproducible prompt records are in `art/prompts/family-home.json` and `art/prompts/family-furniture.json`; source PNGs and runtime WebP assets are in `public/assets/world/`.
+
 ## Landscape decisions
 
 - **Pingjiang Historic Quarter:** the Suzhou municipal history describes the paired street-and-river pattern that informed the parallel lanes and the connected canal branches. [Suzhou municipal source](https://english.suzhou.gov.cn/szsenglish/lsjz/202106/87af552d082446d99f2e23a22c800fab.shtml)

@@ -12,18 +12,19 @@ function clearSegment(scene, a, b) {
 }
 function gridFor(scene) {
   if (grids.has(scene)) return grids.get(scene);
-  const cols = Math.ceil(scene.width / STEP),
-    rows = Math.ceil(scene.height / STEP),
+  const step = scene.navigationStep || STEP;
+  const cols = Math.ceil(scene.width / step),
+    rows = Math.ceil(scene.height / step),
     open = new Uint8Array(cols * rows);
   const point = (i) => ({
-    x: (i % cols) * STEP + STEP / 2,
-    y: Math.floor(i / cols) * STEP + STEP / 2,
+    x: (i % cols) * step + step / 2,
+    y: Math.floor(i / cols) * step + step / 2,
   });
   for (let i = 0; i < open.length; i++) {
     const p = point(i);
-    open[i] = Number(canStand(scene, p.x, p.y, 19));
+    open[i] = Number(canStand(scene, p.x, p.y, scene.navigationRadius ?? 19));
   }
-  const grid = { cols, rows, open, point, edges: new Map() };
+  const grid = { cols, rows, open, point, step, edges: new Map() };
   grids.set(scene, grid);
   return grid;
 }
@@ -77,7 +78,7 @@ export function pathTo(scene, start, destination) {
   )
     return [];
   const grid = gridFor(scene),
-    { cols, rows, open, point } = grid;
+    { cols, rows, open, point, step } = grid;
   const edgeClear = (a, b) => {
     const key = Math.min(a, b) * open.length + Math.max(a, b);
     if (!grid.edges.has(key))
@@ -87,10 +88,11 @@ export function pathTo(scene, start, destination) {
   function closest(p, requireClear) {
     let best = -1,
       distance = Infinity;
-    const cx = Math.floor(p.x / STEP),
-      cy = Math.floor(p.y / STEP);
-    for (let dy = -4; dy <= 4; dy++)
-      for (let dx = -4; dx <= 4; dx++) {
+    const cx = Math.floor(p.x / step),
+      cy = Math.floor(p.y / step);
+    const reach = Math.ceil((4 * STEP) / step);
+    for (let dy = -reach; dy <= reach; dy++)
+      for (let dx = -reach; dx <= reach; dx++) {
         const x = cx + dx,
           y = cy + dy,
           i = y * cols + x;
@@ -116,7 +118,7 @@ export function pathTo(scene, start, destination) {
     heap = new Heap();
   const goal = point(target),
     heuristic = (i) =>
-      Math.hypot(point(i).x - goal.x, point(i).y - goal.y) / STEP;
+      Math.hypot(point(i).x - goal.x, point(i).y - goal.y) / step;
   scores[source] = 0;
   heap.push({ i: source, f: heuristic(source) });
   while (heap.items.length) {

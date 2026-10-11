@@ -1,3 +1,5 @@
+import { travelerById, stationSubjects, stationTravelContext } from "./station-travelers.js";
+import { weatherLines, householdLines } from "./suzhou-life.js";
 import { bookOpeningLine, bookStarter } from "./book-dialogue.js";
 import { familyContext, familyOpeningLines } from "./family-dialogue.js";
 // Old six-level HSK 2–3 discussion material. Questions do not assert NPC memories.
@@ -469,7 +471,28 @@ export const conversationSubjects = {
     ],
   },
 };
+// These subjects provide repeatable entry points for home and seasonal practice.
+conversationSubjects.weather.lines.push(...Object.values(weatherLines).map((l) => [l.zh, l.meaning, l.pinyin]));
+conversationSubjects.weather.keywords = /天气|天气预报|温度|季节|春天|夏天|秋天|冬天|几度|下雨|晴天|冷|热|weather|forecast|temperature|season|spring|summer|autumn|winter/i;
+conversationSubjects.household = {
+  chineseLabel: "家里的事", name: "Home, chores and belongings", topic: "activities",
+  patterns: ["把", "在…旁边", "先…再…"], keywords: /家务|打扫|洗衣|水池|冰箱|书架|整理|household|chores|clean|laundry|appliance/i,
+  lines: [householdLines.clean, householdLines.wash, householdLines.organize, householdLines.room].map((l) => [l.zh, l.meaning, l.pinyin]),
+  response: [householdLines.clean.zh, householdLines.clean.meaning, householdLines.clean.pinyin],
+};
+conversationSubjects.newyear = {
+  chineseLabel: "春节", name: "Chinese New Year with family", topic: "activities",
+  patterns: ["以前", "先…再…", "祝"], keywords: /春节|新年|过年|红包|spring festival|new year|red envelope/i,
+  lines: [householdLines.festival, householdLines.envelope, householdLines.wishes].map((l) => [l.zh, l.meaning, l.pinyin]),
+  response: [householdLines.festival.zh, householdLines.festival.meaning, householdLines.festival.pinyin],
+};
+Object.assign(conversationSubjects, stationSubjects);
 export const npcSubjects = {
+  "family-grandma": ["household", "family", "newyear", "gardens"],
+  "family-grandpa": ["household", "family", "reading", "routines"],
+  "family-dad": ["household", "family", "newyear", "routines"],
+  "family-son": ["household", "reading", "family", "plans"],
+  "family-daughter": ["household", "newyear", "family", "weather"],
   mei: ["food", "routines", "family", "work"],
   lin: ["study", "reading", "music", "plans"],
   qiao: ["food", "friends", "health", "routines"],
@@ -478,7 +501,7 @@ export const npcSubjects = {
   wei: ["food", "shopping", "health", "routines"],
   an: ["music", "gardens", "feelings", "travel"],
   hao: ["travel", "work", "routines", "plans"],
-  yun: ["family", "gardens", "food", "weather"],
+  yun: ["family", "newyear", "food", "weather"],
   "clothing-seller": ["shopping", "weather", "plans", "feelings"],
   "clothing-customer": ["shopping", "weather", "friends", "plans"],
   "visitor-0": ["weather", "sports", "study", "plans"],
@@ -489,6 +512,7 @@ export const npcSubjects = {
   "visitor-5": ["food", "health", "work", "friends"],
   guide: ["gardens", "travel", "reading", "study"],
   waiter: ["food", "friends", "work", "routines"],
+  "station-traveler": ["travel", "friends", "plans", "routines"],
   suyin: ["music", "reading", "travel", "friends"],
   lian: ["food", "friends", "plans", "feelings"],
   diner: ["food", "travel", "family", "friends"],
@@ -505,6 +529,8 @@ export const npcSubjects = {
   "snack-host": ["food", "friends", "shopping", "plans"],
 };
 
+for (const traveler of Object.values(travelerById)) npcSubjects[traveler.id] = traveler.subjects;
+
 export function subjectLine(subject, index = 0) {
   const data = conversationSubjects[subject];
   const [chinese, meaning, pinyin] = data.lines[index % data.lines.length];
@@ -514,6 +540,7 @@ export function openingSubjects(npcId) {
   return npcSubjects[npcId] || ["friends", "plans", "routines", "feelings"];
 }
 export function conversationOpeningOptions(npcId) {
+  if (travelerById[npcId]) return travelerById[npcId].openings.slice(1);
   const offset = [...npcId].reduce((n, c) => n + c.charCodeAt(0), 0);
   return openingSubjects(npcId).flatMap((subject, index) => {
     const book = bookOpeningLine(npcId, subject);
@@ -529,6 +556,8 @@ export function conversationStarter(npcId, subject) {
 export function subjectForText(text) {
   // Specific subjects beat broad words such as 喜欢 or 明天.
   const order = [
+    "newyear",
+    "household",
     "weather",
     "family",
     "reading",
@@ -549,8 +578,9 @@ export function subjectForText(text) {
   return order.find((key) => conversationSubjects[key].keywords.test(text));
 }
 export function conversationContext(npcId) {
+  if (travelerById[npcId]) return `${stationTravelContext} ${travelerById[npcId].facts}`;
   const subjects = openingSubjects(npcId).map(
     (key) => conversationSubjects[key],
   );
-  return `Conversation range for this character: ${subjects.map((s) => s.name).join("; ")}. Follow the learner's current question first. After answering, invite one relevant follow-up about everyday routines, family, weather, hobbies, studies, work, food, feelings, plans, transport, shopping or past experiences. Avoid repeating recent questions; broaden the angle naturally without abruptly changing the subject. Practice one suitable OLD HSK 2–3 pattern at a time: ${[...new Set(subjects.flatMap((s) => s.patterns))].join(", ")}. Ask about the learner's real life. ${familyContext(npcId)} Use only supplied cast facts for the character's own relatives, ages and routines. If no family facts are supplied, do not invent a spouse or children. Never invent personal history, extra relatives or shared experiences with the learner.`;
+  return `Conversation range for this character: ${subjects.map((s) => s.name).join("; ")}. Follow the learner's current question first. After answering, invite one relevant follow-up about everyday routines, family, weather, hobbies, studies, work, food, feelings, plans, transport, shopping or past experiences. Avoid repeating recent questions; broaden the angle naturally without abruptly changing the subject. Weather forecasts and temperatures are authored practice examples, never live weather observations. Discuss spring, summer, autumn and winter; distinguish personal preferences from a forecast. Chinese New Year is a conversation or preparation activity, not a claim that today is the festival. Practice one suitable OLD HSK 2–3 pattern at a time: ${[...new Set(subjects.flatMap((s) => s.patterns))].join(", ")}. Ask about the learner's real life. ${familyContext(npcId)} Use only supplied cast facts for the character's own relatives, ages and routines. If no family facts are supplied, do not invent a spouse or children. Never invent personal history, extra relatives or shared experiences with the learner.`;
 }

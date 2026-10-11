@@ -1,5 +1,5 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.5-panda-feedback-72";
+const CACHE = "xiongmao-shell-0.9.6-no-update-button-90";
 // The user's personal recording is kept outside source control. A checkout
 // without that file must still install the rest of the offline game.
 const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
@@ -7,7 +7,29 @@ const SHELL = [
   ...new Set(
     [
       "/welcome.css",
+      "/data/station-exterior.js",
+      "/data/station-travelers.js",
+      "/data/station-departure.js",
+      "/data/xiaocheng-walk-art.js",
+      "/game/station-departure.js",
+      "/assets/characters/xiaocheng-walk.png",
+      "/data/station-traveler-art.js",
+      "/assets/characters/station-travelers-a.png",
+      "/assets/characters/station-travelers-b.png",
+      "/data/suzhou-life.js",
+      "/assets/world/family-home.webp",
+      "/assets/world/family-furniture.webp",
+      "/assets/world/family-clutter.webp",
+      "/assets/world/family-fallen-chair.webp",
+      "/data/station-props.js",
+      "/game/station-layers.js",
+      "/game/station-environment.js",
+      "/game/water-motion.js",
+      "/game/station-signs.js",
+      "/game/station-sign-help.js",
+      "/assets/world/station-exterior-v2.png",
       "/assets/map-icon.svg",
+      "/assets/journal-icon.svg",
       "/data/optimized-art.js",
       "/data/language.js",
       "/data/hsk-vocabulary.js",

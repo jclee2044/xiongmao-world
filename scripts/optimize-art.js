@@ -6,7 +6,9 @@ const sources = await Promise.all(
   [
     "public/game/render.js",
     "public/data/interiors.js",
+    "public/data/suzhou-life.js",
     "public/data/town-rooms.js",
+    "public/data/station-exterior.js",
   ].map((p) => readFile(p, "utf8")),
 );
 const paths = [

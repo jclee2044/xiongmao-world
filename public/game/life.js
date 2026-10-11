@@ -78,6 +78,16 @@ function swimmingRange(lake, origin) {
   return { center: (left + right) / 2, radius: (right - left) / 2 };
 }
 function build(scene) {
+  if (scene.interior && scene.interactables.some(o => o.playRoute)) {
+    return { last: null, actors: scene.interactables.filter(o => o.playRoute).map((o, i) => ({
+      ...o, type: "passerby", origin: { x: o.x, y: o.y },
+      patrol: o.playRoute.map(([x, y]) => ({ x, y })),
+      zone: { x: 0, y: 0, w: scene.width, h: scene.height },
+      waypoint: 0, target: null, distance: 0, facing: i ? -1 : 1,
+      speed: o.playSpeed || 100, phase: i,
+      pauseIn: 4 + i * 2,
+    })) };
+  }
   const zones = roamingZones(scene);
   const lake = scene.groundZones?.find((z) => z.type === "lake");
   const animals = scene.interactables
@@ -217,7 +227,7 @@ function hopRabbit(scene, o, dt, player, motion) {
   return { ...o, moving: Boolean(motion && o.jump), hop: motion ? o.hop : 0 };
 }
 export function lifeActors(scene, time, player, motion = true) {
-  if (scene.interior || scene.id === "home") return [];
+  if ((scene.interior || scene.id === "home") && !scene.interactables.some(o => o.playRoute)) return [];
   if (!populations.has(scene)) populations.set(scene, build(scene));
   const population = populations.get(scene),
     dt = Math.max(0, Math.min(0.15, time - (population.last ?? time)));

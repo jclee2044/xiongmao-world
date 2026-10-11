@@ -130,7 +130,8 @@ button:hover {
   font-size: 20px;
   padding: 8px 13px;
 }
-.map-button-icon {
+.map-button-icon,
+.journal-button-icon {
   width: 28px;
   height: 28px;
   vertical-align: middle;
@@ -149,6 +150,41 @@ button:hover {
   box-shadow: 0 5px 20px #766d5320;
   min-height: 0;
   background: #bbc3a1;
+}
+.station-sign-help {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.station-sign-phrase {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: 0 0;
+  font-family: "Noto Serif CJK SC", serif;
+  font-weight: bold;
+  white-space: nowrap;
+  color: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -webkit-touch-callout: default;
+  touch-action: manipulation;
+}
+.station-sign-phrase:hover,
+.station-sign-phrase:focus-visible {
+  background: #fff9ed30;
+  outline: 1px solid #46576a;
+  outline-offset: 1px;
+}
+.station-sign-phrase::selection {
+  color: #46576a;
+  background: #c2ded5;
 }
 canvas {
   display: block;

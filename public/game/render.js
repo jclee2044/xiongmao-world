@@ -1,3 +1,10 @@
+import { travelerArt } from "../data/station-traveler-art.js";
+import { xiaochengWalkArt } from "../data/xiaocheng-walk-art.js";
+import { XIAOCHENG } from "../data/station-departure.js";
+import { paintStationProp, beginStationActorLayer } from "./station-layers.js";
+import { STATION_SCALE } from "../data/station-exterior.js";
+import { paintStationSigns } from "./station-signs.js";
+import { paintStationEnvironment, paintStationBanner } from "./station-environment.js";
 import { marketForeground, behindMarketForeground } from "../data/market-foreground.js";
 import { npcFeet } from "./interactions.js";
 import { hasCollectible } from "./collectibles.js";
@@ -13,6 +20,7 @@ import {
   lianPose,
   npcIdlePose,
   gardenWorkFrame,
+  travelerIdleFrame,
 } from "./appearance.js";
 import { paintGround, blendedPlate } from "./terrain.js";
 import { lifeActors, paintLeaves } from "./life.js";
@@ -27,6 +35,9 @@ function asset(path) {
   return images.get(path);
 }
 const paths = {
+  xiaochengWalk: "/assets/characters/xiaocheng-walk.png",
+  travelersA: "/assets/characters/station-travelers-a.png",
+  travelersB: "/assets/characters/station-travelers-b.png",
   fountain: "/assets/world/lotus-fountain.png",
   bridges: "/assets/world/stone-bridges.png",
   boat: "/assets/world/suzhou-passenger-boat.png",
@@ -58,6 +69,9 @@ const paths = {
   paving: "/assets/world/paving.webp",
   earth: "/assets/world/earth.png",
   house: "/assets/world/house.webp",
+  familyFurniture: "/assets/world/family-furniture.webp",
+  fallenChair: "/assets/world/family-fallen-chair.webp",
+  familyClutter: "/assets/world/family-clutter.webp",
   tree: "/assets/world/willow.webp",
   neighbors: "/assets/characters/neighbors.webp",
   indoorNpcs: "/assets/characters/indoor-npcs.png",
@@ -93,8 +107,20 @@ export function prepareCommonArt() {
 }
 export async function prepareArt(scene, onProgress = () => {}) {
   const names = new Set(commonArt);
+  for (const actor of scene.interactables || []) {
+    const art = travelerArt[actor.appearance || actor.id];
+    if (art) names.add(art.sheet);
+    if (actor.id === XIAOCHENG) names.add("xiaochengWalk");
+  }
   if (scene.interactables?.some((o) => bounds.gardenWorkers[o.appearance]))
     names.add("gardenWorkers");
+  if (scene.interactables?.some((o) => Number.isInteger(o.childIndex))) {
+    names.add("children");
+    names.add("roamersIdle");
+  }
+  if (scene.scenery?.some((o) => o.type === "family-furniture")) names.add("familyFurniture");
+  if (scene.scenery?.some((o) => o.sprite === "fallenChair")) names.add("fallenChair");
+  if (scene.scenery?.some((o) => o.type === "family-clutter")) names.add("familyClutter");
   // Interior backgrounds are fetched only when that room is entered.
   if (scene.id === "home" || scene.interior) {
     [
@@ -198,6 +224,8 @@ function atlasCrop(name, col, row, columns, rows) {
   const xs =
     name === "panda"
       ? pandaFrameEdges.map((n) => (n * img.naturalWidth) / 2172)
+      : name === "familyClutter"
+      ? [0, 556, 1000, 1536].map(n => n * img.naturalWidth / 1536)
       : name === "neighborWalk"
       ? [80, 320, 535, 750, 975].map((n) => (n * img.naturalWidth) / 1024)
       : Array.from(
@@ -662,8 +690,10 @@ export function draw(
     hover = null,
     guest = null,
     hungryGuest = null,
+    stationTraveler = null,
     seat = null,
     adventure = {},
+    completedPractice = [],
     settings = {},
     found = false,
     near = null,
@@ -726,7 +756,7 @@ export function draw(
     ctx.rect(overview.x, overview.y, overview.w, overview.h);
     ctx.clip();
   }
-  if (scene.id === "home" || scene.interior) {
+  if (scene.backgroundPath || scene.id === "home" || scene.interior) {
     const img = asset(scene.backgroundPath || paths.home);
     if (ready(img)) ctx.drawImage(img, 0, 0, scene.width, scene.height);
   } else {
@@ -748,7 +778,7 @@ export function draw(
       const earth = earthPattern;
       paintGround(ctx, scene, view, groundPattern, {
         time,
-        animate,
+        animate: animate && settings.motion !== false,
         earth,
         water: waterPattern,
         bridges: asset(paths.bridges),
@@ -767,6 +797,16 @@ export function draw(
         );
     }
   }
+  if (scene.id === "shantang") {
+    const img = asset(scene.backgroundPath);
+    if (ready(img)) paintStationEnvironment(ctx, img, time, settings.motion !== false, STATION_SCALE, p => {
+      sprite(ctx, "visitorWalk", p.x, p.y, 57, {
+        crop: atlasCrop("visitorWalk", p.frame, p.row, 4, 6),
+        flip: p.facing < 0,
+      });
+    });
+    paintStationSigns(ctx);
+  }
   // Walkable planks must be below actors, independent of their foot position.
   // The upright posts remain in the depth-sorted scenery pass.
   for (const o of scene.scenery.filter(
@@ -783,11 +823,12 @@ export function draw(
     scene.interior || scene.id === "home" ? 160 : actorSizes.player;
   const ambient = lifeActors(scene, time, player, settings.motion !== false);
   const entities = [
-    ...scene.scenery.filter((o) => o.type !== "boat-dock" && visible(o, view)),
+    ...scene.scenery.filter((o) => o.type !== "boat-dock" && visible(o, view) && !completedPractice.includes(o.hideAfterActivity)),
     ...scene.interactables.filter(
       (o) =>
         (o.type === "npc" &&
-          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === XIAOCHENG && (adventure.stationTraveler || "new") !== "new") &&
+          !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && hungryGuest) &&
           !(o.id === "qiao" && guest)) ||
         (o.type === "stuffy" && !o.hidden && !o.concealed && !hasCollectible(found, o.collectible || "momo")) ||
@@ -810,6 +851,7 @@ export function draw(
       : []),
     ...(guest ? [guest] : []),
     ...(hungryGuest ? [hungryGuest] : []),
+    ...(stationTraveler ? [stationTraveler] : []),
     ...(scene.roomForeground || []).map((polygon) => ({
       polygon,
       y: Math.max(...polygon.map(([, y]) => y)),
@@ -817,9 +859,15 @@ export function draw(
     })),
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].filter((o) => !overview || !["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"].includes(o.type))
-    .sort((a, b) => (a.artY ?? a.y) - (b.artY ?? b.y));
+    .sort((a, b) => (a.floor ? -1000 : a.artY ?? a.y) - (b.floor ? -1000 : b.artY ?? b.y));
   const marketMasks = marketForeground(scene.marketPlate);
+  const directionalProps = scene.scenery.filter(o => o.type === "station-prop" && o.prop.frontEdge);
+  const actorTypes = ["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"];
   for (const o of entities) {
+    const actorLayer = directionalProps.length && actorTypes.includes(o.type)
+      ? beginStationActorLayer(ctx, asset(scene.backgroundPath), directionalProps, npcFeet(o), STATION_SCALE)
+      : null;
+    if (actorLayer) ctx = actorLayer.context;
     const marketActor = marketMasks.length &&
       ["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"].includes(o.type);
     if (marketActor) {
@@ -932,10 +980,16 @@ export function draw(
       ctx.strokeStyle = "#43342b";
       ctx.fillStyle = "#fff9e9";
       const label =
-        adventure.xp >= AREA_XP ? "船·可以走了" : `船 · ${AREA_XP} XP`;
+        o.label || (adventure.xp >= AREA_XP ? "去苏州站" : `船 · ${AREA_XP} XP`);
       ctx.strokeText(label, o.x, o.y - o.h - 18);
       ctx.fillText(label, o.x, o.y - o.h - 18);
       ctx.restore();
+    } else if (o.type === "family-furniture" || o.type === "family-clutter") {
+      const atlas = o.sprite || (o.type === "family-clutter" ? "familyClutter" : "familyFurniture");
+      if (!ready(asset(paths[atlas]))) continue;
+      sprite(ctx, atlas, o.x, o.y, o.h, {
+        crop: o.sprite ? atlasCrop(atlas, 0, 0, 1, 1) : atlasCrop(atlas, o.spriteIndex % 3, Math.floor(o.spriteIndex / 3), 3, 2),
+      });
     } else if (o.type === "hotpot-table") {
       sprite(ctx, "hotpotTable", o.x, o.y + 18, 170, {
         crop: { x: 30, y: 150, w: 1195, h: 1025 },
@@ -1027,6 +1081,8 @@ export function draw(
       }
     } else if (o.type === "animal") {
       const marketCat = o.id === "courtyard-cat";
+      // A saved interior can briefly render the town while its assets load.
+      if (marketCat && !ready(asset(paths.marketCat))) continue;
       const frames = marketCat
         ? Array.from({ length: 9 }, (_, i) => atlasCrop("marketCat", i % 3, Math.floor(i / 3), 3, 3))
         : bounds.animals?.[o.animal];
@@ -1082,13 +1138,14 @@ export function draw(
           o.y - height - 12,
           varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time),
         );
-    } else if (o.type === "passerby" || o.type === "guest") {
+    } else if (o.type === "passerby" || o.type === "guest" || (o.type === "npc" && Number.isInteger(o.childIndex))) {
       shadow(ctx, o.x, o.y, 25);
-      const height = o.seated ? (o.id === "qiao" ? actorSizes.player : 130) : scene.interior ? 165 : o.artHeight || 165;
-      const child = ["kid-one", "kid-two"].includes(o.id);
+      const height = o.seated ? (o.id === "qiao" ? actorSizes.player : 130) : Number.isInteger(o.childIndex) ? o.artHeight || 120 : scene.interior ? 165 : o.artHeight || 165;
+      const child = Number.isInteger(o.childIndex) || ["kid-one", "kid-two"].includes(o.id);
+      const childIndex = o.childIndex ?? Number(o.id === "kid-two");
       const visitor = o.id.startsWith("visitor-");
       const row = child
-        ? Number(o.id === "kid-two")
+        ? childIndex
         : visitor
           ? Number(o.id.slice(8))
           : ["qiao", "bo", "lan", "wei", "an", "hao"].indexOf(o.appearance);
@@ -1099,7 +1156,7 @@ export function draw(
           : o.id === "lin"
             ? "linWalk"
             : "neighborWalk";
-      const idleIndex = child ? 6 + Number(o.id === "kid-two") : visitor ? row : o.id === "lin" ? 8 : -1;
+      const idleIndex = child ? 6 + childIndex : visitor ? row : o.id === "lin" ? 8 : -1;
       const idle = idleIndex >= 0 && (!o.moving || settings.motion === false);
       const atlas = idle ? "roamersIdle" : walkingAtlas;
       const col = o.moving && settings.motion !== false ? Math.floor(o.distance / 18) % 4 : 1;
@@ -1186,9 +1243,13 @@ export function draw(
         });
       }
     } else if (o.type === "npc") {
+      ctx.save();
+      ctx.globalAlpha *= o.opacity ?? 1;
       const feet = npcFeet(o);
       const height = o.artHeight || actorSizes[o.id];
       if (!o.painted && o.id !== "mei") shadow(ctx, o.x, o.y, 30);
+      const traveler = travelerArt[o.appearance || o.id];
+      const walkingTraveler = o.departing && o.id === XIAOCHENG;
       const neighbor = bounds.neighbors?.[o.appearance || o.id];
       const indoorNpc = bounds.indoorNpcs?.[o.appearance || o.id];
       const marketNpc = bounds.marketNpcs?.[o.appearance || o.id];
@@ -1196,7 +1257,11 @@ export function draw(
       if (!o.painted)
         sprite(
           ctx,
-          gardenWorker
+          walkingTraveler
+            ? xiaochengWalkArt.sheet
+            : traveler
+            ? traveler.sheet
+            : gardenWorker
             ? "gardenWorkers"
             : marketNpc
               ? "marketNpcs"
@@ -1204,26 +1269,35 @@ export function draw(
                 ? "indoorNpcs"
                 : neighbor
                   ? "neighbors"
-                  : o.id,
+                  : o.appearance || o.id,
           feet.x,
           feet.y,
           height,
           {
-            crop: gardenWorker
+            crop: walkingTraveler
+              ? xiaochengWalkArt[o.walkDirection][settings.motion === false ? 1 : Math.floor(o.distance / 22) % 4]
+              : traveler
+              ? traveler.frames[travelerIdleFrame(o, time, animate && settings.motion !== false)]
+              : gardenWorker
               ? gardenWorker[gardenWorkFrame(o, time, animate && settings.motion !== false)]
               : marketNpc || indoorNpc || neighbor,
-            ...(!gardenWorker && npcIdlePose(o, time, animate && settings.motion !== false)),
-            breathe: animate && !gardenWorker ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
+            ...(!traveler && !gardenWorker && npcIdlePose(o, time, animate && settings.motion !== false)),
+            flip: Boolean(traveler && o.facing < 0),
+            ...(walkingTraveler ? { uniformHeight: xiaochengWalkArt.height } : {}),
+            breathe: animate && settings.motion !== false && !traveler && !gardenWorker ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
             highlight: Boolean(o.id && hover?.id === o.id),
           },
         );
-      if (o.bubbles && Math.floor(time / 5 + o.x) % 3 !== 2)
+      if (o.bubbles && (o.travelGroup
+        ? Math.floor(time / 5) % 2 === o.groupSpeaker
+        : Math.floor(time / 5 + o.x) % 3 !== 2))
         speechBubble(
           ctx,
           feet.x,
           feet.y - height - 12,
-          varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time),
+          (traveler ? o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length] : varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time)),
         );
+      ctx.restore();
     } else if (o.type === "panda") {
       shadow(ctx, o.x, o.y, 30);
       const walking = pandaMoving && settings.motion !== false;
@@ -1254,6 +1328,19 @@ export function draw(
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
       sprite(ctx, o.collectible === "fox-plush" ? "fox" : "momo", o.x, o.y, actorSizes.momo);
+    } else if (o.type === "station-prop" && scene.backgroundPath) {
+      const img = asset(scene.backgroundPath);
+      if (ready(img) && !o.prop.frontEdge) paintStationProp(ctx, img, o.prop, STATION_SCALE);
+      if (o.id === "north-banner" && ready(img) && settings.motion !== false)
+        paintStationBanner(ctx, img, time, STATION_SCALE);
+      if (o.id === "travel-poster") {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(843 * STATION_SCALE, 325 * STATION_SCALE, 110 * STATION_SCALE, 137 * STATION_SCALE);
+        ctx.clip();
+        paintStationSigns(ctx);
+        ctx.restore();
+      }
     } else if (o.type === "room-foreground" && scene.backgroundPath) {
       const img = asset(scene.backgroundPath);
       if (!ready(img)) continue;
@@ -1265,6 +1352,16 @@ export function draw(
       ctx.closePath();
       ctx.clip();
       ctx.drawImage(img, 0, 0, scene.width, scene.height);
+      if (scene.id === "shantang") {
+    const img = asset(scene.backgroundPath);
+    if (ready(img)) paintStationEnvironment(ctx, img, time, settings.motion !== false, STATION_SCALE, p => {
+      sprite(ctx, "visitorWalk", p.x, p.y, 57, {
+        crop: atlasCrop("visitorWalk", p.frame, p.row, 4, 6),
+        flip: p.facing < 0,
+      });
+    });
+    paintStationSigns(ctx);
+  }
       ctx.restore();
     } else if (
       o.type === "foreground" &&
@@ -1292,6 +1389,10 @@ export function draw(
       ctx.restore();
     }
     if (marketActor) ctx.restore();
+    if (actorLayer) {
+      actorLayer.finish();
+      ctx = actorLayer.parent;
+    }
   }
   for (const o of scene.interactables) {
     const building = scene.scenery.find((b) => b.doorId === o.id);

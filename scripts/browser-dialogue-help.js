@@ -69,12 +69,16 @@ try {
   assert.equal(await presets.count(), 3);
   const initialPresets = await presets.allTextContents();
   assert.equal(initialPresets[0], "How can I respond to this?");
+  assert.equal(initialPresets[1], "Can you explain this dialogue to me?");
   const chinese = await page.locator("#npc-zh").textContent();
-  for (const question of initialPresets.slice(1)) assert.ok(chinese.includes(question.match(/“(.*?)”/)[1]));
+  assert.ok(chinese.includes(initialPresets[2].match(/“(.*?)”/)[1]));
   // Real authored grammar answer, with English help independent of translation settings.
   await page.locator("#coach-question").fill("Why use 吗 here?");
   await page.locator("#coach-send").click();
   await page.waitForFunction(() => document.querySelector("#coach-tip").textContent.includes("yes/no question"));
+  await presets.nth(1).click();
+  await page.waitForFunction(() => !document.querySelector("#coach-send").disabled);
+  assert.match(await page.locator("#coach-tip").textContent(), /yes\/no question|action is complete|suggestion|links an owner|person \+ action/);
   const requests = [];
   await page.route("**/api/coach", async route => {
     requests.push(route.request().postDataJSON());
@@ -95,7 +99,8 @@ try {
   await page.waitForFunction(() => document.querySelector("#npc-zh").textContent === "你喜欢看什么书？");
   await page.locator("#foreground-panda").click();
   assert.notDeepEqual(await presets.allTextContents(), initialPresets);
-  for (const question of (await presets.allTextContents()).slice(1)) assert.ok("你喜欢看什么书？".includes(question.match(/“(.*?)”/)[1]));
+  assert.deepEqual((await presets.allTextContents()).slice(0, 2), initialPresets.slice(0, 2));
+  assert.ok("你喜欢看什么书？".includes((await presets.nth(2).textContent()).match(/“(.*?)”/)[1]));
   await presets.nth(1).click();
   await page.waitForFunction(() => !document.querySelector("#coach-send").disabled);
   assert.ok(requests.at(-1).context.includes("你喜欢看什么书？"));

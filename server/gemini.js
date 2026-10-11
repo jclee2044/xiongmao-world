@@ -27,7 +27,11 @@ export async function geminiGenerate(
       }),
     },
   );
-  if (!response.ok) throw new Error("Gemini model unavailable.");
+  if (!response.ok)
+    throw Object.assign(new Error("Gemini model unavailable."), {
+      code: response.status === 429 ? "provider-quota" : "provider-unavailable",
+      status: response.status,
+    });
   const body = await response.json();
   const output = body.candidates?.[0]?.content?.parts
     ?.filter((part) => typeof part.text === "string")

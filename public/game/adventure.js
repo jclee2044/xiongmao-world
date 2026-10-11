@@ -39,7 +39,7 @@ export function createAdventure({
     generation = 0;
   const text = (zh, pinyin, meaning) =>
     `<p class="chinese" lang="zh-CN">${escape(zh)}</p>${settings().pinyin ? `<p class="pinyin">${escape(pinyin)}</p>` : ""}${settings().translation ? `<p class="meaning">${escape(meaning)}</p>` : ""}`;
-  function line(title, zh, pinyin, meaning, buttons = [], voice = "male") {
+  function line(title, zh, pinyin, meaning, buttons = [], voice = "panda") {
     openPanel(
       title,
       text(zh, pinyin, meaning) +
@@ -301,6 +301,15 @@ export function createAdventure({
       return true;
     }
     if (o.type === "gate") {
+      const board = () => {
+        change((a) => { a.boatTaken = true; });
+        speech.stop();
+        world().changeScene(o.target);
+      };
+      if (state().boatTaken) {
+        board();
+        return true;
+      }
       const unlocked = state().xp >= AREA_XP;
       line(
         "河边的大船",
@@ -320,8 +329,7 @@ export function createAdventure({
                   // Re-check at boarding, including after a save conflict or state refresh.
                   if (state().xp < AREA_XP) return interact(o);
                   $("panel").close();
-                  speech.stop();
-                  world().changeScene(o.target);
+                  board();
                   panda("走吧！我们一起去看看吧。");
                 },
               ],
@@ -364,7 +372,7 @@ export function createAdventure({
           const item = hotpotItems.find((i) => i.id === b.dataset.learnFood);
           $("food-name").textContent =
             item.zh + " · " + item.pinyin + " · " + item.en;
-          speech.speak(item.zh);
+          speech.speak(item.zh, false, "panda");
         }),
     );
     const work = $("hotpot-work");
@@ -393,11 +401,11 @@ export function createAdventure({
                 .join("和") +
               "。";
             hotpot();
-            if (ingredient) speech.speak(ingredient.zh);
+            if (ingredient) speech.speak(ingredient.zh, false, "panda");
           }),
       );
       $("hotpot-read").onclick = () =>
-        speech.speak("我要豆腐、菜和蘑菇。不要辣。");
+        speech.speak("我要豆腐、菜和蘑菇。不要辣。", false, "panda");
       $("hotpot-review").onclick = () => {
         meal.order = $("hotpot-order").value.trim();
         meal.selected = parseOrder(meal.order);
@@ -426,7 +434,7 @@ export function createAdventure({
       $("hotpot-confirm").onclick = () => {
         meal.phase = "serve";
         hotpot();
-        speech.speak("好的，请等一下。菜来了！");
+        speech.speak("好的，请等一下。菜来了！", false, voiceForNpc("waiter"));
       };
     } else if (meal.phase === "serve") {
       work.innerHTML =
@@ -439,15 +447,19 @@ export function createAdventure({
           .filter(
             (i) => !meal.cooked.includes(i.id) && !meal.eaten.includes(i.id),
           )
-          .map((i) => `<button data-cook="${i.id}">放进${i.zh}</button>`)
+          .map((i) => `<button data-cook="${i.id}">把${i.zh}放进锅里</button>`)
           .join(
             "",
-          )}</div><p class="notice">点一下火锅里的东西，尝一口。${settings().translation ? "Tap an ingredient in the pot to taste it." : ""}</p>`;
+          )}</div><details class="hotpot-grammar"><summary>把东西放在哪里？</summary><p class="chinese">把豆腐放进锅里。把菜放进碗里。</p><p lang="en">Use 把 + the thing + what you do to it + where it goes. 放进 means “put into”; 了 marks the completed action.</p></details><p class="notice">点一下火锅里的东西，尝一口。${settings().translation ? "Tap an ingredient in the pot to taste it." : ""}</p>`;
       document.querySelectorAll("[data-cook]").forEach(
         (b) =>
           (b.onclick = () => {
-            meal.cooked.push(b.dataset.cook);
+            const item = hotpotItems.find((i) => i.id === b.dataset.cook);
+            meal.cooked.push(item.id);
             hotpot();
+            const sentence = `我把${item.zh}放进锅里了。`;
+            $("food-name").textContent = sentence;
+            speech.speak(sentence, false, "panda");
           }),
       );
       document.querySelectorAll("[data-eat]").forEach(
@@ -456,7 +468,7 @@ export function createAdventure({
             const id = b.dataset.eat;
             meal.cooked = meal.cooked.filter((x) => x !== id);
             meal.eaten.push(id);
-            speech.speak(`${hotpotItems.find((i) => i.id === id).zh}很好吃。`);
+            speech.speak(`我把${hotpotItems.find((i) => i.id === id).zh}放进碗里，尝了一口。`, false, "panda");
             if (meal.eaten.length === meal.selected.length) {
               meal.phase = "done";
               change((a) => {

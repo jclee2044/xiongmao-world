@@ -1,8 +1,12 @@
+import { STATION_SCALE } from "./station-exterior.js";
 import { scenes, interactionPoint } from "../game/world.js";
 
 // Authoritative orientation: north = screen up, east = screen right.
 // Coordinates come from the same scene data as walking and the Map buttons.
 export const locationNotes = {
+  "south-home-east": ["陈叔叔家", "Family home", "南边，衣服店的右边。", "At the southern edge of town, to the right of the clothing shop."],
+  "station-entrance": ["苏州站售票处", "Station ticket office", "过桥以后，往右边走，再往上走。售票处在门里左边。", "Cross the bridge to the right, then head right and north to the doorway. The ticket office is on the left inside the public vestibule."],
+  "back-town": ["坐船回河边", "Return boat", "船在左边的码头。", "The return boat is on the west quay."],
   "next-area": [
     "河边的大船",
     "大船",
@@ -145,6 +149,8 @@ export function worldDirectory() {
   );
 }
 export function requestedPlace(text) {
+  if (/陈叔叔|陈奶奶|陈爷爷|小乐|小宁|family home|southern house/i.test(text)) return "south-home-east";
+  if (/售票|车站|苏州站|ticket|station/i.test(text)) return "station-entrance";
   if (/游船|码头|坐船|boat|ferry|dock|next area/i.test(text))
     return "next-area";
   if (/火锅|面馆|hot.?pot|restaurant/i.test(text)) return "dumplings";
@@ -161,8 +167,23 @@ export function requestedPlace(text) {
   );
 }
 export function directionsTo(id, state = {}) {
+  if (id === "next-area" && state.scene === "shantang") id = "back-town";
   const note = locationNotes[id];
   if (!note) return null;
+  if (["station-entrance", "back-town"].includes(id)) {
+    const target = scenes.shantang.interactables.find(o => o.id === id);
+    const atStation = state.scene === "shantang";
+    const east = atStation && (state.position?.x > 600 * STATION_SCALE || state.position?.y < 470 * STATION_SCALE);
+    const chinese = id === "station-entrance" && east
+      ? "售票处在北边车站的门里左边。跟着广场的石头路走。"
+      : note[2];
+    const meaning = id === "station-entrance" && east
+      ? "The ticket office is on the left inside the station doorway to the north. Follow the forecourt paving."
+      : note[3];
+    return { id, scene: atStation ? "shantang" : "shanghai", target: atStation ? interactionPoint(target) : interactionPoint(scenes.shanghai.interactables.find(o => o.id === "next-area")),
+      chinese: atStation ? chinese : "先去河边码头，坐船到苏州站。",
+      meaning: atStation ? meaning : "First take the boat from the town canal dock to the Suzhou Station quay." };
+  }
   const target = scenes.shanghai.interactables.find((o) => o.id === id);
   if (!target) return null;
   let approach = "跟着路走。过河要从桥上走。";
@@ -182,9 +203,10 @@ export function directionsTo(id, state = {}) {
   const inside = state.scene && !["shanghai", "shantang"].includes(state.scene);
   return {
     id,
+    scene: "shanghai",
     target: interactionPoint(target),
-    chinese: (inside ? "先出门。" : "") + note[2] + approach,
-    meaning: (inside ? "First go outside. " : "") + note[3] + " " + english,
+    chinese: (inside ? "先出门。" : state.scene === "shantang" ? "先坐船回河边。" : "") + note[2] + approach,
+    meaning: (inside ? "First go outside. " : state.scene === "shantang" ? "First take the return boat to town. " : "") + note[3] + " " + english,
   };
 }
 export function navigationContext(state, text = "") {

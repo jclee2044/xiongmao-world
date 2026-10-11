@@ -157,7 +157,7 @@ export function goalCards(a) {
     ],
     departure: [
       "Take the boat",
-      "Board at the southeast canal dock to visit Shantang.",
+      "Board at the southeast canal dock to visit the Suzhou Station quay.",
     ],
     complete: [
       "Enjoy the town",

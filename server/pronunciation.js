@@ -24,7 +24,8 @@ const carriers = {
   数: { shu: "数", shuo: "硕" },
   觉: { jue: "觉", jiao: "叫" },
   调: { tiao: "条", diao: "掉" },
-  地: { de: "的", di: "地" },
+  // Kokoro's 地 entry is de; 第 supplies di phones in every installed model.
+  地: { de: "的", di: "第" },
   只: { zhi: "只" },
   相: { xiang: "相" },
   难: { nan: "难" },
@@ -51,6 +52,7 @@ const carriers = {
   曾: { ceng: "层", zeng: "增" },
   给: { gei: "给", ji: "寄" },
   会: { hui: "会", kuai: "快" },
+  和: { he: "和", huo: "火" },
 };
 
 export function pronunciationFor(text, context, options = {}) {

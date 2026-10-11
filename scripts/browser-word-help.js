@@ -1,4 +1,3 @@
-import { voiceProfiles } from "../public/data/voices.js";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { Store } from "../server/store.js";
@@ -53,10 +52,9 @@ try {
       assert.ok(await page.locator("#word-callout em").textContent());
       assert.ok(await page.locator("#word-callout span").textContent());
       assert.equal(await page.evaluate(() => window.spoken.at(-1).word), word);
-      assert.ok(
-        Object.keys(voiceProfiles).includes(
-          await page.evaluate(() => window.spoken.at(-1).voice),
-        ),
+      assert.equal(
+        await page.evaluate(() => window.spoken.at(-1).voice),
+        "panda",
       );
       await page.keyboard.press("Escape");
     }

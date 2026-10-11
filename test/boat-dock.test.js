@@ -5,11 +5,23 @@ import {
   canStand,
   move,
   interactionPoint,
+  pointInPolygon,
 } from "../public/game/world.js";
 import { pathTo } from "../public/game/pathfinding.js";
 
 const scene = scenes.shanghai;
 const dock = scene.scenery.find((o) => o.type === "boat-dock");
+
+test("the boat canal flows to the eastern map edge without a walkable land strip", () => {
+  const canal = scene.canals.find((o) => o.w > 2000 && o.y > 2000);
+  const y = canal.y + canal.h / 2;
+  assert.ok(Math.abs(Math.max(...canal.polygon.map(([x]) => x)) - scene.width) < 0.01);
+  for (const inset of [16, 24, 40]) {
+    const x = scene.width - inset;
+    assert.ok(pointInPolygon(x, y, canal.polygon));
+    assert.equal(canStand(scene, x, y), false);
+  }
+});
 
 test("the pier deck can be crossed and the boat approach stays connected", () => {
   const start = { x: dock.x - dock.w, y: dock.y - 18 };

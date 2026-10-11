@@ -6,6 +6,7 @@ export function createLandmarkPanda({
   hide,
   random = Math.random,
   getFound = () => false,
+  getCompletedPractice = () => [],
 }) {
   let sceneId,
     entered = new Set(),
@@ -25,7 +26,7 @@ export function createLandmarkPanda({
       entered.clear();
       sceneId = scene.id;
     }
-    const areas = landmarkAreas(scene).filter(a =>
+    const areas = landmarkAreas(scene, getCompletedPractice()).filter(a =>
       a.id === "stuffie" ? !getFound("momo") :
       a.id === "fox-plush" ? !getFound("fox-plush") : true);
     for (const id of entered) {

@@ -377,17 +377,17 @@ const alternatives = new Map([
     ],
   ],
   [
-    "欢迎来到山塘！你喜欢听故事，还是听音乐？",
+    "我们到苏州站了！你喜欢听故事，还是听音乐？",
     [
       [
-        "欢迎来山塘！故事和音乐，你喜欢听哪一种？",
-        "Welcome to Shantang! Which do you like listening to: stories or music?",
-        "huān yíng lái shān táng ！ gù shì hé yīn yuè ， nǐ xǐ huan tīng nǎ yì zhǒng ？",
+        "到苏州站了！故事和音乐，你喜欢听哪一种？",
+        "We have arrived at Suzhou Station! Which do you like listening to: stories or music?",
+        "dào sū zhōu zhàn le ！ gù shì hé yīn yuè ， nǐ xǐ huan tīng nǎ yì zhǒng ？",
       ],
       [
-        "山塘欢迎你！你爱听故事，还是音乐？",
-        "Shantang welcomes you! Do you enjoy listening to stories or music?",
-        "shān táng huān yíng nǐ ！ nǐ ài tīng gù shì ， hái shì yīn yuè ？",
+        "在车站休息一下吧！你爱听故事，还是音乐？",
+        "Let’s rest at the station! Do you enjoy listening to stories or music?",
+        "zài chē zhàn xiū xi yí xià ba ！ nǐ ài tīng gù shì ， hái shì yīn yuè ？",
       ],
     ],
   ],

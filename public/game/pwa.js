@@ -11,7 +11,7 @@ export async function registerPwa({ onUpdate, onStatus }) {
     });
     const announce = () => {
       if (registration.waiting)
-        onUpdate(() =>
+        onUpdate?.(() =>
           registration.waiting?.postMessage({ type: "ACTIVATE_UPDATE" }),
         );
     };

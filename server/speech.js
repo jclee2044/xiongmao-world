@@ -127,6 +127,15 @@ export function synthesize(text, slow = false, voice = "male", context) {
       );
     });
   return voice === "panda"
-    ? cachedPandaSpeech({ text, slow, pronunciation, profile }, generate)
+    ? cachedPandaSpeech(
+        {
+          text,
+          slow,
+          pronunciation,
+          profile,
+          ...(/[A-Za-z]/.test(text) ? { frontend: "zh-en-v1" } : {}),
+        },
+        generate,
+      )
     : generate();
 }

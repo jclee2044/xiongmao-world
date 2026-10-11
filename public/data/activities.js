@@ -1,3 +1,4 @@
+import { suzhouActivities } from "./suzhou-life.js";
 import { culturalActivities } from "./cultural-activities.js";
 export { correctRiddle, finishedPattern, marketTotal, marketResult } from "./cultural-activities.js";
 
@@ -127,6 +128,7 @@ export const activities = [
     ],
   },
   ...culturalActivities,
+  ...suzhouActivities,
 ];
 export const activityById = Object.fromEntries(activities.map((a) => [a.id, a]));
 export const newPractice = () => ({ completed: [], active: null, rounds: {} });

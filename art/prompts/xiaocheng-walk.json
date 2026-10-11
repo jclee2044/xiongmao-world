@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "prompt": "Use case: illustration-story. Asset type: transparent game walking sprite atlas. Use the attached atlas as a CHARACTER AND STYLE REFERENCE ONLY: the young man in its TOP ROW is Xiaocheng. Create a new atlas of only that same young man, preserving face, youthful proportions, short tousled dark hair, mustard tan jacket, cream shirt, charcoal trousers, white sneakers, teal backpack and small tan crossbody satchel. His paper map is put away for walking. Painterly cozy watercolor/anime game style matching the reference, thin soft outlines and detailed clothing. Exactly 8 separate full-body walking sprites in a strict evenly spaced 4 column by 2 row grid, on real transparent background, no labels or other people. Each cell same size, each character same height, generous transparent gap, heads and feet never cropped, feet on a common baseline per row. Top row: side/three-quarter view walking toward screen RIGHT, 4 coherent gait phases in sequence (left foot forward, passing step, right foot forward, passing step). Bottom row: rear three-quarter view walking AWAY toward screen UP-RIGHT, 4 coherent gait phases, teal backpack clearly visible. Arms swing naturally, steps clearly alternate, consistent identity, clothing and scale in all frames. No ground, no painted shadows, no text, no borders. Square atlas.",
+  "transparent_background": true,
+  "reference": "public/assets/characters/station-travelers-a.png",
+  "saved_asset": "public/assets/characters/xiaocheng-walk.png"
+}

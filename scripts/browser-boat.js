@@ -31,6 +31,7 @@ async function seed(scene, position, adventure = {}) {
   Object.assign(state, { scene, position, mapVersion: MAP_VERSION });
   Object.assign(state.settings, { voice: false, music: 0, ambience: 0 });
   Object.assign(state.adventure, adventure);
+  state.history = [{ npc: "lin", user: "你好", reply: { chinese: "你好！", pinyin: "nǐ hǎo", meaning: "Hello!", topic: "greeting" } }];
   const saved = await context.request.post(base + "/api/state", {
     headers: { Origin: base },
     data: { revision: first.revision, state },
@@ -144,14 +145,53 @@ try {
       );
       const saved = await cached();
       assert.equal(saved.adventure.xp, 500);
+      assert.equal(saved.adventure.boatTaken, true);
+      assert.equal(saved.history[0].user, "你好", "Conversation history survives both boat trips");
       assert.ok(
         Math.hypot(saved.position.x - dock.x, saved.position.y - dock.y) < 5,
       );
+      // The first trip survives reload; later Space and click trips skip the panel.
+      await page.reload();
+      await page.click("#begin");
+      await page.waitForFunction(
+        () => document.querySelector("#world").dataset.artReady === "true",
+      );
+      await page.evaluate(() => {
+        window.loadingShown = false;
+        const overlay = document.querySelector("#scene-loading");
+        new MutationObserver(() => {
+          if (!overlay.hidden) window.loadingShown = true;
+        }).observe(overlay, { attributes: true, attributeFilter: ["hidden"] });
+      });
+      await page.route("**/assets/optimized/station-exterior-v2.webp", async route => {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        await route.continue();
+      });
+      await page.locator("#world").focus();
+      await page.keyboard.press("Space");
+      await page.waitForFunction(
+        () => document.querySelector("#world").dataset.scene === "shantang" &&
+          document.querySelector("#world").dataset.artReady === "true",
+      );
+      assert.equal(await page.locator("#panel").isVisible(), false);
+      assert.equal(await page.evaluate(() => window.loadingShown), false);
+      await clickWorld(exit.x, exit.y);
+      await page.waitForFunction(
+        () => document.querySelector("#world").dataset.scene === "shanghai" &&
+          document.querySelector("#world").dataset.artReady === "true",
+      );
+      await clickWorld(boat.hitRect.x + boat.hitRect.w / 2, boat.hitRect.y + boat.hitRect.h * 0.6);
+      await page.waitForFunction(
+        () => document.querySelector("#world").dataset.scene === "shantang" &&
+          document.querySelector("#world").dataset.artReady === "true",
+      );
+      assert.equal(await page.locator("#panel").isVisible(), false);
+      assert.equal(await page.evaluate(() => window.loadingShown), false);
     }
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Pier crossing and post collisions, boat click-to-walk, Space, 0/499 XP locks, 500 XP boarding, goal and dock return passed.",
+    "Pier crossing and post collisions, boat click-to-walk, Space, 0/499 XP locks, 500 XP boarding, goal, dock return, saved repeat travel and hidden loading overlay passed.",
   );
 } catch (error) {
   await page?.screenshot({ path: "test-results/boat-failure.png" });

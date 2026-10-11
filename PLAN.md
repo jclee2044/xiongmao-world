@@ -101,3 +101,20 @@ The lantern, silk-color and budget-shopping candidates are implemented in versio
 6. Implement a first-person hot-pot loop with typed and local microphone ordering, explicit transcript review, serving/cooking/eating and completion XP. Select female Mandarin voices for female NPCs, keep audio local and stop microphone tracks on close/visibility changes.
 7. Restyle panels with cream/brown frames, selection feedback and smooth reduced-motion-aware transitions. Cache all new offline assets and preserve mobile touch controls, save conflicts and existing opt-in pinyin.
 8. Run unit/API, all-destination and browser checks on isolated in-memory servers; inspect desktop/mobile screenshots, document real-device/voice limits, commit and restart the game.
+
+## City learning requirements — 2026-10-10
+
+### Shanghai level — planned content
+
+The future Shanghai level needs a hospital with conversations and useful tasks for describing symptoms and body parts, being sick, visiting a doctor, and discussing medicine. Health and illness are among the clearest remaining old HSK 2–3 coverage gaps.
+
+Shanghai also needs corporate work environments: offices and colleagues, introductions and job roles, meetings, schedules, asking for leave, and everyday work tasks. Build actual situations and interactions around these topics.
+
+The current Suzhou town still uses the legacy scene ID `shanghai` for save compatibility. These Shanghai requirements refer to the future city level, not that internal ID.
+
+### Suzhou — household and seasonal content
+
+- Expand weather coverage with clearly labeled sample forecasts, temperatures and all four seasons. Add suitable-clothing conversations and practice to the existing clothing shop.
+- Include Chinese New Year through family preparations, cleaning before the holiday, food, greetings and red envelopes; acknowledge that family traditions vary.
+- Enlarge the southern house beside the clothing shop to fit the neighboring building scale. Make it enterable, with a father, two children and their paternal grandparents. Add separate furniture and household-object sprites informed by Suzhou housing and furniture research. Cover cleaning, washing, organizing belongings, finding misplaced objects, and describing rooms and appliances through activities offered by the family members. Keep the household environment as scenery, with Panda providing observations about the room.
+- Make the hotpot restaurant demonstrate 把 with ingredient actions, including putting food into the pot and transferring it to a bowl.

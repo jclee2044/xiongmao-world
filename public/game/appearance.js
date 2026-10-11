@@ -136,3 +136,10 @@ export function lianPose({
   const frame = seated ? 5 : moving ? 1 + (Math.floor(distance / 18) % 4) : 0;
   return { col: frame % 3, row: Math.floor(frame / 3) };
 }
+
+// A quiet travel gesture, with a longer rest between loops. Reduced motion uses neutral.
+export function travelerIdleFrame(actor, time, animate) {
+  if (!animate) return 0;
+  const phase = [...actor.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 16;
+  return [0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0][(Math.floor(time * 2) + phase) % 16];
+}

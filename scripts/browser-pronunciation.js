@@ -90,7 +90,11 @@ try {
     await page.locator("#world").focus();
     await page.keyboard.press("Space");
     await page.locator("#conversation").waitFor();
-    for (const text of [line, "你的耳朵长得真长。"]) {
+    for (const text of [
+      line,
+      "你的耳朵长得真长。",
+      "我带了地图，但是找不到售票处。你知道在哪儿吗？",
+    ]) {
       line = text;
       await page.locator("#reply").fill("你好");
       await page.locator("#send").click();
@@ -98,29 +102,35 @@ try {
         (text) => document.querySelector("#npc-zh").textContent === text,
         text,
       );
+      const target = text.includes("地图") ? "地图" : "长";
+      const pinyin = target === "地图" ? "dì tú" : "cháng";
       const word = page
         .locator("#npc-zh .help-word")
-        .filter({ hasText: /^长$/ });
+        .filter({ hasText: new RegExp(`^${target}$`) });
       await word.waitFor();
-      assert.equal(await word.getAttribute("data-pinyin"), "cháng");
+      assert.equal(await word.getAttribute("data-pinyin"), pinyin);
       const count = requests.length;
       const pending = page.waitForRequest(
         (request) =>
           request.url().endsWith("/api/speech") &&
-          request.postDataJSON().text === "长",
+          request.postDataJSON().text === target,
       );
       await word.click();
       const replay = (await pending).postDataJSON();
       assert.deepEqual(replay.context, {
         source: text,
-        start: text.lastIndexOf("长"),
+        start: text.lastIndexOf(target),
       });
-      assert.equal(
-        speechPronunciation(replay.text, replay.context)[0].pinyin,
-        "chang2",
+      assert.deepEqual(
+        speechPronunciation(replay.text, replay.context).map(
+          (row) => row.pinyin,
+        ),
+        target === "地图" ? ["di4", "tu2"] : ["chang2"],
       );
       assert.ok(requests.length > count);
-      assert.match(await page.locator("#word-callout").textContent(), /cháng/);
+      assert.ok(
+        (await page.locator("#word-callout").textContent()).includes(pinyin),
+      );
       await page.keyboard.press("Escape");
       if (text.includes("长得")) {
         const growth = page

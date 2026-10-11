@@ -1,3 +1,4 @@
+import { connectStationTicketing } from "../data/station-exterior.js";
 import { townRooms, homeObjects } from "../data/town-rooms.js";
 import { collectibleAvailable } from "./collectibles.js";
 import { validateAdventure } from "../data/adventure.js";
@@ -7,7 +8,7 @@ import { refineMarket } from "../data/market.js";
 import { buildTown } from "../data/town.js";
 import artBounds from "../data/art-bounds.js";
 import { interiors } from "../data/interiors.js";
-export const MAP_VERSION = 13;
+export const MAP_VERSION = 14;
 const OUTDOOR_SCALE = 0.9;
 export const landmark = { x: 0, y: 2046, w: 1254, h: 1254 };
 const lane = [
@@ -1011,6 +1012,7 @@ for (const b of scenes.shanghai.bridges) {
   }
 }
 Object.assign(scenes, townRooms);
+connectStationTicketing(scenes);
 scenes.shantang.interactables.find((o) => o.id === "back-town").returnPoint =
   interactionPoint(
     scenes.shanghai.interactables.find((o) => o.id === "next-area"),
@@ -1087,7 +1089,22 @@ export function pointInPolygon(x, y, polygon) {
   }
   return inside;
 }
+// Scene collision polygons are immutable after registry construction. Reject
+// distant props before tracing their edges; the station has many small bases.
+const collisionBounds = new WeakMap();
 function circleHitsPolygon(x, y, r, polygon) {
+  let bounds = collisionBounds.get(polygon);
+  if (!bounds) {
+    bounds = {
+      left: Math.min(...polygon.map(p => p[0])),
+      right: Math.max(...polygon.map(p => p[0])),
+      top: Math.min(...polygon.map(p => p[1])),
+      bottom: Math.max(...polygon.map(p => p[1])),
+    };
+    collisionBounds.set(polygon, bounds);
+  }
+  if (x + r < bounds.left || x - r > bounds.right ||
+      y + r < bounds.top || y - r > bounds.bottom) return false;
   if (pointInPolygon(x, y, polygon)) return true;
   for (let i = 0; i < polygon.length; i++) {
     const [ax, ay] = polygon[i],
@@ -1173,6 +1190,13 @@ export function move(scene, position, dx, dy) {
   const next = { ...position },
     steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 6));
   for (let i = 0; i < steps; i++) {
+    // Follow the requested segment before trying wall sliding. In a narrow
+    // diagonal gap, both axis-only steps can collide even when this step is clear.
+    if (canStand(scene, next.x + dx / steps, next.y + dy / steps)) {
+      next.x += dx / steps;
+      next.y += dy / steps;
+      continue;
+    }
     if (canStand(scene, next.x + dx / steps, next.y)) next.x += dx / steps;
     if (canStand(scene, next.x, next.y + dy / steps)) next.y += dy / steps;
   }
@@ -1200,6 +1224,13 @@ export function districtAt(scene, position) {
   );
 }
 export function upgradeState(state) {
+  // Only the station changed in v14. Keep town/interior positions and history;
+  // old station coordinates belong to the replaced layout and arrive at the quay.
+  if (state.mapVersion === 13)
+    state = {
+      ...state, mapVersion: MAP_VERSION,
+      position: state.scene === "shantang" ? { ...scenes.shantang.spawn } : state.position,
+    };
   // A save made inside the removed courtyard returns to its new open square.
   if (state.scene === "pingtan-room")
     state = {
@@ -1220,7 +1251,7 @@ export function upgradeState(state) {
               ...state.position,
               x: westBankX(state.position.x / townScale) * townScale,
             }
-          : { ...state.position },
+          : state.scene === "shantang" ? { ...scenes.shantang.spawn } : { ...state.position },
     };
   state = { ...state, adventure: validateAdventure(state.adventure) };
   if (state.mapVersion < 5)

@@ -1,12 +1,15 @@
 export const AREA_XP = 500;
 export const newAdventure = () => ({
   xp: 0,
+  boatTaken: false,
   conversations: 0,
   flowers: "new",
   tea: "new",
   exhibits: [],
   meals: 0,
   hungry: "new",
+  stationTraveler: "new",
+  stationTravelerDistance: 0,
   directionsFind: "new",
   directionsGive: "new",
   directionsStep: 0,
@@ -24,6 +27,11 @@ export function validateAdventure(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw Error("Invalid adventure.");
   const a = { ...newAdventure(), ...value };
+  if (typeof a.boatTaken !== "boolean") throw Error("Invalid boat progress.");
+  if (!["new", "walking", "entered"].includes(a.stationTraveler) ||
+      !Number.isFinite(a.stationTravelerDistance) ||
+      a.stationTravelerDistance < 0 || a.stationTravelerDistance > 10000)
+    throw Error("Invalid station traveler progress.");
   for (const key of ["directionsFind", "directionsGive", "flowerDirections"])
     if (!["new", "accepted", "done"].includes(a[key]))
       throw Error("Invalid directions quest.");
@@ -72,7 +80,10 @@ export function validateAdventure(value) {
   if (!Number.isSafeInteger(a.coins) || a.coins < 0 || a.coins > 1000000)
     throw Error("Invalid coins.");
   return {
+    boatTaken: a.boatTaken,
     hungry: a.hungry,
+    stationTraveler: a.stationTraveler,
+    stationTravelerDistance: a.stationTravelerDistance,
     directionsFind: a.directionsFind,
     directionsGive: a.directionsGive,
     directionsStep: a.directionsStep,
@@ -170,7 +181,10 @@ export function mergeAdventure(local, remote) {
     steps[Math.max(steps.indexOf(a[key]), steps.indexOf(b[key]))];
   return {
     ...a,
+    boatTaken: a.boatTaken || b.boatTaken,
     hungry: later("hungry", ["new", "invited", "dining", "done"]),
+    stationTraveler: later("stationTraveler", ["new", "walking", "entered"]),
+    stationTravelerDistance: Math.max(a.stationTravelerDistance, b.stationTravelerDistance),
     directionsFind: later("directionsFind", ["new", "accepted", "done"]),
     directionsGive: later("directionsGive", ["new", "accepted", "done"]),
     directionsStep: Math.max(a.directionsStep, b.directionsStep),

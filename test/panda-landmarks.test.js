@@ -11,7 +11,7 @@ const outside = { x: 20, y: 20 };
 const tick = () => new Promise((r) => setImmediate(r));
 
 test("all authored areas have three Chinese examples", () => {
-  assert.equal(Object.keys(pandaAreas).length, 19);
+  assert.equal(Object.keys(pandaAreas).length, 21);
   assert.equal(new Set(landmarkAreas(scene).map((a) => a.id)).size, 12);
   for (const area of Object.values(pandaAreas)) {
     assert.equal(area.examples.length, 3);
@@ -102,6 +102,24 @@ test("quiet indoors, no generic NPC areas, and disabled entry makes no request",
   panda.update(scenes.home, scenes.home.spawn);
   panda.update(scene, fountain, false);
   panda.update(scene, fountain, true);
+});
+test("family-home comments appear once per visit and update after cleanup", () => {
+  const shown = [], completed = [];
+  const panda = createLandmarkPanda({
+    random: () => 0,
+    getCompletedPractice: () => completed,
+    generate: () => assert.fail('stored comment selected'),
+    show: text => shown.push(text), hide() {},
+  });
+  const home = scenes['family-home'];
+  panda.update(home, home.spawn, false);
+  panda.update(home, home.spawn);
+  panda.update(home, home.spawn);
+  assert.deepEqual(shown,[pandaAreas['family-home-messy'].examples[0]]);
+  completed.push('family-rug','family-wash','family-tidy');
+  panda.update(home, home.spawn);
+  panda.update(home, home.spawn);
+  assert.deepEqual(shown,[pandaAreas['family-home-messy'].examples[0],pandaAreas['family-home-tidy'].examples[0]]);
 });
 test("LLM receives all trusted references; invalid output and provider errors fall back", async () => {
   let payload;

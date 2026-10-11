@@ -28,7 +28,7 @@ const instructions = {
   ],
   visit: [
     "Explore with a clue",
-    "Listen to the clue, find the person or animal, then interact with them. Use the map for help.",
+    "Listen to the clue, find the person, animal or object, then interact with it. Use the map for help.",
     "Visit and interact with each destination in order.",
   ],
   sequence: [

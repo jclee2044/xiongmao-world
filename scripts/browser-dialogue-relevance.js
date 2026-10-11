@@ -126,8 +126,8 @@ try {
     );
     assert.deepEqual(
       requests[0].history,
-      [],
-      "saved conversations do not contaminate a new session",
+      state.history,
+      "recent messages with this character remain in context",
     );
     assert.equal(requests[0].currentLine.chinese, npcs.mei.greeting.chinese);
     assert.equal(await page.locator("#reply-notice").textContent(), "");
@@ -145,7 +145,7 @@ try {
       false,
       "fallback notice is independent of translation settings",
     );
-    assert.equal(requests[1].history.length, 1);
+    assert.equal(requests[1].history.length, 2);
     assert.match(requests[1].currentLine.chinese, /现在不累/);
     await mkdir("test-results", { recursive: true });
     await page
@@ -162,7 +162,8 @@ try {
     );
     await open();
     await send("今天累不累？");
-    assert.deepEqual(requests[2].history, []);
+    assert.equal(requests[2].history.length, 3);
+    assert.equal(requests[2].history.at(-1).user, "我们一起喝茶吧。");
     assert.equal(
       await page.locator("#reply-notice").textContent(),
       "",
@@ -176,7 +177,7 @@ try {
     await context.close();
   }
   console.log(
-    "Dialogue relevance: repair, contextual fallback, visible notices, fresh session history, retained saves, desktop/mobile pass.",
+    "Dialogue relevance: repair, contextual fallback, visible notices, retained conversation context, desktop/mobile pass.",
   );
 } finally {
   await browser.close();

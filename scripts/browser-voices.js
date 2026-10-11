@@ -98,6 +98,7 @@ try {
     ["shanghai", "kid-two"],
     ["restaurant", "reader"],
     ["clothing-store", "clothing-customer"],
+    ["shantang", "station-traveler"],
   ]) {
     const actor = scenes[sceneId].interactables.find(
       (o) => (o.dialogueId || o.id) === dialogueId,

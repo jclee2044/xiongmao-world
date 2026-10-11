@@ -10,6 +10,7 @@ export const townDestinations = [
   "garden",
   "classical-garden",
   "clothing-store",
+  "south-home-east",
   "fabric",
   "next-area",
 ];
@@ -48,7 +49,7 @@ export function npcFeet(person) {
 }
 export function mapDestinations(scene, stops) {
   const useful = stops.filter(s => !s.hidden && isCoreInteraction(s) &&
-    (["door", "gate"].includes(s.type) || s.id === "flowers"));
+    (["door", "gate"].includes(s.type) || s.navigation || s.id === "flowers"));
   if (scene.id === "shanghai")
     return townDestinations
       .map((id) => useful.find((s) => s.id === id))

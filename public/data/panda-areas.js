@@ -1,4 +1,14 @@
 export const pandaAreas = {
+  "family-home-messy": {
+    always: true,
+    context: "Inside the Chen family home. The children play while toys, clothes or a tea stain still need attention. Make a warm, gently funny observation. Household activities start by talking to family members; do not invite clicking furniture or start an activity.",
+    examples: ["他们家有点脏，我们可以帮忙。", "地上有玩具，还有衣服。两个孩子玩得真高兴。", "这里有很多事要做。我们先问问陈叔叔吧。"],
+  },
+  "family-home-tidy": {
+    always: true,
+    context: "Inside the Chen family home after the rug, laundry and toy cleanup practices are complete. The children still play; appreciate the family helping each other. Do not claim the room is dirty or invite clicking furniture.",
+    examples: ["房间干净多了。大家一起帮忙，真好。", "两个孩子还在玩。我们和家人说说话吧。", "东西放好了。现在容易找到了。"],
+  },
   "fox-plush": {
     always: true,
     context: "Something is completely hidden in the upper-right bamboo inside the northwest walled grove. Panda gives a curious hint without revealing what it is.",
@@ -79,7 +89,11 @@ export const pandaAreas = {
   },
 };
 
-export function landmarkAreas(scene) {
+export function landmarkAreas(scene, completedPractice = []) {
+  if (scene.id === "family-home") {
+    const tidy = ["family-rug", "family-wash", "family-tidy"].every(id => completedPractice.includes(id));
+    return [{ id: tidy ? "family-home-tidy" : "family-home-messy", x: 130, y: 240, w: 940, h: 500 }];
+  }
   const enclosed = {
     "lion-grove": [
       { id: "rock-garden", x: 420, y: 620, r: 155 },

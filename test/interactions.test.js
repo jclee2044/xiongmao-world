@@ -4,8 +4,8 @@ import { scenes } from "../public/game/world.js";
 import { mapDestinations, isCoreInteraction, npcFeet } from "../public/game/interactions.js";
 test("maps contain locations, omit people and activities, and retain room exits", () => {
   const town = mapDestinations(scenes.shanghai, scenes.shanghai.interactables);
-  assert.equal(town.length, 12);
-  assert.equal(new Set(town.map(s => s.id)).size, 12);
+  assert.equal(town.length, 13);
+  assert.equal(new Set(town.map(s => s.id)).size, 13);
   assert.ok(town.some(s => s.id === "next-area"));
   assert.ok(town.some(s => s.id === "flowers" && s.name === "花店"));
   for (const id of ["market-budget", "lan", "lian", "qiao"])
@@ -13,7 +13,7 @@ test("maps contain locations, omit people and activities, and retain room exits"
   for (const scene of Object.values(scenes)) {
     const stops = mapDestinations(scene, scene.interactables);
     assert.ok(stops.length <= 15);
-    assert.ok(stops.every(s => ["door", "gate"].includes(s.type) || s.id === "flowers"), scene.id);
+    assert.ok(stops.every(s => ["door", "gate"].includes(s.type) || s.id === "flowers" || (s.type === "inspect" && s.navigation)), scene.id);
     if (scene.id !== "shanghai") assert.ok(stops.some(s => s.type === "door"));
   }
   for (const id of ["lan", "lost-flowers", "tea-table", "hotpot"])

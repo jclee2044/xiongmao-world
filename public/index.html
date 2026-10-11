@@ -265,13 +265,12 @@
           </div>
         </div>
         <nav aria-label="你的世界">
-          <button id="update" hidden lang="en" aria-label="Update">
-            Update</button
-          ><button id="map" aria-label="地图">
+          <button id="map" aria-label="地图">
             <img class="map-button-icon" src="/assets/map-icon.svg" width="28" height="28" alt="" aria-hidden="true" />
             <span>地图</span></button
           ><button id="journal" aria-label="Journal">
-            ▤ <span>Journal</span></button
+            <img class="journal-button-icon" src="/assets/journal-icon.svg" width="28" height="28" alt="" aria-hidden="true" />
+            <span>Journal</span></button
           ><button id="settings" lang="en" aria-label="Settings">
             ⚙ <span>Settings</span>
           </button>
@@ -284,7 +283,7 @@
           aria-label="Hold or drag to walk; release to stop. Use WASD or arrow keys to walk, and Space to interact nearby."
         ></canvas>
         <div class="scene-loading" id="scene-loading" role="status" hidden>
-          Opening the next little corner…
+          This corner could not load. Check your connection and try again.
           <button id="scene-retry" hidden>Try again</button>
         </div>
         <aside id="goals" aria-label="Panda Hints">

@@ -151,18 +151,20 @@ export function expandTown(scene) {
   // doorway opening onto the promenade. Keep the painted sprite's proportions.
   for (const [id, x, h, flip] of [
     ["clothing-store", 1640, 440, false],
-    ["south-home-east", 2160, 310, true],
+    ["south-home-east", 2160, 440, true],
   ]) {
     const clothing = id === "clothing-store";
     const w = h * (clothing ? artBounds.clothingStore.w / artBounds.clothingStore.h : 1.25);
     scene.scenery.push({ id: `building-${id}`, type: clothing ? "storefront" : "house", x, y: 3590,
-      w, h, flip, ...(clothing ? { storefront: "clothing-store", label: "衣服店", doorId: id } : {}) });
+      w, h, flip, ...(clothing ? { storefront: "clothing-store", label: "衣服店", doorId: id } : { label: "陈叔叔家", doorId: id }) });
     scene.groundZones.push({ type: "courtyard", x: x - w / 2 - 25,
       y: 3550, w: w + 50, h: 110 });
   }
   scene.paths.push({ points: [[1420, 3650], [2410, 3650]], width: 120 });
   scene.interactables.push({ id: "clothing-store", type: "door", target: "clothing-store",
     name: "衣服店", x: 1640, y: 3650, approachX: 1640, approachY: 3650 });
+  scene.interactables.push({ id: "south-home-east", type: "door", target: "family-home",
+    name: "陈叔叔家", x: 2160, y: 3650, approachX: 2160, approachY: 3650 });
   const relocate = (id, x, y) => {
     const o = scene.interactables.find((o) => o.id === id);
     Object.assign(o, { x, y });
@@ -227,7 +229,7 @@ export function expandTown(scene) {
       // These freestanding shops sort by their front edge when rendered.
       // Collide with the walls below the roof, leaving the rear overhang
       // walkable while keeping the entire facade and interior solid.
-      const depth = ["bakery", "books", "tea", "clothing-store"].includes(o.doorId) ? 0.6 : 0.89;
+      const depth = ["bakery", "books", "tea", "clothing-store", "south-home-east"].includes(o.doorId) ? 0.6 : 0.89;
       return {
         x: o.x - o.w * 0.43,
         y: o.y - o.h * depth,
@@ -394,7 +396,7 @@ function addEnclosures(scene) {
       y: gateY + 8,
       w: 200,
       h: 170,
-      doorId: e.id,
+      ...(stop(e.id).type === "door" ? { doorId: e.id } : {}),
     });
     scene.paths.push({
       points: [

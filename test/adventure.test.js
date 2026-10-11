@@ -21,6 +21,7 @@ test("quest progress and participation XP persist without changing learner evide
     const { id } = store.create(),
       s = newState(),
       learner = structuredClone(s.learner);
+    s.adventure.boatTaken = true;
     s.adventure.flowers = "found";
     s.adventure.tea = "invited";
     award(s.adventure, 70);
@@ -44,6 +45,7 @@ test("old saves gain empty quests, invalid counters and quest states are rejecte
   assert.equal(next.settings.pinyin, false);
   assert.equal(next.settings.translation, false);
   for (const patch of [
+    { boatTaken: "yes" },
     { xp: -1 },
     { xp: Infinity },
     { xp: 1.5 },
@@ -56,8 +58,9 @@ test("old saves gain empty quests, invalid counters and quest states are rejecte
 });
 test("explicit keep-local conflict choice preserves completed quests from both devices", () => {
   const a = { ...newAdventure(), xp: 60, flowers: "done" },
-    b = { ...newAdventure(), xp: 80, tea: "done", exhibits: ["lotus-bowl"] };
+    b = { ...newAdventure(), boatTaken: true, xp: 80, tea: "done", exhibits: ["lotus-bowl"] };
   const result = mergeAdventure(a, b);
+  assert.equal(result.boatTaken, true);
   assert.equal(result.flowers, "done");
   assert.equal(result.tea, "done");
   assert.equal(result.xp, 80);

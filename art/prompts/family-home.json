@@ -1,0 +1,9 @@
+{
+  "mode": "built-in image_gen",
+  "useCase": "stylized-concept",
+  "reference": "public/assets/world/home.webp",
+  "referenceRole": "style and camera",
+  "output": "public/assets/world/family-home.png",
+  "browserAsset": "public/assets/world/family-home.webp",
+  "prompt": "Create a new production game background, 1536 by 1024 landscape 3:2, for a family home in a painted Suzhou Chinese-learning game. The supplied image is a STYLE and CAMERA reference only. Match its warm softly painted watercolor/gouache storybook architectural detail, high oblique dollhouse view with visible floor and two back walls, cream floor and wood furniture, muted sage/ochre colors. This is a larger family living room and kitchen/laundry space for a father and two children, with NO people, NO animals, NO text or UI. Keep the lower 55 percent mostly empty continuous walkable pale floor, with a wide open doorway centered at the bottom and no foreground obstructions. Place household furniture along back and side walls only: rear-left a clearly visible sink with a bowl and nearby front-loading washing machine, rear-center low wooden bookshelf with books and folded clothes, rear-right a small cream refrigerator and kitchen counter; along the right edge a modest sofa. A single small storybook visibly lies on the sofa cushion, to be found in a task. A broom rests by the left wall. A small table at the left edge holds a red paper envelope and a plate of oranges for Chinese New Year preparations. Keep these props legible and reachable from the open central floor. Windows show a quiet Suzhou courtyard. No baked-in characters, no floating icons, no labels. Furnishings natural-sized, ample space for several separately rendered character sprites. Entire room fills the frame."
+}

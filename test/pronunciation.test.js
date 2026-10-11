@@ -98,6 +98,51 @@ test("word help and word replay retain the full sentence and the selected occurr
   );
 });
 
+test("地图 uses di4 tu2 for station dialogue and word replay", () => {
+  const text = "我带了地图，但是找不到售票处。你知道在哪儿吗？";
+  const map = defineText(text).tokens.find((word) => word.zh === "地图");
+  assert.equal(map.pinyin, "dì tú");
+  const expected = [
+    { zh: "地", pinyin: "di4", carrier: "第" },
+    { zh: "图", pinyin: "tu2", carrier: "图" },
+  ];
+  assert.deepEqual(speechPronunciation("地图"), expected);
+  assert.deepEqual(speechPronunciation(map.zh, map.context), expected);
+  assert.deepEqual(
+    speechPronunciation(text).slice(
+      text.indexOf("地图"),
+      text.indexOf("地图") + 2,
+    ),
+    expected,
+  );
+});
+
+test("暖和 uses nuan3 huo0 in sentences, dictionary help and every speech frontend", () => {
+  const text = "今天很暖和。我和你一起走。";
+  const word = defineText(text).tokens.find(word => word.zh === "暖和");
+  assert.equal(word.pinyin, "nuǎn huo");
+  const expected = [
+    { zh: "暖", pinyin: "nuan3", carrier: "暖" },
+    { zh: "和", pinyin: "huo0", carrier: "火" },
+  ];
+  assert.deepEqual(speechPronunciation("暖和"), expected);
+  assert.deepEqual(speechPronunciation(word.zh, word.context), expected);
+  assert.deepEqual(speechPronunciation(text).slice(3, 5), expected);
+  assert.equal(speechPronunciation("我和你")[1].pinyin, "he2");
+  assert.equal(basicSpeechText(expected), "nuan3 huo5");
+});
+
+test("Panda's sign explanations use beginner vocabulary and the corrected 暖和 reading", async () => {
+  const { stationBoardPhrases } = await import("../public/game/station-signs.js");
+  const { isBeginnerChinese } = await import("../public/data/language.js");
+  for (const phrase of stationBoardPhrases)
+    assert.ok(isBeginnerChinese(phrase.spoken), phrase.spoken);
+  const warm = stationBoardPhrases[1].spoken;
+  const start = warm.indexOf("暖和");
+  assert.ok(start >= 0);
+  assert.equal(speechPronunciation(warm)[start + 1].pinyin, "huo0");
+});
+
 function authoredLines() {
   const lines = [];
   const paths = [
@@ -218,6 +263,16 @@ for root in ${JSON.stringify(roots)}:
     rows = [{'zh':'长','pinyin':'zhang3','carrier':'涨'}, {'zh':'长','pinyin':'chang2','carrier':'常'}]
     spoken, entries = contextual_entries(rows, lexicon, key_base)
     assert spoken[0] != spoken[1] and entries[0].split()[1:] != entries[1].split()[1:]
+    rows = ${JSON.stringify(speechPronunciation("慢慢地走，看看地图。"))}
+    spoken, entries = contextual_entries(rows, lexicon, key_base)
+    map_phones = entries[-2].split()[1:]
+    particle_phones = entries[2].split()[1:]
+    assert map_phones == (['d', 'i4', '#0'] if 'aishell3' in root else ['ㄉ', 'ㄧ', '4'] if kokoro else ['ㄉ', 'ㄧ', 'ˋ']), (root, map_phones)
+    assert particle_phones == (['d', 'e5', '#0'] if 'aishell3' in root else ['ㄉ', 'ㄜ', '5'] if kokoro else ['ㄉ', 'ㄜ', '˙']), (root, particle_phones)
+    rows = ${JSON.stringify(speechPronunciation("暖和"))}
+    spoken, entries = contextual_entries(rows, lexicon, key_base)
+    warm_phones = entries[1].split()[1:]
+    assert warm_phones == (['h', 'uo5', '#0'] if 'aishell3' in root else ['ㄏ', '我', '5'] if kokoro else ['ㄏ', 'ㄨ', 'ㄛ', '˙']), (root, warm_phones)
 print('All authored speech phones are supported by all models; 长 uses chang2.')
 `,
       input,

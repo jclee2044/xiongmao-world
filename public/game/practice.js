@@ -211,7 +211,7 @@ export function createPractice({
         .join("")}</div><p id="practice-feedback" role="status"></p>`;
     }
     if (!done && a.type === "visit")
-      html += `<p lang="en">${escape(label("到了的时候，选择“说你好”或者 E。", "Tap the person or animal to interact, or press Space / E nearby."))}</p><button id="practice-map">${escape(label("看地图", "Open map"))}</button>`;
+      html += `<p lang="en">${escape(label("到了的时候，选择“说你好”或者 E。", "Tap the person, animal or object to interact, or press Space / E nearby."))}</p><button id="practice-map">${escape(label("看地图", "Open map"))}</button>`;
     const fact = culture[a.culture];
     if (fact)
       html += `<details><summary lang="zh-CN">${escape(label("文化小故事", "A cultural story"))}：${escape(settings().translation ? fact.title : fact.title.split(" · ")[0])}</summary>${line(fact)}${fact.note ? `<p class="notice" lang="en">${escape(fact.note)}</p>` : ""}<div class="small-actions"><button id="practice-culture-replay">${escape(label("听一听", "Listen"))}</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">${escape(label("Source", "Source"))} ↗</a></div></details>`;
@@ -229,10 +229,11 @@ export function createPractice({
       $("practice-hint-content").innerHTML =
         `<p>${escape(hint.meaning)}</p>` + line(hint);
       $("practice-hint-content").hidden = false;
+      speech.narrate(`${hint.meaning} ${hint.zh}`, { interrupt: true });
     };
     $("practice-list").onclick = () => catalog();
     if ($("practice-culture-replay"))
-      $("practice-culture-replay").onclick = () => speech.speak(fact.zh);
+      $("practice-culture-replay").onclick = () => speech.speak(fact.zh, false, "panda");
     if ($("practice-pause"))
       $("practice-pause").onclick = () => {
         $("panel").close();
@@ -275,6 +276,7 @@ export function createPractice({
     const retry = (message) => {
       $("practice-feedback").innerHTML =
         `<p lang="en">${escape(message?.meaning || "Take another look. You can replay the clue or open a hint.")}</p>${line(message || { zh: "再看看，也可以听一听或者看帮助。", pinyin: "zài kàn kàn ， yě kě yǐ tīng yi tīng huò zhě kàn bāng zhù 。", meaning: "Take another look. You can replay the clue or open a hint." }, "notice")}`;
+      speech.narrate($("practice-feedback").textContent, { interrupt: true });
     };
     const changeActive = (patch, focusSelector) => {
       const progress = state();

@@ -1,4 +1,3 @@
-import { voiceProfiles } from "../data/voices.js";
 import { api } from "./persistence.js";
 import { lexicon } from "../data/content.js";
 export function createWordHelp({ discover, speech }) {
@@ -42,8 +41,7 @@ export function createWordHelp({ discover, speech }) {
   }
   async function show(word, anchor) {
     const token = ++generation;
-    const voices = Object.keys(voiceProfiles);
-    const voice = voices[Math.floor(Math.random() * voices.length)];
+    const voice = "panda";
     speech.speak(word.zh, false, voice, word.context);
     const list = word.meaning && word.pinyin && !word.meaning.includes("unavailable")
       ? [word] : await tokens(word.zh);
@@ -143,7 +141,7 @@ export function createWordHelp({ discover, speech }) {
     while (walker.nextNode()) {
       const node = walker.currentNode, parent = node.parentElement;
       if (!parent || !/\p{Script=Han}/u.test(node.textContent) ||
-          parent.closest("script,style,textarea,select,option,svg,canvas,#word-callout,.help-word,[data-map-stop],[data-coach-prompt],[data-conversation-subject],[data-word-leaf],.pinyin,[hidden],dialog:not([open])")) continue;
+          parent.closest("script,style,textarea,select,option,svg,canvas,#word-callout,.help-word,[data-world-sign],[data-map-stop],[data-coach-prompt],[data-conversation-subject],[data-word-leaf],.pinyin,[hidden],dialog:not([open])")) continue;
       leaves.push(node);
     }
     for (const node of leaves) {

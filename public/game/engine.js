@@ -6,6 +6,9 @@ import { hitExitArrow } from "./exit-arrow.js";
 import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
 import { lifeActors } from "./life.js";
+import { XIAOCHENG } from "../data/station-departure.js";
+import { StationDeparture } from "./station-departure.js";
+import { createStationSignHelp } from "./station-sign-help.js";
 import artBounds from "../data/art-bounds.js";
 const PANDA_FOLLOW_DELAY = 0.5;
 const MAX_FRAME_DT = 0.1;
@@ -22,8 +25,11 @@ export class World {
       getSettings = () => ({}),
       getFound = () => false,
       getAdventure = () => ({}),
+      getPractice = () => ({ completed: [] }),
       onGuestArrive = () => {},
+      onStationTravelerProgress = () => {},
       onArtStatus = () => {},
+      onSignSelect = () => {},
     },
   ) {
     Object.assign(this, {
@@ -36,10 +42,17 @@ export class World {
       getSettings,
       getFound,
       getAdventure,
+      getPractice,
       onGuestArrive,
+      onStationTravelerProgress,
       onArtStatus,
     });
     this.ctx = canvas.getContext("2d");
+    this.signHelp = createStationSignHelp(canvas, phrase => {
+      if (this.paused || this.artPending) return;
+      this.clear();
+      onSignSelect(phrase);
+    });
     this.keys = new Set();
     this.paused = true;
     this.scene = scenes.shanghai;
@@ -198,7 +211,8 @@ export class World {
       ...this.scene.interactables.filter(
         (o) =>
           collectibleAvailable(this.scene, o, this.getFound(), this.player) &&
-          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === XIAOCHENG && (this.getAdventure().stationTraveler || "new") !== "new") &&
+          !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
             o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
@@ -237,7 +251,8 @@ export class World {
       ...this.scene.interactables.filter(
         (o) =>
           o.type === "npc" &&
-          !["kid-one", "kid-two", "lin"].includes(o.id) &&
+          !(o.id === XIAOCHENG && (this.getAdventure().stationTraveler || "new") !== "new") &&
+          !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
             o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
@@ -280,10 +295,21 @@ export class World {
     );
     if (painted) return painted;
     return nearest(
-      { ...this.scene, interactables: this.destinations() },
+      { ...this.scene, interactables: this.destinations().filter(o => !this.scene.characterInteractionsOnly || o.type === "door") },
       { x, y },
       this.getFound(),
     );
+  }
+  updateStationTraveler(dt) {
+    const adventure = this.getAdventure();
+    if (this.scene.id !== "shantang" || adventure.stationTraveler !== "walking") {
+      this.stationDeparture = null;
+      this.stationTraveler = null;
+      return;
+    }
+    this.stationDeparture ??= new StationDeparture(this.scene, adventure.stationTravelerDistance || 0);
+    if (this.hover?.id === XIAOCHENG) this.hover = null;
+    this.stationTraveler = this.stationDeparture.update(dt, this.onStationTravelerProgress);
   }
   updateGuest(dt) {
     const state = this.getAdventure().tea;
@@ -302,6 +328,9 @@ export class World {
         distance: 0,
         facing: 1,
       };
+      // The guest moves away from the shop; talk at her current feet.
+      delete this.guest.approachX;
+      delete this.guest.approachY;
     }
     if (state === "seated" || state === "done") {
       Object.assign(this.guest, {
@@ -335,6 +364,12 @@ export class World {
     if (Math.abs(dx) > 0.1) this.guest.facing = Math.sign(dx);
   }
   updateHungryGuest(dt) {
+    // Station forecourt has only its traveler cast; resume the town invitation on return.
+    if (this.scene.id === "shantang") {
+      this.hungryGuest = null;
+      this.friendRoute = [];
+      return;
+    }
     const state = this.getAdventure().hungry;
     if (
       state === "new" ||
@@ -468,6 +503,10 @@ export class World {
     this.canvas.dataset.paused = String(value);
   }
   changeScene(id, position) {
+    if (this.stationDeparture && this.getAdventure().stationTraveler === "walking")
+      this.onStationTravelerProgress("walking", this.stationDeparture.distance);
+    this.stationDeparture = null;
+    this.stationTraveler = null;
     if (
       this.camera &&
       this.scene.id !== id &&
@@ -592,11 +631,13 @@ export class World {
     const dt = Math.min(MAX_FRAME_DT, (t - this.last) / 1000 || 0);
     this.last = t;
     if (this.artPending) {
+      this.signHelp.update(this.scene, this.camera, false);
       requestAnimationFrame((next) => this.frame(next));
       return;
     }
     if (!this.paused && this.getSettings().motion !== false)
       this.ambientTime += dt;
+    this.updateStationTraveler(this.paused ? 0 : dt);
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
@@ -719,8 +760,11 @@ export class World {
         this.hover?.id,
         this.guest,
         this.hungryGuest,
+        this.stationTraveler,
+        this.getAdventure().stationTraveler,
         this.seat,
         this.getAdventure().hungry,
+        this.getPractice().completed,
         this.route.at(-1),
         this.canvas.clientWidth,
         this.canvas.clientHeight,
@@ -756,8 +800,10 @@ export class World {
           hover: this.hover,
           guest: this.guest,
           hungryGuest: this.hungryGuest,
+          stationTraveler: this.stationTraveler,
           seat: this.seat,
           adventure: this.getAdventure(),
+          completedPractice: this.getPractice().completed,
           route: this.route,
           interactionTarget: this.pendingInteraction,
           pandaMoving,
@@ -794,6 +840,7 @@ export class World {
       if (progress === 1) this.transition = null;
     }
     this.animatedLastFrame = moving || pandaMoving;
+    this.signHelp.update(this.scene, this.camera, !this.paused && !this.artPending && !this.transition);
     Object.assign(this.canvas.dataset, {
       camX: String(this.camera.camX),
       camY: String(this.camera.camY),
@@ -805,6 +852,10 @@ export class World {
       hover: this.hover?.id || "",
       pandaX: String(this.panda.x),
       pandaY: String(this.panda.y),
+      stationTravelerStatus: this.getAdventure().stationTraveler || "new",
+      stationTravelerX: this.stationTraveler ? String(this.stationTraveler.x) : "",
+      stationTravelerY: this.stationTraveler ? String(this.stationTraveler.y) : "",
+      stationTravelerDistance: String(this.stationDeparture?.distance ?? this.getAdventure().stationTravelerDistance ?? 0),
     });
     requestAnimationFrame((t) => this.frame(t));
   }

@@ -21,7 +21,7 @@ test("all documented destinations have walkable approaches, and directions reach
   for (const id of Object.keys(locationNotes)) {
     const d = directionsTo(id);
     assert.ok(d, id);
-    assert.ok(canStand(scenes.shanghai, d.target.x, d.target.y), id);
+    assert.ok(canStand(scenes[d.scene], d.target.x, d.target.y), id);
   }
   assert.equal(directionsTo("invented-place"), null);
   assert.equal(

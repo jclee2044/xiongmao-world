@@ -13,7 +13,15 @@ export const beginnerForms = [
 // game. HSK is a difficulty guide; a missing list entry does not make a common
 // label such as 书店 unsuitable for a beginner.
 export const everydayGameWords = [
-  "收集",
+  // Concrete family-home, weather and Spring Festival vocabulary.
+  "地毯", "脏", "布", "弄", "袜子", "陈叔叔", "陈奶奶", "陈爷爷", "小乐", "小宁", "书架", "洗衣机", "水池", "柜子", "玩具盒", "门口", "春节", "红包",
+  "天气预报", "温度", "度", "祝", "锅", "暖和", "凉快", "外套", "家务", "整理", "丢",
+  "收集", "售票处", "车站", "码头", "苏州站", "指示牌", "小程",
+  // Travel names and concrete luggage/scheduling vocabulary taught at the station.
+  "杭州", "南京", "上海", "无锡", "黄山", "雨桐", "文博", "美芳", "佳妮", "小睿", "国良", "雅婷", "慧兰", "子涵",
+  "旅行", "行李", "背包", "箱子", "出发", "发车", "入口", "票价", "消息", "一路平安",
+  // Railway signs are taught as complete phrases in the exterior.
+  "平安出行", "温暖相伴", "售票", "证件", "安检", "广场",
   "小说", // Shu's book-writing conversation; explained in word help.
   "小熊",
   "书店", "花店", "茶馆", "面馆", "衣服店", "蛋糕店", "市场",

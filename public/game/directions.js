@@ -73,7 +73,7 @@ export function createDirections({
     );
     $("directions-hint").onclick = () => {
       $("directions-feedback").textContent = step.hint;
-      say(step.hint);
+      speech.speak(step.hint, false, "panda");
     };
     $("direction-choices")
       .querySelectorAll("button")
@@ -82,7 +82,7 @@ export function createDirections({
           (b.onclick = () => {
             if (Number(b.dataset.direction) !== step.correct) {
               $("directions-feedback").textContent = step.hint;
-              say(step.hint);
+              speech.speak(step.hint, false, "panda");
               return;
             }
             change((a) => {
@@ -141,7 +141,7 @@ export function createDirections({
     );
     const hint = () => {
       $("flower-directions-feedback").textContent = step.hint;
-      sayFlower(step.hint);
+      speech.speak(step.hint, false, "panda");
     };
     $("flower-directions-hint").onclick = hint;
     $("flower-direction-choices")

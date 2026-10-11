@@ -1,3 +1,4 @@
+import { scenes } from "../public/game/world.js";
 import { isBeginnerChinese } from "../public/data/language.js";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -23,8 +24,8 @@ import { reply, ollamaReply } from "../server/dialogue.js";
 import { Persistence } from "../public/game/persistence.js";
 
 test("Chinese errands have distinct places, meaningful clues, and replayable responses", () => {
-  assert.equal(activities.length, 17);
-  assert.equal(new Set(activities.map((a) => a.id)).size, 17);
+  assert.equal(activities.length, 27);
+  assert.equal(new Set(activities.map((a) => a.id)).size, activities.length);
   assert.deepEqual(
     new Set(activities.map((a) => a.type)),
     new Set([
@@ -59,7 +60,7 @@ test("Chinese errands have distinct places, meaningful clues, and replayable res
     }
     if (a.options) assert.ok(a.options[a.answer]);
     for (const step of a.steps || [])
-      if (a.type === "visit") assert.ok(Object.hasOwn(npcs, step.target));
+      if (a.type === "visit") assert.ok(Object.values(scenes).some((scene) => scene.interactables.some((stop) => stop.id === step.target)), step.target);
   }
 });
 
@@ -214,7 +215,8 @@ test("each new neighbor supports honest fallback and has a distinct local AI ide
     });
     assert.equal(local.mode, "local");
     assert.ok(sent.messages[0].content.includes(npcs[id].identity));
-    assert.ok(!sent.messages[0].content.includes("上海"));
+    // Travel vocabulary may mention Shanghai; these neighbors still live in Suzhou.
+    assert.ok(!npcs[id].identity.includes("上海"));
     assert.equal(sent.messages.at(-1).content, "你好");
     assert.equal(sent.messages.length, 2, "no invented example conversation");
   }

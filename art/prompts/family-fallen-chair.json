@@ -1,0 +1,9 @@
+{
+  "mode": "built-in image_gen",
+  "useCase": "precise-object-edit",
+  "reference": "User screenshot of the spare chair beside the schoolbag and rug",
+  "referenceRole": "chair identity, camera and painted style",
+  "output": "public/assets/world/family-fallen-chair.png",
+  "browserAsset": "public/assets/world/family-fallen-chair.webp",
+  "prompt": "Use case: precise-object-edit. Create one transparent game sprite of the EXACT FULLY INTACT wooden armchair in Image 1 (the original game screenshot), fallen backwards onto its back. Image 2 is the previous attempted sprite; correct its confusing jumbled construction. The chair is NOT BROKEN, NOT DISASSEMBLED, NOT COLLAPSED. It is one rigid complete chair simply tipped back by 90 degrees. Preserve the original curved horseshoe back rail, vertical back splat, two armrests, rectangular woven straw seat, FOUR original legs and stretchers, with every original joint firmly connected in its correct place. No extra timbers, no disconnected or intersecting parts. The curved back rail rests against the floor; the seat is nearly vertical; the four intact legs extend together diagonally upwards toward the front/right. Show a clear coherent tipped-over chair, all parts connected, easy to understand at small game size. Warm detailed softly painted watercolor/gouache style matching Image 1, high oblique dollhouse view. Isolated single chair, transparent background, no floor plane, no people, no rug, no other objects, no UI or text. Tight centered framing with modest transparent padding."
+}

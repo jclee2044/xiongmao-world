@@ -42,7 +42,8 @@ export function buildTown(previous) {
   const bridges = [950,1750,2640].map(y=>({x:720,y:y-85,w:260,h:170,axis:'x'}));
   bridges.push({x:1330,y:2180,w:190,h:250,axis:'y'},{x:2520,y:2180,w:190,h:250,axis:'y'});
   const canal = (x,y,w,h)=>({type:'canal',x,y,w,h,polygon:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]]});
-  const canals=[canal(760,35,180,2930),canal(940,2220,2625,170)];
+  // The southern channel flows out of the map beside the passenger boat.
+  const canals=[canal(760,35,180,2930),canal(940,2220,previous.width-940,170)];
   const lake={type:'lake',shape:'polygon',x:2840,y:1300,w:600,h:410,polygon:[[2840,1410],[2930,1310],[3140,1300],[3370,1390],[3440,1550],[3320,1690],[3080,1710],[2880,1600]]};
   const paths=[
     {points:[[660,100],[660,2880]],width:130}, {points:[[1040,100],[1040,2880]],width:120},
@@ -85,7 +86,7 @@ export function buildTown(previous) {
   add('lake-cat',2620,1800);add('lake-duck',3430,1510,{approachX:3480,approachY:1510});add('garden-rabbit',650,1820);
   for(const [id,animal,x,y] of [['courtyard-cat','cat',1730,1680],['home-cat','cat',500,960],['garden-rabbit-two','rabbit',2770,1040],['lake-duck-two','duck',3320,1650]]) add(id,x,y,{type:'animal',animal,name:animal==='cat'?'小猫':animal==='duck'?"duck":"rabbit",zh:'你好，小朋友！',pinyin:"nǐ hǎo ， xiǎo péng yǒu ！",meaning:'Hello, little friend!',...(animal==='duck'?{approachX:3400,approachY:1750}:{})});
   add('lost-flowers',660,1840,{type:'quest',quest:'flowers',name:"没有找到的花"});
-  add('next-area',3420,2640,{type:'gate',name:"山塘 canal",target:'shantang'});
+  add('next-area',3420,2640,{type:'gate',name:"苏州站码头",target:'shantang'});
   for(const o of stops.filter(o=>o.type==='npc')){o.approachX=o.x;o.approachY=o.y+48;o.artHeight=o.id==='yun'?195:o.id==='lin'?215:205;}
 
   // Each landmark entrance is real; the smaller gardens are illustrative visits.

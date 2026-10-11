@@ -1,7 +1,10 @@
+import { familyHome } from "./suzhou-life.js";
+import { stationExterior } from "./station-exterior.js";
 import { npcs } from "./content.js";
 import { museumObjects } from "./adventure.js";
 import { decoratePond } from "./ponds.js";
 export const townRooms = {
+  "family-home": familyHome,
   restaurant: {
     id: "restaurant",
     title: "火锅店",
@@ -121,105 +124,7 @@ export const townRooms = {
       },
     ],
   },
-  shantang: {
-    id: "shantang",
-    title: "山塘河边",
-    chinese: "山塘河边",
-    width: 1800,
-    height: 1200,
-    spawn: { x: 450, y: 780 },
-    scenery: [
-      { type: "house", x: 400, y: 550, w: 480, h: 400, label: "Story 花园" },
-      { type: "house", x: 1420, y: 550, w: 480, h: 400, label: "Tea room" },
-      { type: "festival-lanterns", x: 430, y: 1030, w: 330, h: 210 },
-      { type: "tree", x: 1570, y: 950, w: 300, h: 350 },
-    ],
-    solids: [
-      { x: 194, y: 195, w: 412, h: 365 },
-      { x: 1214, y: 195, w: 412, h: 365 },
-    ],
-    canals: [
-      {
-        type: "canal",
-        x: 820,
-        y: 30,
-        w: 180,
-        h: 1140,
-        polygon: [
-          [820, 30],
-          [1000, 30],
-          [1000, 1170],
-          [820, 1170],
-        ],
-      },
-    ],
-    bridges: [{ x: 785, y: 690, w: 250, h: 180, axis: "x" }],
-    groundZones: [],
-    paths: [
-      {
-        points: [
-          [220, 780],
-          [1580, 780],
-        ],
-        width: 190,
-      },
-      {
-        points: [
-          [720, 80],
-          [720, 1080],
-        ],
-        width: 130,
-      },
-      {
-        points: [
-          [1110, 80],
-          [1110, 1080],
-        ],
-        width: 130,
-      },
-    ],
-    interactables: [
-      {
-        id: "back-town",
-        type: "door",
-        name: "回河边",
-        x: 250,
-        y: 800,
-        target: "shanghai",
-        returnPoint: { x: 3360, y: 2640 },
-      },
-      {
-        id: "shantang-story",
-        type: "inspect",
-        name: "山塘故事",
-        x: 440,
-        y: 625,
-        zh: "这是山塘街。河里有船。我们坐下看看吧。",
-        pinyin:
-          "zhè shì shān táng jiē 。 hé lǐ yǒu chuán 。 wǒ men zuò xià kàn kàn ba 。",
-        meaning:
-          "This is Shantang Street. There are boats on the canal. Let’s sit and watch.",
-      },
-      {
-        id: "shantang-host",
-        dialogueId: "suyin",
-        type: "npc",
-        name: "Suyin",
-        appearance: "qiao",
-        artHeight: 230,
-        x: 1400,
-        y: 650,
-      },
-      {
-        id: "shantang-riddles",
-        type: "practice",
-        name: "回答问题",
-        activity: "lantern-riddles",
-        x: 430,
-        y: 1090,
-      },
-    ],
-  },
+  shantang: stationExterior,
 };
 export const homeObjects = [
   [

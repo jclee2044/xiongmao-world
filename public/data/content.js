@@ -1,3 +1,5 @@
+import { stationTravelers, stationTravelContext } from "./station-travelers.js";
+import { householdNpcs } from "./suzhou-life.js";
 import { bookProfiles } from "./book-dialogue.js";
 import { voiceForNpc } from "./voices.js";
 export const topics=['food','school','work','activities','travel','greeting'];
@@ -52,7 +54,17 @@ Object.assign(npcs,{
  waiter:{name:"Xiaochen",identity:"Xiaochen, a waiter at a canal restaurant",voice:'male',topic:'food',personality:'Waiter in a small canal-side restaurant offering Suzhou noodles and a hot-pot practice table. Does not claim to change game state through conversation.',greeting:{chinese:"欢迎！想吃面条，还是一起吃火锅？",pinyin:"huān yíng ！ xiǎng chī miàn tiáo ， hái shì yì qǐ chī huǒ guō ？",meaning:'Welcome! Noodles, or shall we have hot pot?',topic:'food'}},
 });
 for(const id of ['mei','yun','qiao','lan','an'])npcs[id].voice='female';
-npcs.suyin={name:"Suyin",identity:"Suyin, a tea room host in Shantang",voice:'female',topic:'activities',personality:'A Shantang teahouse host interested in local storytelling, music and canal life. Explains that Suzhou pingtan combines storytelling and singing, without claiming to perform actual recordings.',greeting:{chinese:"欢迎来到山塘！你喜欢听故事，还是听音乐？",pinyin:"huān yíng lái dào shān táng ！ nǐ xǐ huan tīng gù shi ， hái shì tīng yīn yuè ？",meaning:'Welcome to Shantang! Do you enjoy stories or music?',topic:'activities'}};
+npcs.suyin={name:"Suyin",identity:"Suyin, a Suzhou teahouse host visiting the station forecourt",voice:'female',topic:'activities',personality:'A teahouse host resting in the station forecourt. Interested in local storytelling, music and canal life. Explains that Suzhou pingtan combines storytelling and singing, without claiming to perform actual recordings.',greeting:{chinese:"我们到苏州站了！你喜欢听故事，还是听音乐？",pinyin:"wǒ men dào sū zhōu zhàn le ！ nǐ xǐ huan tīng gù shi ， hái shì tīng yīn yuè ？",meaning:'We have arrived at Suzhou Station! Do you enjoy stories or music?',topic:'activities'}};
+for (const traveler of stationTravelers) npcs[traveler.id] = {
+  name: traveler.name, appearance: traveler.id,
+  identity: `${traveler.english}, a traveler at Suzhou Station with ${traveler.luggage}`,
+  voice: traveler.voice, topic: "travel",
+  personality: `${traveler.facts} ${stationTravelContext}`,
+  greeting: traveler.openings[0],
+  starter: { zh: "我想坐火车去…", example: "我想坐火车去北京。", why: "Use 坐火车去 plus a place to say where you want to go by train." },
+};
+npcs["traveler-zihan"].starter = { zh: "她几点回来？", example: "她几点坐火车回来？", why: "Ask what time she is coming back by train. 几点 asks the time; 回来 means to come back." };
+npcs["station-traveler"].starter = { zh: "过桥以后…", example: "过桥以后，往右边走。售票处在门里左边。", why: "Cross the bridge to the right, then head toward the station. You can also ask for help or reply in English." };
 
 const newNeighbors = [
  ['lian',"小莲",'lian','female',"我有点饿了。你愿意和我一起吃东西吗？","I am a little hungry. Would you eat with me?",'A hungry friend who would enjoy being invited to hotpot.'],
@@ -159,6 +171,9 @@ Object.assign(npcs, {
     },
   },
 });
+
+Object.assign(npcs, householdNpcs);
+npcs["clothing-seller"].personality += " Help choose suitable clothes for sample weather: the jacket for cold days, the shirt or dress for hot days, and an umbrella for rain. Do not claim live weather or change purchases through chat.";
 
 for (const [id, npc] of Object.entries(npcs)) npc.voiceProfile = voiceForNpc(id);
 

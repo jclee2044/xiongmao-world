@@ -1,4 +1,5 @@
 import { bridgeArt } from "./bridges.js";
+import { paintWaterSurface, waterPatternTransform } from "./water-motion.js";
 import { paintMarketSigns } from "./language-signs.js";
 import { pointInPolygon } from "./world.js";
 const plates = new WeakMap();
@@ -99,6 +100,7 @@ export function paintWater(ctx, zone, time, animate) {
       ctx.fill();
     }
   }
+  if (animate) paintWaterSurface(ctx, zone, time, { intensity: 0.85, flowX: 2.5, flowY: 0.7 });
   ctx.restore();
   zonePath(ctx, zone);
   ctx.strokeStyle = "#dad0ad88";
@@ -218,27 +220,23 @@ export function paintGround(
       } else ctx.rect(z.x, z.y, z.w, z.h);
     }
     ctx.clip();
-    // Painted ripples use the same turquoise watercolor language as the market.
+    // The watercolor drifts underneath independently phased surface waves.
+    // Translate the fill while keeping the pattern's scale fixed, so the
+    // browser can reuse its texture as the current advances.
+    const drift = waterPatternTransform(time, animate);
+    if (water) water.setTransform(waterPatternTransform(0, false));
+    ctx.save();
+    ctx.translate(drift.e, drift.f);
     ctx.fillStyle = water || "#438e94";
-    ctx.fillRect(0, 0, scene.width, scene.height);
-    if (animate) {
-      ctx.globalAlpha = 0.08;
-      ctx.strokeStyle = "#f9edc2";
-      ctx.lineWidth = 1.2;
-      for (let y = 20; y < scene.height; y += 85)
-        for (let x = 20; x < scene.width; x += 105) {
-          const shift = Math.sin(time * 0.35 + y + x) * 3;
-          ctx.beginPath();
-          ctx.ellipse(x + shift, y, 13, 2, -0.15, 0.1, Math.PI * 0.8);
-          ctx.stroke();
-        }
-      ctx.globalAlpha = 1;
-    }
+    ctx.fillRect(view.x - drift.e, view.y - drift.f, view.w, view.h);
+    ctx.restore();
+    if (animate) paintWaterSurface(ctx, { x: 0, y: 0, w: scene.width, h: scene.height }, time, { view });
     // Slow wooden boats pass under the bridges, following the canal centerline.
+    const boatTime = animate ? time : 0;
     for (const z of canals.filter((c) => c.h > c.w && !c.winding))
       for (let i = 0; i < 2; i++) {
         const x = z.x + z.w * (i ? 0.67 : 0.33),
-          y = z.y + ((time * 13 + i * 1200 + 320) % (z.h - 180)) + 90;
+          y = z.y + ((boatTime * 13 + i * 1200 + 320) % (z.h - 180)) + 90;
         ctx.save();
         ctx.translate(x, y);
         if (i) ctx.rotate(Math.PI);
@@ -281,7 +279,7 @@ export function paintGround(
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.moveTo(15, 40);
-        ctx.lineTo(48 + Math.sin(time * 1.5) * 9, 68);
+        ctx.lineTo(48 + Math.sin(boatTime * 1.5) * 9, 68);
         ctx.stroke();
         ctx.restore();
       }
@@ -295,6 +293,8 @@ export function paintGround(
         ...z.polygon[(i + 1) % z.polygon.length],
       ]);
       for (const [ax, ay, bx, by] of edges) {
+        // A channel leaving the eastern map edge has no closing quay wall.
+        if (ax >= scene.width - 0.01 && bx >= scene.width - 0.01) continue;
         const d = Math.hypot(bx - ax, by - ay),
           n = Math.ceil(d / 30);
         if (!d) continue;

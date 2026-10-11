@@ -6,7 +6,7 @@ The user approved the Kokoro male auditions, female auditions zf_001 and zf_026,
 | --- | --- | --- |
 | Kokoro zf_001 | 3 | Mei, Lan, An, Lian, museum guide, clothing seller, snack seller, visitors 1 and 3 |
 | Kokoro zf_026 | 17 | Qiao, Suyin, diner Xiao Tao, rock gardener Shulan |
-| Kokoro zm_009 | 58 | Lin |
+| Kokoro zm_009 | 58 | Lin, station visitor Xiaocheng |
 | Kokoro zm_014 | 63 | Hao |
 | Kokoro zm_020 | 66 | Diner A Le |
 | Kokoro zm_055 | 81 | Young reader, clothing customer |
@@ -24,5 +24,7 @@ The AISHELL3 SSB0354 older female voice uses gain 3.2 (twice its previous 1.6 ga
 Kokoro shares the installed `tools/asr-venv` runtime and `tools/kokoro-multi-lang-v1_1` model. Additional speaker IDs do not install additional models. Preserve the bundled Apache-2.0 license. Contextual pinyin decisions are translated to numeric tone tokens and temporary Hanzi keys; model weights and the original lexicon remain unchanged. A new line still incurs CPU synthesis latency. Browser decoding and ASR checks test playback/intelligibility, not all Mandarin tones or perceived age.
 
 Panda's separate profile uses zm_009 plus the exact audition A effects; see [Panda voice](panda-voice.md).
+
+Xiaocheng uses zm_009 following feedback that zm_014 sounded too old for his portrait. 地图 is explicitly dì tú; speech takes the di phones from 第 because Kokoro's default 地 entry contains de phones. Adverbial 地 still uses neutral de from 的.
 
 For a voice-only rollback, set `CHARACTER_VOICES_ENABLED = false` in `public/data/voices.js`, bump the service-worker cache, then restart `panda-world.service`. All NPC IDs map back to the existing female/male baseline. Panda keeps his selected voice. No save schema changes are needed; do not reset unrelated game work.

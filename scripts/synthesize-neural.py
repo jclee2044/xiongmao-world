@@ -11,6 +11,9 @@ root=Path(__file__).resolve().parents[1]/'tools'/('kokoro-multi-lang-v1_1' if ko
 model='model.onnx' if aishell else 'vits-zh-hf-fanchen-wnj.onnx'
 with contextual_lexicon(root/('lexicon-zh.txt' if kokoro else 'lexicon.txt'), r['text'], r.get('pronunciation'), key_base=0x9F00 if kokoro else 0xE000) as (lexicon, spoken):
  if kokoro:
+  # Panda also reads English explanations, using the same speaker and effect.
+  if r.get('effect') == 'panda-light-v1' and any(c.isascii() and c.isalpha() for c in r['text']):
+   lexicon += ',' + str(root/'lexicon-us-en.txt')
   model_config=sherpa_onnx.OfflineTtsModelConfig(kokoro=sherpa_onnx.OfflineTtsKokoroModelConfig(model=str(root/'model.onnx'),voices=str(root/'voices.bin'),tokens=str(root/'tokens.txt'),data_dir=str(root/'espeak-ng-data'),lexicon=lexicon),num_threads=3,debug=False)
  else:
   model_config=sherpa_onnx.OfflineTtsModelConfig(vits=sherpa_onnx.OfflineTtsVitsModelConfig(model=str(root/model),lexicon=lexicon,tokens=str(root/'tokens.txt')),num_threads=2,debug=False)

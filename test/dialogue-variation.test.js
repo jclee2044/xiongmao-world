@@ -228,18 +228,19 @@ test("client preset branch works offline and never generates on replay", async (
   assert.equal(await variations.spoken(base.chinese), selected.chinese);
 });
 
-test("every character has four different everyday discussion subjects in old HSK 2–3", async () => {
+test("characters have distinct, scene-appropriate discussion subjects in old HSK 2–3", async () => {
   const { conversationSubjects, npcSubjects, conversationOpeningOptions } =
     await import("../public/data/conversation-subjects.js");
-  assert.equal(Object.keys(conversationSubjects).length, 16);
+  const { travelerById, stationSubjects } = await import("../public/data/station-travelers.js");
+  assert.ok(Object.keys(conversationSubjects).length >= 16 + Object.keys(stationSubjects).length);
   for (const [id, npc] of Object.entries(npcs)) {
-    assert.equal(new Set(npcSubjects[id]).size, 4, id);
+    assert.equal(new Set(npcSubjects[id]).size, travelerById[id] ? 3 : 4, id);
     const options = dialogueOptions({
       ...npc.greeting,
       purpose: "opening",
       npcId: id,
     });
-    const expected = ["yun", "visitor-4"].includes(id) ? 7 : 5;
+    const expected = travelerById[id]?.openings.length || (["yun", "visitor-4"].includes(id) ? 7 : 5);
     assert.equal(options.length, expected);
     assert.equal(new Set(options.map((o) => o.chinese)).size, expected, id);
     assert.equal(conversationOpeningOptions(id).length, expected - 1);

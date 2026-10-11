@@ -1,6 +1,24 @@
 import { normalizeVoice } from "../data/voices.js";
 import { needsPronunciationContext } from "../data/pronunciation.js";
 
+// Keep every narration request within the server's short-phrase limit.
+export function narrationChunks(text) {
+  const chunks = [];
+  let remaining = String(text).trim();
+  while (remaining.length > 180) {
+    const prefix = remaining.slice(0, 180);
+    const boundaries = [...prefix.matchAll(/[。！？.!?]\s*|\s+/g)];
+    const last = boundaries.at(-1);
+    let end = last ? last.index + last[0].length : 180;
+    if (end < 60) end = 180;
+    if (/[\uD800-\uDBFF]/.test(remaining[end - 1])) end--;
+    chunks.push(remaining.slice(0, end).trim());
+    remaining = remaining.slice(end).trim();
+  }
+  if (remaining) chunks.push(remaining);
+  return chunks;
+}
+
 export class Speech {
   constructor(onStatus, getSettings, onActivity = () => {}) {
     this.onStatus = onStatus;
@@ -29,6 +47,7 @@ export class Speech {
   }
   stop() {
     this.generation++;
+    this.narrationQueue = null;
     this.controller?.abort();
     this.controller = null;
     window.speechSynthesis?.cancel();
@@ -55,15 +74,48 @@ export class Speech {
       URL.revokeObjectURL(this.url);
       this.url = null;
     }
+    this.complete?.();
+    this.complete = null;
   }
-  async speak(text, slow = false, voice = this.voice || "male", context) {
+  // Automatic Panda comments wait for the current speaker and each other.
+  // Explicit playback, closing a panel, or leaving the page cancels the queue.
+  narrate(text, { interrupt = false, valid = () => true } = {}) {
+    if (interrupt) this.stop();
+    if (!this.getSettings().voice) return Promise.resolve();
+    const generation = this.generation;
+    const previous =
+      this.narrationQueue || this.completion || Promise.resolve();
+    const task = previous.then(async () => {
+      for (const chunk of narrationChunks(text)) {
+        if (generation !== this.generation || !valid()) return;
+        const playback = this.play(chunk, false, "panda");
+        const completion = this.completion;
+        await playback;
+        await completion;
+      }
+    });
+    this.narrationQueue = task;
+    return task;
+  }
+  speak(text, slow = false, voice = this.voice || "panda", context) {
     this.stop();
+    return this.play(text, slow, voice, context);
+  }
+  async play(text, slow, voice, context) {
+    this.completion = new Promise((resolve) => (this.complete = resolve));
     const settings = this.getSettings();
     voice = normalizeVoice(voice);
-    if (!settings.voice)
+    if (!settings.voice) {
+      this.finish(this.generation);
       return this.onStatus("声音关了。可以在 Settings 里开。");
+    }
     const generation = this.generation;
-    if (this.resolveText) text = await this.resolveText(text);
+    try {
+      if (this.resolveText) text = await this.resolveText(text);
+    } catch {
+      this.finish(generation);
+      return;
+    }
     if (generation !== this.generation) return;
     // Preserve Panda's expressive punctuation; NPCs use simple pause marks.
     if (voice !== "panda")

@@ -1,6 +1,79 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Speech } from "../public/game/speech.js";
+import { Speech, narrationChunks } from "../public/game/speech.js";
+
+test("narration chunks retain long English and Chinese explanations within the API limit", () => {
+  for (const text of [
+    "A helpful explanation. ".repeat(30),
+    "这里的故事真有意思。".repeat(40),
+    "熊猫🐼".repeat(100),
+  ]) {
+    const chunks = narrationChunks(text);
+    assert.ok(chunks.every((chunk) => chunk.length <= 180 && chunk.length > 0));
+    assert.equal(chunks.join("").replace(/\s/g, ""), text.replace(/\s/g, ""));
+    assert.ok(chunks.every((chunk) => !/[\uD800-\uDBFF]$/.test(chunk)));
+  }
+});
+
+test("Panda narration waits for NPC playback, cancels stale comments, and respects mute", async (t) => {
+  const keys = ["window", "fetch", "Audio"];
+  const originals = keys.map((key) => [
+    key,
+    Object.getOwnPropertyDescriptor(globalThis, key),
+  ]);
+  t.after(() => {
+    for (const [key, descriptor] of originals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  globalThis.window = {};
+  const requests = [];
+  globalThis.fetch = async (_url, options) => {
+    requests.push(JSON.parse(options.body));
+    return new Response(new Blob(["fixture"]));
+  };
+  globalThis.Audio = class {
+    async play() {}
+    pause() {}
+    removeAttribute() {}
+    load() {}
+  };
+  const settings = { voice: true, voiceVolume: 0.7 };
+  const speech = new Speech(
+    () => {},
+    () => settings,
+  );
+  const tick = () => new Promise((resolve) => setImmediate(resolve));
+  await speech.speak("你好。", false, "young-male");
+  speech.voice = "young-male";
+  const narration = speech.narrate(
+    "Put the time before the verb. 我每天喝茶。",
+  );
+  await tick();
+  assert.equal(requests.length, 1, "NPC is not interrupted");
+  speech.audio.onended();
+  while (!speech.audio) await tick();
+  assert.equal(
+    requests.at(-1).voice,
+    "panda",
+    "narration ignores the previous NPC voice",
+  );
+  speech.audio.onended();
+  await narration;
+  await speech.speak("再见。", false, "young-male");
+  const stale = speech.narrate("已经离开的地方。", { valid: () => false });
+  const canceled = speech.narrate("不要再读这个。");
+  speech.stop();
+  await Promise.all([stale, canceled]);
+  assert.equal(requests.length, 3, "stop cancels queued comments");
+  const invalid = speech.narrate("过时的帮助。", { valid: () => false });
+  await invalid;
+  assert.equal(requests.length, 3, "hidden feedback is skipped");
+  settings.voice = false;
+  await speech.narrate("声音关了。");
+  assert.equal(requests.length, 3);
+});
 
 test("late mobile female voices are refreshed; missing voices request neural server speech", async (t) => {
   const keys = [
@@ -129,6 +202,7 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
     assert.equal(voiceForNpc(id), "older-female");
   const additions = {
     lin: "male-kokoro-009",
+    "station-traveler": "male-kokoro-009",
     hao: "male-kokoro-014",
     diner: "male-kokoro-020",
     reader: "male-kokoro-055",
@@ -154,8 +228,15 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
     v.startsWith("older-male"),
   );
   assert.equal(older.filter((v) => v === "older-male").length, 4);
-  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 4);
-  for (const id of ["wei", "gardener", "visitor-2", "courtyard-caretaker"])
+  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 6);
+  for (const id of [
+    "wei",
+    "gardener",
+    "visitor-2",
+    "courtyard-caretaker",
+    "traveler-guoliang",
+    "family-grandpa",
+  ])
     assert.equal(voiceForNpc(id), "older-male-kokoro");
   for (const [id, profile] of Object.entries(voiceProfiles)) {
     assert.equal(
