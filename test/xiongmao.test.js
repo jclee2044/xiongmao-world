@@ -80,12 +80,12 @@ test("every public venue has hosts, real exits, and valid activities", () => {
     (s) => s.id !== "shanghai" && s.id !== "home" && s.id !== "shantang",
   )) {
     assert.ok(
-      s.interactables.filter((o) => o.type === "npc").length >= 2,
+      s.interactables.filter((o) => o.type === "npc").length >= (s.id === "station-platform" ? 1 : 2),
       s.id,
     );
     assert.ok(
       s.interactables.some(
-        (o) => o.type === "door" && o.target === (s.id === "station-ticketing" ? "shantang" : s.id === "station-waiting" ? "station-ticketing" : "shanghai") && o.returnPoint,
+        (o) => o.type === "door" && o.target === (s.id === "station-ticketing" ? "shantang" : s.id === "station-waiting" ? "station-ticketing" : s.id === "station-platform" ? "station-waiting" : "shanghai") && o.returnPoint,
       ),
       s.id,
     );

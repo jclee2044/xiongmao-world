@@ -148,6 +148,15 @@ export function createStationInteractions({ line, state, change, world }) {
       "zhàn tái zài lóu xià 。 wǒ men zài zhè lǐ děng yí xià ba 。",
       "These stairs and the lift lead down to the ground-level platform. The platform and train journey are not open yet. You can return to the waiting hall.");
   }
+  function platformTrain() {
+    const arrived = journey().trainArrived;
+    say("站台 · Platform",
+      arrived ? "火车到了！我们不着急。" : "火车快来了。请站在黄线里面等车。",
+      arrived ? "huǒ chē dào le ！ wǒ men bù zháo jí 。" : "huǒ chē kuài lái le 。 qǐng zhàn zài huáng xiàn lǐ miàn děng chē 。",
+      arrived ? "The train has arrived and will wait here. The train ride is still being built; you can explore the platform or return upstairs."
+        : "The train will arrive shortly. Wait behind the yellow line. There is no boarding countdown.",
+      [["station-platform-done", "好 · Continue", close]]);
+  }
   return (o) => {
     // Ignore stale belt interactions if clearance was reset while navigating.
     if (["station-bag-drop", "station-bag-collect"].includes(o.id) && journey().entry === "public") return false;
@@ -159,6 +168,7 @@ export function createStationInteractions({ line, state, change, world }) {
     else if (["station-stairs-up", "station-lift-up"].includes(o.id)) upstairs(o);
     else if (o.id === "station-boarding-check") boarding();
     else if (["station-platform-stairs", "station-platform-lift"].includes(o.id)) platform(o);
+    else if (o.id === "station-platform-train") platformTrain();
     else return false;
     return true;
   };

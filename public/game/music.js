@@ -152,7 +152,7 @@ export class Music {
     const track =
       scene?.id === "home"
         ? homeTrack
-        : ["shantang", "station-ticketing", "station-waiting"].includes(scene?.id)
+        : ["shantang", "station-ticketing", "station-waiting", "station-platform"].includes(scene?.id)
           ? stationTrack
           : scene?.interior
             ? indoorTrack

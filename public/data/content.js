@@ -2,6 +2,7 @@ import { stationShopNpcs } from "./station-shops.js";
 import { stationTravelers, stationTravelContext } from "./station-travelers.js";
 import { waitingCharacters } from "./station-waiting-characters.js";
 import { stationHelpNpc } from "./station-help.js";
+import { additionalPlatformNpcs } from "./station-platform-travelers.js";
 const stationReader = {
   name: "林阿姨", appearance: "station-reader", voice: "female", topic: "travel",
   identity: "Auntie Lin, a seated passenger reading in the public ticket hall",
@@ -75,6 +76,7 @@ for (const traveler of stationTravelers) npcs[traveler.id] = {
 };
 npcs["traveler-zihan"].starter = { zh: "她几点回来？", example: "她几点坐火车回来？", why: "Ask what time she is coming back by train. 几点 asks the time; 回来 means to come back." };
 npcs["station-traveler"].starter = { zh: "过桥以后…", example: "过桥以后，往右边走。售票处在门里左边。", why: "Cross the bridge to the right, then head toward the station. You can also ask for help or reply in English." };
+Object.assign(npcs, additionalPlatformNpcs);
 
 const newNeighbors = [
  ['lian',"小莲",'lian','female',"我有点饿了。你愿意和我一起吃东西吗？","I am a little hungry. Would you eat with me?",'A hungry friend who would enjoy being invited to hotpot.'],

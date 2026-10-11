@@ -167,6 +167,12 @@ export function requestedPlace(text) {
   );
 }
 export function directionsTo(id, state = {}) {
+  if (state.scene === "station-platform" && ["station-entrance", "next-area", "back-town"].includes(id)) {
+    const target = scenes["station-platform"].interactables.find(o => o.id === "station-platform-return-lift");
+    return { id: target.id, scene: "station-platform", target: interactionPoint(target),
+      chinese: "先坐电梯回二楼候车室，再下楼出站。",
+      meaning: "Take the lift back to the second-floor waiting hall, then go downstairs to leave the station." };
+  }
   if (state.scene === "station-waiting" && ["station-entrance", "next-area", "back-town"].includes(id)) {
     const target = scenes["station-waiting"].interactables.find(o => o.id === "station-waiting-lift");
     return { id: target.id, scene: "station-waiting", target: interactionPoint(target),

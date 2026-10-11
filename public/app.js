@@ -1,7 +1,8 @@
 import { waitingTravelerProfile } from "./data/station-waiting-travelers.js";
+import { platformTravelerProfile } from "./data/station-platform-travelers.js";
 import { activities } from "./data/activities.js";
 import { XIAOCHENG, STATION_DEPARTURE } from "./data/station-departure.js";
-import { stationJourneyAction, indoorTravelerGreeting, waitingTravelerGreeting } from "./data/station-journey.js";
+import { stationJourneyAction, indoorTravelerGreeting, waitingTravelerGreeting, platformTravelerGreeting } from "./data/station-journey.js";
 import { dialogueQuestions } from "./game/coach-questions.js";
 import { createDialogueVariations, createAmbientDialogue } from "./game/dialogue-variation.js";
 import { passiveLandmarks } from "./game/interactions.js";
@@ -408,6 +409,9 @@ function startWorld() {
       persistence.change((s) => {
         s.adventure.stationJourney = stationJourneyAction(s.adventure.stationJourney, action);
       });
+      // Continuous walking postpones the ordinary save debounce. Dialogue on
+      // the server must see the train that has just arrived on this screen.
+      if (action === "train-arrived") void persistence.flush();
     },
     onArtStatus: (status) => {
       $("scene-loading").hidden = status !== "error";
@@ -645,14 +649,14 @@ function openConversation(id, shopId = null, appearance = null) {
   $("npc-name").textContent = npcs[id].name;
   $("reply").value = "";
   $("last-user").textContent = "";
-  const waitingProfile = waitingTravelerProfile(id, world.scene.id);
+  const waitingProfile = platformTravelerProfile(id, world.scene.id) || waitingTravelerProfile(id, world.scene.id);
   $("reply").placeholder = waitingProfile?.starter || (
     id === XIAOCHENG && world.scene.id === "station-ticketing"
       ? "我想坐火车去上海。"
       : npcs[id].starter?.example || starters[npcs[id].topic].example);
   $("send").disabled = false;
   if (!shopId) displayReply({
-    ...(waitingProfile?.greeting || (id === XIAOCHENG && world.scene.id === "station-waiting" ? waitingTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-ticketing" ? indoorTravelerGreeting : npcs[id].greeting)),
+    ...(waitingProfile?.greeting || (id === XIAOCHENG && world.scene.id === "station-platform" ? platformTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-waiting" ? waitingTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-ticketing" ? indoorTravelerGreeting : npcs[id].greeting)),
     purpose: "opening", npcId: id,
     mode: "authored",
     notice: "",

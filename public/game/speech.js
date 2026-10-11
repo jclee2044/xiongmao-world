@@ -174,7 +174,7 @@ export class Speech {
       if (generation !== this.generation) return;
       this.url = URL.createObjectURL(blob);
       this.audio = new Audio(this.url);
-      this.audio.volume = settings.voiceVolume;
+      this.audio.volume = settings.voiceVolume * (voice === "panda" ? 0.75 : 1);
       this.audio.onended = () => this.finish(generation);
       this.audio.onerror = () => {
         if (generation === this.generation) {

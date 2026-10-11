@@ -1,5 +1,7 @@
 # Station second-floor implementation
 
+The later [platform implementation](STATION_PLATFORM_IMPLEMENTATION.md) connects the checked stairs and lift below. The earlier notes below describe the scope when this floor was first built.
+
 Built October 11, 2026 in `/home/jlrj/Documents/lotus`. The playable `station-waiting` scene follows the approved upper-floor reference: sunset windows, twelve blue bench banks in four rows, snack shop, café, toilets, help desk, hot water, four massage chairs, departure board, boarding gates and checked landing.
 
 ## Connections and progression

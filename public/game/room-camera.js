@@ -1,3 +1,12 @@
+// Small authored scenes can show their complete composition without tracking
+// the player. Portrait screens retain the whole platform and both rail ends.
+export function fixedRoomCamera(scene, width, height) {
+  if (!scene.fixedCamera) return null;
+  return { scale: Math.min(width / scene.width, height / scene.height),
+    camX: 0, camY: 0, sceneId: scene.id,
+    viewportWidth: width, viewportHeight: height, settling: false };
+}
+
 // Keep the complete viewport inside an authored convex room outline. Zoom is
 // raised only where a tapering room cannot contain the preferred framing.
 export function constrainedRoomCamera(scene, player, width, height, preferredScale, previous, dt = 0) {

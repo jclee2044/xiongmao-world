@@ -270,3 +270,12 @@ Household practices are offered by their existing family hosts. The missing-book
 Added Panda observations about the messy house, once per visit, with a separate set after rug/laundry/toy cleanup. These comments do not open panels or start practices. The existing quiet behavior in other homes remains. Offline cache: suzhou-family-characters-88.
 
 Validation: eight focused household tests, twelve Panda-landmark tests, practice, interaction and contextual-pronunciation tests pass. Isolated muted Chromium confirms clicks on the removed rug/bookshelf/sofa/holiday-table hotspots open no panels or conversations, family activities launch from character conversations, the Grandpa book task resumes after a server save/reload, rug cleanup persists, and Panda supplies the room comment. Existing phone, child-animation, exit and hotpot checks also pass. Syntax and whitespace checks pass.
+
+
+## Station platform and traveler cast — 2026-10-11
+
+The compact overhead platform is connected to the upstairs boarding gates by matching stairs and lift, with both return routes working. The stairs continue offscreen, the track stays on the right, and the separate train arrives and waits. The original sunset concept remains preserved in the README. Existing work was checkpointed first as `fafbf9e`.
+
+Fourteen traveler placements reuse existing station and casual artwork, with individual travel identities, voices and platform dialogue. Xiaocheng retains his encounter visibility; Zihan stays outside waiting for his fiancée. The central aisle and landings remain clear. Train arrival saves immediately so server conversation reflects the train on screen even during continuous movement. See [implementation notes](handoff/STATION_PLATFORM_IMPLEMENTATION.md) and [populated platform](docs/screenshots/station-platform-train.png).
+
+Validation: all fourteen browser conversations, a train-arrival reply, upstairs gate/check/landing flow, stairs and lift both ways, phone touch, fixed camera, save/reload, reduced motion and offline reload pass. Focused platform checks: 9 passed; shared dialogue/voice checks: 26 passed. Full suite: 324 passed, with the same four failures reproduced in the pre-change checkpoint (language scanner, visitor range, market-cat range, existing station-help pinyin). Syntax and whitespace checks pass. The local `panda-world.service` was restarted and its health endpoint reports healthy; the user's personal save was not used for tests. Carriage boarding, the ride and a new destination remain later work.

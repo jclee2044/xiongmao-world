@@ -12,6 +12,7 @@ const sources = await Promise.all(
     "public/data/station-exterior.js",
     "public/data/station-interior.js",
     "public/data/station-waiting.js",
+    "public/data/station-platform.js",
   ].map((p) => readFile(p, "utf8")),
 );
 const paths = [
@@ -47,7 +48,7 @@ for (const path of paths) {
       .split("/")
       .at(-1)
       .replace(/\.(png|webp)$/, ".webp");
-  convert("public" + path, "public" + target);
+  if (path !== target) convert("public" + path, "public" + target);
   manifest[path] = target;
 }
 await writeFile(

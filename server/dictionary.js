@@ -44,6 +44,7 @@ function load() {
     ["火锅", "huǒ guō", "hot pot; a shared pot of hot soup in which you cook food"],
     ["橘子", "jú zi", "tangerine; mandarin orange"],
     ["苏州", "sū zhōu", "Suzhou; a city in China"],
+    ["无锡", "wú xī", "Wuxi; a city in Jiangsu, China"],
     ["苏州博物馆", "sū zhōu bó wù guǎn", "Suzhou Museum"],
     ["虎丘", "hǔ qiū", "Tiger Hill; a famous hill in Suzhou"],
     ["画画", "huà huà", "to draw; to paint"],

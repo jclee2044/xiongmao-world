@@ -1,6 +1,8 @@
 import { paintStationEscalators } from "./station-escalators.js";
 import { paintWaitingSigns, paintBoardingGates, prepareWaitingSignArt } from "./station-waiting-art.js";
 import { waitingEscalators, WAITING_SCALE } from "../data/station-waiting.js";
+import { platformTrainArt } from "../data/station-platform.js";
+import { paintPlatformTrain } from "./station-platform-art.js";
 import { carriesTravelSuitcase, luggageObjectVisible } from "../data/travel-luggage.js";
 import { travelerWalkArt } from "../data/station-traveler-walk-art.js";
 import { travelerArt } from "../data/station-traveler-art.js";
@@ -11,7 +13,7 @@ import { paintGroundSigns, paintGroundSecurity, paintGroundPropSign, paintGround
 import { interactionSurface, paintInteractionSurface } from "./interaction-surfaces.js";
 import { stationCharacterArt } from "../data/station-interior-characters.js";
 import { stationEmployeeFrame } from "./station-employee-animation.js";
-import { constrainedRoomCamera } from "./room-camera.js";
+import { constrainedRoomCamera, fixedRoomCamera } from "./room-camera.js";
 import { paintStationProp, beginStationActorLayer } from "./station-layers.js";
 import { STATION_SCALE } from "../data/station-exterior.js";
 import { paintStationSigns } from "./station-signs.js";
@@ -206,6 +208,7 @@ export async function prepareArt(scene, onProgress = () => {}) {
     ].forEach((name) => names.add(name));
   }
   const files = [...names].map((name) => paths[name]);
+  if (scene.id === "station-platform") files.push(platformTrainArt.path);
   if (scene.backgroundPath) files.push(scene.backgroundPath);
   else if (scene.id === "home") files.push(paths.home);
   let completed = 0;
@@ -735,6 +738,7 @@ export function draw(
     guest = null,
     hungryGuest = null,
     stationTraveler = null,
+    platformTrain = null,
     seat = null,
     adventure = {},
     completedPractice = [],
@@ -774,7 +778,7 @@ export function draw(
         (window.matchMedia("(hover: hover) and (pointer: fine)").matches
           ? 1.1
           : 1);
-  const constrained = !overview && constrainedRoomCamera(scene, player, w, h, preferredScale, previousCamera, cameraDelta);
+  const constrained = !overview && (fixedRoomCamera(scene, w, h) || constrainedRoomCamera(scene, player, w, h, preferredScale, previousCamera, cameraDelta));
   const scale = constrained ? constrained.scale : preferredScale;
   const viewW = w / scale,
     viewH = h / scale,
@@ -795,7 +799,7 @@ export function draw(
         ? (viewH - scene.height) / 2
         : 0;
   const view = { x: camX - ox, y: camY - oy, w: viewW, h: viewH };
-  ctx.fillStyle = "#e9d7b5";
+  ctx.fillStyle = scene.fixedCamera ? "#303c36" : "#e9d7b5";
   ctx.fillRect(0, 0, w, h);
   ctx.save();
   ctx.scale(scale, scale);
@@ -816,6 +820,7 @@ export function draw(
       if (settings.motion !== false) paintStationEscalators(ctx, img, time, waitingEscalators, WAITING_SCALE);
       paintWaitingSigns(ctx, adventure.stationJourney);
     }
+    if (scene.id === "station-platform") paintPlatformTrain(ctx, asset(platformTrainArt.path), platformTrain);
   } else {
     const paving = asset(paths.paving);
     if (ready(paving)) {

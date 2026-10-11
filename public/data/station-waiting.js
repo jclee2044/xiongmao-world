@@ -3,6 +3,7 @@ import { waitingTravelers } from "./station-waiting-travelers.js";
 import { travelerById } from "./station-travelers.js";
 import { XIAOCHENG } from "./station-departure.js";
 import { groundPoint } from "./station-interior.js";
+import { platformArrival, platformLiftArrival, STATION_STAIR_CLEAR_WIDTH } from "./station-platform.js";
 
 // Source coordinates on the 1536 × 1024 production plate. The upper landing
 // sits north of the recessed A well, continuing the right-up lane from 1F.
@@ -138,6 +139,7 @@ export const stationWaiting = {
   id:"station-waiting",title:"苏州站 · 二楼候车室",chinese:"苏州站 · 二楼候车室",interior:true,
   width:1536*WAITING_SCALE,height:1024*WAITING_SCALE,stationScale:WAITING_SCALE,
   backgroundPath:"/assets/world/station-waiting-v5.png",
+  stairClearWidth:STATION_STAIR_CLEAR_WIDTH,
   cameraRegion:poly(rect(16,8,1505,848)),walkableFloor:poly(rect(20,188,1490,604)),
   spawn:waitingArrival,navigationStep:12,navigationRadius:15,
   solids:[
@@ -172,8 +174,8 @@ export const stationWaiting = {
     inspect("station-massage","按摩椅",227,752,"走累了，坐一会儿吧。","zǒu lèi le ， zuò yí huì er ba 。","Four massage chairs offer a place to rest beside the main seating.",{hitRect:box(113,616,214,103)}),
     inspect("station-departure-board","出发信息",953,366,"去上海的火车在晚上六点二十分出发。检票口在右边。","qù shàng hǎi de huǒ chē zài wǎn shang liù diǎn èr shí fēn chū fā 。 jiǎn piào kǒu zài yòu biān 。","G728 to Shanghai departs at 18:20 (6:20 pm). The board also shows Nanjing at 19:05, Hangzhou at 19:40, and Wuxi at 20:10. Speak to the boarding attendant on the right when you are ready.",{hitRect:box(838,175,232,115),navigation:true}),
     stop("station-boarding-check","npc","检票员",1236,394,{appearance:"station-security",artX:1233*WAITING_SCALE,artY:434*WAITING_SCALE,artHeight:171,hitRect:box(1198,350,65,82),navigation:true}),
-    inspect("station-platform-stairs","站台 · 下楼",1350,573,"站台在楼下。","zhàn tái zài lóu xià 。","The platform is on floor one.",{hitRect:box(1280,600,144,160),integrationTarget:"station-platform",navigation:true}),
-    inspect("station-platform-lift","站台 · 电梯",1466,558,"电梯到楼下的站台。","diàn tī dào lóu xià de zhàn tái 。","The lift opens onto the checked landing and descends to the platform.",{hitRect:box(1464,614,64,190),integrationTarget:"station-platform",navigation:true}),
+    inspect("station-platform-stairs","站台 · 下楼",1350,573,"站台在楼下。","zhàn tái zài lóu xià 。","The platform is on floor one.",{hitRect:box(1280,600,144,160),integrationTarget:"station-platform",floorTransition:true,returnPoint:platformArrival,navigation:true}),
+    inspect("station-platform-lift","站台 · 电梯",1466,558,"电梯到楼下的站台。","diàn tī dào lóu xià de zhàn tái 。","The lift opens onto the checked landing and descends to the platform.",{hitRect:box(1464,614,64,190),integrationTarget:"station-platform",floorTransition:true,returnPoint:platformLiftArrival,navigation:true}),
     ...liveSeats.map((s,i)=>stop(s.id,"npc",s.name,s.x,s.y+22,{appearance:`waiting-person-${i}`,artX:s.x*WAITING_SCALE-(s.companionOf?0:18),artY:(s.y-(s.artLift||0))*WAITING_SCALE,artHeight:s.artHeight||151,seated:true,companionOf:s.companionOf,age:s.age,sortY:(s.y+1)*WAITING_SCALE,occlusionIgnore:[`waiting-bench-${s.bank}`],hitRect:s.companionOf?box(s.x-17,s.y-(s.artLift||0)-(s.artHeight||151)/2,34,(s.artHeight||151)/2):box(s.x-23,s.y-77,47,78)})),
     // Close, stationary conversation clusters use the existing idle gestures.
     ...[

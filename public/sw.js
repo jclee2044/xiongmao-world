@@ -1,5 +1,5 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.8-station-passport-conveyor-144";
+const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149";
 // The user's personal recording is kept outside source control. A checkout
 // without that file must still install the rest of the offline game.
 const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
@@ -10,6 +10,12 @@ const SHELL = [
       "/data/station-exterior.js",
       "/data/station-interior.js",
       "/data/station-waiting.js",
+      "/data/station-platform.js",
+      "/data/station-platform-travelers.js",
+      "/game/station-train.js",
+      "/game/station-platform-art.js",
+      "/assets/world/station-platform-v3.png",
+      "/assets/world/station-train-overhead-v1.png",
       "/data/station-shops.js",
       "/assets/world/shop-station-cafe.png",
       "/assets/world/shop-station-snacks.png",

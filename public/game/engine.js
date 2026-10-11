@@ -14,6 +14,7 @@ import { stationTravelerVisible, playerCarriesBag } from "../data/station-journe
 import { stationGroundForJourney, groundProgressAction } from "../data/station-interior.js";
 import { stationWaitingForJourney } from "../data/station-waiting.js";
 import { StationDeparture } from "./station-departure.js";
+import { StationTrain } from "./station-train.js";
 import { createStationSignHelp } from "./station-sign-help.js";
 import artBounds from "../data/art-bounds.js";
 const PANDA_FOLLOW_DELAY = 0.5;
@@ -319,7 +320,7 @@ export class World {
   }
   updateStationTraveler(dt) {
     const adventure = this.getAdventure();
-    if (!["shantang", "station-ticketing", "station-waiting"].includes(this.scene.id) || adventure.stationTraveler !== "walking") {
+    if (!["shantang", "station-ticketing", "station-waiting", "station-platform"].includes(this.scene.id) || adventure.stationTraveler !== "walking") {
       this.stationDeparture = null;
       this.stationTraveler = null;
       return;
@@ -327,7 +328,7 @@ export class World {
     this.stationDeparture ??= new StationDeparture(scenes.shantang, adventure.stationTravelerDistance || 0);
     // Once the player reaches 2F, the traveler they helped has caught up.
     // This also handles a saved departure whose outdoor animation was unfinished.
-    if (this.scene.id === "station-waiting" && this.stationDeparture.route)
+    if (["station-waiting", "station-platform"].includes(this.scene.id) && this.stationDeparture.route)
       this.stationDeparture.distance = this.stationDeparture.route.length;
     if (this.hover?.id === XIAOCHENG) this.hover = null;
     const pose = this.stationDeparture.update(dt, this.onStationTravelerProgress);
@@ -544,7 +545,8 @@ export class World {
   changeScene(id, position) {
     if (!this.hasScene(id)) return false;
     if (id === "station-waiting" && this.getAdventure().stationJourney?.entry !== "ready") return false;
-    if (["station-ticketing", "station-waiting"].includes(this.scene.id) && !["station-ticketing", "station-waiting", "station-platform"].includes(id))
+    if (id === "station-platform" && !(this.getAdventure().stationJourney?.booked && this.getAdventure().stationJourney?.entry === "ready" && this.getAdventure().stationJourney?.boarding)) return false;
+    if (["station-ticketing", "station-waiting", "station-platform"].includes(this.scene.id) && !["station-ticketing", "station-waiting", "station-platform"].includes(id))
       this.onStationJourneyAction("leave");
     if (this.stationDeparture && this.getAdventure().stationTraveler === "walking")
       this.onStationTravelerProgress("walking", this.stationDeparture.distance);
@@ -564,6 +566,8 @@ export class World {
     this.standUp();
     this.scene = id === "station-ticketing" ? stationGroundForJourney(this.getAdventure().stationJourney)
       : id === "station-waiting" ? stationWaitingForJourney(this.getAdventure().stationJourney) : scenes[id];
+    this.platformTrain = id === "station-platform"
+      ? new StationTrain({ arrived: this.getAdventure().stationJourney?.trainArrived }) : null;
     this.animalPoses = [];
     this.guest = null;
     this.hungryGuest = null;
@@ -612,6 +616,7 @@ export class World {
     if (door?.type !== "door" || !scenes[door.target]) return false;
     if (needsStationLuggage(this.scene, door, this.getAdventure())) return false;
     if (door.target === "station-waiting" && this.getAdventure().stationJourney?.entry !== "ready") return false;
+    if (door.target === "station-platform" && !(this.getAdventure().stationJourney?.booked && this.getAdventure().stationJourney?.entry === "ready" && this.getAdventure().stationJourney?.boarding)) return false;
     this.changeScene(door.target, door.returnPoint);
     return true;
   }
@@ -686,6 +691,11 @@ export class World {
       this.ambientTime += dt;
     this.updateStationTraveler(this.paused ? 0 : dt);
     this.syncStationInterior();
+    if (this.platformTrain && !this.paused && !this.bubbleHelp.reading) {
+      const pose = this.platformTrain.update(dt, this.getSettings().motion !== false);
+      if (pose.phase === "ready" && !this.getAdventure().stationJourney?.trainArrived)
+        this.onStationJourneyAction("train-arrived");
+    }
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
@@ -804,6 +814,8 @@ export class World {
     this.canvas.dataset.stationEntry = this.getAdventure().stationJourney?.entry || "public";
     this.canvas.dataset.stationBooked = String(this.getAdventure().stationJourney?.booked || false);
     this.canvas.dataset.stationBoarding = String(this.getAdventure().stationJourney?.boarding || false);
+    this.canvas.dataset.trainPhase = this.platformTrain?.phase || "none";
+    this.canvas.dataset.trainTravel = String(this.platformTrain?.pose().travel || 0);
     this.canvas.dataset.playerBag = playerCarriesBag(this.scene, this.getAdventure().stationJourney) ? "carried" : "on-belt";
     const pandaMoving =
       Math.hypot(
@@ -839,7 +851,7 @@ export class World {
     const ambientFrame =
       !this.paused &&
       settings.motion !== false &&
-      (["station-ticketing", "station-waiting"].includes(this.scene.id) || t - (this.lastPaint || 0) > 90);
+      (["station-ticketing", "station-waiting", "station-platform"].includes(this.scene.id) || t - (this.lastPaint || 0) > 90);
     if (
       moving ||
       pandaMoving ||
@@ -870,6 +882,7 @@ export class World {
           guest: this.guest,
           hungryGuest: this.hungryGuest,
           stationTraveler: this.stationTraveler,
+          platformTrain: this.platformTrain?.pose(),
           seat: this.seat,
           adventure: this.getAdventure(),
           completedPractice: this.getPractice().completed,

@@ -40,6 +40,7 @@ export function validateState(s) {
     !s ||
     s.schema !== 1 ||
     !scenes[s.scene] ||
+    (s.scene === "station-platform" && !(s.adventure?.stationJourney?.booked && s.adventure?.stationJourney?.entry === "ready" && s.adventure?.stationJourney?.boarding)) ||
     !s.position ||
     !Number.isFinite(s.position.x) ||
     !Number.isFinite(s.position.y) ||

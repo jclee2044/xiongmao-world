@@ -1,6 +1,7 @@
 import { connectStationTicketing } from "../data/station-exterior.js";
 import { stationGround, stationGroundForJourney, groundCheckpoint, GROUND_SCALE } from "../data/station-interior.js";
 import { stationWaiting, stationWaitingForJourney, waitingPoint, boardingBoundary } from "../data/station-waiting.js";
+import { stationPlatform } from "../data/station-platform.js";
 import { townRooms, homeObjects } from "../data/town-rooms.js";
 import { collectibleAvailable } from "./collectibles.js";
 import { validateAdventure } from "../data/adventure.js";
@@ -1018,6 +1019,7 @@ for (const b of scenes.shanghai.bridges) {
 Object.assign(scenes, townRooms);
 scenes[stationGround.id] = stationGround;
 scenes[stationWaiting.id] = stationWaiting;
+scenes[stationPlatform.id] = stationPlatform;
 connectStationTicketing(scenes);
 scenes.shantang.interactables.find((o) => o.id === "back-town").returnPoint =
   interactionPoint(
@@ -1276,6 +1278,8 @@ export function upgradeState(state) {
           }
         : {}),
     };
+  if (state.scene === stationPlatform.id && !state.adventure.stationJourney.boarding)
+    state = { ...state, scene: stationWaiting.id, position: waitingPoint(1160, 370) };
   if (state.scene === stationWaiting.id && state.adventure.stationJourney.entry !== "ready")
     state = { ...state, scene: stationGround.id, position: { ...stationGround.spawn } };
   const scene = state.scene === stationGround.id

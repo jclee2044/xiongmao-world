@@ -17,11 +17,14 @@ export function validateStationJourney(value = newStationJourney()) {
       (!value.booked && value.entry !== "public") ||
       (value.boarding !== undefined && typeof value.boarding !== "boolean") ||
       (value.visitedWaiting !== undefined && typeof value.visitedWaiting !== "boolean") ||
+      (value.trainArrived !== undefined && typeof value.trainArrived !== "boolean") ||
+      (value.trainArrived && !value.boarding) ||
       (value.boarding && value.entry !== "ready") ||
       !Number.isSafeInteger(value.revision) || value.revision < 0 || value.revision > 1000000)
     throw Error("Invalid station journey.");
   return { booked: value.booked, entry: value.entry, revision: value.revision,
     ...(value.visitedWaiting ? { visitedWaiting: true } : {}),
+    ...(value.trainArrived ? { trainArrived: true } : {}),
     ...(value.boarding ? { boarding: true } : {}) };
 }
 
@@ -35,8 +38,9 @@ export function stationJourneyAction(value, action, xp = 0) {
   if (action === "collect" && journey.entry === "screened") next.entry = "ready";
   if (action === "visit-waiting" && journey.entry === "ready") next.visitedWaiting = true;
   if (action === "board" && journey.booked && journey.entry === "ready" && stationBoardingProgress(xp).ready) next.boarding = true;
-  if (action === "leave") { next.entry = "public"; delete next.boarding; }
-  if (next.entry !== journey.entry || next.booked !== journey.booked || next.boarding !== journey.boarding || next.visitedWaiting !== journey.visitedWaiting)
+  if (action === "train-arrived" && journey.boarding) next.trainArrived = true;
+  if (action === "leave") { next.entry = "public"; delete next.boarding; delete next.trainArrived; }
+  if (next.entry !== journey.entry || next.booked !== journey.booked || next.boarding !== journey.boarding || next.visitedWaiting !== journey.visitedWaiting || next.trainArrived !== journey.trainArrived)
     next.revision = Math.min(1000000, journey.revision + 1);
   return next;
 }
@@ -79,7 +83,14 @@ export const waitingTravelerGreeting = {
   topic: "travel",
 };
 
+export const platformTravelerGreeting = {
+  chinese: "我们到站台了！先站在黄线里面等车吧。",
+  pinyin: "wǒ men dào zhàn tái le ！ xiān zhàn zài huáng xiàn lǐ miàn děng chē ba 。",
+  meaning: "We're on the platform! Let's wait behind the yellow line.",
+  topic: "travel",
+};
+
 export function stationTravelerVisible(scene, adventure) {
   const status = adventure.stationTraveler || "new";
-  return ["station-ticketing", "station-waiting"].includes(scene.id) ? status === "entered" : status === "new";
+  return ["station-ticketing", "station-waiting", "station-platform"].includes(scene.id) ? status === "entered" : status === "new";
 }

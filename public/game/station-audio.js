@@ -21,6 +21,7 @@ export function stationApproach(scene, player) {
 }
 
 export function stationSoundscape(scene, player) {
+  if (scene?.id === "station-platform") return { hall: 0.18, pa: 0.4, traffic: 0 };
   if (["station-ticketing", "station-waiting"].includes(scene?.id))
     return { hall: 0.45, pa: 0.65, traffic: 0 };
   if (scene?.id !== "shantang" || scene.interior || !player)

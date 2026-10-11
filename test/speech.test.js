@@ -209,6 +209,11 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
     "station-shopkeeper": "older-male-kokoro",
     lin: "male-kokoro-009",
     "station-traveler": "male-kokoro-009",
+    "station-passenger-xinyi": "female-kokoro-001",
+    "station-passenger-siyu": "female-kokoro-026",
+    "station-passenger-min": "older-female",
+    "station-passenger-haoran": "male-kokoro-020",
+    "station-passenger-hong": "older-male-kokoro",
     hao: "male-kokoro-014",
     diner: "male-kokoro-020",
     reader: "male-kokoro-055",
@@ -234,7 +239,7 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
     v.startsWith("older-male"),
   );
   assert.equal(older.filter((v) => v === "older-male").length, 4);
-  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 8);
+  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 9);
   for (const id of [
     "wei",
     "gardener",

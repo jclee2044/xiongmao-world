@@ -4,6 +4,7 @@ import { chromium } from "playwright";
 import { Store, newState } from "../server/store.js";
 import { createApp } from "../server/index.js";
 import { scenes, MAP_VERSION } from "../public/game/world.js";
+import { platformPoint } from "../public/data/station-platform.js";
 import { waitingPoint as p } from "../public/data/station-waiting.js";
 await mkdir("test-results/station-waiting",{recursive:true});
 const server=createApp({store:new Store(":memory:"),providerConfig:{provider:"story"}});
@@ -49,10 +50,11 @@ try{
   await capture("departure-board");await keyTo("d","x",1234,1);await clickWorld(p(1233,392));await capture("boarding-pass-ready");await page.click("#station-boarding-confirm");await capture("boarding-pass-checked");await page.click("#station-boarding-done");
   await page.waitForFunction(()=>document.querySelector("#world").dataset.stationBoarding==="true");await capture("boarding-open");
   await keyTo("d","x",1307,1);await keyTo("s","y",556,1);await keyTo("d","x",1350,1);await capture("checked-landing");
-  await clickWorld(p(1350,637));await page.locator("#panel").waitFor({state:"visible"});assert.match(await page.locator("#panel").innerText(),/not open yet/);await close();
+  await clickWorld(p(1350,637));await page.waitForFunction(()=>document.querySelector("#world").dataset.scene==="station-platform");await ready();
+  await clickWorld(platformPoint(400,200));await page.waitForFunction(()=>document.querySelector("#world").dataset.scene==="station-waiting");await ready();
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem("panda-world-v1"))?.dirty===false);
   await page.reload();await page.click("#begin");await ready();assert.equal(await page.locator("#world").getAttribute("data-station-boarding"),"true");
-  await keyTo("a","x",1307,-1);await keyTo("w","y",369,-1);await keyTo("a","x",752,-1);await clickWorld(p(749,270));
+  await clickWorld(p(1307,369));await page.waitForFunction(()=>+document.querySelector("#world").dataset.y<740);await keyTo("a","x",752,-1);await clickWorld(p(749,270));
   await page.waitForFunction(()=>document.querySelector("#world").dataset.scene==="station-ticketing");await ready();
   assert.ok(Math.hypot(+(await page.locator("#world").getAttribute("data-x"))-525*1.5,+(await page.locator("#world").getAttribute("data-y"))-325*1.5)<2);
   await capture("lift-return-to-1f");
@@ -69,7 +71,7 @@ try{
 
   await seed({offline:true,position:p(1307,557),boarding:true});await page.waitForFunction(()=>!!navigator.serviceWorker.controller,null,{timeout:60000});
   const cached=await page.evaluate(async()=>{const c=await caches.open((await caches.keys()).find(k=>k.startsWith("xiongmao-shell-")));return(await c.keys()).map(r=>new URL(r.url).pathname);});
-  for(const file of ["/data/station-waiting.js","/data/station-waiting-characters.js","/game/station-waiting-art.js","/assets/fonts/station-hand.woff2","/assets/fonts/station-brush.woff2","/assets/optimized/station-waiting-v5.webp","/assets/optimized/station-sign-readability-v1.webp","/assets/optimized/station-waiting-people-v1.webp"])assert.ok(cached.includes(file),file);
+  for(const file of ["/data/station-waiting.js","/data/station-waiting-characters.js","/game/station-waiting-art.js","/assets/fonts/station-hand.woff2","/assets/fonts/station-brush.woff2","/assets/optimized/station-waiting-v5.webp","/assets/optimized/station-sign-readability-v1.webp","/assets/optimized/station-waiting-people-v2.webp"])assert.ok(cached.includes(file),file);
   await context.setOffline(true);await page.reload();await page.click("#begin");await ready();assert.equal(await page.locator("#world").getAttribute("data-station-boarding"),"true");await capture("offline-landing");
   assert.deepEqual(await page.evaluate(()=>[...document.fonts].map(f=>[f.family.replaceAll('"',''),f.status]).filter(([name])=>name.startsWith("Station ")).sort()),[["Station Brush","loaded"],["Station Hand","loaded"]]);
   assert.deepEqual(errors,[]);console.log("2F: ascent, amenities, boarding passage, landing/reload, lift both ways, seated dialogue, Xiaocheng, phone touch, Panda floor samples and offline cache passed.");

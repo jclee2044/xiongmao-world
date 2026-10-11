@@ -26,6 +26,8 @@ export const everydayGameWords = [
   "平安出行", "温暖相伴", "售票", "证件", "安检", "广场",
   // Concrete ground-floor signs and checkpoint vocabulary, explained in place.
   "售票员", "取行李", "候车室", "站台", "检票", "楼梯", "传送带", "车站导览", "林阿姨",
+  // The platform's painted boundary, return route, and fellow travelers.
+  "黄线", "左上方", "心怡", "思雨", "敏阿姨", "浩然", "洪叔叔",
   // Travel practice upstairs: hotel check-in, timetables and changing plans.
   "日期", "时刻表", "酒店", "订房", "订", "改成", "见面", "见", "怎么办", "变", "午饭", "数", "比如", "到达", "下一班",
   // Upper-floor amenities, wayfinding labels and the seated travelers' names.
