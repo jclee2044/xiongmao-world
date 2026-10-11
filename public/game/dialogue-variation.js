@@ -81,7 +81,7 @@ export function createDialogueVariations({
     return entry.chosen.chinese;
   }
   function prepare(container) {
-    for (const node of container.querySelectorAll("p.chinese")) {
+    for (const node of container.querySelectorAll("p.chinese[data-dialogue]")) {
       if (
         node.dataset.dialogueVariation ||
         !/\p{Script=Han}/u.test(node.textContent)

@@ -4,7 +4,7 @@ import { platformTravelerProfile } from "./data/station-platform-travelers.js";
 import { activities } from "./data/activities.js";
 import { XIAOCHENG, STATION_DEPARTURE } from "./data/station-departure.js";
 import { stationJourneyAction, indoorTravelerGreeting, waitingTravelerGreeting, platformTravelerGreeting } from "./data/station-journey.js";
-import { dialogueQuestions } from "./game/coach-questions.js";
+import { dialogueQuestions, screenContext } from "./game/coach-questions.js";
 import { createDialogueVariations, createAmbientDialogue } from "./game/dialogue-variation.js";
 import { passiveLandmarks } from "./game/interactions.js";
 import { createLandmarkPanda } from "./game/panda-landmarks.js";
@@ -127,6 +127,12 @@ function openPanel(title, html, language = "zh-CN") {
   speech.stop();
   $("panel-title").textContent = title;
   $("panel-content").innerHTML = html;
+  const help = document.createElement("button");
+  help.type = "button";
+  help.dataset.screenHelp = "";
+  help.textContent = "Ask Panda about this screen";
+  help.onclick = showPandaCoach;
+  $("panel-content").prepend(help);
   animatePanel($("panel-content"));
   if (!$("panel").open) $("panel").showModal();
   world?.pause(true);
@@ -753,7 +759,7 @@ function openConversation(id, shopId = null, appearance = null, replay = false) 
   $("conversation").showModal();
   animatePanel($("conversation"));
   world.pause(true);
-  (shopId === "clothing"
+  (matchMedia("(pointer: coarse)").matches ? $("conversation").querySelector(".close") : shopId === "clothing"
     ? $("shop-purchases").querySelector("button")
     : $("reply")
   ).focus();
@@ -1107,9 +1113,11 @@ function speakConversationReply(reply) {
   }
 }
 
+let coachSource;
 let coachController,
   coachGeneration = 0;
 function showPandaCoach() {
+  coachSource = [...document.querySelectorAll("dialog[open]")].filter(el => el.id !== "panda-coach").at(-1) || $("game");
   coachController?.abort();
   coachGeneration++;
   $("coach-send").disabled = false;
@@ -1121,7 +1129,7 @@ function showPandaCoach() {
   $("coach-tip").textContent = "";
   $("coach-listen").hidden = true;
   $("coach-use").hidden = true;
-  $("coach-presets").replaceChildren(...dialogueQuestions(currentReply).map(question => {
+  $("coach-presets").replaceChildren(...(coachSource?.id === "conversation" ? dialogueQuestions(currentReply) : ["What does the button at the bottom mean?", "Which controls can I use here?"]).map(question => {
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.coachPrompt = "";
@@ -1144,7 +1152,9 @@ async function askPanda(question) {
   coachController?.abort();
   coachController = new AbortController();
   const token = ++coachGeneration;
-  const reply = currentReply;
+  const reply = coachSource?.id === "conversation" ? currentReply : null;
+  const screen = screenContext(coachSource);
+  const screenKey = JSON.stringify(screen);
   $("coach-send").disabled = true;
   for (const button of $("coach-presets").children) button.disabled = true;
   $("coach-status").textContent = "Panda is thinking…";
@@ -1159,12 +1169,17 @@ async function askPanda(question) {
       "/api/coach",
       {
         question,
+        screen,
         context: `Learner: ${$("last-user").textContent.slice(0, 250)}\nNPC: ${reply?.chinese || ""} (${reply?.meaning || ""})\nPanda tip: ${reply?.pandaFeedback?.chinese || ""}`.slice(0, 700),
         explanationLanguage: "en",
       },
       AbortSignal.any([coachController.signal, AbortSignal.timeout(65000)]),
     );
     if (token !== coachGeneration || !$("panda-coach").open) return;
+    if (JSON.stringify(screenContext(coachSource)) !== screenKey) {
+      $("coach-status").textContent = "The screen changed. Please ask again about the current screen.";
+      return;
+    }
     $("coach-zh").textContent = answer.chinese;
     $("coach-tip").textContent = answer.explanation;
     $("coach-pinyin").textContent = answer.pinyin;
@@ -1173,7 +1188,7 @@ async function askPanda(question) {
     $("coach-listen").hidden = false;
     const narration = `${answer.explanation} ${answer.chinese}`;
     $("coach-listen").onclick = () => speech.narrate(narration, { interrupt: true });
-    $("coach-use").hidden = false;
+    $("coach-use").hidden = coachSource?.id !== "conversation" || answer.mode === "screen";
     $("coach-use").onclick = () => {
       $("reply").value = answer.chinese;
       $("panda-coach").close();

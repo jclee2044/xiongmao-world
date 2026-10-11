@@ -111,7 +111,7 @@ export class Speech {
     }
     const generation = this.generation;
     try {
-      if (this.resolveText) text = await this.resolveText(text);
+      if (this.resolveText && !context) text = await this.resolveText(text);
     } catch {
       this.finish(generation);
       return;

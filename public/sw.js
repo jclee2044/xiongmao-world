@@ -1,9 +1,10 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149-refactor-worlds-rewards-1";
+const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149-refactor-worlds-rewards-language-2";
 // The user's personal recording is kept outside source control. A checkout
 // without that file must still install the rest of the offline game.
 const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
 const SHELL = [
+  "/data/language-text.js",
   "/data/rewards.js",
   "/state/rewards.js",
   ...new Set(

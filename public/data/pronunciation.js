@@ -5,6 +5,7 @@ export const needsPronunciationContext = (text) =>
 
 // Reviewed game usages that the general pinyin dictionary misreads.
 export const pronunciationOverrides = {
+  故事: "gù shi",
   地图: "dì tú",
   暖和: "nuǎn huo",
   看家人: "kàn jiā rén",

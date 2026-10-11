@@ -1,3 +1,4 @@
+import { segmentChinese } from "../data/language-text.js";
 import { api } from "./persistence.js";
 import { lexicon } from "../data/content.js";
 export function createWordHelp({ discover, speech }) {
@@ -18,19 +19,11 @@ export function createWordHelp({ discover, speech }) {
           .then((r) => r.tokens)
           .catch(() => {
             cache.delete(text);
-            return [
-              ...new Intl.Segmenter("zh", { granularity: "word" }).segment(
-                text,
-              ),
-            ].map(
-              (s) =>
-                lexicon.find((w) => w.zh === s.segment) || {
-                  zh: s.segment,
-                  pinyin: "",
-                  meaning: "Dictionary unavailable offline.",
-                  punctuation: !/\p{Script=Han}/u.test(s.segment),
-                },
-            );
+            return segmentChinese(text).map(({ zh, start }) => ({
+              ...(lexicon.find(w => w.zh === zh) || { zh, pinyin: "", meaning: "Dictionary unavailable offline." }),
+              context: { source: text, start },
+              punctuation: !/\p{Script=Han}/u.test(zh),
+            }));
           }),
       );
     return cache.get(text);
@@ -90,6 +83,7 @@ export function createWordHelp({ discover, speech }) {
     callout.style.top = `${top}px`;
   }
   async function annotate(el) {
+    if (el.closest("#panel button, #panel a, #panel [role=button]")) return;
     const text = el.textContent;
     if (
       !text ||
@@ -141,7 +135,7 @@ export function createWordHelp({ discover, speech }) {
     while (walker.nextNode()) {
       const node = walker.currentNode, parent = node.parentElement;
       if (!parent || !/\p{Script=Han}/u.test(node.textContent) ||
-          parent.closest("script,style,textarea,select,option,svg,canvas,#word-callout,.help-word,[data-world-sign],[data-map-stop],[data-coach-prompt],[data-conversation-subject],[data-word-leaf],.pinyin,[hidden],dialog:not([open])")) continue;
+          parent.closest("#panel button,#panel a,#panel [role=button],script,style,textarea,select,option,svg,canvas,#word-callout,.help-word,[data-world-sign],[data-map-stop],[data-coach-prompt],[data-conversation-subject],[data-word-leaf],.pinyin,[hidden],dialog:not([open])")) continue;
       leaves.push(node);
     }
     for (const node of leaves) {

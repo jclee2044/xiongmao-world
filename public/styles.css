@@ -2334,3 +2334,11 @@ dialog .primary {
 .bubble-help-text .help-word:focus-visible {
   background: #6e9ea233 !important;
 }
+
+/* Shared speaker attribution and separate, touch-accessible screen help. */
+.panda-speaker { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin: 10px auto; width: max-content; text-align: center; }
+.panda-speaker img { object-fit: contain; }
+.panda-speaker span { font-weight: 700; text-align: center; width: 100%; }
+[data-screen-help] { min-height: 44px; padding: 8px 14px; margin: 0 0 12px; }
+.instruction-label { display: block; font-weight: 700; margin-bottom: 6px; }
+#panel .small-actions > button { min-height: 44px; }

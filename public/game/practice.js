@@ -1,3 +1,4 @@
+import { pandaSpeaker } from "./coach-questions.js";
 import { grantReward, completionText } from "../data/rewards.js";
 import { activityGuide } from "./activity-guide.js";
 import { npcs } from "../data/content.js";
@@ -223,7 +224,7 @@ export function createPractice({
       html += `<details><summary lang="zh-CN">${escape(label("文化小故事", "A cultural story"))}：${escape(settings().translation ? fact.title : fact.title.split(" · ")[0])}</summary>${line(fact)}${fact.note ? `<p class="notice" lang="en">${escape(fact.note)}</p>` : ""}<div class="small-actions"><button id="practice-culture-replay">${escape(label("听一听", "Listen"))}</button><a href="${escape(fact.source)}" target="_blank" rel="noopener noreferrer">${escape(label("Source", "Source"))} ↗</a></div></details>`;
     html += `<p><button id="practice-list">${escape(label("其他练习", "All activities"))}</button>${!done ? ` <button id="practice-pause">${escape(label("先不做了", "Save and return to town"))}</button>` : ""}</p>`;
     html =
-      `<section class="activity-guide" lang="en"><strong>${done ? "Practice complete" : escape(guide.purpose)}</strong><p>${done ? "Your practice has been recorded. Keep chatting or try another activity." : escape(guide.how)}</p>${!done ? `${guide.next !== guide.how && a.type !== "visit" ? `<p><strong>Your task:</strong> ${escape(guide.next)}</p>` : ""}<p><strong>Complete when:</strong> ${escape(guide.complete)}</p>${guide.progress ? `<p>${escape(guide.progress)}</p>` : ""}<p class="muted">Practice only — no coins are spent and no items are purchased.</p>` : ""}</section>` +
+      `<section class="activity-guide" lang="en"><span class="instruction-label">Instructions</span><strong>${done ? "Practice complete" : escape(guide.purpose)}</strong><p>${done ? "Your practice has been recorded. Keep chatting or try another activity." : escape(guide.how)}</p>${!done ? `${guide.next !== guide.how && a.type !== "visit" ? `<p><strong>Your task:</strong> ${escape(guide.next)}</p>` : ""}<p><strong>Complete when:</strong> ${escape(guide.complete)}</p>${guide.progress ? `<p>${escape(guide.progress)}</p>` : ""}<p class="muted">Practice only — no coins are spent and no items are purchased.</p>` : ""}</section>` +
       html;
     openPanel(label(a.title, a.english), html, "en");
     const spoken = done ? a.response.zh : stitchClue?.clue.zh || prompt.zh;
@@ -233,9 +234,9 @@ export function createPractice({
     $("practice-hint").onclick = () => {
       const hint = riddle?.hint || a.hint;
       $("practice-hint-content").innerHTML =
-        `<p>${escape(hint.meaning)}</p>` + line(hint);
+        pandaSpeaker + line(hint);
       $("practice-hint-content").hidden = false;
-      speech.narrate(`${hint.meaning} ${hint.zh}`, { interrupt: true });
+      speech.narrate(hint.zh, { interrupt: true });
     };
     $("practice-list").onclick = () => catalog();
     if ($("practice-culture-replay"))
@@ -282,8 +283,8 @@ export function createPractice({
     };
     const retry = (message) => {
       $("practice-feedback").innerHTML =
-        `<p lang="en">${escape(message?.meaning || "Take another look. You can replay the clue or open a hint.")}</p>${line(message || { zh: "再看看，也可以听一听或者看帮助。", pinyin: "zài kàn kàn ， yě kě yǐ tīng yi tīng huò zhě kàn bāng zhù 。", meaning: "Take another look. You can replay the clue or open a hint." }, "notice")}`;
-      speech.narrate($("practice-feedback").textContent, { interrupt: true });
+        `${pandaSpeaker}${line(message || { zh: "再看看，也可以听一听或者看帮助。", pinyin: "zài kàn kàn ， yě kě yǐ tīng yi tīng huò zhě kàn bāng zhù 。", meaning: "Take another look. You can replay the clue or open a hint." }, "notice")}`;
+      speech.narrate(message?.zh || "再看看，也可以听一听或者看帮助。", { interrupt: true });
     };
     const changeActive = (patch, focusSelector) => {
       const progress = state();
