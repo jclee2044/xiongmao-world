@@ -1,6 +1,17 @@
+import { paintStationEscalators } from "./station-escalators.js";
+import { paintWaitingSigns, paintBoardingGates, prepareWaitingSignArt } from "./station-waiting-art.js";
+import { waitingEscalators, WAITING_SCALE } from "../data/station-waiting.js";
+import { carriesTravelSuitcase, luggageObjectVisible } from "../data/travel-luggage.js";
+import { travelerWalkArt } from "../data/station-traveler-walk-art.js";
 import { travelerArt } from "../data/station-traveler-art.js";
 import { xiaochengWalkArt } from "../data/xiaocheng-walk-art.js";
 import { XIAOCHENG } from "../data/station-departure.js";
+import { stationTravelerVisible, playerCarriesBag } from "../data/station-journey.js";
+import { paintGroundSigns, paintGroundSecurity, paintGroundPropSign, paintGroundBaggage } from "./station-interior-art.js";
+import { interactionSurface, paintInteractionSurface } from "./interaction-surfaces.js";
+import { stationCharacterArt } from "../data/station-interior-characters.js";
+import { stationEmployeeFrame } from "./station-employee-animation.js";
+import { constrainedRoomCamera } from "./room-camera.js";
 import { paintStationProp, beginStationActorLayer } from "./station-layers.js";
 import { STATION_SCALE } from "../data/station-exterior.js";
 import { paintStationSigns } from "./station-signs.js";
@@ -35,7 +46,24 @@ function asset(path) {
   return images.get(path);
 }
 const paths = {
+  travelSuitcase: "/assets/props/travel-suitcase.png",
+  stationBag: "/assets/props/player-green-satchel.png",
+  idleWithoutBag: "/assets/characters/player-idle-without-bag.png",
+  walkWithoutBag: "/assets/characters/player-walk-without-bag.png",
+  seatedWithoutBag: "/assets/characters/player-seated-without-bag.png",
+  stationEmployeeGuide: "/assets/characters/station-employee-guide-v1.png",
+  stationEmployeePoses: "/assets/characters/station-employee-poses-v2.png",
+  stationEmployeeExit: "/assets/characters/station-employee-exit-v1.png",
+  stationEmployeeDesk: "/assets/characters/station-employee-desk-v1.png",
+  stationReaderSeated: "/assets/characters/station-reader-seated-v3.png",
+  stationClerk: "/assets/characters/station-clerk-v2.png",
+  stationStaff: "/assets/characters/station-interior-people-v1.png",
+  waitingCompanions: "/assets/characters/station-seated-companions-v3.png",
+  waitingPeople: "/assets/characters/station-waiting-people-v2.png",
   xiaochengWalk: "/assets/characters/xiaocheng-walk.png",
+  travelersWalkA: "/assets/characters/station-travelers-walk-a-v1.png",
+  travelersWalk: "/assets/characters/station-travelers-walk-v1.png",
+  wenboConversation: "/assets/characters/wenbo-conversation-away-v1.png",
   travelersA: "/assets/characters/station-travelers-a.png",
   travelersB: "/assets/characters/station-travelers-b.png",
   fountain: "/assets/world/lotus-fountain.png",
@@ -63,6 +91,8 @@ const paths = {
   lin: "/assets/characters/lin.webp",
   yun: "/assets/characters/yun.webp",
   momo: "/assets/characters/momo.webp",
+  rabbit: "/assets/optimized/rabbit-plush.webp",
+  cityModel: "/assets/optimized/suzhou-model-table-rotated.webp",
   fox: "/assets/characters/fox-plush.png",
   lane: "/assets/world/canal-lane.webp",
   home: "/assets/world/home.webp",
@@ -101,15 +131,22 @@ function decodeAsset(path) {
   }
   return decoded.get(path);
 }
-const commonArt = ["player", "idle", "walk", "panda", "seated", "momo", "fox"];
+const commonArt = ["travelSuitcase", "player", "idle", "walk", "panda", "seated", "momo", "fox", "rabbit"];
 export function prepareCommonArt() {
   return Promise.all(commonArt.map((name) => decodeAsset(paths[name])));
 }
 export async function prepareArt(scene, onProgress = () => {}) {
+  if (scene.id === "station-waiting") await prepareWaitingSignArt();
   const names = new Set(commonArt);
+  if (scene.id === "station-waiting") names.add("cityModel");
+  if (scene.id === "station-ticketing")
+    ["stationBag", "idleWithoutBag", "walkWithoutBag", "seatedWithoutBag"].forEach(name => names.add(name));
   for (const actor of scene.interactables || []) {
-    const art = travelerArt[actor.appearance || actor.id];
+    if (stationCharacterArt[actor.appearance]) names.add(stationCharacterArt[actor.appearance].sheet || "stationStaff");
+    const art = actor.idleArt || travelerArt[actor.appearance || actor.id];
     if (art) names.add(art.sheet);
+    const walkArt = travelerWalkArt[actor.appearance || actor.id];
+    if (walkArt && actor.playRoute) names.add(walkArt.sheet);
     if (actor.id === XIAOCHENG) names.add("xiaochengWalk");
   }
   if (scene.interactables?.some((o) => bounds.gardenWorkers[o.appearance]))
@@ -180,11 +217,11 @@ export async function prepareArt(scene, onProgress = () => {}) {
     }),
   );
 }
-const idleCrops = [];
-function idleCrop(frame, row) {
-  const img = asset(paths.idle),
-    index = row * 5 + frame;
-  if (idleCrops[index]) return idleCrops[index];
+const idleCrops = new Map();
+function idleCrop(frame, row, name = "idle") {
+  const img = asset(paths[name]),
+    index = `${name}:${row}:${frame}`;
+  if (idleCrops.has(index)) return idleCrops.get(index);
   const xs = [0, 0.24, 0.421, 0.602, 0.783, 1],
     ys = [0, 0.518, 1];
   const x = Math.floor(xs[frame] * img.naturalWidth),
@@ -209,12 +246,14 @@ function idleCrop(frame, row) {
         top = Math.min(top, py);
         bottom = Math.max(bottom, py);
       }
-  return (idleCrops[index] = {
+  const crop = {
     x: x + left,
     y: y + top,
     w: right - left + 1,
     h: bottom - top + 1,
-  });
+  };
+  idleCrops.set(index, crop);
+  return crop;
 }
 const atlasCrops = new Map();
 function atlasCrop(name, col, row, columns, rows) {
@@ -235,7 +274,7 @@ function atlasCrop(name, col, row, columns, rows) {
   const ys =
     name === "roamersIdle"
       ? [0, 450, 855, 1278].map((n) => n * img.naturalHeight / 1278)
-      : name === "walk"
+      : name === "walk" || name === "walkWithoutBag"
       ? [0, 0.514, 1].map((n) => n * img.naturalHeight)
       : name === "neighborWalk"
         ? [0, 260, 525, 780, 1040, 1282, 1536].map(
@@ -389,22 +428,24 @@ function playerPartsAt(color, name, crop) {
   playerParts.set(key, parts);
   return parts;
 }
-function playerWalkPose(color, row, frame) {
-  const key = `${color}:${row}:${frame}`;
+function playerWalkPose(color, row, frame, withoutBag = false) {
+  const idleName = withoutBag ? "idleWithoutBag" : "idle";
+  const walkName = withoutBag ? "walkWithoutBag" : "walk";
+  const key = `${color}:${row}:${frame}:${withoutBag}`;
   if (playerWalkPoses.has(key)) return playerWalkPoses.get(key);
-  const idle = idleCrop(0, row);
+  const idle = idleCrop(0, row, idleName);
   const idleHeight = Math.max(
-    ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, row).h),
+    ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, row, idleName).h),
   );
-  const walk = atlasCrop("walk", frame, row, 4, 2);
+  const walk = atlasCrop(walkName, frame, row, 4, 2);
   const walkHeight = Math.max(
-    ...[0, 1, 2, 3].map((f) => atlasCrop("walk", f, row, 4, 2).h),
+    ...[0, 1, 2, 3].map((f) => atlasCrop(walkName, f, row, 4, 2).h),
   );
   const scale = idleHeight / walkHeight;
   // Keep the idle face, hair and neck at their original scale. Normalizing
   // two independently painted full bodies does not normalize their faces.
-  const idleParts = playerPartsAt(color, "idle", idle);
-  const walkParts = playerPartsAt(color, "walk", walk);
+  const idleParts = playerPartsAt(color, idleName, idle);
+  const walkParts = playerPartsAt(color, walkName, walk);
   const headY = idleHeight - idle.h;
   const neckY = headY + idleParts.neckY;
   const bodyScaleY = (idleHeight - neckY) / (walk.h - walkParts.neckY);
@@ -639,6 +680,7 @@ function sprite(
   if (highlight) {
     ctx.shadowColor = "white";
     ctx.shadowBlur = 5;
+    ctx.filter = "brightness(1.18)";
   }
   if (flip) ctx.scale(-1, 1);
   ctx.drawImage(
@@ -672,6 +714,8 @@ function plateVisible(p, view) {
 }
 let groundPattern, earthPattern, waterPattern;
 const opacity = new WeakMap();
+const bubbleLayouts = new WeakMap();
+
 export function draw(
   ctx,
   canvas,
@@ -700,8 +744,11 @@ export function draw(
     route = [],
     interactionTarget = null,
     overview = null,
+    previousCamera = null,
+    cameraDelta = 0,
   } = {},
 ) {
+  bubbleLayouts.set(ctx, []);
   const dpr = Math.min(window.devicePixelRatio || 1, 2),
     w = canvas.clientWidth,
     h = canvas.clientHeight;
@@ -716,25 +763,27 @@ export function draw(
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
-  const scale = overview
+  const preferredScale = overview
     ? Math.min(w / overview.w, h / overview.h)
     : scene.id === "home" || scene.interior
       ? (scene.id === "home" ? 0.830584 : 1) * Math.max(
-          w / (scene.id === "home" ? scene.width : 1200),
-          h / (scene.id === "home" ? scene.height : 800),
+          w / (scene.id === "home" ? scene.width : scene.cameraWidth || 1200),
+          h / (scene.id === "home" ? scene.height : scene.cameraHeight || 800),
         )
       : Math.min(1.15, Math.max(0.68, w / 1254, h / 1254)) *
         (window.matchMedia("(hover: hover) and (pointer: fine)").matches
           ? 1.1
           : 1);
+  const constrained = !overview && constrainedRoomCamera(scene, player, w, h, preferredScale, previousCamera, cameraDelta);
+  const scale = constrained ? constrained.scale : preferredScale;
   const viewW = w / scale,
     viewH = h / scale,
     camX = overview
       ? overview.x
-      : Math.max(0, Math.min(scene.width - viewW, player.x - viewW / 2)),
+      : constrained ? constrained.camX : Math.max(0, Math.min(scene.width - viewW, player.x - viewW / 2)),
     camY = overview
       ? overview.y
-      : Math.max(0, Math.min(scene.height - viewH, player.y - viewH * 0.55));
+      : constrained ? constrained.camY : Math.max(0, Math.min(scene.height - viewH, player.y - viewH * 0.55));
   const ox = overview
       ? (viewW - overview.w) / 2
       : scene.width < viewW
@@ -759,6 +808,14 @@ export function draw(
   if (scene.backgroundPath || scene.id === "home" || scene.interior) {
     const img = asset(scene.backgroundPath || paths.home);
     if (ready(img)) ctx.drawImage(img, 0, 0, scene.width, scene.height);
+    if (scene.id === "station-ticketing") {
+      if (settings.motion !== false) paintStationEscalators(ctx, img, time);
+      paintGroundSigns(ctx);
+    }
+    if (scene.id === "station-waiting") {
+      if (settings.motion !== false) paintStationEscalators(ctx, img, time, waitingEscalators, WAITING_SCALE);
+      paintWaitingSigns(ctx, adventure.stationJourney);
+    }
   } else {
     const paving = asset(paths.paving);
     if (ready(paving)) {
@@ -822,17 +879,22 @@ export function draw(
   const playerHeight =
     scene.interior || scene.id === "home" ? 160 : actorSizes.player;
   const ambient = lifeActors(scene, time, player, settings.motion !== false);
+  hover ||= scene.interactables.find(o => o.id === interactionTarget);
+  const surface = ["stuffy", "friend", "suitcase", "animal"].includes(hover?.type) ? null : interactionSurface(scene, hover);
   const entities = [
+    ...(surface ? [{ type: "interaction-highlight", polygon: surface,
+      y: hover.id.startsWith("station-bag-") ? 605 * scene.stationScale : Math.max(...surface.map(p => p[1])) + 1 }] : []),
     ...scene.scenery.filter((o) => o.type !== "boat-dock" && visible(o, view) && !completedPractice.includes(o.hideAfterActivity)),
     ...scene.interactables.filter(
       (o) =>
         (o.type === "npc" &&
-          !(o.id === XIAOCHENG && (adventure.stationTraveler || "new") !== "new") &&
+          !(o.id === XIAOCHENG && !stationTravelerVisible(scene, adventure)) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && hungryGuest) &&
           !(o.id === "qiao" && guest)) ||
         (o.type === "stuffy" && !o.hidden && !o.concealed && !hasCollectible(found, o.collectible || "momo")) ||
-        (o.type === "friend" && hasCollectible(found, o.collectible || "momo")),
+        (o.type === "suitcase" && luggageObjectVisible(o, adventure)) ||
+        (o.type === "friend" && luggageObjectVisible(o, adventure) && hasCollectible(found, o.collectible || "momo")),
     ),
     { ...player, ...(seat || {}), type: "player" },
     {
@@ -841,7 +903,7 @@ export function draw(
       type: "panda",
     },
     ...ambient,
-    ...(scene.id === "home" && adventure.hungry === "done"
+    ...(scene.id === "home" && adventure.hungry === "done" && !adventure.travelLuggage?.items?.includes("sheep-keepsake")
       ? [
           {
             ...scene.interactables.find((o) => o.id === "sheep-keepsake"),
@@ -859,13 +921,13 @@ export function draw(
     })),
     ...(scene.foreground || []).map((o) => ({ ...o, type: "foreground" })),
   ].filter((o) => !overview || !["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"].includes(o.type))
-    .sort((a, b) => (a.floor ? -1000 : a.artY ?? a.y) - (b.floor ? -1000 : b.artY ?? b.y));
+    .sort((a, b) => (a.floor ? -1000 : a.sortY ?? a.artY ?? a.y) - (b.floor ? -1000 : b.sortY ?? b.artY ?? b.y));
   const marketMasks = marketForeground(scene.marketPlate);
   const directionalProps = scene.scenery.filter(o => o.type === "station-prop" && o.prop.frontEdge);
   const actorTypes = ["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"];
   for (const o of entities) {
     const actorLayer = directionalProps.length && actorTypes.includes(o.type)
-      ? beginStationActorLayer(ctx, asset(scene.backgroundPath), directionalProps, npcFeet(o), STATION_SCALE)
+      ? beginStationActorLayer(ctx, asset(scene.backgroundPath), directionalProps.filter(p => !o.occlusionIgnore?.includes(p.id)), npcFeet(o), scene.stationScale || STATION_SCALE)
       : null;
     if (actorLayer) ctx = actorLayer.context;
     const marketActor = marketMasks.length &&
@@ -881,9 +943,9 @@ export function draw(
         ctx.clip("evenodd");
       }
     }
-    if (!overview && ["npc", "passerby", "guest"].includes(o.type) &&
+    if (!overview && !o.artClip && ["npc", "passerby", "guest"].includes(o.type) &&
         (near?.id === o.id || hover?.id === o.id)) {
-      const feet = npcFeet(o);
+      const feet = o.groundShadow === false ? { x: o.x, y: o.y } : npcFeet(o);
       ctx.fillStyle = "#fff6dfa0";
       ctx.beginPath();
       ctx.ellipse(feet.x, feet.y, 28, 9, 0, 0, Math.PI * 2);
@@ -1105,6 +1167,7 @@ export function draw(
         ctx.clip();
       }
       sprite(ctx, marketCat ? "marketCat" : "animals", o.x, o.y, height, {
+        highlight: hover?.id === o.id,
         // Ducks rest in their neutral floating sprite; grounded rabbits crouch.
         crop: frames[marketCat ? (active ? Math.floor(o.distance / 4) % 8 : 8) : swimming ? 1 : o.animal === "rabbit" ? (o.hop > 0.2 ? 1 : 0) : active ? walkFrame(o.distance) : 1],
         uniformHeight: Math.max(...frames.map((f) => f.h)),
@@ -1138,7 +1201,7 @@ export function draw(
           o.y - height - 12,
           varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time),
         );
-    } else if (o.type === "passerby" || o.type === "guest" || (o.type === "npc" && Number.isInteger(o.childIndex))) {
+    } else if ((o.type === "passerby" && !travelerArt[o.appearance || o.id]) || o.type === "guest" || (o.type === "npc" && Number.isInteger(o.childIndex))) {
       shadow(ctx, o.x, o.y, 25);
       const height = o.seated ? (o.id === "qiao" ? actorSizes.player : 130) : Number.isInteger(o.childIndex) ? o.artHeight || 120 : scene.interior ? 165 : o.artHeight || 165;
       const child = Number.isInteger(o.childIndex) || ["kid-one", "kid-two"].includes(o.id);
@@ -1212,29 +1275,55 @@ export function draw(
       }
     } else if (o.type === "player") {
       const col = settings.hair === "short" ? 1 : 0;
+      const withoutBag = !playerCarriesBag(scene, adventure.stationJourney);
+      const idleName = withoutBag ? "idleWithoutBag" : "idle";
+      const seatedName = withoutBag ? "seatedWithoutBag" : "seated";
       const animatedWalk = moving && settings.motion !== false;
+      const carryingSuitcase = carriesTravelSuitcase(scene, adventure);
       shadow(ctx, o.x, o.y, 32);
+      // Enlarge the case independently of the grip height so the wheels stay
+      // grounded and the telescoping handle still meets her existing hand.
+      if (carryingSuitcase) {
+        const bag = asset(paths.travelSuitcase);
+        if (ready(bag)) {
+          const walking = animatedWalk && !seat;
+          const height = playerHeight * 0.45;
+          const width = height * bag.naturalWidth / bag.naturalHeight;
+          const gripHeight = playerHeight * (walking ? 0.46 : 0.36);
+          const offset = playerHeight * (seat ? 0.34 : walking ? 0.20 : 0.145);
+          const split = Math.round(bag.naturalHeight * 0.25);
+          const top = height * 0.25;
+          ctx.save();
+          ctx.translate(o.x, o.y + 2);
+          if (facing < 0) ctx.scale(-1, 1);
+          ctx.drawImage(bag, 0, 0, bag.naturalWidth, split,
+            offset - width / 2, -gripHeight, width, gripHeight - height + top);
+          ctx.drawImage(bag, 0, split, bag.naturalWidth, bag.naturalHeight - split,
+            offset - width / 2, -height + top, width, height - top);
+          ctx.restore();
+        }
+      }
       if (seat) {
-        sprite(ctx, "seated", o.x, o.y, seat.kind === "tea" ? playerHeight : scene.interior ? 128 : 138, {
-          crop: atlasCrop("seated", col, 0, 3, 1),
-          imageOverride: playerOutfit(settings.outfit, "seated"),
+        sprite(ctx, seatedName, o.x, o.y, seat.kind === "tea" ? playerHeight : scene.interior ? 128 : 138, {
+          crop: atlasCrop(seatedName, col, 0, 3, 1),
+          imageOverride: playerOutfit(settings.outfit, seatedName),
           flip: Boolean(seat.flip),
         });
       } else if (!animatedWalk) {
         const frame =
-          settings.motion === false
+          settings.motion === false || carryingSuitcase
             ? 0
             : [0, 0, 1, 1, 2, 2, 0, 0, 3, 0, 4, 4][Math.floor(time * 2) % 12];
-        sprite(ctx, "idle", o.x, o.y, playerHeight, {
-          imageOverride: playerOutfit(settings.outfit),
-          crop: idleCrop(frame, col),
+        sprite(ctx, idleName, o.x, o.y, playerHeight, {
+          imageOverride: playerOutfit(settings.outfit, idleName),
+          crop: idleCrop(frame, col, idleName),
           uniformHeight: Math.max(
-            ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, col).h),
+            ...[0, 1, 2, 3, 4].map((f) => idleCrop(f, col, idleName).h),
           ),
           flip: facing < 0,
         });
       } else {
-        const pose = playerWalkPose(settings.outfit, col, Math.floor(walkDistance / 27) % 4);
+        const pose = playerWalkPose(settings.outfit, col, Math.floor(walkDistance / 27) % 4, withoutBag);
         sprite(ctx, "walk", o.x, o.y, playerHeight, {
           imageOverride: pose,
           crop: { x: 0, y: 0, w: pose.width, h: pose.height },
@@ -1242,14 +1331,22 @@ export function draw(
           flip: facing < 0,
         });
       }
-    } else if (o.type === "npc") {
+    } else if (o.type === "npc" || (o.type === "passerby" && travelerArt[o.appearance || o.id])) {
       ctx.save();
+      if (o.artClip) {
+        ctx.beginPath();
+        o.artClip.forEach(([x,y],i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y));
+        ctx.closePath(); ctx.clip();
+      }
       ctx.globalAlpha *= o.opacity ?? 1;
       const feet = npcFeet(o);
       const height = o.artHeight || actorSizes[o.id];
-      if (!o.painted && o.id !== "mei") shadow(ctx, o.x, o.y, 30);
-      const traveler = travelerArt[o.appearance || o.id];
+      if (!o.painted && !o.artClip && o.groundShadow !== false && o.id !== "mei") shadow(ctx, feet.x, feet.y, 30);
+      const stationPerson = stationCharacterArt[o.appearance];
+      const traveler = o.idleArt || travelerArt[o.appearance || o.id];
       const walkingTraveler = o.departing && o.id === XIAOCHENG;
+      const travelerWalk = animate && settings.motion !== false && o.moving
+        ? travelerWalkArt[o.appearance || o.id] : null;
       const neighbor = bounds.neighbors?.[o.appearance || o.id];
       const indoorNpc = bounds.indoorNpcs?.[o.appearance || o.id];
       const marketNpc = bounds.marketNpcs?.[o.appearance || o.id];
@@ -1257,8 +1354,10 @@ export function draw(
       if (!o.painted)
         sprite(
           ctx,
-          walkingTraveler
+          stationPerson ? stationPerson.sheet || "stationStaff" : walkingTraveler
             ? xiaochengWalkArt.sheet
+            : travelerWalk
+            ? travelerWalk.sheet
             : traveler
             ? traveler.sheet
             : gardenWorker
@@ -1274,28 +1373,33 @@ export function draw(
           feet.y,
           height,
           {
-            crop: walkingTraveler
+            crop: (stationPerson?.frames
+              ? stationPerson.frames[stationEmployeeFrame(o, time, animate && settings.motion !== false)]
+              : stationPerson) || (walkingTraveler
               ? xiaochengWalkArt[o.walkDirection][settings.motion === false ? 1 : Math.floor(o.distance / 22) % 4]
+              : travelerWalk
+              ? travelerWalk.frames[[0, 1, 2, 1][Math.floor((o.distance || 0) / 18) % 4]]
               : traveler
               ? traveler.frames[travelerIdleFrame(o, time, animate && settings.motion !== false)]
               : gardenWorker
               ? gardenWorker[gardenWorkFrame(o, time, animate && settings.motion !== false)]
-              : marketNpc || indoorNpc || neighbor,
-            ...(!traveler && !gardenWorker && npcIdlePose(o, time, animate && settings.motion !== false)),
+              : marketNpc || indoorNpc || neighbor),
+            ...(!traveler && !gardenWorker && !stationPerson && npcIdlePose(o, time, animate && settings.motion !== false)),
             flip: Boolean(traveler && o.facing < 0),
             ...(walkingTraveler ? { uniformHeight: xiaochengWalkArt.height } : {}),
             breathe: animate && settings.motion !== false && !traveler && !gardenWorker ? Math.sin(time * 1.8 + o.x) * 0.006 : 0,
             highlight: Boolean(o.id && hover?.id === o.id),
           },
         );
+      const bubblePhase = Math.floor(time / 5 + (o.origin?.x ?? o.x));
       if (o.bubbles && (o.travelGroup
-        ? Math.floor(time / 5) % 2 === o.groupSpeaker
-        : Math.floor(time / 5 + o.x) % 3 !== 2))
+        ? Math.floor(time / 5) % (o.groupSize || 2) === o.groupSpeaker
+        : bubblePhase % 3 !== 2))
         speechBubble(
           ctx,
           feet.x,
           feet.y - height - 12,
-          (traveler ? o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length] : varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time)),
+          (traveler ? o.bubbles[bubblePhase % o.bubbles.length] : varyBubble(o.bubbles[Math.floor(time / 5 + o.x) % o.bubbles.length], o.id, scene.id, time)),
         );
       ctx.restore();
     } else if (o.type === "panda") {
@@ -1325,12 +1429,27 @@ export function draw(
           sway: hop * 0.0025,
         },
       );
+    } else if (o.type === "suitcase") {
+      shadow(ctx, o.x, o.y, 24);
+      sprite(ctx, "travelSuitcase", o.x, o.y, 95, { highlight: hover?.id === o.id });
     } else if (o.type === "stuffy" || o.type === "friend") {
       shadow(ctx, o.x, o.y, 24);
-      sprite(ctx, o.collectible === "fox-plush" ? "fox" : "momo", o.x, o.y, actorSizes.momo);
+      sprite(ctx, o.collectible === "rabbit-plush" ? "rabbit" : o.collectible === "fox-plush" ? "fox" : "momo", o.x, o.y, actorSizes.momo, { highlight: hover?.id === o.id });
+    } else if (o.type === "city-model") {
+      sprite(ctx, "cityModel", o.x, o.y, o.h);
+    } else if (o.type === "station-boarding") {
+      paintBoardingGates(ctx, adventure.stationJourney);
+    } else if (o.type === "station-security") {
+      paintGroundSecurity(ctx, adventure.stationJourney);
+    } else if (o.type === "interaction-highlight") {
+      paintInteractionSurface(ctx, o.polygon);
+    } else if (o.type === "station-baggage") {
+      paintGroundBaggage(ctx, adventure.stationJourney, asset(paths.stationBag),
+        adventure.travelLuggage?.packed ? asset(paths.travelSuitcase) : null);
     } else if (o.type === "station-prop" && scene.backgroundPath) {
       const img = asset(scene.backgroundPath);
-      if (ready(img) && !o.prop.frontEdge) paintStationProp(ctx, img, o.prop, STATION_SCALE);
+      if (ready(img) && !o.prop.frontEdge) paintStationProp(ctx, img, o.prop, scene.stationScale || STATION_SCALE);
+      if (scene.id === "station-ticketing" && !o.prop.frontEdge) paintGroundPropSign(ctx, o.id);
       if (o.id === "north-banner" && ready(img) && settings.motion !== false)
         paintStationBanner(ctx, img, time, STATION_SCALE);
       if (o.id === "travel-poster") {
@@ -1440,13 +1559,6 @@ export function draw(
       ctx.stroke();
     }
   }
-  if (hover && !["npc", "passerby", "guest", "door"].includes(hover.type)) {
-    ctx.strokeStyle = "#79bcdc";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(hover.x, hover.y, 26, 10, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  }
   const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);
   const exit = exitArrow(scene, player);
   if (exit) {
@@ -1462,18 +1574,20 @@ export function draw(
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    const arrowTip = exit.entering ? 12 : 32;
+    const arrowWing = exit.entering ? 20 : 24;
     ctx.beginPath();
     ctx.moveTo(exit.x + 21, exit.y + 12);
     ctx.lineTo(exit.x + 21, exit.y + 32);
-    ctx.moveTo(exit.x + 13, exit.y + 24);
-    ctx.lineTo(exit.x + 21, exit.y + 32);
-    ctx.lineTo(exit.x + 29, exit.y + 24);
+    ctx.moveTo(exit.x + 13, exit.y + arrowWing);
+    ctx.lineTo(exit.x + 21, exit.y + arrowTip);
+    ctx.lineTo(exit.x + 29, exit.y + arrowWing);
     ctx.stroke();
     ctx.fillStyle = "#fff4dc";
     ctx.font = 'bold 18px "Noto Sans CJK SC",sans-serif';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("出门", exit.x + 58, exit.y + 22);
+    ctx.fillText(exit.entering ? "进站" : "出门", exit.x + 58, exit.y + 22);
     ctx.restore();
   }
   ctx.restore();
@@ -1487,13 +1601,21 @@ export function draw(
   );
   canvas.dataset.ambientCount = String(ambient.length);
   canvas.dataset.fallingLeaves = String(leaves);
-  return { camX, camY, scale, ox, oy };
+  return { ...(constrained || {}), camX, camY, scale, ox, oy, bubbles: bubbleLayouts.get(ctx) };
 }
 
 function speechBubble(ctx, x, y, text) {
   ctx.save();
   ctx.font = '16px "Noto Sans CJK SC",sans-serif';
   const w = ctx.measureText(text).width + 24;
+  const matrix = ctx.getTransform();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  bubbleLayouts.get(ctx)?.push({
+    text, width: w - 24,
+    x: (matrix.a * (x - w / 2 + 12) + matrix.c * (y - 32) + matrix.e) / dpr,
+    y: (matrix.b * (x - w / 2 + 12) + matrix.d * (y - 32) + matrix.f) / dpr,
+    scale: matrix.a / dpr,
+  });
   ctx.fillStyle = "#fff4dc";
   ctx.strokeStyle = "#b99c76";
   ctx.lineWidth = 1.5;

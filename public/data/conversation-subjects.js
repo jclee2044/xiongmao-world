@@ -1,3 +1,5 @@
+import { waitingOpeningOptions } from "./station-waiting-characters.js";
+import { stationShops } from "./station-shops.js";
 import { travelerById, stationSubjects, stationTravelContext } from "./station-travelers.js";
 import { weatherLines, householdLines } from "./suzhou-life.js";
 import { bookOpeningLine, bookStarter } from "./book-dialogue.js";
@@ -488,6 +490,12 @@ conversationSubjects.newyear = {
 };
 Object.assign(conversationSubjects, stationSubjects);
 export const npcSubjects = {
+  "waiting-granddaughter": ["family", "friends", "travel", "feelings"],
+  "waiting-grandson": ["family", "reading", "travel", "friends"],
+  "waiting-friend": ["friends", "travel", "study", "plans"],
+  "waiting-travel-friend": ["friends", "travel", "gardens", "plans"],
+  "station-barista": ["food", "travel", "work", "plans"],
+  "station-shopkeeper": ["food", "shopping", "travel", "routines"],
   "family-grandma": ["household", "family", "newyear", "gardens"],
   "family-grandpa": ["household", "family", "reading", "routines"],
   "family-dad": ["household", "family", "newyear", "routines"],
@@ -513,6 +521,14 @@ export const npcSubjects = {
   guide: ["gardens", "travel", "reading", "study"],
   waiter: ["food", "friends", "work", "routines"],
   "station-traveler": ["travel", "friends", "plans", "routines"],
+  "station-reader": ["reading", "stationBags", "stationDestinations", "stationTimes"],
+  "waiting-auntie": ["reading", "stationBags", "stationDestinations", "stationTimes"],
+  "station-help": ["stationDirections", "stationBags", "stationDestinations", "stationTimes"],
+  "waiting-student": ["stationReunions", "stationBags", "stationDestinations", "stationTimes"],
+  "waiting-tea": ["stationDirections", "stationBags", "stationDestinations", "stationTimes"],
+  "waiting-uncle": ["stationReunions", "stationBags", "stationDestinations", "stationTimes"],
+  "waiting-hiker": ["stationBags", "stationDestinations", "stationDirections", "stationTimes"],
+  "waiting-reader": ["reading", "stationDestinations", "stationBags", "stationTimes"],
   suyin: ["music", "reading", "travel", "friends"],
   lian: ["food", "friends", "plans", "feelings"],
   diner: ["food", "travel", "family", "friends"],
@@ -540,6 +556,9 @@ export function openingSubjects(npcId) {
   return npcSubjects[npcId] || ["friends", "plans", "routines", "feelings"];
 }
 export function conversationOpeningOptions(npcId) {
+  if (waitingOpeningOptions[npcId]) return waitingOpeningOptions[npcId];
+  const shop = Object.values(stationShops).find(shop => shop.seller === npcId);
+  if (shop) return shop.openings.slice(1);
   if (travelerById[npcId]) return travelerById[npcId].openings.slice(1);
   const offset = [...npcId].reduce((n, c) => n + c.charCodeAt(0), 0);
   return openingSubjects(npcId).flatMap((subject, index) => {

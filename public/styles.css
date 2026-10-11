@@ -176,6 +176,7 @@ button:hover {
   -webkit-touch-callout: default;
   touch-action: manipulation;
 }
+.station-sign-phrase[hidden] { display: none; }
 .station-sign-phrase:hover,
 .station-sign-phrase:focus-visible {
   background: #fff9ed30;
@@ -1406,8 +1407,8 @@ dialog .primary {
   position: absolute;
   z-index: 6;
   left: 50%;
-  top: 14%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: min(460px, 75%);
   padding: 22px;
   text-align: center;
@@ -1421,7 +1422,7 @@ dialog .primary {
   );
   pointer-events: none;
   text-shadow: 0 2px 5px #0008;
-  animation: word-arrives 0.7s ease-out;
+  animation: discovery-arrives 0.35s ease-out;
 }
 #discovery > * {
   display: block;
@@ -1450,6 +1451,16 @@ dialog .primary {
     opacity: 1;
     filter: blur(0);
     transform: translate(-50%, 0);
+  }
+}
+@keyframes discovery-arrives {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 10px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }
 #word-callout {
@@ -1519,9 +1530,6 @@ dialog .primary {
   }
   .goal-card span {
     font-size: 11px;
-  }
-  #discovery {
-    top: 35%;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1647,7 +1655,7 @@ dialog .primary {
 /* Learning overlays live in the top layer with their active dialogue. */
 #discovery {
   inset: auto;
-  top: 20px;
+  top: 50%;
   left: 50%;
   margin: 0;
   width: min(420px, 85vw);
@@ -1709,14 +1717,12 @@ dialog .primary {
     font-size: 17px;
   }
   #discovery {
-    top: 12px;
     width: min(340px, 85vw);
   }
 }
 
 #discovery {
   position: fixed;
-  animation: word-arrives 0.35s ease-out;
 }
 
 /* Keep Panda beside the other dialogue controls. */
@@ -2279,4 +2285,52 @@ dialog .primary {
   font: 0.48em/1.6 system-ui, sans-serif;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.packing-option { display: flex; align-items: center; gap: .6rem; padding: .65rem; }
+.packing-option input { width: 1.2rem; height: 1.2rem; }
+
+.place-closeup { display:block; width:100%; height:auto; border-radius:12px; margin:0 0 16px; }
+
+.station-boarding-pass {
+  margin: 1rem 0;
+  padding: 1rem 1.2rem;
+  border: 1px solid #b9c9c5;
+  border-radius: 12px;
+  background: #f3f6ed;
+  color: #263e43;
+}
+.station-boarding-pass h3 { margin: .4rem 0; }
+.station-boarding-pass p { margin: .5rem 0; }
+.station-boarding-pass progress { width: 100%; accent-color: #426c65; }
+
+/* Canvas lettering remains visible; these matching word targets add touch,
+   mouse and keyboard access without changing the painted bubble layout. */
+.bubble-help {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bubble-help-text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 34px;
+  transform-origin: 0 0;
+  white-space: nowrap;
+  font: 16px/34px "Noto Sans CJK SC", sans-serif;
+  color: transparent;
+  pointer-events: auto;
+}
+.bubble-help-text .help-word {
+  padding: 0 !important;
+  height: 34px;
+  vertical-align: top;
+  text-decoration: none;
+  cursor: pointer;
+}
+.bubble-help-text .help-word:hover,
+.bubble-help-text .help-word:focus-visible {
+  background: #6e9ea233 !important;
 }

@@ -1,0 +1,8 @@
+{
+  "tool": "image_gen",
+  "date": "2026-10-11",
+  "reference": "User screenshot of upstairs Yutong, Wenbo and Yating group",
+  "output": "public/assets/characters/wenbo-conversation-away-v1.png",
+  "prompt": "Create a transparent game sprite atlas for ONLY the central man in this screenshot, Wenbo, turned AROUND with his BACK to the viewer, looking upward into the scene to talk to the two women standing behind him. Do not draw the women or background. Preserve his existing identity and exactly matching storybook painted style, short dark hair, navy jacket, tan trousers, brown shoes and burgundy rolling suitcase with black extended handle. His torso and feet face away from camera toward upper screen. Back of head clearly visible, just a tiny sliver of round glasses on side if appropriate, never a full face. Suitcase on screen RIGHT of his body as in reference, held in his right hand. Make 3 very subtle stationary talking IDLE poses in a single horizontal row: neutral back view, slight head turn toward upper-left with small free-hand conversational gesture, slight head turn upper-right with free arm relaxing. Same rear torso and stance in all three, no walking, waving overhead, or turning toward camera. Uniform size and feet baseline across cells. Exactly three full-body isolated sprites on genuine transparent background, substantial transparent spacing and padding, no text, labels, grid, scenery or ground shadows. These will be cropped into a stationary conversation animation. Preserve all luggage and clothes colors.",
+  "integration": "Three rear-facing idle frames scoped to Wenbo's upstairs placement via idleArt. Original exterior sprites retained. Prepare using node scripts/prepare-wenbo-conversation.js."
+}

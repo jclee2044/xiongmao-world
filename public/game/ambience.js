@@ -1,4 +1,6 @@
-// Original procedural ambience: no recordings or network requests.
+import { StationAudio } from "./station-audio.js";
+import { STATION_SCALE } from "../data/station-exterior.js";
+// Procedural nature sounds with locally bundled station recordings.
 const falloff = (distance, range) => Math.max(0, 1 - distance / range);
 const boxDistance = (p, o) =>
   Math.hypot(
@@ -7,9 +9,23 @@ const boxDistance = (p, o) =>
   );
 export function soundscape(scene, player) {
   if (!scene || scene.interior || scene.id === "home")
-    return { water: 0, fountain: 0, birds: 0, ducks: 0, pan: 0 };
+    return {
+      water: 0,
+      breeze: 0,
+      leaves: 0,
+      fountain: 0,
+      birds: 0,
+      ducks: 0,
+      pan: 0,
+    };
+  // The painted canal has no groundZones. Keep its nature sounds on the
+  // planted quay, promenade and bridge, fading toward the station forecourt.
+  const quay =
+    scene.id === "shantang"
+      ? Math.max(0, Math.min(1, (980 - player.x / STATION_SCALE) / 380))
+      : 0;
   const water = Math.max(
-    0,
+    quay,
     ...(scene.groundZones || [])
       .filter((o) => ["lake", "canal"].includes(o.type))
       .map((o) => falloff(boxDistance(player, o), 330)),
@@ -47,6 +63,8 @@ export function soundscape(scene, player) {
     )[0];
   return {
     water,
+    breeze: quay,
+    leaves: quay,
     fountain,
     birds,
     ducks: duck
@@ -73,6 +91,7 @@ export class Ambience {
     this.master = this.context.createGain();
     this.master.gain.value = 0;
     this.master.connect(this.context.destination);
+    this.station = new StationAudio(this.context, this.master);
     const c = this.context,
       buffer = c.createBuffer(1, c.sampleRate * 4, c.sampleRate),
       data = buffer.getChannelData(0);
@@ -99,6 +118,44 @@ export class Ambience {
     this.fountain.gain.value = 0;
     this.stream.connect(splash).connect(this.fountain).connect(this.master);
     this.stream.start();
+    // Independent stereo pink noise avoids a single flat hiss. Long loops and
+    // slow, differently timed swells suggest air moving through foliage.
+    const airBuffer = c.createBuffer(2, c.sampleRate * 19, c.sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+      const samples = airBuffer.getChannelData(channel);
+      let slow = 0,
+        medium = 0,
+        fast = 0;
+      for (let i = 0; i < samples.length; i++) {
+        const white = Math.random() * 2 - 1;
+        slow = slow * 0.997 + white * 0.03;
+        medium = medium * 0.96 + white * 0.12;
+        fast = fast * 0.6 + white * 0.3;
+        samples[i] = (slow + medium + fast) * 0.45;
+      }
+      // Bring the loop seam to silence over a short, inaudible edge taper.
+      const edge = Math.floor(c.sampleRate * 0.04);
+      for (let i = 0; i < edge; i++) {
+        samples[i] *= i / edge;
+        samples[samples.length - 1 - i] *= i / edge;
+      }
+    }
+    this.air = c.createBufferSource();
+    this.air.buffer = airBuffer;
+    this.air.loop = true;
+    for (const [name, frequency, q] of [
+      ["breeze", 420, 0.5],
+      ["leaves", 2300, 0.65],
+    ]) {
+      const band = c.createBiquadFilter();
+      band.type = "bandpass";
+      band.frequency.value = frequency;
+      band.Q.value = q;
+      this[name] = c.createGain();
+      this[name].gain.value = 0;
+      this.air.connect(band).connect(this[name]).connect(this.master);
+    }
+    this.air.start();
     this.timer = setInterval(() => this.tick(), 450);
     this.tick();
   }
@@ -116,6 +173,7 @@ export class Ambience {
     const w = this.getWorld(),
       volume = this.getSettings().ambience ?? 0.25;
     const audible = this.ready && w && !document.hidden && volume > 0;
+    this.station.update(w?.scene, w?.player, audible);
     if (!audible) {
       this.master.gain.value = 0;
       c.suspend().catch(() => {});
@@ -129,7 +187,18 @@ export class Ambience {
       t,
       0.15,
     );
-    this.water.gain.setTargetAtTime(levels.water * 0.085, t, 1.8);
+    this.water.gain.setTargetAtTime(
+      levels.water * (w.scene.id === "shantang" ? 0.38 * 0.30 : 0.085),
+      t,
+      1.8,
+    );
+    const gust = 0.76 + 0.16 * Math.sin(t * 0.31) + 0.08 * Math.sin(t * 0.73);
+    this.breeze.gain.setTargetAtTime(levels.breeze * 0.32 * 0.30 * gust, t, 1.2);
+    this.leaves.gain.setTargetAtTime(
+      levels.leaves * 0.22 * 0.30 * gust * (0.8 + 0.2 * Math.sin(t * 1.17)),
+      t,
+      0.7,
+    );
     this.fountain.gain.setTargetAtTime(levels.fountain * 0.25, t, 0.45);
     if (w.paused || this.ducked) return;
     if (levels.birds > 0.05 && t > this.nextBird) {

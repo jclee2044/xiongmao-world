@@ -1,4 +1,6 @@
 import { newAdventure, validateAdventure } from "../public/data/adventure.js";
+import { stationGroundForJourney } from "../public/data/station-interior.js";
+import { stationWaitingForJourney } from "../public/data/station-waiting.js";
 import { DatabaseSync } from "node:sqlite";
 import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -31,6 +33,9 @@ export const newState = () => ({
   adventure: newAdventure(),
 });
 export function validateState(s) {
+  const scene = s?.scene === "station-ticketing"
+    ? stationGroundForJourney(s?.adventure?.stationJourney)
+    : s?.scene === "station-waiting" ? stationWaitingForJourney(s?.adventure?.stationJourney) : scenes[s?.scene];
   if (
     !s ||
     s.schema !== 1 ||
@@ -38,12 +43,12 @@ export function validateState(s) {
     !s.position ||
     !Number.isFinite(s.position.x) ||
     !Number.isFinite(s.position.y) ||
-    !canStand(scenes[s.scene], s.position.x, s.position.y)
+    !canStand(scene, s.position.x, s.position.y)
   )
     throw new Error("Invalid save position.");
   if (
     !Array.isArray(s.found) ||
-    s.found.some((id) => !["momo", "fox-plush"].includes(id)) ||
+    s.found.some((id) => !["momo", "fox-plush", "rabbit-plush"].includes(id)) ||
     new Set(s.found).size !== s.found.length
   )
     throw new Error("Invalid discoveries.");

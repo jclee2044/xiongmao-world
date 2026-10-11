@@ -1,3 +1,5 @@
+import { WAITING_SCALE } from "../data/station-waiting.js";
+import { waitingPhrasesForJourney } from "../data/station-waiting-signs.js";
 import { STATION_SCALE } from "../data/station-exterior.js";
 import { stationBoardPhrases } from "./station-signs.js";
 
@@ -7,10 +9,11 @@ export function createStationSignHelp(canvas, select) {
   const layer = document.createElement("div");
   layer.className = "station-sign-help";
   layer.hidden = true;
-  const controls = stationBoardPhrases.map(phrase => {
+  let controls = [], phrases = [], activeKey = null;
+  function controlFor(phrase) {
     const control = document.createElement("span");
     control.className = "station-sign-phrase";
-    control.dataset.worldSign = "";
+    control.dataset.worldSign = phrase.id || phrase.zh;
     control.lang = "zh-CN";
     control.tabIndex = 0;
     control.setAttribute("role", "button");
@@ -20,7 +23,11 @@ export function createStationSignHelp(canvas, select) {
     control.textContent = phrase.zh;
     control.style.width = `${phrase.w}px`;
     control.style.height = `${phrase.h}px`;
+    if (phrase.floorCorners) control.style.clipPath = `polygon(${phrase.floorCorners.map(([x,y]) => `${x/phrase.w*100}% ${y/phrase.h*100}%`).join(",")})`;
     control.style.fontSize = `${phrase.size}px`;
+    if (phrase.id) control.style.fontFamily = phrase.layout === "mural"
+      ? '"Station Brush", "Noto Serif CJK SC", serif'
+      : '"Station Hand", "Station Brush", "Noto Sans CJK SC", sans-serif';
     control.addEventListener("click", () => {
       const selection = window.getSelection();
       if (!selection?.isCollapsed && control.contains(selection?.anchorNode)) return;
@@ -34,18 +41,29 @@ export function createStationSignHelp(canvas, select) {
     });
     layer.append(control);
     return control;
-  });
+  }
   canvas.after(layer);
   return {
-    update(scene, camera, available) {
-      layer.hidden = scene.id !== "shantang" || !camera || !available;
+    update(scene, camera, available, journey) {
+      const upstairs = scene.id === "station-waiting";
+      layer.hidden = !["shantang", "station-waiting"].includes(scene.id) || !camera || !available;
       if (layer.hidden) return;
+      const key = `${scene.id}:${upstairs && Boolean(journey?.boarding)}`;
+      if (key !== activeKey) {
+        activeKey = key;
+        phrases = upstairs ? waitingPhrasesForJourney(journey) : stationBoardPhrases;
+        layer.replaceChildren();
+        controls = phrases.map(controlFor);
+      }
       const { scale, camX, camY, ox, oy } = camera;
-      const zoom = STATION_SCALE * scale;
+      const sceneScale = upstairs ? WAITING_SCALE : STATION_SCALE;
+      const zoom = sceneScale * scale;
       controls.forEach((control, index) => {
-        const phrase = stationBoardPhrases[index];
-        const x = canvas.offsetLeft + (phrase.x * STATION_SCALE - camX + ox) * scale;
-        const y = canvas.offsetTop + (phrase.y * STATION_SCALE - camY + oy) * scale;
+        const phrase = phrases[index];
+        const x = canvas.offsetLeft + (phrase.x * sceneScale - camX + ox) * scale;
+        const y = canvas.offsetTop + (phrase.y * sceneScale - camY + oy) * scale;
+        control.hidden = x + phrase.w * zoom < canvas.offsetLeft || x > canvas.offsetLeft + canvas.clientWidth ||
+          y + phrase.h * zoom < canvas.offsetTop || y > canvas.offsetTop + canvas.clientHeight;
         control.style.transform = `matrix(${zoom}, ${phrase.slope * zoom}, 0, ${zoom}, ${x}, ${y})`;
       });
     },

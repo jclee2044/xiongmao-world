@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "path": "public/assets/characters/rabbit-plush.png",
+      "runtime": "public/assets/optimized/rabbit-plush.webp",
+      "prompt": "Use case: stylized-concept. Asset type: isolated cozy game collectible sprite. A single little cream-colored stuffed rabbit with very long floppy ears hanging down on both sides of its face to its feet, seated round soft body, tiny black bead eyes and stitched nose, subtle beige corduroy fabric, pale pink inner ears, sweet understated expression. Warm hand-painted storybook game art with soft dimensional shading, front view slightly from above. Entire toy visible, centered, no accessories, no text, no other objects, transparent background. Save the output image for use in the local game project."
+    },
+    {
+      "path": "public/assets/props/suzhou-model-table.png",
+      "runtime": "public/assets/optimized/suzhou-model-table.webp",
+      "prompt": "Use case: stylized-concept. Asset type: isolated furniture sprite for a cozy hand-painted exploration game. One rectangular museum display table containing a miniature artistic model of Suzhou under a clear glass enclosure. Honey-colored wooden base and four short sturdy legs, delicate antique brass edges holding the glass. Inside are tiny white houses with dark gray tiled roofs, winding blue-green canals, small arched stone bridges, trees and one small pagoda, all unmistakably miniature. View from above and in front at about 35 degrees down, front long edge almost horizontal, see the glass top and front. Entire table including all feet visible and centered with margins. Warm golden-hour soft painterly storybook rendering, appealing detailed illustration that reads clearly at small size. Glass nearly invisible except fine glints at edges. No people, no surrounding room, no floor, no text, no labels. Genuine transparent background."
+    },
+    {
+      "path": "public/assets/props/suzhou-model-closeup.png",
+      "runtime": "public/assets/optimized/suzhou-model-closeup.webp",
+      "reference": "public/assets/props/suzhou-model-table.png",
+      "prompt": "Use case: stylized-concept. Reference image is the miniature Suzhou city model display table. Create a landscape first-person close-up illustration as if the viewer is standing at the table leaning over and looking down through its clear glass lid. The miniature canals, tiny white houses with charcoal tiled roofs, little arched bridges, willow trees, garden pond and pagoda fill nearly all the image. Preserve the same warm painted style and model appearance as the reference. Include the fine brass and wood rim at bottom edge and subtle glass reflections to make it clearly a model under glass, not a real landscape. Beyond the far rim only a small softly blurred suggestion of a golden station interior. No person or hands, no text, no labels, no interface, no black background. This image is the closeup in a game popup."
+    }
+  ]
+}

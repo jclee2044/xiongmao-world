@@ -30,6 +30,9 @@ try {
     (o) => o.type === "door",
   );
   assert.equal(exitArrow(scenes.shantang, interactionPoint(canalExit)), null);
+  const stationEntrance = scenes.shantang.interactables.find(o => o.id === "station-entrance");
+  assert.equal(exitArrow(scenes.shantang, interactionPoint(stationEntrance)).entering, true);
+  assert.equal(exitArrow(scenes.shantang, { x: stationEntrance.x, y: stationEntrance.y + 181 }), null);
   for (const entrance of scenes.shanghai.interactables.filter(
     (o) => o.type === "door" || o.id === "bamboo-grove",
   ))
@@ -52,11 +55,14 @@ try {
     assert.equal(hitExitArrow(scene, player, arrow.x - 1, arrow.y), null);
   }
   for (const [id, mobile] of [
+    ["shantang", false],
+    ["shantang", true],
     ["home", false],
     ["bakery", false],
     ["bookshop", true],
     ...courtyards.map((id, i) => [id, i % 2 === 0]),
   ]) {
+    if (process.env.STATION_ENTRY_ONLY && id !== "shantang") continue;
     const context = await browser.newContext({
       viewport: mobile
         ? { width: 390, height: 844 }
@@ -67,13 +73,14 @@ try {
     });
     const scene = scenes[id];
     const door = scene.interactables.find(
-      (o) => o.type === "door" && o.target === "shanghai",
+      (o) => id === "shantang" ? o.id === "station-entrance" : o.type === "door" && o.target === "shanghai",
     );
     const point = interactionPoint(door);
     const state = newState();
+    state.adventure.travelLuggage = { packed: true, items: [] };
     Object.assign(state, {
       scene: id,
-      position: { x: point.x, y: point.y - 140 },
+      position: { x: point.x, y: point.y + (id === "shantang" ? 65 : -140) },
     });
     Object.assign(state.settings, {
       voice: false,
@@ -109,17 +116,18 @@ try {
         y: rect.top + (arrow.y + arrow.h / 2 - +d.camY + +d.oy) * +d.scale,
       };
     });
-    await page.screenshot({ path: `test-results/exit-arrow-${id}.png` });
+    await page.screenshot({ path: `test-results/exit-arrow-${id}-${mobile ? "mobile" : "desktop"}.png` });
     if (mobile) await page.touchscreen.tap(target.x, target.y);
     else await page.mouse.click(target.x, target.y);
     await page.waitForFunction(
-      () => document.getElementById("world").dataset.scene === "shanghai",
+      target => document.getElementById("world").dataset.scene === target,
+      door.target,
     );
     const returned = await page.locator("#world").evaluate((canvas) => ({
       x: +canvas.dataset.x,
       y: +canvas.dataset.y,
     }));
-    assert.ok(
+    if (door.returnPoint) assert.ok(
       Math.hypot(
         returned.x - door.returnPoint.x,
         returned.y - door.returnPoint.y,
@@ -130,7 +138,7 @@ try {
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Indoor and gated courtyard exit arrows: proximity, desktop clicks, mobile taps, and return locations passed.",
+    "Station entry and indoor/courtyard exit arrows: proximity, desktop clicks, mobile taps, and return locations passed.",
   );
 } finally {
   await browser.close();

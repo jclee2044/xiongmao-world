@@ -53,3 +53,35 @@ This is an Asian-inspired chill-hop / LoFi instrumental, categorized by the arti
 - Changes: transcoded the artist's 320 kbps MP3 to 160 kbps stereo MP3 for a smaller local download (4,230,484 bytes), with attribution embedded in its metadata. The arrangement and tempo are unchanged. The game plays the recording in a loop and adjusts playback volume for Mandarin speech.
 
 Retain this attribution and the license when distributing the recording with the game. The game's original procedural ambient score remains the fallback if this recording is unavailable.
+
+
+## Station audio (free assets only)
+
+Added 2026-10-11. No paid Bandcamp recordings are used.
+
+| Local file | Recording / creator | Source | License | Changes |
+| --- | --- | --- | --- | --- |
+| `station-hall.mp3` | Waiting room in Guilin North railway station — lastraindrop | https://freesound.org/people/lastraindrop/sounds/713441/ | CC0 1.0 | First 100 seconds, mono, filtered, normalized, edge fades, 96 kbps MP3. The uploader describes people only, without broadcasts. |
+| `station-pa.mp3` | Train Station PA announcements China — mycompasstv | https://freesound.org/people/mycompasstv/sounds/474614/ | CC0 1.0 | Complete 15.37-second Beijing recording; filtered, normalized, mono; 12-second lead-in and silence to a 90-second loop. |
+| `station-forecourt.mp3` | Urban busy traffic by the street — lastraindrop | https://freesound.org/people/lastraindrop/sounds/718465/ | CC0 1.0 | First 70 seconds of Liuzhou street recording, mono, filtered, normalized, edge fades, 96 kbps MP3. Exterior forecourt only. |
+| `station-piano.mp3` | Friday Morning — composed and performed by Kevin MacLeod (incompetech.com) | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100224 | CC BY 4.0 | Mono, high/low-pass filtering, subtle echo and normalization for distant station speakers, 128 kbps MP3. No pitch/tempo change. |
+
+Licenses: https://creativecommons.org/publicdomain/zero/1.0/ and https://creativecommons.org/licenses/by/4.0/ . Credits and links are also shown in Settings.
+
+Published source audio URLs:
+
+- https://cdn.freesound.org/previews/713/713441_12768873-hq.mp3
+- https://cdn.freesound.org/previews/474/474614_3902754-hq.mp3
+- https://cdn.freesound.org/previews/718/718465_12768873-hq.mp3
+- https://incompetech.com/music/royalty-free/mp3-royaltyfree/Friday%20Morning.mp3
+
+Freesound assets use the site's publicly offered high-quality MP3 previews under each recording's CC0 license. Full original-format downloads require login.
+
+The music selection is an interpretation of quiet station background piano, not a claim that Suzhou Station plays this specific recording. Reporting describes low-volume instrumental and piano playback in Shanghai station spaces: https://www.jingan.gov.cn/rmtzx/003008/003008006/20150210/3ff112b1-12ed-45bc-9bd4-0957f6eb3525.html .
+
+SHA-256 of bundled files:
+
+- station-hall.mp3: `60ca38bbdfd142cd9b34fb6e558aee1c53ef5434654327a94fea9d115c9b144f`
+- station-pa.mp3: `0bc2f844c04f6c8da7ce0cc928a36d1c90e679de66be48cf640b1d45969b68f5`
+- station-forecourt.mp3: `05a6138e72d87e1cd952db0793edeafa39ff83e64a077fb007ed5bbdaf3efd0a`
+- station-piano.mp3: `2c2f7db8007795d7a2f84d9ae4ea05a81f6b6aeb12a18826393c2b4fc21894f6`

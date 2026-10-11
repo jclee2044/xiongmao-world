@@ -1,4 +1,29 @@
+import { stationPandaAreas, stationLandmarkAreas } from "./station-panda.js";
+
 export const pandaAreas = {
+  ...stationPandaAreas,
+  "station-quay-arrival": {
+    always: true,
+    storedOnly: true,
+    context: "First arrival at the Suzhou Station quay after the boat ride from town. Panda honestly admits he does not want to leave Suzhou yet.",
+    examples: ["说真的，我还不想离开苏州。", "我真的很喜欢苏州，还想在这里多玩一会。", "我很喜欢苏州，现在还不想走。"],
+  },
+  "station-plaza-arrival": {
+    always: true,
+    storedOnly: true,
+    context: "First arrival at the station plaza after crossing from the quay. Reassure the player that if we miss Suzhou, we can always come back.",
+    examples: ["如果想苏州了，我们什么时候都可以回来。", "没关系，想这里的时候，我们可以再回来。", "以后想苏州了，我们就回来看看吧。"],
+  },
+  "station-quay": {
+    firstVisit: "station-quay-arrival",
+    context: "Walking by the canal on the Suzhou Station quay or northern promenade. Notice the beautiful water, trees, or pleasant breeze; the boat ride and arrival have already happened.",
+    examples: ["河边有一点风，真舒服。", "你看，水和树都很漂亮。", "这里真漂亮，我想慢慢走。"],
+  },
+  "station-plaza": {
+    firstVisit: "station-plaza-arrival",
+    context: "Walking in the outdoor Suzhou Station plaza, east of the bridge. Notice the open space, beautiful surroundings, or pleasant breeze without repeating the first-arrival reassurance.",
+    examples: ["广场上的风真舒服。", "这里真漂亮，我们慢慢看看吧。", "在这里走走，我觉得很高兴。"],
+  },
   "family-home-messy": {
     always: true,
     context: "Inside the Chen family home. The children play while toys, clothes or a tea stain still need attention. Make a warm, gently funny observation. Household activities start by talking to family members; do not invite clicking furniture or start an activity.",
@@ -8,6 +33,11 @@ export const pandaAreas = {
     always: true,
     context: "Inside the Chen family home after the rug, laundry and toy cleanup practices are complete. The children still play; appreciate the family helping each other. Do not claim the room is dirty or invite clicking furniture.",
     examples: ["房间干净多了。大家一起帮忙，真好。", "两个孩子还在玩。我们和家人说说话吧。", "东西放好了。现在容易找到了。"],
+  },
+  "rabbit-plush": {
+    always: true,
+    context: "Something is hidden behind the mural in the station waiting hall. Give a curious hint without revealing the toy or animal type.",
+    examples: ["你看，后面好像有什么东西。我们去看看吧。", "看看壁画后面，有什么？", "那后面是什么？我们去看看吧。"],
   },
   "fox-plush": {
     always: true,
@@ -89,7 +119,24 @@ export const pandaAreas = {
   },
 };
 
-export function landmarkAreas(scene, completedPractice = []) {
+export function landmarkAreas(scene, completedPractice = [], stationJourney = {}) {
+  if (scene.id === "shantang") {
+    const scale = scene.width / 1536;
+    return [
+      // Split at the station end of the bridge; the quay line lasts across it.
+      { id: "station-quay", x: 0, y: 0, w: 599 * scale, h: scene.height },
+      { id: "station-plaza", x: 599 * scale, y: 400 * scale, w: scene.width - 599 * scale, h: 450 * scale },
+    ];
+  }
+  if (scene.id === "station-waiting") {
+    const behindMural = scene.interactables.find(o => o.id === "rabbit-plush")?.discoveryBounds;
+    // Use the hidden passage itself; the exit margin must not reach the side aisle.
+    return [
+      ...(behindMural ? [{id:"rabbit-plush", ...behindMural, bounds:behindMural}] : []),
+      ...stationLandmarkAreas(scene, stationJourney),
+    ];
+  }
+  if (scene.id === "station-ticketing") return stationLandmarkAreas(scene, stationJourney);
   if (scene.id === "family-home") {
     const tidy = ["family-rug", "family-wash", "family-tidy"].every(id => completedPractice.includes(id));
     return [{ id: tidy ? "family-home-tidy" : "family-home-messy", x: 130, y: 240, w: 940, h: 500 }];

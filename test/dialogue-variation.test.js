@@ -231,6 +231,7 @@ test("client preset branch works offline and never generates on replay", async (
 test("characters have distinct, scene-appropriate discussion subjects in old HSK 2–3", async () => {
   const { conversationSubjects, npcSubjects, conversationOpeningOptions } =
     await import("../public/data/conversation-subjects.js");
+  const { waitingOpeningOptions } = await import("../public/data/station-waiting-characters.js");
   const { travelerById, stationSubjects } = await import("../public/data/station-travelers.js");
   assert.ok(Object.keys(conversationSubjects).length >= 16 + Object.keys(stationSubjects).length);
   for (const [id, npc] of Object.entries(npcs)) {
@@ -240,7 +241,7 @@ test("characters have distinct, scene-appropriate discussion subjects in old HSK
       purpose: "opening",
       npcId: id,
     });
-    const expected = travelerById[id]?.openings.length || (["yun", "visitor-4"].includes(id) ? 7 : 5);
+    const expected = (waitingOpeningOptions[id] ? waitingOpeningOptions[id].length + 1 : 0) || Object.values(shops).find(shop => shop.seller === id)?.openings?.length || travelerById[id]?.openings.length || (["yun", "visitor-4"].includes(id) ? 7 : 5);
     assert.equal(options.length, expected);
     assert.equal(new Set(options.map((o) => o.chinese)).size, expected, id);
     assert.equal(conversationOpeningOptions(id).length, expected - 1);
@@ -394,4 +395,16 @@ test("client and server keep runtime dialogue free of generic filler offline", a
     assert.equal(entry.chosen.chinese, line.chinese);
     assert.equal(entry.chosen.meaning, line.meaning);
   }
+});
+
+
+test("Duoduo can open with her stuffed rabbit and a little-animal question", () => {
+  const options = dialogueOptions({ ...npcs["waiting-granddaughter"].greeting, purpose: "opening", npcId: "waiting-granddaughter" });
+  const animal = options.find(option => option.chinese.includes("你也喜欢小动物吗"));
+  assert.ok(animal);
+  assert.match(animal.chinese, /兔子玩偶/);
+  assert.match(animal.meaning, /stuffed rabbit/);
+  assert.ok(animal.pinyin);
+  assert.ok(isChineseDialogue(animal.chinese));
+  assert.equal(options.length, 3);
 });

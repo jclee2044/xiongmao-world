@@ -63,7 +63,7 @@ const cached = () =>
   page.evaluate(() => JSON.parse(localStorage.getItem("panda-world-v1")).state);
 try {
   for (const [id, shop] of Object.entries(shops).filter(
-    ([id]) => id !== "clothing",
+    ([id]) => id !== "clothing" && !id.startsWith("station-"),
   )) {
     const seller = scenes.shanghai.interactables.find(
       (o) => o.shopId === id && o.type === "npc",

@@ -1,0 +1,7 @@
+{
+  "mode": "built-in image_gen edit",
+  "source": "public/assets/world/station-ground-v3.png",
+  "output": "public/assets/world/station-ground-v4.png",
+  "integration": "Composite generated region 135x85+250+350 over original plate; preserve all other original pixels.",
+  "prompt": "Edit target: attached 1024x1536 station game background. Precise-object-edit. Preserve camera, dimensions, architecture, all equipment, all pixels outside small scanner pickup region x245..355 y340..448 as closely as possible. At the REAR/NORTH end of the baggage x-ray scanner (scanner is x250..337 y411..600), create an obvious exposed short dark roller conveyor collection tray extending NORTH from scanner roof rear edge (y411) to y366, width x265..328. Remove the obstructing glass railing AND horizontal handrail in that narrow x253..338 region so travelers standing on the upstairs/north side can reach baggage on this exposed rear output tray. Remaining glass railing left and right terminates neatly at this pickup opening. Keep scanner front entrance and long front conveyor unchanged. Match warm painterly golden station style exactly. No bags, no people, no text. Do not change anything elsewhere in station."
+}

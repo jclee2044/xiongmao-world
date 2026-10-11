@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "source": "public/assets/world/station-waiting-v4.png",
+  "output": "public/assets/world/station-waiting-v5.png",
+  "prompt": "Use case: precise-object-edit. Edit this 1536x1024 game background. Remove ONLY the blank blue rectangular boarding sign floating above the right-hand ticket gates at x1315–1499,y325–376, including its thin border and little cyan right edge. Fill its former area with continuous cream/gold tiled floor matching the surrounding perspective, tile lines and lighting. Preserve exact positions and appearance of gates, railings, plants, furniture, people, escalators, other blue signs, windows and all other scenery. No new text or signs. Keep image dimensions and composition identical."
+}

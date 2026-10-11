@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "source": "public/assets/world/station-waiting-v3.png",
+  "output": "public/assets/world/station-waiting-v4.png",
+  "prompt": "Use case: precise-object-edit. Edit target: attached 1536x1024 production game background. Preserve dimensions, exact layout and pixel positions of all furniture, escalators, lift, shops, windows, benches and people. ONE localized change: remove the projecting wooden vertical lamp post immediately LEFT of the paired escalators, between the cafe and escalators, at source x438\u2013474,y177\u2013275. Replace its lower projecting section and lamp with continuous matching cream/gold tiled WALKABLE FLOOR so the corridor beside and behind the escalators clearly reads as open floor. Retain the horizontal rear timber edge at y165 and upper window structure. Also remove the thin horizontal brass bars across the bottom mouths of the two escalator tread lanes at y322-329, restoring matching metal treads under them; retain the lateral and central handrails and base edge. Do not change any other pixels or objects. Do not add signage or text. Warm painted art exactly matching source."
+}

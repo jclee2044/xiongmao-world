@@ -1,5 +1,7 @@
 # Station exterior build handoff
 
+> The exterior has since been implemented; see [implementation notes](/home/jlrj/Documents/lotus/handoff/STATION_EXTERIOR_IMPLEMENTATION.md). For the next interior build, use [Station interior build handoff](/home/jlrj/Documents/lotus/handoff/STATION_INTERIOR_HANDOFF.md) and its approved v5 image. That handoff supersedes the older interior layouts below and specifies that about half the seated passengers remain in the environment artwork.
+
 Build the playable boat-arrival and station-forecourt area in the existing Xiongmao World game at `/home/jlrj/Documents/lotus`. The user has completed several visual-design iterations and now wants a new thread to implement the exterior. Preserve the existing boat departure, create a clear walk from the landing across a bridge to the station, and prepare the entrance for the future ticketing interior.
 
 This handoff and its reference images are the deliverables of the research thread. No station gameplay has been implemented. Read [the research findings](/home/jlrj/Documents/lotus/handoff/STATION_RESEARCH.md) before building. They distinguish verified railway practice from the game's spatial simplifications.
@@ -10,16 +12,22 @@ This handoff and its reference images are the deliverables of the research threa
 - Build the outside area, boat arrival/return, navigable bridge and forecourt, station facade and entrance interaction. Add a small amount of relevant conversation and sign discovery using existing systems.
 - Preserve the future sequence: ticketing, entry verification/security, waiting hall, boarding gate/platform, cozy train conversation, Shanghai. The full interior, train ride and Shanghai are later work.
 - The current town boat trip remains the way to reach the smaller area. Upgrade that destination rather than inserting another compulsory travel hub or a second boat journey.
-- The user explicitly likes the latest waiting-hall/platform connection and substantial station scale. The latest exterior is a proposed composition, not a demand to reproduce every generated pixel.
+- The user likes the waiting hall leading directly into boarding gates and the substantial station scale. The subsequent design uses two levels to clarify the train's elevation: ascend after security, then descend after the boarding gates. Preserve that sequence. The exterior remains a proposed composition, not a demand to reproduce every generated pixel.
 - Work autonomously on normal implementation choices; do not repeat the visual-discovery interview. Check current repository instructions and changes before editing.
 
 ## Visual references to inspect
 
 ![Proposed boat landing and station forecourt](/home/jlrj/Documents/lotus/handoff/references/station/exterior-concept-v1.png)
 
-![Station interior context with restored decorative signs](/home/jlrj/Documents/lotus/handoff/references/station/interior-context-v1.png)
+![Earlier station interior style and sign reference](/home/jlrj/Documents/lotus/handoff/references/station/interior-context-v1.png)
 
-Both images were created with the built-in image-generation tool during this design thread and copied into the repository for continuity. They are concept references, not production backgrounds. The four `sign-*.png` files in the same directory are user-supplied crops. Use the exterior for composition and the interior for the doorway's destination, materials and larger building scale.
+The earlier flat interior is retained only for materials and decorative signs. The newer two-level drawing below supersedes its circulation and elevations.
+
+![Two-level station with expanded upstairs amenities](/home/jlrj/Documents/lotus/handoff/references/station/interior-two-levels-v3.png)
+
+The latest revision expands the upstairs waiting hall leftward with a small snack/convenience shop and a compact café. Toilets, help desk, hot water, food and seating all open onto the same continuous 2F floor, before boarding checks. Ground-floor ticketing gains a mural flat against a side wall, a bench and a station map; the central route to screening stays clear. Boarding gates are short ticket/ID check gates with a staffed lane, not metal-detector arches. These details supersede the narrower v2 image retained in the reference folder.
+
+The concept images were created with the built-in image-generation tool during this design thread and copied into the repository for continuity. They are references, not production backgrounds. The four `sign-*.png` files in the same directory are user-supplied crops. Use the exterior for composition and the interior for the doorway's destination, materials and larger building scale.
 
 Inspect these existing game assets as the final style authority:
 
@@ -99,7 +107,7 @@ Keep water blocked except on the actual deck and gangplank. The same geometry sh
 
 The exterior ends at the real station doorway. Wire it to an existing ticketing room if one has been added by the time work starts. Otherwise provide a useful authored entrance inspection using the existing UI, keep the return route working, and expose a clearly named integration point for the later room. Report interior entry as pending; do not silently send the player to town or an unrelated interior. Do not expand into building the entire railway sequence merely to fill that boundary.
 
-The train should eventually be above ground. The approved flat waiting-hall/platform connection remains a proposed gameplay simplification; final vertical circulation is not settled and is outside this exterior task. Preserve space for either interior solution without adding arbitrary exterior stairs.
+The current interior direction is ground-floor ticketing and security, followed by stairs/escalator/lift A up to a first upper-floor waiting hall. Boarding gates lead directly to stairs/escalator/lift B down to the above-ground platform. The platform cannot be reached directly from the public forecourt or ticketing. Keep the exterior entrance at ground level; both level changes occur inside. Detailed interior implementation remains outside this exterior task. The two-level drawing is a game concept, not a measured plan of the real station.
 
 ## Validation and completion
 

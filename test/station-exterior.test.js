@@ -147,10 +147,10 @@ test("old station saves arrive safely without changing XP, history or unrelated 
   }
 });
 
-test("entrance is inspectable until a real ticketing room exists; return uses the actual town dock", () => {
+test("entrance opens registered ticketing, missing rooms remain guarded, and boat return uses the actual town dock", () => {
   const entrance = scene.interactables.find((o) => o.id === "station-entrance");
-  assert.equal(entrance.type, "inspect");
-  assert.equal(entrance.target, undefined);
+  assert.equal(entrance.type, "door");
+  assert.equal(entrance.target, "station-ticketing");
   assert.ok(mapDestinations(scene, scene.interactables).includes(entrance));
   assert.deepEqual(
     scene.interactables.find((o) => o.id === "back-town").returnPoint,

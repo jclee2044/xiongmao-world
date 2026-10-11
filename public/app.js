@@ -1,5 +1,7 @@
+import { waitingTravelerProfile } from "./data/station-waiting-travelers.js";
 import { activities } from "./data/activities.js";
 import { XIAOCHENG, STATION_DEPARTURE } from "./data/station-departure.js";
+import { stationJourneyAction, indoorTravelerGreeting, waitingTravelerGreeting } from "./data/station-journey.js";
 import { dialogueQuestions } from "./game/coach-questions.js";
 import { createDialogueVariations, createAmbientDialogue } from "./game/dialogue-variation.js";
 import { passiveLandmarks } from "./game/interactions.js";
@@ -179,6 +181,11 @@ function panda(text, vary = true) {
 panda.generation = 0;
 panda.presentation = 0;
 const landmarkPanda = createLandmarkPanda({
+  getBoatVisited: () => persistence.state.adventure.boatVisited || persistence.state.adventure.boatTaken,
+  onBoatVisit: () => persistence.change((s) => { s.adventure.boatVisited = true; }),
+  getPandaMoments: () => persistence.state.adventure.pandaMoments,
+  onPandaMoment: (id) => persistence.change((s) => { s.adventure.pandaMoments.push(id); }),
+  getStationJourney: () => persistence.state.adventure.stationJourney,
   getCompletedPractice: () => persistence.state.practice.completed,
   getFound: (id) => persistence.state.found.includes(id),
   generate: (area, signal) =>
@@ -358,7 +365,21 @@ practiceStatus.id = "practice-active";
 practiceStatus.lang = "en";
 practiceStatus.setAttribute("role", "status");
 $("panda-help").append(practiceStatus);
-const enableOffline = () => registerPwa({ onStatus: toast });
+const enableOffline = () => registerPwa({
+  onStatus: toast,
+  onUpdate: activate => {
+    let button = $("game-update");
+    if (!button) {
+      button = document.createElement("button");
+      button.id = "game-update";
+      button.dataset.wordLeaf = "";
+      button.textContent = "更新游戏 · Update game";
+      $("settings").parentElement.append(button);
+    }
+    button.onclick = () => { persistence.cache(); activate(); };
+    toast("Game update ready. Use Update game to load the latest version.");
+  },
+});
 function startWorld() {
   hidePandaSpeech();
   const state = persistence.state;
@@ -383,10 +404,17 @@ function startWorld() {
         }
       });
     },
+    onStationJourneyAction: (action) => {
+      persistence.change((s) => {
+        s.adventure.stationJourney = stationJourneyAction(s.adventure.stationJourney, action);
+      });
+    },
     onArtStatus: (status) => {
       $("scene-loading").hidden = status !== "error";
       $("scene-loading").firstChild.textContent =
         "This corner could not load. Check your connection and try again. ";
+      if (status === "ready" && world?.scene.id === "shantang")
+        landmarkPanda.update(world.scene, world.player, !document.querySelector("dialog[open]"));
       $("scene-retry").hidden = status !== "error";
     },
     onGuestArrive: () => {
@@ -396,24 +424,31 @@ function startWorld() {
       panda("小乔已经坐下了，我们也去喝茶吧。");
     },
     onStep: (scene, position) => {
+      music.setScene(scenes[scene], position);
+      ambience.station?.update(scenes[scene], position,
+        ambience.ready && !document.hidden && (persistence.state.settings.ambience ?? 0.25) > 0);
       landmarkPanda.update(
         scenes[scene],
         position,
-        !document.querySelector("dialog[open]"),
+        !document.querySelector("dialog[open]") && (scene !== "shantang" || !world?.artPending),
       );
     },
     onMove: (scene, position) => {
-      music.setScene(scenes[scene]);
-      landmarkPanda.update(
-        scenes[scene],
-        position,
-        !document.querySelector("dialog[open]"),
-      );
+      music.setScene(scenes[scene], position);
+      ambience.station?.update(scenes[scene], position,
+        ambience.ready && !document.hidden && (persistence.state.settings.ambience ?? 0.25) > 0);
       persistence.change((s) => {
+        if (scene === "station-waiting" || s.scene === "station-waiting")
+          s.adventure.stationJourney = stationJourneyAction(s.adventure.stationJourney, "visit-waiting");
         s.scene = scene;
         if (scene === "shantang") s.adventure.boatTaken = true;
         s.position = { ...position };
       });
+      landmarkPanda.update(
+        scenes[scene],
+        position,
+        !document.querySelector("dialog[open]") && (scene !== "shantang" || !world?.artPending),
+      );
       if (!document.querySelector("dialog[open]")) {
         for (const target of scenes[scene].interactables.filter((o) =>
           passiveLandmarks.has(o.id),
@@ -492,13 +527,14 @@ function interact(n) {
   else if (n.type === "stuffy") {
     const id = n.collectible || "momo";
     const fox = id === "fox-plush";
-    const name = fox ? "小狐狸" : "小熊";
-    const plushImage = fox
+    const rabbit = id === "rabbit-plush";
+    const name = rabbit ? "小兔子" : fox ? "小狐狸" : "小熊";
+    const plushImage = rabbit ? "/assets/optimized/rabbit-plush.webp" : fox
       ? "/assets/characters/fox-plush.png"
       : "/assets/characters/momo.webp";
     openPanel(
       name,
-      `<div class="collectible-discovery"><img class="collectible-reveal" src="${plushImage}" alt="${name}玩具"><p class="chinese" lang="zh-CN">哇！你找到了一个${name}玩具！</p>${persistence.state.settings.translation ? `<p>Wow! You found a little ${fox ? "fox" : "bear"} plush!</p>` : ""}<button class="primary" id="bring-home" data-word-leaf>收集 <span lang="en">Collect</span></button></div>`,
+      `<div class="collectible-discovery"><img class="collectible-reveal" src="${plushImage}" alt="${name}玩具"><p class="chinese" lang="zh-CN">哇！你找到了一个${name}玩具！</p>${persistence.state.settings.translation ? `<p>Wow! You found a little ${rabbit ? "rabbit" : fox ? "fox" : "bear"} plush!</p>` : ""}<button class="primary" id="bring-home" data-word-leaf>收集 <span lang="en">Collect</span></button></div>`,
     );
     speech.speak(`哇！你找到了一个${name}玩具！`, false, "panda");
     $("bring-home").onclick = () => {
@@ -506,7 +542,7 @@ function interact(n) {
         persistence.change((s) => {
           s.found.push(id);
           s.journal.push(
-            fox
+            rabbit ? "在车站的壁画后面找到了一只长耳朵玩具小兔子，带它回家了。" : fox
               ? "在竹子后面找到了一只玩具小狐狸，带它回家了。"
               : "在树旁边找到了一个小熊玩具，带它回家了。",
           );
@@ -556,7 +592,7 @@ function interact(n) {
       : "";
     openPanel(
       n.name,
-      `<p class="chinese" lang="zh-CN">${escape(n.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(n.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(n.meaning)}</p>` : ""}<button id="place-replay">再听一次</button>${factHtml}<p id="panel-audio-status" role="status" class="muted"></p>`,
+      `${n.detailImage ? `<img class="place-closeup" src="${escape(n.detailImage)}" alt="${escape(n.detailAlt || n.name)}">` : ""}<p class="chinese" lang="zh-CN">${escape(n.zh)}</p>${persistence.state.settings.pinyin ? `<p class="pinyin">${escape(n.pinyin)}</p>` : ""}${persistence.state.settings.translation ? `<p class="meaning">${escape(n.meaning)}</p>` : ""}<button id="place-replay">再听一次</button>${factHtml}<p id="panel-audio-status" role="status" class="muted"></p>`,
     );
     if (fact) $("culture-replay").onclick = () => speech.speak(fact.zh, false, "panda");
     $("place-replay").onclick = () => speech.speak(n.zh, false, "panda");
@@ -609,15 +645,18 @@ function openConversation(id, shopId = null, appearance = null) {
   $("npc-name").textContent = npcs[id].name;
   $("reply").value = "";
   $("last-user").textContent = "";
-  $("reply").placeholder =
-    npcs[id].starter?.example || starters[npcs[id].topic].example;
+  const waitingProfile = waitingTravelerProfile(id, world.scene.id);
+  $("reply").placeholder = waitingProfile?.starter || (
+    id === XIAOCHENG && world.scene.id === "station-ticketing"
+      ? "我想坐火车去上海。"
+      : npcs[id].starter?.example || starters[npcs[id].topic].example);
   $("send").disabled = false;
   if (!shopId) displayReply({
-    ...npcs[id].greeting,
+    ...(waitingProfile?.greeting || (id === XIAOCHENG && world.scene.id === "station-waiting" ? waitingTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-ticketing" ? indoorTravelerGreeting : npcs[id].greeting)),
     purpose: "opening", npcId: id,
     mode: "authored",
     notice: "",
-  });
+  }, id !== "station-help" && !waitingProfile && !(id === XIAOCHENG && ["station-ticketing", "station-waiting"].includes(world.scene.id)));
   $("dialog-status").textContent = "";
   $("npc-quest")?.remove();
   $("directions-quest")?.remove();
@@ -689,9 +728,9 @@ function openConversation(id, shopId = null, appearance = null) {
     $("npc-name").textContent = shop.name + " · " + npcs[id].name;
     $("reply").placeholder = "这个多少钱？";
     displayReply({
-      chinese: shop.greeting,
-      pinyin: shop.pinyin,
-      meaning: shop.meaning,
+      ...(shop.openings?.[Math.floor(Math.random() * shop.openings.length)] || {
+        chinese: shop.greeting, pinyin: shop.pinyin, meaning: shop.meaning,
+      }),
       topic: "food",
       mode: "authored",
       notice: "",
@@ -1289,7 +1328,7 @@ $("reply-form").onsubmit = async (e) => {
     dialogueVariations.retain(result);
     displayReply(result, false);
     speakConversationReply(result);
-    $("dialog-status").textContent = "+10 XP";
+    $("dialog-status").textContent = "+25 XP";
     if (departing) {
       $("reply-form").hidden = true;
       const goodbye = document.createElement("button");
@@ -1298,7 +1337,7 @@ $("reply-form").onsubmit = async (e) => {
       goodbye.textContent = "再见 · Watch Xiaocheng go";
       goodbye.onclick = () => $("conversation").close();
       $("conversation").querySelector(".conversation-body").append(goodbye);
-      $("dialog-status").textContent = "+10 XP · Xiaocheng knows the way. Close the chat to watch him go.";
+      $("dialog-status").textContent = "+25 XP · Xiaocheng knows the way. Close the chat to watch him go.";
     }
   } catch (error) {
     if (generation === requestGeneration && error.name !== "AbortError")

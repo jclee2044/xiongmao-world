@@ -1,4 +1,6 @@
 import { connectStationTicketing } from "../data/station-exterior.js";
+import { stationGround, stationGroundForJourney, groundCheckpoint, GROUND_SCALE } from "../data/station-interior.js";
+import { stationWaiting, stationWaitingForJourney, waitingPoint, boardingBoundary } from "../data/station-waiting.js";
 import { townRooms, homeObjects } from "../data/town-rooms.js";
 import { collectibleAvailable } from "./collectibles.js";
 import { validateAdventure } from "../data/adventure.js";
@@ -902,7 +904,9 @@ export const scenes = {
         x: 596,
         y: 418,
       },
+      { id: "home-suitcase", type: "suitcase", name: "收拾行李", x: 700, y: 480 },
       { id: "momo-home", collectible: "momo", type: "friend", name: "小熊", x: 940, y: 520 },
+      { id: "rabbit-plush-home", collectible: "rabbit-plush", type: "friend", name: "小兔子", x: 925, y: 520 },
       { id: "fox-plush-home", collectible: "fox-plush", type: "friend", name: "小狐狸", x: 855, y: 520 },
     ],
   },
@@ -1012,6 +1016,8 @@ for (const b of scenes.shanghai.bridges) {
   }
 }
 Object.assign(scenes, townRooms);
+scenes[stationGround.id] = stationGround;
+scenes[stationWaiting.id] = stationWaiting;
 connectStationTicketing(scenes);
 scenes.shantang.interactables.find((o) => o.id === "back-town").returnPoint =
   interactionPoint(
@@ -1270,7 +1276,19 @@ export function upgradeState(state) {
           }
         : {}),
     };
-  const scene = scenes[state.scene] || scenes.shanghai;
+  if (state.scene === stationWaiting.id && state.adventure.stationJourney.entry !== "ready")
+    state = { ...state, scene: stationGround.id, position: { ...stationGround.spawn } };
+  const scene = state.scene === stationGround.id
+    ? stationGroundForJourney(state.adventure.stationJourney)
+    : state.scene === stationWaiting.id ? stationWaitingForJourney(state.adventure.stationJourney)
+    : scenes[state.scene] || scenes.shanghai;
+  if (state.scene === stationWaiting.id && !state.adventure.stationJourney.boarding &&
+      state.position?.x > boardingBoundary.west && state.position?.y > boardingBoundary.north)
+    state = { ...state, position: waitingPoint(1160, 370) };
+  if (state.scene === stationGround.id &&
+      !["bags", "screened", "ready"].includes(state.adventure.stationJourney.entry) &&
+      state.position?.y < groundCheckpoint.lane.y * GROUND_SCALE)
+    state = { ...state, position: { ...scene.spawn } };
   if (state.mapVersion === 2 && MAP_VERSION === 3) {
     return upgradeState({
       ...state,

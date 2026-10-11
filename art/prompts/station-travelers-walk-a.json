@@ -1,0 +1,10 @@
+{
+  "tool": "image_gen.imagegen",
+  "date": "2026-10-11",
+  "reference": "public/assets/characters/station-travelers-a.png",
+  "output": "public/assets/characters/station-travelers-walk-a-v1.png",
+  "transparent_background": true,
+  "prompt": "Production 2D game sprite sheet: create dedicated walking poses for ONLY the second and third characters in the reference: Yutong (woman with short black bob, teal open jacket, cream shirt, wide navy trousers, white shoes, mustard yellow wheeled suitcase) and Wenbo (man with short black hair, round glasses, navy jacket, cream shirt, tan trousers, brown shoes, burgundy wheeled suitcase). Preserve their exact identity, outfits, luggage colors, proportions and soft hand-painted storybook art style. EXACT layout 3 columns by 2 rows, SIX isolated full body sprites, all facing screen right three-quarter view. Row1 woman; row2 man. Each row has THREE different WALKING phases: left foot stepping forward, passing pose with one knee bent, then opposite right foot stepping forward with opposite arm swing. Pull suitcase naturally behind the body with handle extended and wheels grounded; other arm swings. Never use waving, checking watch or standing idle. Stable character size and ground baseline across each row. Generous fully transparent gutters around every sprite: shrink sprites to 75% cell height, no feet touching next row. Portrait-ish or square canvas suitable for 3x2 cells. Actual transparent background, no scenery, shadow, labels, borders, grid, or text. Consistent fixed scale for animation; no cropped body parts.",
+  "preparation": "node scripts/prepare-station-traveler-walk-a.js && node scripts/prepare-station-traveler-walk.js",
+  "notes": "Transparent gutters determine crop boundaries. The existing four-person walk atlas is reused alongside these two returning exterior travelers. No idle atlas is replaced."
+}

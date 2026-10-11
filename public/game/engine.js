@@ -1,4 +1,7 @@
-import { isCoreInteraction } from "./interactions.js";
+import { createBubbleHelp } from "./bubble-help.js";
+import { luggageObjectVisible, carriesTravelSuitcase, needsStationLuggage } from "../data/travel-luggage.js";
+import { isCoreInteraction, npcFeet } from "./interactions.js";
+import { interactionSurface, hitInteractionSurface } from "./interaction-surfaces.js";
 import { collectibleAvailable } from "./collectibles.js";
 import { scenes, move, nearest, canStand, interactionPoint } from "./world.js";
 import { draw, prepareArt } from "./render.js";
@@ -7,6 +10,9 @@ import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
 import { lifeActors } from "./life.js";
 import { XIAOCHENG } from "../data/station-departure.js";
+import { stationTravelerVisible, playerCarriesBag } from "../data/station-journey.js";
+import { stationGroundForJourney, groundProgressAction } from "../data/station-interior.js";
+import { stationWaitingForJourney } from "../data/station-waiting.js";
 import { StationDeparture } from "./station-departure.js";
 import { createStationSignHelp } from "./station-sign-help.js";
 import artBounds from "../data/art-bounds.js";
@@ -28,6 +34,7 @@ export class World {
       getPractice = () => ({ completed: [] }),
       onGuestArrive = () => {},
       onStationTravelerProgress = () => {},
+      onStationJourneyAction = () => {},
       onArtStatus = () => {},
       onSignSelect = () => {},
     },
@@ -45,6 +52,7 @@ export class World {
       getPractice,
       onGuestArrive,
       onStationTravelerProgress,
+      onStationJourneyAction,
       onArtStatus,
     });
     this.ctx = canvas.getContext("2d");
@@ -53,6 +61,7 @@ export class World {
       this.clear();
       onSignSelect(phrase);
     });
+    this.bubbleHelp = createBubbleHelp(canvas, () => this.clear());
     this.keys = new Set();
     this.paused = true;
     this.scene = scenes.shanghai;
@@ -117,6 +126,7 @@ export class World {
         if (this.heldPointer) return;
         e.preventDefault();
         this.clear();
+        this.hover = null;
         this.heldPointer = {
           id: e.pointerId,
           pointerType: e.pointerType,
@@ -127,6 +137,9 @@ export class World {
           started: performance.now(),
           dragged: false,
         };
+        const p = this.pointerPoint(e);
+        this.touchTarget = this.hitAt(p.x, p.y);
+        this.touchTargetUntil = performance.now() + 1000;
         canvas.setPointerCapture(e.pointerId);
         return;
       }
@@ -156,6 +169,7 @@ export class World {
         held.clientY = e.clientY;
         held.dragged ||=
           Math.hypot(e.clientX - held.startX, e.clientY - held.startY) > 8;
+        if (held.dragged) this.touchTarget = null;
         return;
       }
       const { x, y } = this.pointerPoint(e);
@@ -178,6 +192,8 @@ export class World {
           return;
         }
         const target = this.hitAt(x, y);
+        this.touchTarget = target;
+        this.touchTargetUntil = performance.now() + 1000;
         if (
           target &&
           Math.hypot(
@@ -206,12 +222,13 @@ export class World {
       this.getSettings().motion !== false,
     );
   }
-  destinations() {
+  destinations(includeObjects = false) {
     return [
       ...this.scene.interactables.filter(
         (o) =>
+          luggageObjectVisible(o, this.getAdventure()) &&
           collectibleAvailable(this.scene, o, this.getFound(), this.player) &&
-          !(o.id === XIAOCHENG && (this.getAdventure().stationTraveler || "new") !== "new") &&
+          !(o.id === XIAOCHENG && !stationTravelerVisible(this.scene, this.getAdventure())) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
@@ -226,10 +243,10 @@ export class World {
       ...this.actors().filter((o) => o.type === "passerby"),
       ...(this.guest ? [this.guest] : []),
       ...(this.hungryGuest ? [this.hungryGuest] : []),
-    ].filter(isCoreInteraction);
+    ].filter(o => includeObjects || isCoreInteraction(o));
   }
   nearby() {
-    const chosen = this.destinations().find(
+    const chosen = this.destinations(true).find(
       (o) => o.id === this.navigationFocus,
     );
     if (chosen) {
@@ -246,12 +263,18 @@ export class World {
   hitAt(x, y) {
     const exit = hitExitArrow(this.scene, this.player, x, y);
     if (exit) return exit;
+    // A traveler's generous portrait bounds must not swallow clicks on the
+    // painted escalators or elevator behind them.
+    const floorLink = this.destinations().find(o => o.floorTransition && o.hitRect &&
+      x >= o.hitRect.x && x <= o.hitRect.x + o.hitRect.w &&
+      y >= o.hitRect.y && y <= o.hitRect.y + o.hitRect.h);
+    if (floorLink) return floorLink;
     const actors = [
       ...this.actors().filter((o) => o.type === "passerby"),
       ...this.scene.interactables.filter(
         (o) =>
           o.type === "npc" &&
-          !(o.id === XIAOCHENG && (this.getAdventure().stationTraveler || "new") !== "new") &&
+          !(o.id === XIAOCHENG && !stationTravelerVisible(this.scene, this.getAdventure())) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
@@ -262,18 +285,16 @@ export class World {
       ...(this.guest ? [this.guest] : []),
       ...(this.hungryGuest ? [this.hungryGuest] : []),
     ].sort((a, b) => b.y - a.y);
-    const person = actors.find(
-      (o) =>
-        x > o.x - 43 &&
-        x < o.x + 43 &&
-        y > o.y - (o.artHeight || 235) &&
-        y < o.y + 8,
-    );
+    const person = actors.find((o) => {
+      const feet = npcFeet(o);
+      return x > feet.x - 43 && x < feet.x + 43 &&
+        y > feet.y - (o.artHeight || 235) && y < feet.y + 8;
+    });
     if (person) return person;
     const animal = this.animalPoses.find(
       (o) => Math.abs(x - o.x) < 45 && y > o.y - 70 && y < o.y + 10,
     );
-    if (animal) return this.destinations().find((o) => o.id === animal.id);
+    if (animal) return this.destinations(true).find((o) => o.id === animal.id);
     const b = [...this.scene.scenery]
       .reverse()
       .find(
@@ -285,32 +306,44 @@ export class World {
           y < o.y,
       );
     if (b) return this.scene.interactables.find((o) => o.id === b.doorId);
-    const painted = this.destinations().find(
-      (o) =>
-        o.hitRect &&
-        x >= o.hitRect.x &&
-        x <= o.hitRect.x + o.hitRect.w &&
-        y >= o.hitRect.y &&
-        y <= o.hitRect.y + o.hitRect.h,
-    );
+    const painted = this.destinations(true).find(o => hitInteractionSurface(this.scene, o, x, y) ||
+      (["npc", "door"].includes(o.type) && o.hitRect && x >= o.hitRect.x &&
+        x <= o.hitRect.x+o.hitRect.w && y >= o.hitRect.y && y <= o.hitRect.y+o.hitRect.h));
     if (painted) return painted;
     return nearest(
-      { ...this.scene, interactables: this.destinations().filter(o => !this.scene.characterInteractionsOnly || o.type === "door") },
+      { ...this.scene, interactables: this.destinations().filter(o =>
+        !interactionSurface(this.scene, o) && (!this.scene.characterInteractionsOnly || o.type === "door")) },
       { x, y },
       this.getFound(),
     );
   }
   updateStationTraveler(dt) {
     const adventure = this.getAdventure();
-    if (this.scene.id !== "shantang" || adventure.stationTraveler !== "walking") {
+    if (!["shantang", "station-ticketing", "station-waiting"].includes(this.scene.id) || adventure.stationTraveler !== "walking") {
       this.stationDeparture = null;
       this.stationTraveler = null;
       return;
     }
-    this.stationDeparture ??= new StationDeparture(this.scene, adventure.stationTravelerDistance || 0);
+    this.stationDeparture ??= new StationDeparture(scenes.shantang, adventure.stationTravelerDistance || 0);
+    // Once the player reaches 2F, the traveler they helped has caught up.
+    // This also handles a saved departure whose outdoor animation was unfinished.
+    if (this.scene.id === "station-waiting" && this.stationDeparture.route)
+      this.stationDeparture.distance = this.stationDeparture.route.length;
     if (this.hover?.id === XIAOCHENG) this.hover = null;
-    this.stationTraveler = this.stationDeparture.update(dt, this.onStationTravelerProgress);
+    const pose = this.stationDeparture.update(dt, this.onStationTravelerProgress);
+    this.stationTraveler = this.scene.id === "shantang" ? pose : null;
   }
+  syncStationInterior() {
+    if (!["station-ticketing", "station-waiting"].includes(this.scene.id)) return;
+    const next = this.scene.id === "station-waiting"
+      ? stationWaitingForJourney(this.getAdventure().stationJourney)
+      : stationGroundForJourney(this.getAdventure().stationJourney);
+    if (next !== this.scene) {
+      this.scene = next;
+      this.clear();
+    }
+  }
+  hasScene(id) { return Boolean(scenes[id]); }
   updateGuest(dt) {
     const state = this.getAdventure().tea;
     const teaTable = this.scene.interactables.find((o) => o.id === "tea-table");
@@ -444,6 +477,7 @@ export class World {
     this.paintKey = null;
   }
   clear() {
+    this.touchTarget = null;
     const held = this.heldPointer;
     this.heldPointer = null;
     if (held && this.canvas.hasPointerCapture(held.id))
@@ -492,6 +526,11 @@ export class World {
     return 0.75 + 0.5 * fraction;
   }
   walkTo(point, interactOnArrival = false) {
+    if (point.floorTransition && this.getAdventure().stationJourney?.entry !== "ready") {
+      this.clear();
+      this.onInteract(point);
+      return true;
+    }
     this.pendingInteraction = interactOnArrival ? point.id : null;
     this.navigationFocus = point.id || null;
     this.route = pathTo(this.scene, this.player, interactionPoint(point));
@@ -503,6 +542,10 @@ export class World {
     this.canvas.dataset.paused = String(value);
   }
   changeScene(id, position) {
+    if (!this.hasScene(id)) return false;
+    if (id === "station-waiting" && this.getAdventure().stationJourney?.entry !== "ready") return false;
+    if (["station-ticketing", "station-waiting"].includes(this.scene.id) && !["station-ticketing", "station-waiting", "station-platform"].includes(id))
+      this.onStationJourneyAction("leave");
     if (this.stationDeparture && this.getAdventure().stationTraveler === "walking")
       this.onStationTravelerProgress("walking", this.stationDeparture.distance);
     this.stationDeparture = null;
@@ -519,7 +562,8 @@ export class World {
       this.transition = { image, start: null };
     } else this.transition = null;
     this.standUp();
-    this.scene = scenes[id] || scenes.shanghai;
+    this.scene = id === "station-ticketing" ? stationGroundForJourney(this.getAdventure().stationJourney)
+      : id === "station-waiting" ? stationWaitingForJourney(this.getAdventure().stationJourney) : scenes[id];
     this.animalPoses = [];
     this.guest = null;
     this.hungryGuest = null;
@@ -566,6 +610,8 @@ export class World {
   }
   enterDoor(door) {
     if (door?.type !== "door" || !scenes[door.target]) return false;
+    if (needsStationLuggage(this.scene, door, this.getAdventure())) return false;
+    if (door.target === "station-waiting" && this.getAdventure().stationJourney?.entry !== "ready") return false;
     this.changeScene(door.target, door.returnPoint);
     return true;
   }
@@ -632,12 +678,14 @@ export class World {
     this.last = t;
     if (this.artPending) {
       this.signHelp.update(this.scene, this.camera, false);
+      this.bubbleHelp.update([], false);
       requestAnimationFrame((next) => this.frame(next));
       return;
     }
-    if (!this.paused && this.getSettings().motion !== false)
+    if (!this.paused && !this.bubbleHelp.reading && this.getSettings().motion !== false)
       this.ambientTime += dt;
     this.updateStationTraveler(this.paused ? 0 : dt);
+    this.syncStationInterior();
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
@@ -675,7 +723,9 @@ export class World {
       const len = Math.hypot(dx, dy),
         speed =
           (this.getSettings().pace === "slow" ? 184 : 264) *
-          (this.scene.interior || this.scene.id === "home" ? 0.8 : 1);
+          (this.scene.interior || this.scene.id === "home" ? 0.8 : 1) *
+          // A lingering, more reluctant walk before leaving the station quay.
+          (this.scene.id === "shantang" && !this.scene.interior ? 0.8 : 1);
       if (len) {
         if (Math.abs(dx) > 0.1) this.facing = Math.sign(dx);
         const step = Math.min(
@@ -714,7 +764,7 @@ export class World {
         } else this.route = [];
       }
       if (this.pendingInteraction) {
-        const target = this.destinations().find(
+        const target = this.destinations(true).find(
           (o) => o.id === this.pendingInteraction,
         );
         if (!target) this.pendingInteraction = null;
@@ -731,6 +781,14 @@ export class World {
         }
       }
       this.updatePanda(dt, speed * this.pointerSpeedMultiplier());
+      if (this.scene.id === "station-ticketing") {
+        const action = groundProgressAction(this.getAdventure().stationJourney, this.player, this.panda);
+        if (action) {
+          this.onStationJourneyAction(action);
+          this.syncStationInterior();
+          this.onMove?.(this.scene.id, this.player);
+        }
+      }
     }
     if (this.wasMoving && !moving) this.onMove?.(this.scene.id, this.player);
     this.wasMoving = moving;
@@ -742,6 +800,11 @@ export class World {
     this.canvas.dataset.x = this.player.x.toFixed(1);
     this.canvas.dataset.y = this.player.y.toFixed(1);
     this.canvas.dataset.scene = this.scene.id;
+    this.canvas.dataset.travelSuitcase = carriesTravelSuitcase(this.scene, this.getAdventure()) ? "carried" : this.getAdventure().travelLuggage?.packed ? "on-belt" : "home";
+    this.canvas.dataset.stationEntry = this.getAdventure().stationJourney?.entry || "public";
+    this.canvas.dataset.stationBooked = String(this.getAdventure().stationJourney?.booked || false);
+    this.canvas.dataset.stationBoarding = String(this.getAdventure().stationJourney?.boarding || false);
+    this.canvas.dataset.playerBag = playerCarriesBag(this.scene, this.getAdventure().stationJourney) ? "carried" : "on-belt";
     const pandaMoving =
       Math.hypot(
         this.panda.x - previousPanda.x,
@@ -749,6 +812,7 @@ export class World {
       ) > 0.05;
     const settings = this.getSettings(),
       found = this.getFound(),
+      feedbackTarget = this.hover || (t < this.touchTargetUntil ? this.touchTarget : null),
       paintKey = JSON.stringify([
         this.scene.id,
         this.player,
@@ -757,11 +821,13 @@ export class World {
         settings,
         found,
         near?.id,
-        this.hover?.id,
+        feedbackTarget?.id,
+        this.pendingInteraction,
         this.guest,
         this.hungryGuest,
         this.stationTraveler,
         this.getAdventure().stationTraveler,
+        this.getAdventure().stationJourney,
         this.seat,
         this.getAdventure().hungry,
         this.getPractice().completed,
@@ -773,12 +839,13 @@ export class World {
     const ambientFrame =
       !this.paused &&
       settings.motion !== false &&
-      t - (this.lastPaint || 0) > 90;
+      (["station-ticketing", "station-waiting"].includes(this.scene.id) || t - (this.lastPaint || 0) > 90);
     if (
       moving ||
       pandaMoving ||
       this.animatedLastFrame ||
       this.transition ||
+      this.camera?.settling ||
       ambientFrame ||
       paintKey !== this.paintKey ||
       this.canvas.dataset.artReady !== "true"
@@ -792,12 +859,14 @@ export class World {
         {
           varyBubble: this.varyBubble,
           time: this.ambientTime,
+          previousCamera: this.camera,
+          cameraDelta: dt,
           walkDistance: this.walkDistance,
           pandaWalkDistance: this.pandaWalkDistance,
           animate: !this.paused && settings.motion !== false,
           moving,
           facing: this.facing,
-          hover: this.hover,
+          hover: feedbackTarget,
           guest: this.guest,
           hungryGuest: this.hungryGuest,
           stationTraveler: this.stationTraveler,
@@ -839,12 +908,14 @@ export class World {
       this.ctx.restore();
       if (progress === 1) this.transition = null;
     }
+    this.bubbleHelp.update(this.camera.bubbles || [], !this.paused && !this.artPending && !this.transition);
     this.animatedLastFrame = moving || pandaMoving;
-    this.signHelp.update(this.scene, this.camera, !this.paused && !this.artPending && !this.transition);
+    this.signHelp.update(this.scene, this.camera, !this.paused && !this.artPending && !this.transition, this.getAdventure().stationJourney);
     Object.assign(this.canvas.dataset, {
       camX: String(this.camera.camX),
       camY: String(this.camera.camY),
       scale: String(this.camera.scale),
+      cameraSettling: String(Boolean(this.camera.settling)),
       ox: String(this.camera.ox),
       oy: String(this.camera.oy),
       routeLength: String(this.route.length),

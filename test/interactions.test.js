@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { scenes } from "../public/game/world.js";
 import { mapDestinations, isCoreInteraction, npcFeet } from "../public/game/interactions.js";
-test("maps contain locations, omit people and activities, and retain room exits", () => {
+test("maps contain locations and marked service staff, omit ordinary people and activities, and retain room exits", () => {
   const town = mapDestinations(scenes.shanghai, scenes.shanghai.interactables);
   assert.equal(town.length, 13);
   assert.equal(new Set(town.map(s => s.id)).size, 13);
@@ -13,9 +13,12 @@ test("maps contain locations, omit people and activities, and retain room exits"
   for (const scene of Object.values(scenes)) {
     const stops = mapDestinations(scene, scene.interactables);
     assert.ok(stops.length <= 15);
-    assert.ok(stops.every(s => ["door", "gate"].includes(s.type) || s.id === "flowers" || (s.type === "inspect" && s.navigation)), scene.id);
+    assert.ok(stops.every(s => ["door", "gate"].includes(s.type) || s.id === "flowers" || (["inspect", "npc"].includes(s.type) && s.navigation)), scene.id);
     if (scene.id !== "shanghai") assert.ok(stops.some(s => s.type === "door"));
   }
+  const hall = mapDestinations(scenes["station-ticketing"], scenes["station-ticketing"].interactables);
+  for (const id of ["station-ticket-counter", "station-entry-check"]) assert.ok(hall.some(s => s.id === id));
+  for (const id of ["station-reader", "station-traveler"]) assert.ok(!hall.some(s => s.id === id));
   for (const id of ["lan", "lost-flowers", "tea-table", "hotpot"])
     assert.equal(isCoreInteraction({ id }), true);
   for (const id of ["garden-bench", "well", "home-sofa", "buy-cake", "lake", "lake-duck", "lake-cat", "bamboo-grove", "rock-study"])

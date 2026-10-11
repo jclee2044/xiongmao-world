@@ -10,10 +10,19 @@ const gatedCourtyards = new Set(
 );
 
 export function exitArrow(scene, player) {
+  // The painted station doorway needs the same explicit control as room exits.
+  const entrance = scene.interactables.find(
+    (o) => o.id === "station-entrance" && o.type === "door" && o.target,
+  );
+  if (entrance) {
+    const point = interactionPoint(entrance);
+    if (Math.hypot(point.x - player.x, point.y - player.y) < 180)
+      return { door: entrance, x: entrance.x + 55, y: entrance.y - 76, w: 88, h: 44, entering: true };
+  }
   if (!scene.interior && scene.id !== "home" && !gatedCourtyards.has(scene.id))
     return null;
   const door = scene.interactables.find((o) => {
-    if (o.type !== "door" || o.target !== "shanghai") return false;
+    if (o.type !== "door" || !(o.target === "shanghai" || o.id === "station-ground-exit")) return false;
     const point = interactionPoint(o);
     return Math.hypot(point.x - player.x, point.y - player.y) < 180;
   });

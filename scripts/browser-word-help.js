@@ -17,6 +17,8 @@ try {
     const page = await browser.newPage({
       viewport: { width, height: 900 },
       serviceWorkers: "block",
+      hasTouch: width === 390,
+      isMobile: width === 390,
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -67,6 +69,41 @@ try {
     });
     await page.getByRole("button", { name: "看看“豆腐”的意思" }).click();
     assert.equal(await page.evaluate(() => window.spoken.at(-1).word), "豆腐");
+    // Floating canvas bubbles use the same dictionary, with individual words
+    // and no click-through to the world's movement controls.
+    await page.evaluate(async () => {
+      document.querySelector("dialog").remove();
+      const style = document.createElement("link");
+      style.rel = "stylesheet";
+      style.href = "/styles.css";
+      document.head.append(style);
+      const canvas = document.createElement("canvas");
+      canvas.style.cssText = "width:390px;height:300px";
+      document.body.append(canvas);
+      window.canvasClicks = 0;
+      canvas.onpointerdown = () => window.canvasClicks++;
+      const { createBubbleHelp } = await import("/game/bubble-help.js");
+      window.bubbleHelp = createBubbleHelp(canvas, () => {});
+      window.bubbleHelp.update([
+        { text: "她今天从北京坐火车回来。", x: 20, y: 120, width: 208, scale: 1 },
+      ], true);
+    });
+    const train = page.locator(".bubble-help .help-word").filter({ hasText: /^火车$/ });
+    if (width === 390) await train.tap();
+    else await train.click();
+    await page.waitForFunction(() => document.querySelector("#word-callout").matches(":popover-open"));
+    assert.equal(await page.locator("#word-callout strong").textContent(), "火车");
+    assert.ok(await page.locator("#word-callout em").textContent());
+    assert.ok(await page.locator("#word-callout span").textContent());
+    assert.equal(await page.evaluate(() => window.spoken.at(-1).word), "火车");
+    assert.equal(await page.evaluate(() => window.canvasClicks), 0);
+    assert.equal(await page.evaluate(() => window.bubbleHelp.reading), true);
+    await page.keyboard.press("Escape");
+    await train.focus();
+    await page.keyboard.press("Enter");
+    assert.equal(await page.evaluate(() => window.spoken.at(-1).word), "火车");
+    await page.evaluate(() => window.bubbleHelp.update([], false));
+    assert.equal(await page.locator(".bubble-help .help-word").count(), 0);
     assert.deepEqual(errors, []);
     await page.close();
   }

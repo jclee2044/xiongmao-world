@@ -11,7 +11,7 @@ const outside = { x: 20, y: 20 };
 const tick = () => new Promise((r) => setImmediate(r));
 
 test("all authored areas have three Chinese examples", () => {
-  assert.equal(Object.keys(pandaAreas).length, 21);
+  assert.equal(Object.keys(pandaAreas).length, 38);
   assert.equal(new Set(landmarkAreas(scene).map((a) => a.id)).size, 12);
   for (const area of Object.values(pandaAreas)) {
     assert.equal(area.examples.length, 3);
@@ -262,4 +262,121 @@ test("stuffie stored hint repeats on a new visit before collection", () => {
   panda.update(scene, outside);
   panda.update(scene, stuffie);
   assert.deepEqual(shown, [pandaAreas.stuffie.examples[0], pandaAreas.stuffie.examples[0]]);
+});
+
+test("boat introduction is limited to the first visit, including reloads and quiet entries", () => {
+  const boat = landmarkAreas(scene).find(a => a.id === "boat");
+  for (const firstEntry of ["spoken", "randomly quiet", "disabled"]) {
+    let visited = false, visits = 0;
+    const shown = [];
+    const create = () => createLandmarkPanda({
+      getBoatVisited: () => visited,
+      onBoatVisit: () => { visited = true; visits++; },
+      random: () => firstEntry === "randomly quiet" ? 0.9 : 0,
+      generate: () => assert.fail("Boat should use the stored line"),
+      show: text => shown.push(text),
+      hide() {},
+    });
+    const panda = create();
+    panda.update(scene, boat, firstEntry !== "disabled");
+    assert.equal(visited, true);
+    assert.equal(shown.length, firstEntry === "spoken" ? 1 : 0);
+    panda.update(scene, outside);
+    panda.update(scene, boat);
+    panda.update(scenes.home, scenes.home.spawn);
+    panda.update(scene, boat);
+    create().update(scene, boat);
+    assert.equal(visits, 1);
+    assert.equal(shown.length, firstEntry === "spoken" ? 1 : 0);
+  }
+});
+
+test("station arrival moments always speak in order, defer while disabled, and survive repeat visits", () => {
+  const station = scenes.shantang;
+  const plaza = { x: 700 * 1.8, y: 565 * 1.8 };
+  const moments = [], shown = [];
+  const create = () => createLandmarkPanda({
+    getPandaMoments: () => moments,
+    onPandaMoment: id => moments.push(id),
+    random: () => 0.99,
+    generate: () => assert.fail("First arrivals must use authored lines"),
+    show: text => shown.push(text), hide() {},
+  });
+  const panda = create();
+  panda.update(station, station.spawn, false);
+  assert.deepEqual(moments, []);
+  panda.update(station, station.spawn);
+  assert.deepEqual(shown, [pandaAreas["station-quay-arrival"].examples[2]]);
+  assert.deepEqual(moments, ["station-quay-arrival"]);
+  panda.update(station, station.spawn);
+  assert.equal(shown.length, 1, "No ambient line replaces the first moment while lingering");
+  panda.update(station, plaza, false);
+  assert.equal(moments.length, 1);
+  panda.update(station, plaza);
+  assert.deepEqual(shown, [pandaAreas["station-quay-arrival"].examples[2], pandaAreas["station-plaza-arrival"].examples[2]]);
+  assert.deepEqual(moments, ["station-quay-arrival", "station-plaza-arrival"]);
+  panda.update(scenes.shanghai, outside);
+  panda.update(station, station.spawn);
+  panda.update(station, plaza);
+  const reloaded = create();
+  reloaded.update(station, station.spawn);
+  reloaded.update(station, plaza);
+  assert.equal(shown.length, 2, "Later visits use the optional ambient roll");
+  assert.equal(moments.length, 2);
+});
+
+test("later station visits can speak stored ambient lines at both quay and plaza", () => {
+  const station = scenes.shantang;
+  const shown = [];
+  const panda = createLandmarkPanda({
+    getPandaMoments: () => ["station-quay-arrival", "station-plaza-arrival"],
+    onPandaMoment: () => assert.fail("First-time progress must not be repeated"),
+    random: () => 0,
+    generate: () => assert.fail(), show: text => shown.push(text), hide() {},
+  });
+  panda.update(station, station.spawn, false);
+  panda.update(station, station.spawn);
+  panda.update(station, station.spawn);
+  panda.update(station, { x: 700 * 1.8, y: 565 * 1.8 });
+  panda.update(station, { x: 700 * 1.8, y: 565 * 1.8 });
+  assert.deepEqual(shown, [pandaAreas["station-quay"].examples[0], pandaAreas["station-plaza"].examples[0]]);
+});
+
+test("later quay visits support generated variations without repeating the arrival", async () => {
+  const shown = [], draws = [0, 0, 0.9];
+  const panda = createLandmarkPanda({
+    getPandaMoments: () => ["station-quay-arrival"],
+    random: () => draws.shift(),
+    generate: async id => {
+      assert.equal(id, "station-quay");
+      return { chinese: "河边的树真好看。" };
+    },
+    show: text => shown.push(text), hide() {},
+  });
+  panda.update(scenes.shantang, scenes.shantang.spawn);
+  await tick();
+  assert.deepEqual(shown, ["河边的树真好看。"]);
+});
+
+test("the station plaza moment starts after the bridge and never on the canal promenade", () => {
+  const station = scenes.shantang;
+  const areas = landmarkAreas(station);
+  const at = (x, y) => areas.filter(area => withinArea(area, { x: x * 1.8, y: y * 1.8 })).map(area => area.id);
+  assert.deepEqual(at(355, 813), ["station-quay"]);
+  assert.deepEqual(at(530, 500), ["station-quay"]);
+  assert.deepEqual(at(620, 550), ["station-plaza"]);
+  assert.deepEqual(at(700, 565), ["station-plaza"]);
+  assert.deepEqual(at(650, 320), []);
+});
+
+test("station arrival and ambient lines use beginner Chinese; first moments never call AI", async () => {
+  for (const id of ["station-quay-arrival", "station-plaza-arrival", "station-quay", "station-plaza"])
+    for (const line of pandaAreas[id].examples) assert.ok(isChineseDialogue(line), line);
+  for (const area of ["station-quay-arrival", "station-plaza-arrival"]) {
+    const reply = await landmarkReply({ area }, {
+      provider: "local", random: () => 0,
+      fetcher: () => assert.fail("The first-time sentiment must stay authored"),
+    });
+    assert.deepEqual(reply, { chinese: pandaAreas[area].examples[0], mode: "stored" });
+  }
 });

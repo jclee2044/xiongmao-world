@@ -20,6 +20,13 @@ import { Store, newState } from "../server/store.js";
 import { interiors } from "../public/data/interiors.js";
 import { activityById } from "../public/data/activities.js";
 import bounds from "../public/data/art-bounds.js";
+import { stationGroundForJourney } from "../public/data/station-interior.js";
+import { stationWaitingForJourney } from "../public/data/station-waiting.js";
+// Exhaustive room geometry checks use an authorized open checkpoint. Separate
+// station tests verify that the public state cannot reach screened destinations.
+const navigableScenes = () => Object.values(scenes).map(scene => scene.id === "station-ticketing"
+  ? stationGroundForJourney({ booked: true, entry: "ready" })
+  : scene.id === "station-waiting" ? stationWaitingForJourney({ booked: true, entry: "ready", boarding: true }) : scene);
 test("indoor NPCs have distinct appearances, including painted diners", () => {
   const seenSprites = new Set();
   for (const scene of Object.values(scenes).filter((s) => s.interior)) {
@@ -50,7 +57,7 @@ test("collision cannot tunnel through a building and allows sliding along walls"
   assert.ok(slid.y > 220);
 });
 test("every scene spawn and interaction point is reachable in walkable geometry", () => {
-  for (const scene of Object.values(scenes)) {
+  for (const scene of navigableScenes()) {
     assert.ok(canStand(scene, scene.spawn.x, scene.spawn.y));
     for (const obj of scene.interactables) {
       const target = interactionPoint(obj);
@@ -250,7 +257,7 @@ test("lake uses the same irregular shore for rendering and collision, with an ac
   assert.ok(stopped.x > duck.x, "Walking toward the duck stops on the shore");
 });
 test("routes can be followed at normal movement speed without stalling near furniture, people or lane boundaries", () => {
-  for (const scene of Object.values(scenes))
+  for (const scene of navigableScenes())
     for (const dt of [1 / 60, 0.04, 0.1]) {
       for (const destination of scene.interactables) {
         let position = { ...scene.spawn };

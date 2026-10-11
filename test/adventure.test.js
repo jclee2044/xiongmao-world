@@ -94,3 +94,33 @@ test("hot-pot orders match menu ingredients, including negation and traditional 
   assert.deepEqual(parseOrder("我要麵條和蘑菇。"), ["mushrooms", "noodles"]);
   assert.deepEqual(parseOrder("你好"), []);
 });
+
+test("boat visit flag survives saves and merges while older saves default to unvisited", () => {
+  assert.equal(validateAdventure({}).boatVisited, false);
+  const visited = { ...newAdventure(), boatVisited: true };
+  assert.equal(validateAdventure(JSON.parse(JSON.stringify(visited))).boatVisited, true);
+  assert.equal(mergeAdventure(newAdventure(), visited).boatVisited, true);
+  assert.equal(mergeAdventure(visited, newAdventure()).boatVisited, true);
+  assert.throws(() => validateAdventure({ boatVisited: "yes" }));
+});
+
+test("Panda arrival moments survive saves, reloads and merges with older journals", () => {
+  assert.deepEqual(validateAdventure({}).pandaMoments, []);
+  const quay = { ...newAdventure(), pandaMoments: ["station-quay-arrival"] };
+  const plaza = { ...newAdventure(), pandaMoments: ["station-plaza-arrival"] };
+  const merged = mergeAdventure(quay, plaza);
+  assert.deepEqual(merged.pandaMoments, ["station-quay-arrival", "station-plaza-arrival"]);
+  assert.deepEqual(mergeAdventure(merged, quay).pandaMoments, merged.pandaMoments);
+  assert.deepEqual(validateAdventure(JSON.parse(JSON.stringify(merged))).pandaMoments, merged.pandaMoments);
+  for (const pandaMoments of [true, [1], ["station-quay-arrival", "station-quay-arrival"]])
+    assert.throws(() => validateAdventure({ pandaMoments }));
+  const store = new Store(":memory:");
+  try {
+    const { id } = store.create(), state = newState();
+    state.adventure = merged;
+    store.save(id, 0, state);
+    assert.deepEqual(store.read(id).state.adventure.pandaMoments, merged.pandaMoments);
+  } finally {
+    store.close();
+  }
+});

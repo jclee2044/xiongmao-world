@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { scenes, interactionPoint, MAP_VERSION } from "../public/game/world.js";
 import { newState } from "../server/store.js";
 import { goalCards } from "../public/game/goals.js";
+import { pandaAreas } from "../public/data/panda-areas.js";
 import { mkdir } from "node:fs/promises";
 await mkdir("test-results", { recursive: true });
 const server = createApp({
@@ -136,6 +137,29 @@ try {
       await page.waitForFunction(
         () => document.querySelector("#world").dataset.artReady === "true",
       );
+      await page.locator("#panda-speech").waitFor({ state: "visible" });
+      assert.ok(pandaAreas["station-quay-arrival"].examples.includes(
+        await page.locator("#panda-message").textContent()), "Panda admits he does not want to leave on the first boat arrival");
+      assert.deepEqual((await cached()).adventure.pandaMoments, ["station-quay-arrival"]);
+      for (const [x, y] of [[272, 711], [304, 550], [427, 502], [620, 518]]) {
+        await clickWorld(x * 1.8, y * 1.8);
+        await page.waitForFunction(({ x, y }) => {
+          const d = document.querySelector("#world").dataset;
+          return Math.hypot(Number(d.x) - x, Number(d.y) - y) < 14;
+        }, { x: x * 1.8, y: y * 1.8 });
+      }
+      assert.ok(pandaAreas["station-plaza-arrival"].examples.includes(
+        await page.locator("#panda-message").textContent()), "Panda reassures us at the plaza that we can come back");
+      assert.deepEqual((await cached()).adventure.pandaMoments, ["station-quay-arrival", "station-plaza-arrival"]);
+      // The return boat is off screen from the plaza. Walk back across the
+      // bridge before clicking it so this exercises the real camera and path.
+      for (const [x, y] of [[427, 502], [304, 550], [272, 711]]) {
+        await clickWorld(x * 1.8, y * 1.8);
+        await page.waitForFunction(({ x, y }) => {
+          const d = document.querySelector("#world").dataset;
+          return Math.hypot(Number(d.x) - x, Number(d.y) - y) < 14;
+        }, { x: x * 1.8, y: y * 1.8 });
+      }
       const exit = interactionPoint(
         scenes.shantang.interactables.find((o) => o.id === "back-town"),
       );
@@ -175,6 +199,9 @@ try {
       );
       assert.equal(await page.locator("#panel").isVisible(), false);
       assert.equal(await page.evaluate(() => window.loadingShown), false);
+      assert.ok(!pandaAreas["station-quay-arrival"].examples.includes(
+        await page.locator("#panda-message").textContent()), "The first-arrival line stays completed after reload and another boat trip");
+      assert.deepEqual((await cached()).adventure.pandaMoments, ["station-quay-arrival", "station-plaza-arrival"]);
       await clickWorld(exit.x, exit.y);
       await page.waitForFunction(
         () => document.querySelector("#world").dataset.scene === "shanghai" &&

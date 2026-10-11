@@ -1,8 +1,8 @@
 import { givesStationDirections, stationDepartureReply } from "./station-departure.js";
-// Ten travelers, three painted poses each. Six are placed outside; four remain available for future scenes.
+// Ten travelers, three painted poses each. Six are outside; four model the ground-floor journey.
 // Retain station-traveler's encounter ID for existing journals and saves.
 const line = (chinese, pinyin, meaning) => ({ chinese, meaning, pinyin, topic: "travel" });
-export const stationTravelContext = "Stay in the station travel setting. Discuss trains, destinations, buying tickets, choosing departures, luggage, schedules, waiting for or meeting family and friends, and station directions. Answer the learner's question first, then keep any follow-up travel-related. Use only the supplied personal facts. Times are fictional personal plans, never a live railway timetable. Ticket purchases, station interior and train journeys are not playable yet: do not claim to sell tickets, board trains or unlock anything. Use short old HSK 2–3 Chinese; accept English, help and leaving.";
+export const stationTravelContext = "Stay in the station travel setting. Discuss trains, destinations, buying tickets, choosing departures, luggage, schedules, waiting for or meeting family and friends, and station directions. Answer the learner's question first, then keep any follow-up travel-related. Use only the supplied personal facts. Times are fictional personal plans, never a live railway timetable. The ground-floor ticket office and security are playable. Only the ticket clerk's guided interaction books a journey. The second-floor waiting hall is open, with shops and services on the left, seating in the middle and boarding gates on the right. The platform and train journey are not open yet. Upstairs, Xiaocheng already knows the player; do not repeat the outdoor directions quest. Do not claim that ordinary conversation buys tickets or changes game state. Inside station-ticketing, Xiaocheng has already followed the player's directions indoors: do not send him back to the bridge or ask again where the ticket office is. Use short old HSK 2–3 Chinese; accept English, help and leaving.";
 export const stationTravelers = [
   {
     id: "station-traveler", name: "小程", english: "Xiaocheng", voice: "male",
@@ -104,6 +104,33 @@ export const stationTravelers = [
     bubbles: ["她今天从北京坐火车回来。", "我在等女朋友，我们要结婚了。"],
   },
 ];
+// These four existing travelers demonstrate successive parts of the indoor journey.
+export const groundTravelerLessons = {
+  "traveler-rui": {
+    facts: "Inside the ground-floor hall, choosing a destination before buying a ticket at the left windows. Demonstrates asking the clerk for a ticket and showing a passport. Has not bought a ticket yet.",
+    hint: line("我先去左边买票。买票时，要给售票员看护照。", "wǒ xiān qù zuǒ biān mǎi piào 。 mǎi piào shí ， yào gěi shòu piào yuán kàn hù zhào 。", "First I go left to buy a ticket. When buying it, show the clerk your passport."),
+    bubbles: ["先选好去哪儿，再买票。", "我想买一张车票。"],
+  },
+  "traveler-yating": {
+    facts: "Inside the ground-floor hall, has bought a ticket to Shanghai and is approaching the entry-check officer. Shows the same passport used to buy the ticket before taking her suitcase to the conveyor.",
+    hint: line("我买好票了。先检查护照，再去放行李。", "wǒ mǎi hǎo piào le 。 xiān jiǎn chá hù zhào ， zài qù fàng xíng li 。", "I've bought my ticket. First comes the passport check, then taking the luggage to the conveyor."),
+    bubbles: ["买好票，再来检查护照。", "这是我的护照。"],
+  },
+  "traveler-huilan": {
+    facts: "Inside the ground-floor hall, ticket and passport checked, preparing to place her bags on the scanner conveyor. Explains that bags go on the belt and people walk through the detector beside it, then collect their bags on the far side.",
+    hint: line("包放在传送带上，人从旁边的安检门走过去。", "bāo fàng zài chuán sòng dài shàng ， rén cóng páng biān de ān jiǎn mén zǒu guò qù 。", "Put your bag on the conveyor. Walk through the detector beside it."),
+    bubbles: ["先放行李，再走安检门。", "过去以后，记得拿包。"],
+  },
+  "traveler-guoliang": {
+    facts: "Waiting with his leather duffel in the middle of the open public square in front of ground-floor security. Has his ticket and has not passed security yet. Explains that after security passengers collect their belongings before taking the escalator or lift to the second-floor waiting hall. Never directs passengers straight to a platform from this hall.",
+    hint: line("过了安检，先拿好包，再坐扶梯去二楼候车室。", "guò le ān jiǎn ， xiān ná hǎo bāo ， zài zuò fú tī qù èr lóu hòu chē shì 。", "After security, collect your bag, then take the escalator to the second-floor waiting hall."),
+    bubbles: ["车票和旅行包都带好了。", "过了安检，再去楼上。"],
+  },
+};
+for (const traveler of stationTravelers) {
+  const lesson = groundTravelerLessons[traveler.id];
+  if (lesson) Object.assign(traveler, { facts: lesson.facts, openings: [lesson.hint], bubbles: lesson.bubbles });
+}
 export const travelerById = Object.fromEntries(stationTravelers.map(t => [t.id, t]));
 export const exteriorTravelerIds = [...stationTravelers.slice(0, 5).map(t => t.id), "traveler-zihan"];
 
@@ -127,7 +154,7 @@ for (const subject of Object.values(stationSubjects)) {
 }
 
 // Authored offline conversation keeps these travelers in their station context.
-export function travelerStoryReply(id, text, { currentLine, history = [], random = Math.random } = {}) {
+export function travelerStoryReply(id, text, { currentLine, history = [], random = Math.random, scene } = {}) {
   const traveler = travelerById[id];
   if (!traveler) return null;
   const choose = choices => {
@@ -142,13 +169,20 @@ export function travelerStoryReply(id, text, { currentLine, history = [], random
   }
   if (/再见|拜拜|\b(bye|goodbye)\b|(?:must|need to|have to) leave/i.test(text))
     return line("再见！祝你一路平安。", "", "Goodbye! Have a safe journey.");
+  if (scene === "station-ticketing" && groundTravelerLessons[id] &&
+      /你好|hello|\bhi\b|怎么|哪里|在哪|先|然后|护照|安检|传送带|候车|扶梯|电梯|help|what|how|where|next|passport|security|conveyor|upstairs|ticket|bag/i.test(text))
+    return groundTravelerLessons[id].hint;
+  if (id === "station-traveler" && scene === "station-ticketing" && /你好|hello|hi|售票|ticket|桥|bridge|在哪|where/i.test(text))
+    return line("又见面了！售票处就在左边。买好票，再去安检吧。", "", "Good to see you again! The ticket windows are on the left. Buy your ticket, then go to security.");
+  if (scene === "station-waiting" && /你好|hello|hi|售票|ticket|桥|bridge|在哪|where|方向|怎么走|board|上车|进去|进站|出发/i.test(text))
+    return line("我们在二楼候车室。右边是检票口，左边有热水。", "", "We are in the second-floor waiting hall. Boarding gates are on the right; hot water is on the left.");
   if (/^(你好[！!。，\s]*|hello|hi|hey)$/i.test(text)) return choose(traveler.openings);
   if (id === "traveler-zihan" && /女朋友|结婚|她|学中文|北京|回来|fianc|girlfriend|marry|married|who.*wait|stud/i.test(text))
     return traveler.openings[0];
-  if (id === "station-traveler" && givesStationDirections(text))
+  if (id === "station-traveler" && scene === "shantang" && givesStationDirections(text))
     return stationDepartureReply;
   if (/进去|进站|上车|出发吧|买好了|board|enter|buy.*(?:me|now)|let.s go/i.test(text))
-    return line("现在还不能进站坐火车。我们先在外面看看指示牌吧。", "", "We can't enter the station to take a train yet. Let's look at the signs outside first.");
+    return line("买好票，过了安检，就可以去楼上的候车室。", "", "After buying a ticket and completing security, you can go upstairs to the waiting hall.");
   if (/多少钱|票价|price|cost|how much/i.test(text))
     return line("我不知道现在的票价。买票以前，要问清楚去哪里、几点出发。", "", "I don't know the current fare. Before buying a ticket, check the destination and departure time.");
   if (/几点.*(?:车|出发)|时刻表|晚点|timetable|delayed|what time.*(?:train|depart)/i.test(text))

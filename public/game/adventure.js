@@ -1,4 +1,6 @@
+import { luggageReminder, needsStationLuggage, packingOptions, packTravelLuggage } from "../data/travel-luggage.js";
 import { voiceForNpc } from "../data/voices.js";
+import { createStationInteractions } from "./station-interactions.js";
 import {
   AREA_XP,
   award,
@@ -38,12 +40,12 @@ export function createAdventure({
     abort = null,
     generation = 0;
   const text = (zh, pinyin, meaning) =>
-    `<p class="chinese" lang="zh-CN">${escape(zh)}</p>${settings().pinyin ? `<p class="pinyin">${escape(pinyin)}</p>` : ""}${settings().translation ? `<p class="meaning">${escape(meaning)}</p>` : ""}`;
-  function line(title, zh, pinyin, meaning, buttons = [], voice = "panda") {
+    `<p class="chinese" lang="zh-CN"${zh === luggageReminder ? ' data-dialogue-variation="fixed"' : ""}>${escape(zh)}</p>${settings().pinyin ? `<p class="pinyin">${escape(pinyin)}</p>` : ""}${settings().translation ? `<p class="meaning">${escape(meaning)}</p>` : ""}`;
+  function line(title, zh, pinyin, meaning, buttons = [], voice = "panda", detail = "") {
     openPanel(
       title,
-      text(zh, pinyin, meaning) +
-        `<div class="small-actions"><button id="adventure-listen">听一听</button>${buttons.map(([id, label]) => `<button id="${id}" class="primary">${escape(label)}</button>`).join("")}</div><p id="panel-audio-status" role="status"></p>`,
+      text(zh, pinyin, meaning) + detail +
+        `<div class="small-actions"><button id="adventure-listen" data-word-leaf>听一听</button>${buttons.map(([id, label]) => `<button id="${id}" class="primary"${/^(station|packing|luggage)-/.test(id) ? " data-word-leaf" : ""}>${escape(label)}</button>`).join("")}</div><p id="panel-audio-status" role="status"></p>`,
     );
     $("panel").classList.toggle("seated-panel", Boolean(world()?.seat));
     $("adventure-listen").onclick = () => speech.speak(zh, false, voice);
@@ -207,7 +209,42 @@ export function createAdventure({
       "female",
     );
   }
+  function packingList() {
+    const options = packingOptions(persistence.state);
+    const zh = "你想把什么放进行李箱？";
+    openPanel("收拾行李 · Pack your suitcase",
+      text(zh, "nǐ xiǎng bǎ shén me fàng jìn xíng li xiāng ？", "What would you like to pack?") +
+      `<form id="packing-form"><fieldset><legend>玩具和衣服 · Stuffies and clothes</legend>${options.map(item =>
+        `<label class="packing-option" data-word-leaf><input type="checkbox" name="packed-item" value="${escape(item.id)}"> ${escape(item.zh)}${settings().translation ? ` · ${escape(item.en)}` : ""}</label>`).join("")}</fieldset>
+      <p class="notice">日用品已经放好了。${settings().translation ? " Your everyday essentials are already inside. Choose any of your collected stuffies and purchased clothes." : ""}</p>
+      <div class="small-actions"><button type="submit" class="primary" data-word-leaf>收拾好了，带上行李箱。</button><button type="button" id="packing-cancel" data-word-leaf>等一下</button></div></form>`);
+    speech.speak(zh, false, "panda");
+    $("packing-cancel").onclick = () => $("panel").close();
+    $("packing-form").onsubmit = event => {
+      event.preventDefault();
+      const items = [...document.querySelectorAll('[name="packed-item"]:checked')].map(input => input.value);
+      const luggage = packTravelLuggage(persistence.state, items, world().scene.id);
+      change(a => { a.travelLuggage = luggage; });
+      line("行李准备好了", "收拾好了！带上行李箱，我们去火车站吧。",
+        "shōu shi hǎo le ！ dài shàng xíng li xiāng ， wǒ men qù huǒ chē zhàn ba 。",
+        "All packed! Take your suitcase and let's go to the train station.",
+        [["packing-done", "走吧！", () => $("panel").close()]]);
+    };
+  }
+  const stationInteract = createStationInteractions({ line, state, change, world });
   function interact(o) {
+    if (needsStationLuggage(world().scene, o, state())) {
+      line("熊猫", luggageReminder, "nǐ hái shi xiān huí jiā ná xíng li ba 。",
+        "You'd better go home and get your luggage first.",
+        [["luggage-go-home", "好，我先回家。", () => $("panel").close()]]);
+      return true;
+    }
+    if (o.id === "home-suitcase" && world().scene.id === "home" && !state().travelLuggage.packed) {
+      line("行李箱", "要收拾行李吗？", "yào shōu shi xíng li ma ？", "Would you like to pack your suitcase?",
+        [["packing-start", "好，收拾行李。", packingList], ["packing-later", "等一下。", () => $("panel").close()]]);
+      return true;
+    }
+    if (stationInteract(o)) return true;
     if (o.type === "shop") {
       const a = state(),
         bought = a.purchases.includes(o.id);
@@ -330,7 +367,6 @@ export function createAdventure({
                   if (state().xp < AREA_XP) return interact(o);
                   $("panel").close();
                   board();
-                  panda("走吧！我们一起去看看吧。");
                 },
               ],
             ]
@@ -606,7 +642,7 @@ export function createAdventure({
     conversation() {
       change((a) => {
         a.conversations = Math.min(1000000, a.conversations + 1);
-        award(a, 10);
+        award(a, 25);
       });
     },
   };

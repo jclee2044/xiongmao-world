@@ -92,8 +92,14 @@ export const stationExterior = {
 // Future room integration is explicit and guarded: a missing target is never
 // passed to changeScene(), whose legacy fallback would otherwise send us home.
 export function connectStationTicketing(scenes) {
-  if (!scenes[STATION_TICKETING_SCENE]) return;
-  Object.assign(scenes.shantang.interactables.find(o => o.id === "station-entrance"), {
+  const entrance = scenes.shantang?.interactables.find(o => o.id === "station-entrance");
+  if (!entrance) return;
+  if (!scenes[STATION_TICKETING_SCENE]) {
+    entrance.type = "inspect";
+    delete entrance.target;
+    return;
+  }
+  Object.assign(entrance, {
     type: "door", target: STATION_TICKETING_SCENE,
   });
 }

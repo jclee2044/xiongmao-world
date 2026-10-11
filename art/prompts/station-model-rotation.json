@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "public/assets/props/suzhou-model-table-rotated.png",
+  "runtime": "public/assets/optimized/suzhou-model-table-rotated.webp",
+  "prompt": "Edit the reference furniture sprite: rotate the entire glass-enclosed Suzhou miniature display table 90 degrees around its vertical axis so the SHORT END faces the viewer and the LONG dimension recedes away toward the top of the image. This is a new perspective of the same standing table, NOT rotating the flat image. Elevated game camera looking downward 35 degrees. Narrow portrait-oriented silhouette, short front edge horizontal, long side edges receding backward. Preserve honey wooden base and legs, brass glass frame, tiny canals white houses dark roofs arched bridges willow trees and pagoda, warm painted style. Whole furniture centered, all feet visible, margins. Genuine transparent background, no room, floor, glow outside the object, text or people. Preserve original design and materials."
+}

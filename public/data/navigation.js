@@ -167,6 +167,19 @@ export function requestedPlace(text) {
   );
 }
 export function directionsTo(id, state = {}) {
+  if (state.scene === "station-waiting" && ["station-entrance", "next-area", "back-town"].includes(id)) {
+    const target = scenes["station-waiting"].interactables.find(o => o.id === "station-waiting-lift");
+    return { id: target.id, scene: "station-waiting", target: interactionPoint(target),
+      chinese: "先坐电梯回一楼，再从安检出口出去。",
+      meaning: "Take the lift back to floor one, then leave through the security exit and the south station door." };
+  }
+  if (state.scene === "station-ticketing" && ["station-entrance", "next-area", "back-town"].includes(id)) {
+    const tickets = id === "station-entrance";
+    const target = scenes["station-ticketing"].interactables.find(o => o.id === (tickets ? "station-ticket-counter" : "station-ground-exit"));
+    return { id: target.id, scene: "station-ticketing", target: interactionPoint(target),
+      chinese: tickets ? "售票处就在左边。买好票，再去安检。" : "先从南边的门出去，再过桥回码头。",
+      meaning: tickets ? "The ticket windows are on the left. Buy your ticket, then go to security." : "Leave through the south door, then cross the bridge back to the quay." };
+  }
   if (id === "next-area" && state.scene === "shantang") id = "back-town";
   const note = locationNotes[id];
   if (!note) return null;

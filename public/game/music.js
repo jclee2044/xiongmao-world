@@ -48,6 +48,16 @@ export const homeTrack = {
   source: "https://www.youtube.com/watch?v=-KrlR5UM6dI",
 };
 
+export const stationTrack = {
+  url: "/assets/audio/station-piano.mp3",
+  title: "Friday Morning",
+  artist: "Kevin MacLeod",
+  composer: "Kevin MacLeod",
+  source:
+    "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100224",
+  license: "https://creativecommons.org/licenses/by/4.0/",
+};
+
 // Recordings play locally. The original pentatonic score
 // remains available when the recording cannot load or decode.
 export class Music {
@@ -142,9 +152,11 @@ export class Music {
     const track =
       scene?.id === "home"
         ? homeTrack
-        : scene?.interior
-          ? indoorTrack
-          : backgroundTrack;
+        : ["shantang", "station-ticketing", "station-waiting"].includes(scene?.id)
+          ? stationTrack
+          : scene?.interior
+            ? indoorTrack
+            : backgroundTrack;
     if (track === this.track) return;
     this.track = track;
     ++this.version;
@@ -170,7 +182,11 @@ export class Music {
     const gain = this.master.gain;
     gain.cancelScheduledValues(now);
     gain.setTargetAtTime(
-      this.audible() ? this.volume * (this.ducked ? 0.1 : 1) : 0,
+      this.audible()
+        ? this.volume *
+            (this.ducked ? 0.1 : 1) *
+            (this.track === stationTrack ? 0.45 : 1)
+        : 0,
       now,
       this.ducked ? 0.035 : starting ? 0.005 : 0.3,
     );

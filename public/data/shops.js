@@ -1,4 +1,6 @@
+import { stationShops } from "./station-shops.js";
 export const shops = {
+  ...stationShops,
   clothing: {
     name: "衣服店",
     seller: "clothing-seller",

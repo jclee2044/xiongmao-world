@@ -54,6 +54,7 @@ async function seed({
     motion: false,
   });
   state.adventure.xp = 547;
+  state.adventure.travelLuggage = { packed: true, items: [] };
   state.history = [
     {
       npc: "lin",
@@ -189,16 +190,18 @@ try {
   await closePanel();
   await walk(1100, 490);
   await click(1215, 448);
-  await page.locator("#panel").waitFor({ state: "visible" });
-  assert.match(await page.locator("#panel").innerText(), /not playable yet/);
+  await page.waitForFunction(() => document.querySelector("#world").dataset.scene === "station-ticketing");
+  await ready();
   assert.equal(
     await page.locator("#world").getAttribute("data-scene"),
-    "shantang",
+    "station-ticketing",
   );
   await page.screenshot({
     path: "test-results/station-entrance-inspection.png",
   });
-  await closePanel();
+  await click(505 * 1.5 / S, 1375 * 1.5 / S);
+  await page.waitForFunction(() => document.querySelector("#world").dataset.scene === "shantang");
+  await ready();
   await page.screenshot({ path: "test-results/station-forecourt-desktop.png" });
   // Render a complete overview using the actual renderer, for visual geometry QA.
   await page.evaluate(async () => {
@@ -259,7 +262,8 @@ try {
   await seed({ phone: true, position: { x: 1215 * S, y: 483 * S } });
   await page.screenshot({ path: "test-results/station-entrance-phone.png" });
   await click(1215, 448, true);
-  await page.locator("#panel").waitFor({ state: "visible" });
+  await page.waitForFunction(() => document.querySelector("#world").dataset.scene === "station-ticketing");
+  await ready();
   await page.screenshot({ path: "test-results/station-inspection-phone.png" });
 
   await seed({ position: { x: 365 * S, y: 285 * S } });

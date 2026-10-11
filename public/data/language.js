@@ -13,6 +13,8 @@ export const beginnerForms = [
 // game. HSK is a difficulty guide; a missing list entry does not make a common
 // label such as 书店 unsuitable for a beginner.
 export const everydayGameWords = [
+  // Concrete packing vocabulary taught beside the suitcase at home.
+  "收拾", "日用品", "火车站",
   // Concrete family-home, weather and Spring Festival vocabulary.
   "地毯", "脏", "布", "弄", "袜子", "陈叔叔", "陈奶奶", "陈爷爷", "小乐", "小宁", "书架", "洗衣机", "水池", "柜子", "玩具盒", "门口", "春节", "红包",
   "天气预报", "温度", "度", "祝", "锅", "暖和", "凉快", "外套", "家务", "整理", "丢",
@@ -22,10 +24,20 @@ export const everydayGameWords = [
   "旅行", "行李", "背包", "箱子", "出发", "发车", "入口", "票价", "消息", "一路平安",
   // Railway signs are taught as complete phrases in the exterior.
   "平安出行", "温暖相伴", "售票", "证件", "安检", "广场",
+  // Concrete ground-floor signs and checkpoint vocabulary, explained in place.
+  "售票员", "取行李", "候车室", "站台", "检票", "楼梯", "传送带", "车站导览", "林阿姨",
+  // Travel practice upstairs: hotel check-in, timetables and changing plans.
+  "日期", "时刻表", "酒店", "订房", "订", "改成", "见面", "见", "怎么办", "变", "午饭", "数", "比如", "到达", "下一班",
+  // Upper-floor amenities, wayfinding labels and the seated travelers' names.
+  "座位", "七点四十分", "八点十分", // Concrete seating and authored timetable times at the help desk.
+  "扶梯", "出口", "便利店", "简餐", "人间天堂", "人间", "天堂", "信息", "旅途", "按摩", "椅", "中", "面", "问询处", "按摩椅", "出发信息", "检票员", "候车", "检票中", "温暖旅途",
+  "小宇", "陈女士", "吴叔叔", "阿文", "窗外", "风景",
   "小说", // Shu's book-writing conversation; explained in word help.
   "小熊",
+  // The seated children talk about their visible stuffed rabbit and picture book.
+  "玩偶", "软", "哇", "恐龙",
   "书店", "花店", "茶馆", "面馆", "衣服店", "蛋糕店", "市场",
-  "河", "湖", "桥", "石头", "花园", "竹子", "竹林", "苏州",
+  "河", "湖", "桥", "石头", "花园", "竹子", "竹林", "苏州", "风",
   "汤圆", "米粉", "漫画", "沙发", "房子", "黄色", "白色", "早餐店", "小吃店", "水果店", "饼干", "米", "糖", "手", "床", "山", "窗户", "小林", "小安", "小美", "安宁",
   "火锅", "橘子", "梨", "粉色", "辣", "蘑菇", "豆腐", "葱油饼", "扇子", "明信片",
   "鸭子", "兔子", "羊", "小屋", "虎丘", "塔", "博物馆", "平江路", "山塘街", "山塘",

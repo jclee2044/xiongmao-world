@@ -8,7 +8,7 @@ import { api } from "./persistence.js";
 import { shops } from "../data/shops.js";
 import { npcs } from "../data/content.js";
 import { validatePatch, parseCustomization } from "../data/settings.js";
-import { backgroundTrack, indoorTrack, homeTrack } from "./music.js";
+import { backgroundTrack, indoorTrack, homeTrack, stationTrack } from "./music.js";
 const $ = (id) => document.getElementById(id);
 const escape = (text) =>
   String(text).replace(
@@ -284,7 +284,7 @@ export function createPanels({
       ])}${select("voice", "Chinese voice", [
         [true, "On"],
         [false, "Off"],
-      ])}</div><label for="voice-volume">Voice volume</label><input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"><label for="music-toggle">Music</label><select id="music-toggle"><option value="on" ${s.music > 0 ? "selected" : ""}>On</option><option value="off" ${s.music === 0 ? "selected" : ""}>Off</option></select><label for="music-volume">Music volume</label><input id="music-volume" type="range" min="0.05" max="1" step="0.05" value="${s.music || musicVolume}" ${s.music === 0 ? "disabled" : ""}><label for="ambience-volume">Nature sounds</label><input id="ambience-volume" type="range" min="0" max="1" step="0.05" value="${s.ambience}"><p class="notice">Music quiets during speech. You can use the microphone to order at the restaurant.</p><div class="panel-section"><h3>Customize your world</h3><p>Change your outfit color, hairstyle, walking speed, Chinese practice level, or Panda help. Practice uses everyday Chinese around old HSK 2–3.</p><form id="custom-form"><label for="custom-prompt">Describe a change</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="sage clothes, short hair"></textarea><div class="small-actions"><button class="primary">Apply change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Recent changes</h3><ul id="settings-history">${
+      ])}</div><label for="voice-volume">Voice volume</label><input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${s.voiceVolume}"><label for="music-toggle">Music</label><select id="music-toggle"><option value="on" ${s.music > 0 ? "selected" : ""}>On</option><option value="off" ${s.music === 0 ? "selected" : ""}>Off</option></select><label for="music-volume">Music volume</label><input id="music-volume" type="range" min="0.05" max="1" step="0.05" value="${s.music || musicVolume}" ${s.music === 0 ? "disabled" : ""}><label for="ambience-volume">Environment sounds</label><input id="ambience-volume" type="range" min="0" max="1" step="0.05" value="${s.ambience}"><p class="notice">Music quiets during speech. You can use the microphone to order at the restaurant.</p><div class="panel-section"><h3>Customize your world</h3><p>Change your outfit color, hairstyle, walking speed, Chinese practice level, or Panda help. Practice uses everyday Chinese around old HSK 2–3.</p><form id="custom-form"><label for="custom-prompt">Describe a change</label><textarea id="custom-prompt" rows="2" maxlength="500" placeholder="sage clothes, short hair"></textarea><div class="small-actions"><button class="primary">Apply change</button><button type="button" id="undo-settings" ${!persistence.state.settingsHistory.length ? "disabled" : ""}>Undo</button></div></form><p id="custom-result" role="status"></p></div><div class="panel-section"><h3>Recent changes</h3><ul id="settings-history">${
         persistence.state.settingsHistory
           .slice(-5)
           .reverse()
@@ -305,7 +305,7 @@ export function createPanels({
     saveTools();
     const credit = document.createElement("details");
     credit.className = "muted";
-    credit.innerHTML = `<summary>Music credits</summary><p>Home： <a href="${homeTrack.source}" target="_blank" rel="noopener">${homeTrack.title}</a> — composed by ${homeTrack.composer}, guitar by ${homeTrack.artist}. Outdoors： <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Other indoor rooms： <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor music)。</p>`;
+    credit.innerHTML = `<summary>Music credits</summary><p>Station: <a href="${stationTrack.source}" target="_blank" rel="noopener">${stationTrack.title}</a> — ${stationTrack.artist} (incompetech.com), <a href="${stationTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Filtered for distant station speakers. <a href="/assets/audio/ATTRIBUTION.md" target="_blank" rel="noopener">Station recording sources and credits</a>.</p><p>Home： <a href="${homeTrack.source}" target="_blank" rel="noopener">${homeTrack.title}</a> — composed by ${homeTrack.composer}, guitar by ${homeTrack.artist}. Outdoors： <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Other indoor rooms： <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor music)。</p>`;
     $("music-volume").after(credit);
     for (const select of document.querySelectorAll("[data-setting]"))
       select.onchange = () => {
@@ -330,7 +330,7 @@ export function createPanels({
     $("ambience-volume").onchange = (e) =>
       applyPatch(
         { ambience: Number(e.target.value) },
-        `Nature sounds: ${e.target.value}`,
+        `Environment sounds: ${e.target.value}`,
       );
     $("voice-volume").onchange = (e) =>
       applyPatch(

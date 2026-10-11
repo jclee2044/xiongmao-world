@@ -1,0 +1,6 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "public/assets/props/travel-suitcase.png",
+  "prompt": "Create a game prop sprite: ONE small upright rolling travel suitcase, warm honey tan canvas with brown leather trim, two small dark wheels and extended narrow telescoping handle, soft hand-painted watercolor cozy storybook style with subtle brown outlines. Three-quarter view with front and right side visible, seen slightly from above for a cozy top-down 2D Chinese village game. Entire suitcase and handle visible, isolated on true transparent background, no text, no characters, no ground or cast shadow, no extra objects. Suitcase occupies most image height.",
+  "integration": "The renderer composes the transparent suitcase with existing idle/walk sprites after outfit recoloring, preserving all four colors and both hairstyles. The same prop is used at home and on the security belt."
+}

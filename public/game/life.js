@@ -279,6 +279,8 @@ export function lifeActors(scene, time, player, motion = true) {
         o.x = next.x;
         o.y = next.y;
         o.distance += Math.hypot(o.x - previous.x, o.y - previous.y);
+        if (o.playPause && Math.hypot(o.x - target.x, o.y - target.y) < 1)
+          o.pauseRemaining = o.playPause;
         if (o.animal === "cat" && !o.patrol) {
           const heading = Math.cos(time * 0.23 + o.phase);
           if (Math.abs(heading) > 0.15) o.facing = Math.sign(heading);

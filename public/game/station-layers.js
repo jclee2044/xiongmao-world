@@ -46,7 +46,7 @@ export function stationLayer(image, prop) {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(image, -left, -top, 1536, 1024);
+  ctx.drawImage(image, -left, -top, image.naturalWidth, image.naturalHeight);
   const pixels = ctx.getImageData(0, 0, width, height);
   ctx.clearRect(0, 0, width, height);
   fillPolygons(ctx, prop.foliage, left, top);

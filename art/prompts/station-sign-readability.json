@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "source": "public/assets/world/station-waiting-v5.png",
+  "output": "public/assets/world/station-sign-readability-v1.png",
+  "runtime": "public/assets/optimized/station-sign-readability-v1.webp",
+  "regions": [
+    [
+      840,
+      175,
+      227,
+      115
+    ],
+    [
+      1105,
+      191,
+      158,
+      128
+    ]
+  ],
+  "prompt": "Use case: precise-object-edit. Edit target: this exact 1536x1024 warm painterly railway waiting-hall game background. Make two strictly localized readability improvements. (1) Within the framed Suzhou landscape mural ONLY, source rectangle x1105–1263,y191–319, clear a generous, softly painted pale warm-ivory sky area in the upper-left for a two-line dark brush inscription. The inscription will be added by the game at x1122–1227,y195–243, so remove busy mountain edges, tree leaves and pagoda detail from behind that area. Retain the beautiful arched stone bridge, canal, lower garden, and right-hand trees. Let the simplified pale sky blend naturally into the landscape below and to the right; no rectangular label or card, no lettering. Keep the gold frame precisely where it is. (2) Within the blank departure sign ONLY, rectangle x840–1067,y175–290, deepen the blue face to a rich, even dark cobalt/navy blue for clearer ivory lettering, retaining gentle painted enamel texture. Keep its brass frame unchanged. All signs remain completely blank: DO NOT add text, symbols, numbers, or lines. Preserve every other area, object, bench, traveler, plant, shop, escalator, stair, floor tile, railing, light, perspective and exact position from the input. Preserve dimensions and composition. These are small refinements to existing art, not a redesign."
+}

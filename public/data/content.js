@@ -1,4 +1,13 @@
+import { stationShopNpcs } from "./station-shops.js";
 import { stationTravelers, stationTravelContext } from "./station-travelers.js";
+import { waitingCharacters } from "./station-waiting-characters.js";
+import { stationHelpNpc } from "./station-help.js";
+const stationReader = {
+  name: "林阿姨", appearance: "station-reader", voice: "female", topic: "travel",
+  identity: "Auntie Lin, a seated passenger reading in the public ticket hall",
+  personality: "A calm passenger reading a book in the ground-floor public ticket hall. Likes taking time before a journey. Ticket windows are on the left and security is ahead. The waiting hall is upstairs, reached by the escalator or lift after security. Conversation cannot book tickets or change game state.",
+  greeting: { chinese: "坐一会儿吧。你喜欢坐火车的时候看书吗？", pinyin: "zuò yí huì er ba 。 nǐ xǐ huan zuò huǒ chē de shí hou kàn shū ma ？", meaning: "Rest a moment. Do you like reading on the train?", topic: "travel" },
+};
 import { householdNpcs } from "./suzhou-life.js";
 import { bookProfiles } from "./book-dialogue.js";
 import { voiceForNpc } from "./voices.js";
@@ -40,6 +49,7 @@ export const lexicon=[
 ];
 export const starters={food:{zh:'我想…',example:"我想吃面条。",why:'想 + an action tells Mei what you would like.'},school:{zh:'我喜欢…',example:'我喜欢看书。',why:'Share an activity or ask Lin a question.'},work:{zh:'今天…',example:'今天工作忙吗？',why:'Ask about today; 忙吗 means “are you busy?”'},activities:{zh:'我们一起…',example:'我们一起喝茶吧。',why:'一起 + activity suggests doing something together.'},travel:{zh:'请问，…',example:"请问，书店在哪儿？",why:'请问 is a polite way to begin asking for directions.'},greeting:{zh:'你好，…',example:'你好，我叫…',why:'A greeting and your name are a fine beginning.'}};
 
+npcs["station-reader"] = stationReader;
 export const visitors = [
  {id:'visitor-0',appearance:'visitor-0',name:"Aming",zh:"今天天气真好！你喜欢晴天还是雨天？",pinyin:"jīn tiān tiān qì zhēn hǎo ！ nǐ xǐ huan qíng tiān hái shì yǔ tiān ？",meaning:'Lovely weather today! Do you prefer sunny or rainy days?',bubble:'今天天气真好！',personality:'A neighborhood student who loves sunshine and cycling.',voice:'male'},
  {id:'visitor-1',appearance:'visitor-1',name:"小雨",zh:"我在找花店。你能告诉我怎么走吗？",pinyin:"wǒ zài zhǎo huā diàn 。 nǐ néng gào sù wǒ zěn me zǒu ma ？",meaning:'I am looking for the flower shop. Can you tell me how to get there?',bubble:"花店怎么走呢？",personality:'A flower-loving neighbor buying a present for her grandmother.',voice:'female'},
@@ -173,8 +183,13 @@ Object.assign(npcs, {
 });
 
 Object.assign(npcs, householdNpcs);
+Object.assign(npcs, waitingCharacters);
+npcs["station-help"] = stationHelpNpc;
 npcs["clothing-seller"].personality += " Help choose suitable clothes for sample weather: the jacket for cold days, the shirt or dress for hot days, and an umbrella for rain. Do not claim live weather or change purchases through chat.";
 
-for (const [id, npc] of Object.entries(npcs)) npc.voiceProfile = voiceForNpc(id);
-
 for (const [id, profile] of Object.entries(bookProfiles)) npcs[id].personality = profile.context;
+
+Object.assign(npcs, stationShopNpcs);
+
+// Initialize after every NPC group, including station sellers, has been registered.
+for (const [id, npc] of Object.entries(npcs)) npc.voiceProfile = voiceForNpc(id);

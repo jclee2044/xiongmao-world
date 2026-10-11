@@ -1,0 +1,16 @@
+{
+  "tool": "built-in image_gen",
+  "revision": 2,
+  "assets": [
+    {
+      "path": "public/assets/world/shop-station-cafe.png",
+      "reference": "public/assets/world/shop-snacks.png",
+      "prompt": "Edit the supplied Suzhou market shop illustration into a STATION CAFE interaction scene. The supplied image is the authoritative art-style reference: preserve its exact rounded chibi/storybook character design, oversized rounded head, large simple dark oval eyes, tiny nose, rosy cheeks, small compact torso, outlined shapes, flat painted skin, textured watercolor/gouache surfaces and richly illustrated warm colors. It must look drawn by precisely the same artist for the same game. Keep its 1536x1024 first-person straight-on counter composition and character scale. Change the woman into a new barista with a short dark bob, cream shirt and muted green apron, still with EXACTLY the reference's cartoon proportions and simplified face. Replace foreground goods with a clearly illustrated cup of tea, cup of coffee and bowl of noodles on the counter. Replace market stall background with a cozy small cafe in a Chinese railway waiting hall: painted shelves, simple illustrated espresso machine and station-hall windows behind her. Keep decorative potted greenery and warm wood counter. One friendly shopkeeper looking at viewer. No realistic human face, no realistic anatomy, no photographic rendering, no cinematic blur, no lifelike skin or reflections. No text, logos, UI, border, or extra people. This is a finished station shop illustration in the SAME visual style as the supplied market image, not a photo with a watercolor filter."
+    },
+    {
+      "path": "public/assets/world/shop-station-snacks.png",
+      "reference": "public/assets/world/shop-streetfood.png",
+      "prompt": "Edit the supplied Suzhou market shop illustration into a STATION CONVENIENCE STORE interaction scene. The supplied image is the authoritative art-style reference: preserve its exact rounded chibi/storybook character design, oversized rounded head, large simple dark oval eyes, tiny nose, rosy cheeks, small compact torso, outlined shapes, flat painted skin, textured watercolor/gouache surfaces and richly illustrated warm colors. It must look drawn by precisely the same artist for the same game. Keep its 1536x1024 first-person straight-on counter composition and character scale. Change the man into a new middle-aged shopkeeper with short dark hair, round glasses, no moustache, and a blue collared shirt, still with EXACTLY the reference's cartoon proportions and simplified face. Replace foreground goods with illustrated bottled water, wrapped bread rolls and packets of cookies on a wood shop counter. Replace market stall background with a small convenience store inside a Chinese railway waiting hall: tidy illustrated snack shelves, a small checkout register, and a glimpse of painted station hall through the shop opening. Warm wood and a small potted plant. One friendly shopkeeper looking at viewer. No realistic human face, no realistic anatomy, no photographic rendering, no cinematic blur, no lifelike skin or reflections. No text, logos, UI, border, or extra people. This is a finished station shop illustration in the SAME visual style as the supplied market image, not a photo with a watercolor filter."
+    }
+  ]
+}

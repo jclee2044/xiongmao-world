@@ -3,6 +3,25 @@ import assert from "node:assert/strict";
 import { soundscape } from "../public/game/ambience.js";
 import { scenes } from "../public/game/world.js";
 
+test("painted station quay has water, breeze and foliage that fade across the bridge", () => {
+  const scene = scenes.shantang;
+  const at = (x, y) => soundscape(scene, { x: x * 1.8, y: y * 1.8 });
+  const quay = at(355, 813);
+  const bridge = at(800, 580);
+  const forecourt = at(1215, 550);
+  for (const layer of ["water", "breeze", "leaves"]) {
+    assert.ok(quay[layer] > 0.8, `${layer} is audible at the boat`);
+    assert.ok(at(450, 510)[layer] > 0.8, `${layer} is audible by the arch`);
+    assert.ok(bridge[layer] > 0 && bridge[layer] < quay[layer]);
+    assert.equal(forecourt[layer], 0);
+    assert.equal(soundscape(scenes.home, scene.spawn)[layer], 0);
+    assert.equal(
+      soundscape({ ...scene, interior: true }, scene.spawn)[layer],
+      0,
+    );
+  }
+});
+
 test("south fountain and its flock are audible nearby and fall silent at distance or indoors", () => {
   const fountain = scenes.shanghai.scenery.find((o) => o.type === "fountain");
   const flock = scenes.shanghai.scenery.find(

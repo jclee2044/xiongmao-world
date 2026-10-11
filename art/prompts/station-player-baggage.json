@@ -1,0 +1,25 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "asset": "idle",
+      "reference": "public/assets/characters/player-idle.png",
+      "prompt": "Use case: precise-object-edit. Asset type: transparent game sprite atlas. Edit target: the provided player-idle sprite sheet. Remove the olive green crossbody bag AND its diagonal shoulder strap from EVERY one of the 10 sprites. Reconstruct the lavender sweater and cream trousers beneath them, with natural painted fabric folds. In the last column change the strap-gripping hand to a relaxed hand resting near the upper torso, with no strap. Preserve exact identity, faces, brown hair, bun hairstyle top row and short bob bottom row, pose positions, sprite scale, shoes, the 5 columns by 2 rows layout, outer margins, and watercolor storybook rendering. The same young woman must remain recognizable. Retain lavender clothing so the game can recolor it to sage green, peach, teal. Real transparent background. No bag, no bag straps, no labels, no ground shadow or background."
+    },
+    {
+      "asset": "walk",
+      "reference": "public/assets/characters/player-walk-v2.png",
+      "prompt": "Use case: precise-object-edit. Asset type: transparent game walking sprite atlas. Edit target: provided player-walk-v2 sprite sheet. Remove the olive green crossbody shoulder bag and its entire diagonal shoulder strap from ALL 8 walking sprites. Reconstruct the lavender sweater and cream trousers beneath the bag and strap with matching painted texture. Preserve exact faces, brown hair, bun top row, short bob bottom row, right-facing walking poses, sprite positions and scale, 4 columns by 2 rows layout and margins, cream trousers, gray shoes, and watercolor storybook style. Maintain the young woman's proportions and lavender sweater suitable for runtime recoloring sage, peach, teal. Real transparent background. No bag, no strap, no extra characters, no labels, no ground or shadows."
+    },
+    {
+      "asset": "seated",
+      "reference": "public/assets/characters/seated-friends.png",
+      "prompt": "Use case: precise-object-edit. Asset type: transparent game seated sprite atlas. Edit target: provided seated-friends sprite sheet. Remove the olive crossbody bag and shoulder strap from ONLY the first two characters (the player with brown bun and the same player with brown short bob). Reconstruct lavender sweater and cream trousers under the bag and strap in the same painted texture. Preserve their exact faces, hairstyles, seated posture, tea cups, stools, shoes, all positions, scale and 3-column layout. Keep the third woman entirely unchanged. Transparent background. No remaining bag or strap on the first two sprites, no text or scenery."
+    },
+    {
+      "asset": "bag",
+      "reference": "public/assets/characters/player-idle.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone transparent game prop for a station security conveyor. Reference image: the player's olive green crossbody satchel in the supplied sprite atlas; recreate THIS bag separately without any person. One olive sage green canvas shoulder satchel, rounded rectangular soft body, large curved flap with two small warm brass buttons, subtle fabric seams, watercolor highlights and darker bottom folds. Its long olive shoulder strap is folded neatly behind and over the bag, not standing as a tall loop. Draw at a slightly elevated three-quarter angle, like a satchel resting upright on a train-station conveyor; front flap clearly visible and some top/right side depth. Match the cozy detailed watercolor storybook game art. Single isolated bag centered with transparent margins, genuine alpha background, no person, no floor, no cast shadow, no text, no logos, no backpack, no duplicate bags."
+    }
+  ]
+}

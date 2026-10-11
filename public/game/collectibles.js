@@ -8,6 +8,12 @@ export function collectibleAvailable(scene, object, found, player) {
   if (object.type === "friend") return collected;
   if (collected) return false;
   if (!object.hidden) return true;
+  if (object.discoveryBounds) {
+    const b = object.discoveryBounds;
+    return !!player && player.x > b.x && player.x < b.x + b.w &&
+      player.y > b.y && player.y < b.y + b.h &&
+      Math.hypot(player.x - object.x, player.y - object.y) < 85;
+  }
   const yard = scene.enclosures?.find(e => e.id === object.enclosureId);
   const wall = 18 * (scene.worldScale || 1);
   return !!yard && !!player &&

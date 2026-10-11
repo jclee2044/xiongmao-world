@@ -85,7 +85,7 @@ test("every public venue has hosts, real exits, and valid activities", () => {
     );
     assert.ok(
       s.interactables.some(
-        (o) => o.type === "door" && o.target === "shanghai" && o.returnPoint,
+        (o) => o.type === "door" && o.target === (s.id === "station-ticketing" ? "shantang" : s.id === "station-waiting" ? "station-ticketing" : "shanghai") && o.returnPoint,
       ),
       s.id,
     );

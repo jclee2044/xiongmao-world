@@ -201,6 +201,12 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
   for (const id of ["yun", "baker", "silk-host"])
     assert.equal(voiceForNpc(id), "older-female");
   const additions = {
+    "waiting-granddaughter": "young-female",
+    "waiting-grandson": "young-male",
+    "waiting-friend": "male-kokoro-009",
+    "waiting-travel-friend": "female-kokoro-001",
+    "station-barista": "female-kokoro-001",
+    "station-shopkeeper": "older-male-kokoro",
     lin: "male-kokoro-009",
     "station-traveler": "male-kokoro-009",
     hao: "male-kokoro-014",
@@ -228,7 +234,7 @@ test("all NPCs have a cast voice and appearance overrides preserve the visible c
     v.startsWith("older-male"),
   );
   assert.equal(older.filter((v) => v === "older-male").length, 4);
-  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 6);
+  assert.equal(older.filter((v) => v === "older-male-kokoro").length, 8);
   for (const id of [
     "wei",
     "gardener",

@@ -1,7 +1,11 @@
+import { newTravelLuggage, validateTravelLuggage, mergeTravelLuggage } from "./travel-luggage.js";
+import { newStationJourney, validateStationJourney, mergeStationJourney } from "./station-journey.js";
 export const AREA_XP = 500;
 export const newAdventure = () => ({
   xp: 0,
   boatTaken: false,
+  boatVisited: false,
+  pandaMoments: [],
   conversations: 0,
   flowers: "new",
   tea: "new",
@@ -10,6 +14,8 @@ export const newAdventure = () => ({
   hungry: "new",
   stationTraveler: "new",
   stationTravelerDistance: 0,
+  stationJourney: newStationJourney(),
+  travelLuggage: newTravelLuggage(),
   directionsFind: "new",
   directionsGive: "new",
   directionsStep: 0,
@@ -27,6 +33,9 @@ export function validateAdventure(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw Error("Invalid adventure.");
   const a = { ...newAdventure(), ...value };
+  a.stationJourney = validateStationJourney(a.stationJourney);
+  a.travelLuggage = validateTravelLuggage(a.travelLuggage);
+  if (typeof a.boatVisited !== "boolean") throw Error("Invalid boat visit progress.");
   if (typeof a.boatTaken !== "boolean") throw Error("Invalid boat progress.");
   if (!["new", "walking", "entered"].includes(a.stationTraveler) ||
       !Number.isFinite(a.stationTravelerDistance) ||
@@ -69,6 +78,7 @@ export function validateAdventure(value) {
     "clickedWords",
     "purchases",
     "nature",
+    "pandaMoments",
   ])
     if (
       !Array.isArray(a[key]) ||
@@ -81,9 +91,13 @@ export function validateAdventure(value) {
     throw Error("Invalid coins.");
   return {
     boatTaken: a.boatTaken,
+    boatVisited: a.boatVisited,
+    pandaMoments: [...a.pandaMoments],
     hungry: a.hungry,
     stationTraveler: a.stationTraveler,
     stationTravelerDistance: a.stationTravelerDistance,
+    stationJourney: a.stationJourney,
+    travelLuggage: a.travelLuggage,
     directionsFind: a.directionsFind,
     directionsGive: a.directionsGive,
     directionsStep: a.directionsStep,
@@ -182,9 +196,13 @@ export function mergeAdventure(local, remote) {
   return {
     ...a,
     boatTaken: a.boatTaken || b.boatTaken,
+    boatVisited: a.boatVisited || b.boatVisited,
+    pandaMoments: [...new Set([...a.pandaMoments, ...b.pandaMoments])],
     hungry: later("hungry", ["new", "invited", "dining", "done"]),
     stationTraveler: later("stationTraveler", ["new", "walking", "entered"]),
     stationTravelerDistance: Math.max(a.stationTravelerDistance, b.stationTravelerDistance),
+    stationJourney: mergeStationJourney(a.stationJourney, b.stationJourney),
+    travelLuggage: mergeTravelLuggage(a.travelLuggage, b.travelLuggage),
     directionsFind: later("directionsFind", ["new", "accepted", "done"]),
     directionsGive: later("directionsGive", ["new", "accepted", "done"]),
     directionsStep: Math.max(a.directionsStep, b.directionsStep),

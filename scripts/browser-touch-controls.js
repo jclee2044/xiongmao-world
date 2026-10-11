@@ -252,7 +252,7 @@ try {
 
   await seed("home", { x: 447, y: 370 });
   await page.touchscreen.tap(
-    ...Object.values(await screen({ x: 447, y: 313.5 })),
+    ...Object.values(await screen({ x: 283, y: 235 })),
   );
   await page.locator("#panel").waitFor({ state: "visible" });
   await seed("home", { x: 450, y: 465 }, { width: 1280, height: 900 }, false);
