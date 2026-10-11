@@ -65,6 +65,7 @@ try {
   for (const [id, shop] of Object.entries(shops).filter(([id]) => id.startsWith("station-"))) {
     const seller = scenes["station-waiting"].interactables.find(o => o.shopId === id);
     await seed("station-waiting", interactionPoint(seller), {stationJourney:{booked:true,entry:"ready",revision:5}});
+    await page.screenshot({ path: `test-results/counter-${id}.png` });
     const rect = seller.hitRect;
     await clickWorld(rect.x + rect.w / 2, rect.y + rect.h / 2);
     await page.locator("#shop-view").waitFor({ state: "visible" });
@@ -76,6 +77,7 @@ try {
       () => document.querySelector("#shop-view").complete,
     );
     assert.ok(await page.locator("#npc-zh").innerText());
+    assert.ok(await page.locator(".conversation-body").evaluate(e => e.clientHeight >= 80), "Shop dialogue must not collapse below the portrait");
     assert.equal(await page.locator("#shop-view").evaluate(img => img.naturalWidth > 0), true);
     const item = shop.items[0];
     await page.locator(`[data-buy="${item.id}"]`).click();
@@ -96,6 +98,8 @@ try {
       );
     }
   }
+  await seed("station-waiting", { x: 554, y: 1134 }, {stationJourney:{booked:true,entry:"ready",revision:5}});
+  await page.screenshot({ path: "test-results/station-help-counter.png" });
   assert.deepEqual(errors, []);
   console.log(
     "Station café and convenience store: clickable counters, images and purchases passed.",

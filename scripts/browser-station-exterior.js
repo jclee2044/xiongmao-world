@@ -153,6 +153,24 @@ async function closePanel() {
   );
 }
 try {
+  // The right end of the poster must block upward movement without painting
+  // the sign over an actor whose feet are still in front of its slanted base.
+  await seed({ position: { x: 950 * S, y: 550 * S } });
+  await page.locator("#world").focus();
+  await page.keyboard.down("w");
+  await page.waitForTimeout(1000);
+  await page.keyboard.up("w");
+  await page.waitForFunction(() => document.querySelector("#world").dataset.cameraSettling === "false");
+  const posterContact = await position();
+  assert.ok(posterContact.y > 486 * S && posterContact.y < 525 * S);
+  assert.equal(await page.evaluate(async () => {
+    const { stationProps } = await import("/data/station-props.js");
+    const { behindStationProp } = await import("/game/station-layers.js");
+    const d = document.querySelector("#world").dataset;
+    return behindStationProp(stationProps.find(o => o.id === "travel-poster"), d.x / 1.8, d.y / 1.8);
+  }), false);
+  await page.screenshot({ path: "test-results/station-poster-right-contact.png" });
+
   await seed({ old: true, position: { x: 900, y: 400 } });
   let pos = await position();
   assert.ok(

@@ -37,12 +37,12 @@ export const stationPandaAreas = {
     "这里有咖啡，也有水和吃的东西。",
     "你喜欢茶还是咖啡？我想坐下来休息一会儿。",
   ]),
-  "station-panda-water": observation("Beside the hot-water dispenser in the waiting hall. Notice cups and hot water; do not invent a filling interaction.", [
+  "station-panda-water": observation("Beside the hot-water dispenser in the waiting hall. Meifang is thirsty: talk to her, fill a cup here, and bring it back.", [
     "这里的水很热。喝水的时候要小心。",
     "带着杯子出门真方便，这里就有热水。",
     "热水在这里。等车的时候，喝点水也很好。",
   ]),
-  "station-panda-rest": observation("Near the waiting hall's massage chairs. One traveler rests here; do not claim a playable massage action.", [
+  "station-panda-rest": observation("Near the waiting hall's massage chairs. Wenbo feels stressed. Invite him to follow you to these chairs so he can relax.", [
     "这里有人在休息。我们安静一点吧。",
     "走了很久，我想坐下来休息。",
     "候车室里有好多椅子。大家一边休息，一边等车。",

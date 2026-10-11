@@ -1,0 +1,6 @@
+{
+  "mode": "built-in image_gen",
+  "source": "public/assets/world/station-platform-v3.png",
+  "output": "public/assets/world/station-platform-v4.png",
+  "prompt": "Use case: precise-object-edit. Edit target: attached station platform game background. Preserve image dimensions, exact overhead camera, all geometry, stairs, rails, paving, flowers, bench, lighting and composition. Only two small edits in upper-left: replace the elevator door beside the staircase (logical coordinates x196 y70 width75 height110 on 1206x864 layout) with a single staff maintenance door recessed into same wall, warm weathered bronze/olive metal, handle, subtle vents, small plaque 维修门; remove elevator buttons. Paint a small trash can on floor just below/right of that door, centered logical x278 with base y207, about 26 logical pixels wide and 37 high. Match existing painted game art perfectly: soft detailed brush texture, golden sunlight, amber highlights, blue-gray shadows, muted blue/olive metal, natural contact shadows and overhead perspective. Both objects must look originally painted into environment, no flat vector overlays. Keep entire rest of scene unchanged. No train, no characters."
+}

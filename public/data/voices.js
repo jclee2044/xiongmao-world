@@ -31,6 +31,7 @@ export function normalizeVoice(voice, enabled = CHARACTER_VOICES_ENABLED) {
 // Casting follows the rendered sprites, including the gray-haired visitor-0
 // whose dialogue describes a student. See handoff/references/voice-casting.md.
 export const npcVoiceProfiles = Object.freeze({
+  "station-confused": "male-kokoro-009", "platform-trash-traveler": "female-kokoro-026",
   mei: "female-kokoro-001", lin: "male-kokoro-009", qiao: "female-kokoro-026",
   bo: "older-male", lan: "female-kokoro-001", wei: "older-male-kokoro",
   an: "female-kokoro-001", hao: "male-kokoro-014", yun: "older-female",

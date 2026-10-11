@@ -1,3 +1,26 @@
+// Ease outdoor tracking in world space so starts, turns and stops do not jerk
+// the background. Both endpoints are clamped, so easing stays inside the scene.
+export function followingRoomCamera(scene, player, width, height, scale, previous, dt = 0) {
+  if (!scene.cameraFollowSeconds) return null;
+  const target = {
+    scale,
+    camX: Math.max(0, Math.min(scene.width - width / scale, player.x - width / scale / 2)),
+    camY: Math.max(0, Math.min(scene.height - height / scale, player.y - height / scale * 0.55)),
+    sceneId: scene.id, viewportWidth: width, viewportHeight: height, settling: false,
+  };
+  if (!previous || previous.sceneId !== scene.id || previous.scale !== scale ||
+      previous.viewportWidth !== width || previous.viewportHeight !== height || dt <= 0)
+    return target;
+  const error = Math.max(Math.abs(previous.camX - target.camX), Math.abs(previous.camY - target.camY)) * scale;
+  if (error < 0.15) return target;
+  const blend = -Math.expm1(-dt / scene.cameraFollowSeconds);
+  return { ...target,
+    camX: previous.camX + (target.camX - previous.camX) * blend,
+    camY: previous.camY + (target.camY - previous.camY) * blend,
+    settling: true,
+  };
+}
+
 // Small authored scenes can show their complete composition without tracking
 // the player. Portrait screens retain the whole platform and both rail ends.
 export function fixedRoomCamera(scene, width, height) {

@@ -1,12 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { StationTrain, TRAIN_WAIT, TRAIN_ARRIVAL, TRAIN_DEPARTURE } from "../public/game/station-train.js";
+import { StationTrain, TRAIN_ARRIVAL, TRAIN_DEPARTURE } from "../public/game/station-train.js";
 import { stationJourneyAction as act, validateStationJourney, mergeStationJourney } from "../public/data/station-journey.js";
 
 test("train waits, arrives smoothly, stays indefinitely, and can explicitly depart", () => {
   const train = new StationTrain();
   assert.equal(train.pose().visible, false);
-  train.update(TRAIN_WAIT);
+  train.update(10000, true, 99);
+  assert.equal(train.phase, "waiting");
+  train.update(0, true, 100);
   assert.equal(train.phase, "arriving");
   assert.equal(train.pose().travel, -1);
   const offsets = Array.from({length:90}, () => train.update(TRAIN_ARRIVAL / 90).travel);
@@ -26,8 +28,8 @@ test("train waits, arrives smoothly, stays indefinitely, and can explicitly depa
 
 test("reduced motion and saved arrivals show the stationary train", () => {
   const train = new StationTrain();
-  assert.equal(train.update(0, false).phase, "ready");
-  assert.equal(new StationTrain({arrived:true}).pose().phase, "ready");
+  assert.equal(train.update(0, false, 100).phase, "ready");
+  assert.equal(new StationTrain({arrived:true,earnedPlatformXP:100}).pose().phase, "ready");
   const journey = {booked:true,entry:"ready",boarding:true,revision:6};
   const arrived = act(journey, "train-arrived");
   assert.equal(arrived.trainArrived, true);
@@ -38,4 +40,13 @@ test("reduced motion and saved arrivals show the stationary train", () => {
   assert.equal(left.trainArrived,undefined);
   assert.equal(mergeStationJourney(arrived,left).trainArrived,undefined);
   assert.throws(()=>validateStationJourney({...journey,boarding:false,trainArrived:true}));
+});
+
+ test("saved arrival cannot bypass platform conversation credit", () => {
+  for (const motion of [true, false]) {
+    const train = new StationTrain({ arrived: true, earnedPlatformXP: 99 });
+    assert.equal(train.pose().visible, false);
+    assert.equal(train.update(10000, motion, 99).visible, false);
+    assert.equal(train.update(0, motion, 100).visible, true);
+  }
 });

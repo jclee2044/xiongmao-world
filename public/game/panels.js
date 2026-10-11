@@ -24,6 +24,7 @@ export function createPanels({
   openPanel,
   toast,
   applySettings,
+  onDevModeChange = () => {},
   restoreWorld,
   getWorld,
   showMapWord,
@@ -116,7 +117,7 @@ export function createPanels({
       "mei-order";
     const guide = activityGuide(recommended, active);
     const card = `<section class="journal-next"><small>${active ? "CONTINUE YOUR ACTIVITY" : "START HERE"}</small><h3>${escape(guide.english)}</h3><p>${escape(guide.next)}</p>${guide.next !== guide.how ? `<p>${escape(guide.how)}</p>` : ""}${guide.progress ? `<p>${escape(guide.progress)}</p>` : ""}<p><strong>Complete when:</strong> ${escape(guide.complete)}</p><button id="journal-start" class="primary">${active ? "Continue activity" : "Start practice"}</button><p class="muted">Practice does not spend coins or buy items.</p></section>`;
-    const goals = goalCards(s.adventure).filter((g) => g.target);
+    const goals = goalCards(s.adventure, persistence.devMode, s.scene).filter((g) => g.target);
     const words = s.adventure.vocabulary.filter(isBeginnerChinese);
     const readable = s.journal.map(journalText).filter(Boolean).reverse();
     const older = s.journal.filter((entry) => journalText(entry) === null);
@@ -134,7 +135,7 @@ export function createPanels({
       `<ul>${rows.map((x) => `<li>${escape(x)}</li>`).join("")}</ul>`;
     const content =
       tab === "next"
-        ? `${card}<p><button id="journal-browse">Browse all activities</button></p><details><summary>Explore town and help neighbors</summary><div class="activity-catalog">${goals.map((g) => `<button data-journal-goal="${escape(g.target)}"><strong>${escape(g.title)}</strong><span>${escape(g.detail)}</span><small>Show me where →</small></button>`).join("")}</div></details><p class="muted">${s.adventure.boatTaken ? "Next travel stage" : "Boat travel"} · ${s.adventure.xp} / ${progression(s.adventure, s.scene).required} XP</p>`
+        ? `${card}<p><button id="journal-browse">Browse all activities</button></p><details><summary>Explore town and help neighbors</summary><div class="activity-catalog">${goals.map((g) => `<button data-journal-goal="${escape(g.target)}"><strong>${escape(g.title)}</strong><span>${escape(g.detail)}</span><small>Show me where →</small></button>`).join("")}</div></details><p class="muted">${persistence.devMode ? "Dev mode · Boat travel unlocked" : `${s.adventure.boatTaken ? "Next travel stage" : "Boat travel"} · ${s.adventure.xp} / ${progression(s.adventure, s.scene).required} XP`}</p>`
         : tab === "words"
           ? `<h3>My words</h3><p>Tap a word to hear it and see its meaning and pinyin.</p>${words.length ? `<div class="journal-words">${words.map((word) => `<p class="journal-word" lang="zh-CN">${escape(word)}</p>`).join("")}</div>` : `<p>No words yet. Talk to someone and tap a Chinese word to discover it.</p><button id="journal-browse">Find an activity</button>`}`
           : `<h3>Memories</h3><p>Your adventures are recorded here automatically. You do not need to write an entry.</p>${readable.length ? list(readable) : ""}${completed.length ? `<h3>Activities practiced</h3>${list(completed.map((a) => a.english))}` : ""}${s.adventure.met.length ? `<h3>People you have met</h3>${list(s.adventure.met.map((id) => npcs[id]?.identity?.split(",")[0] || npcs[id]?.name || id))}` : ""}${items.length ? `<h3>My belongings</h3>${list(items.map((item) => item.en))}` : ""}<p>Coins: ¥${s.adventure.coins}</p>${s.adventure.hungry === "done" ? "<p>You shared hotpot with Lian. Your sheep keepsake is waiting at home.</p>" : ""}${s.adventure.flowers === "done" ? "<p>You returned Lan’s missing flowers.</p>" : ""}${s.adventure.tea === "done" ? "<p>You shared tea with Qiao.</p>" : ""}${!readable.length && !completed.length && !s.adventure.met.length ? '<p>Your story starts with a conversation or activity.</p><button id="journal-browse">Choose an activity</button>' : ""}${older.length ? `<details><summary>Older memories · ${older.length}</summary><p>Original entries from your saved journal.</p>${list(older)}</details>` : ""}${
@@ -304,6 +305,59 @@ export function createPanels({
       "en",
     );
     saveTools();
+    $("panel-content").insertAdjacentHTML("beforeend", `
+      <details id="dev-mode-section" data-enabled="${persistence.devMode === true}">
+        <summary id="dev-mode-summary">Dev mode · ${persistence.devMode ? "On" : "Off"}</summary>
+        <div class="panel-section">
+          <p class="notice">Unlock all playable areas without XP requirements. Earned XP stays the same. Tickets, luggage and security remain part of gameplay.</p>
+          <form id="dev-mode-form" ${persistence.devMode ? "hidden" : ""}>
+            <label for="dev-mode-password">Dev mode password</label>
+            <input id="dev-mode-password" type="password" autocomplete="off" maxlength="200" required>
+            <div class="small-actions"><button class="primary" id="dev-mode-enable">Enable dev mode</button><button type="button" id="dev-mode-cancel">Cancel</button></div>
+          </form>
+          <button type="button" id="dev-mode-disable" ${persistence.devMode ? "" : "hidden"}>Disable dev mode</button>
+          <p id="dev-mode-status" role="status">${persistence.devMode ? "Dev mode is enabled for this browser session." : "Password required to enable."}</p>
+        </div>
+      </details>`);
+    const devMenu = $("dev-mode-section"), devSummary = $("dev-mode-summary"),
+      devForm = $("dev-mode-form"), devPassword = $("dev-mode-password"),
+      devStatus = $("dev-mode-status"), devEnable = $("dev-mode-enable"),
+      devDisable = $("dev-mode-disable"), devCancel = $("dev-mode-cancel");
+    const changeDevMode = async (enabled) => {
+      devEnable.disabled = devDisable.disabled = devCancel.disabled = true;
+      devStatus.textContent = enabled ? "Checking password…" : "Turning off dev mode…";
+      try {
+        await persistence.setDevMode(enabled, enabled ? devPassword.value : undefined);
+        devMenu.dataset.enabled = String(persistence.devMode === true);
+        devSummary.textContent = `Dev mode · ${persistence.devMode ? "On" : "Off"}`;
+        devForm.hidden = persistence.devMode;
+        devDisable.hidden = !persistence.devMode;
+        devStatus.textContent = persistence.devMode
+          ? "Dev mode is enabled for this browser session."
+          : "Dev mode is off. Normal XP requirements apply.";
+        onDevModeChange();
+      } catch (error) {
+        devStatus.textContent = error.status ? error.message : "Connect to the game server to change dev mode.";
+        if (enabled) devPassword.focus();
+      } finally {
+        devPassword.value = "";
+        devEnable.disabled = devDisable.disabled = devCancel.disabled = false;
+      }
+    };
+    devForm.onsubmit = (event) => {
+      event.preventDefault();
+      void changeDevMode(true);
+    };
+    devDisable.onclick = () => { void changeDevMode(false); };
+    devCancel.onclick = () => {
+      devPassword.value = "";
+      devMenu.open = false;
+      devStatus.textContent = "Password required to enable.";
+      devSummary.focus();
+    };
+    devMenu.ontoggle = () => {
+      if (!devMenu.open) devPassword.value = "";
+    };
     const credit = document.createElement("details");
     credit.className = "muted";
     credit.innerHTML = `<summary>Music credits</summary><p>Station: <a href="${stationTrack.source}" target="_blank" rel="noopener">${stationTrack.title}</a> — ${stationTrack.artist} (incompetech.com), <a href="${stationTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Filtered for distant station speakers. <a href="/assets/audio/ATTRIBUTION.md" target="_blank" rel="noopener">Station recording sources and credits</a>.</p><p>Home： <a href="${homeTrack.source}" target="_blank" rel="noopener">${homeTrack.title}</a> — composed by ${homeTrack.composer}, guitar by ${homeTrack.artist}. Outdoors： <a href="${backgroundTrack.source}" target="_blank" rel="noopener">${backgroundTrack.title} — ${backgroundTrack.artist}</a> · <a href="${backgroundTrack.license}" target="_blank" rel="noopener">CC BY 4.0</a>. Other indoor rooms： <a href="${indoorTrack.source}" target="_blank" rel="noopener">${indoorTrack.title} — ${indoorTrack.artist}</a> · <a href="${indoorTrack.license}" target="_blank" rel="noopener">Pixabay Content License</a>. <a href="https://www.free-stock-music.com" target="_blank" rel="noopener">Music by https://www.free-stock-music.com</a> (outdoor music)。</p>`;

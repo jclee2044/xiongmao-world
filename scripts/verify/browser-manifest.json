@@ -2,6 +2,12 @@
   "format": 1,
   "entries": [
     {
+      "file": "scripts/browser-dev-mode.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Concurrent authorized dev-mode feature; isolated in-memory server and test-only password."
+    },
+    {
       "file": "scripts/browser-conversation-feedback.js",
       "classification": "active",
       "group": "maintained",
@@ -398,6 +404,12 @@
       "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
     },
     {
+      "file": "scripts/browser-station-performance.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Station animation worker, bounded frame queue, visual equivalence, fallback, offline loading, and frame-time measurements."
+    },
+    {
       "file": "scripts/browser-station-environment.js",
       "classification": "active",
       "group": "supplemental",
@@ -552,6 +564,12 @@
       "classification": "active",
       "group": "supplemental",
       "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-platform-refinements.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Conversation-gated train arrival, maintenance access, platform framing, and shared word boundaries on desktop and phone."
     }
   ]
 }

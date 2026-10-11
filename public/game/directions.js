@@ -18,14 +18,14 @@ export function createDirections({
     const a = persistence.state.adventure;
     if (a.directionsFind === "new")
       change((a) => (a.directionsFind = "accepted"));
-    const d = directionsTo("dumplings", persistence.state);
+    const d = directionsTo("clothing-store", persistence.state);
     const zh =
       a.directionsFind === "done"
-        ? "你找到饭店了！下次你可以帮别人说怎么走。"
-        : "饭店在湖的下面。跟着市场右边的石头路走。不要走进水里，要走桥啊。";
+        ? "你找到衣服店了！下次你可以帮别人说怎么走。"
+        : "衣服店在南边的河下面。过南边的桥，再往左边走。";
     openPanel(
       "问路",
-      `<p class="chinese" lang="zh-CN">${zh}</p><p>听小林说怎么走，再去找饭店。可以看看地图，或者跟着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一次</button><button id="directions-go" class="primary">我去找找！</button></div>`,
+      `<p class="chinese" lang="zh-CN">${zh}</p><p>听小林说怎么走，再去找衣服店。可以看看地图，或者跟着石头路走。</p><div class="small-actions"><button id="directions-listen">再听一次</button><button id="directions-go" class="primary">我去找找！</button></div>`,
     );
     $("directions-listen").onclick = () => say(zh);
     $("directions-go").onclick = () => {
@@ -168,7 +168,7 @@ export function createDirections({
   }
   function visit(id) {
     if (
-      id !== "dumplings" ||
+      id !== "clothing-store" ||
       persistence.state.adventure.directionsFind !== "accepted"
     )
       return;
@@ -176,7 +176,7 @@ export function createDirections({
       a.directionsFind = "done";
       award(a, 40);
     });
-    panda("找到了！这就是饭店。你会问路了！");
+    panda("找到了！这就是衣服店。你会问路了！");
   }
   return { find, give, flowers, visit };
 }

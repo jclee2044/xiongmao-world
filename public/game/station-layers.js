@@ -143,18 +143,21 @@ export function beginStationActorLayer(parent, image, props, feet, scale) {
     canvas = document.createElement("canvas");
     actorLayers.set(parent, canvas);
   }
-  if (
-    canvas.width !== parent.canvas.width ||
-    canvas.height !== parent.canvas.height
-  ) {
-    canvas.width = parent.canvas.width;
-    canvas.height = parent.canvas.height;
+  // Rasterize only the actor's local screen rectangle, not the entire phone
+  // canvas once for every person behind a prop.
+  const matrix = parent.getTransform();
+  const left = Math.floor(matrix.a * (feet.x - 180) + matrix.e);
+  const top = Math.floor(matrix.d * (feet.y - 320) + matrix.f);
+  const width = Math.ceil(Math.abs(matrix.a) * 360);
+  const height = Math.ceil(Math.abs(matrix.d) * 380);
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width; canvas.height = height;
   }
   const context = canvas.getContext("2d");
   context.setTransform(1, 0, 0, 1, 0, 0);
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.save();
-  context.setTransform(parent.getTransform());
+  context.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e-left, matrix.f-top);
   context.imageSmoothingEnabled = parent.imageSmoothingEnabled;
   return {
     parent,
@@ -167,7 +170,7 @@ export function beginStationActorLayer(parent, image, props, feet, scale) {
       context.restore();
       parent.save();
       parent.setTransform(1, 0, 0, 1, 0, 0);
-      parent.drawImage(canvas, 0, 0);
+      parent.drawImage(canvas, left, top);
       parent.restore();
     },
   };

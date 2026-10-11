@@ -1,3 +1,4 @@
+import { newStationErrands, validateStationErrands, mergeStationErrands } from "./station-errands.js";
 import { newRewards, validateRewards, mergeRewards } from "../state/rewards.js";
 import { SUZHOU_XP } from "./rewards.js";
 import { newTravelLuggage, validateTravelLuggage, mergeTravelLuggage } from "./travel-luggage.js";
@@ -18,6 +19,7 @@ export const newAdventure = () => ({
   stationTraveler: "new",
   stationTravelerDistance: 0,
   stationJourney: newStationJourney(),
+  stationErrands: newStationErrands(),
   travelLuggage: newTravelLuggage(),
   directionsFind: "new",
   directionsGive: "new",
@@ -38,6 +40,7 @@ export function validateAdventure(value) {
   const a = { ...newAdventure(), ...value };
   a.rewards = validateRewards(a.rewards);
   a.stationJourney = validateStationJourney(a.stationJourney);
+  a.stationErrands = validateStationErrands(a.stationErrands);
   a.travelLuggage = validateTravelLuggage(a.travelLuggage);
   if (typeof a.boatVisited !== "boolean") throw Error("Invalid boat visit progress.");
   if (typeof a.boatTaken !== "boolean") throw Error("Invalid boat progress.");
@@ -101,6 +104,7 @@ export function validateAdventure(value) {
     stationTraveler: a.stationTraveler,
     stationTravelerDistance: a.stationTravelerDistance,
     stationJourney: a.stationJourney,
+    stationErrands: a.stationErrands,
     travelLuggage: a.travelLuggage,
     directionsFind: a.directionsFind,
     directionsGive: a.directionsGive,
@@ -206,6 +210,7 @@ export function mergeAdventure(local, remote) {
     hungry: later("hungry", ["new", "invited", "dining", "done"]),
     stationTraveler: later("stationTraveler", ["new", "walking", "entered"]),
     stationTravelerDistance: Math.max(a.stationTravelerDistance, b.stationTravelerDistance),
+    stationErrands: mergeStationErrands(a.stationErrands, b.stationErrands),
     stationJourney: mergeStationJourney(a.stationJourney, b.stationJourney),
     travelLuggage: mergeTravelLuggage(a.travelLuggage, b.travelLuggage),
     directionsFind: later("directionsFind", ["new", "accepted", "done"]),

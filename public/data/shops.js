@@ -106,7 +106,7 @@ export const shops = {
   },
 };
 for (const [id, shop] of Object.entries(shops))
-  shop.image = id === "clothing" ? "/assets/world/clothing-store-interior.png" : `/assets/world/shop-${id}.png`;
+  shop.image ??= id === "clothing" ? "/assets/world/clothing-store-interior.png" : `/assets/world/shop-${id}.png`;
 export function shopContext(id) {
   const shop = shops[id];
   return shop

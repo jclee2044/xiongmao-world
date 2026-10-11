@@ -7,7 +7,7 @@ export function segmentChinese(text) {
   let offset = 0;
   // Reviewed compound labels and Latin names remain one help unit. They never
   // compete with arbitrary dictionary prefixes at a grammatical boundary.
-  const protectedWords = /苏州博物馆|故事书|[A-Za-z]+(?:[ '-][A-Za-z]+)*/gu;
+  const protectedWords = /[看听读说吃喝去来买住坐做学玩用见写走问找]过(?=关于)|关于|苏州博物馆|故事书|[A-Za-z]+(?:[ '-][A-Za-z]+)*/gu;
   const append = (end) => {
     for (const { segment, index } of segmenter.segment(text.slice(offset, end)))
       parts.push({ zh: segment, start: offset + index });

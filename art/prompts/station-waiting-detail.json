@@ -1,0 +1,8 @@
+{
+  "mode": "built-in image_gen",
+  "source": "public/assets/world/station-waiting-v6.png",
+  "output": "public/assets/world/station-waiting-v7.png",
+  "optimized": "public/assets/optimized/station-waiting-v7.webp",
+  "prompt": "Use case: precise-object-edit. Edit target: this exact train station waiting hall game background. Produce a high resolution 3072x2048 detail restoration of this exact composition. Preserve all architecture, furniture, counters, benches, railings, staircases, planters and their exact positions and shapes: gameplay collision geometry depends on exact alignment. Preserve golden lighting and cozy hand-painted illustration. Increase crisp readable material detail in stone floor tiles, fine grout seams, marble grain, wood grain, metal bench edges, leaves, shelves, windows; no depth of field, no blur, no smeared floor reflections. Keep all blue sign panels blank. ONLY remove the two small shop workers in the upper-left shop counters (gray-haired man at original x150 y250 and bob-haired woman x355 y255), reconstruct shelves behind them; these two workers will be rendered with actual game NPC sprites. Keep all seated passengers elsewhere exactly unchanged. Keep help desk at original x190..367 y460..540 empty and unchanged. Do not add people or props or text. Preserve full framing and original 3:2 aspect ratio. Save high resolution, no borders.",
+  "notes": "Tool returned 1536x1024. Kept original dimensions and lossless WebP encoding; no upscaling. Counter NPCs render from the same original first-person portraits used by shop interactions."
+}

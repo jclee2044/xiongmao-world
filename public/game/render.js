@@ -3,7 +3,7 @@ import { paintStationEscalators } from "./station-escalators.js";
 import { paintWaitingSigns, paintBoardingGates, prepareWaitingSignArt } from "./station-waiting-art.js";
 import { waitingEscalators, WAITING_SCALE } from "../data/station-waiting.js";
 import { platformTrainArt } from "../data/station-platform.js";
-import { paintPlatformTrain } from "./station-platform-art.js";
+import { paintPlatformTrain, paintMaintenanceDoor } from "./station-platform-art.js";
 import { carriesTravelSuitcase, luggageObjectVisible } from "../data/travel-luggage.js";
 import { travelerWalkArt } from "../data/station-traveler-walk-art.js";
 import { travelerArt } from "../data/station-traveler-art.js";
@@ -14,11 +14,11 @@ import { paintGroundSigns, paintGroundSecurity, paintGroundPropSign, paintGround
 import { interactionSurface, paintInteractionSurface } from "./interaction-surfaces.js";
 import { stationCharacterArt } from "../data/station-interior-characters.js";
 import { stationEmployeeFrame } from "./station-employee-animation.js";
-import { constrainedRoomCamera, fixedRoomCamera } from "./room-camera.js";
-import { paintStationProp, beginStationActorLayer } from "./station-layers.js";
+import { constrainedRoomCamera, fixedRoomCamera, followingRoomCamera } from "./room-camera.js";
+import { paintStationProp, beginStationActorLayer, stationLayer } from "./station-layers.js";
 import { STATION_SCALE } from "../data/station-exterior.js";
 import { paintStationSigns } from "./station-signs.js";
-import { paintStationEnvironment, paintStationBanner } from "./station-environment.js";
+import { paintStationEnvironment, paintStationBanner, prepareStationEnvironment, prepareStationAnimation } from "./station-environment.js";
 import { marketForeground, behindMarketForeground } from "../data/market-foreground.js";
 import { npcFeet } from "./interactions.js";
 import { hasCollectible } from "./collectibles.js";
@@ -81,7 +81,7 @@ export async function prepareArt(scene, onProgress = () => {}) {
     const art = actor.idleArt || travelerArt[actor.appearance || actor.id];
     if (art) names.add(art.sheet);
     const walkArt = travelerWalkArt[actor.appearance || actor.id];
-    if (walkArt && actor.playRoute) names.add(walkArt.sheet);
+    if (walkArt && (actor.playRoute || ["traveler-jiani", "traveler-wenbo"].includes(actor.id))) names.add(walkArt.sheet);
     if (actor.id === XIAOCHENG) names.add("xiaochengWalk");
   }
   if (scene.interactables?.some((o) => bounds.gardenWorkers[o.appearance]))
@@ -152,6 +152,17 @@ export async function prepareArt(scene, onProgress = () => {}) {
       onProgress(++completed, files.length);
     }),
   );
+  if (scene.backgroundPath) {
+    const image = asset(scene.backgroundPath);
+    if (scene.id === "shantang") {
+      prepareStationEnvironment(image);
+      await prepareStationAnimation(image);
+    }
+    for (const o of scene.scenery || []) if (o.type === "station-prop") {
+      stationLayer(image, o.prop);
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  }
 }
 const idleCrops = new Map();
 function idleCrop(frame, row, name = "idle") {
@@ -592,6 +603,7 @@ function sprite(
   height,
   {
     crop,
+    silhouette = null,
     flip = false,
     bob = 0,
     sway = 0,
@@ -619,6 +631,11 @@ function sprite(
     ctx.filter = "brightness(1.18)";
   }
   if (flip) ctx.scale(-1, 1);
+  if (silhouette) {
+    ctx.beginPath();
+    silhouette.forEach(([px,py],i)=>{const dx=(px-source.x)*ratio-width/2,dy=(py-source.y)*ratio-drawnHeight;i?ctx.lineTo(dx,dy):ctx.moveTo(dx,dy);});
+    ctx.closePath();ctx.clip();
+  }
   ctx.drawImage(
     img,
     source.x,
@@ -670,6 +687,7 @@ export function draw(
     hover = null,
     guest = null,
     hungryGuest = null,
+    errandActors = [],
     stationTraveler = null,
     platformTrain = null,
     seat = null,
@@ -702,7 +720,9 @@ export function draw(
   ctx.clearRect(0, 0, w, h);
   const preferredScale = overview
     ? Math.min(w / overview.w, h / overview.h)
-    : scene.id === "home" || scene.interior
+    : scene.cameraFitHeight
+      ? h / scene.height
+      : scene.id === "home" || scene.interior
       ? (scene.id === "home" ? 0.830584 : 1) * Math.max(
           w / (scene.id === "home" ? scene.width : scene.cameraWidth || 1200),
           h / (scene.id === "home" ? scene.height : scene.cameraHeight || 800),
@@ -711,8 +731,13 @@ export function draw(
         (window.matchMedia("(hover: hover) and (pointer: fine)").matches
           ? 1.1
           : 1);
-  const constrained = !overview && (fixedRoomCamera(scene, w, h) || constrainedRoomCamera(scene, player, w, h, preferredScale, previousCamera, cameraDelta));
-  const scale = constrained ? constrained.scale : preferredScale;
+  const trackingScale = Math.min(preferredScale, scene.cameraMinWidth ? w / scene.cameraMinWidth : Infinity);
+  const constrained = !overview && (
+    fixedRoomCamera(scene, w, h) ||
+    constrainedRoomCamera(scene, player, w, h, preferredScale, previousCamera, cameraDelta) ||
+    followingRoomCamera(scene, player, w, h, trackingScale, previousCamera, cameraDelta)
+  );
+  const scale = constrained ? constrained.scale : trackingScale;
   const viewW = w / scale,
     viewH = h / scale,
     camX = overview
@@ -753,7 +778,10 @@ export function draw(
       if (settings.motion !== false) paintStationEscalators(ctx, img, time, waitingEscalators, WAITING_SCALE);
       paintWaitingSigns(ctx, adventure.stationJourney);
     }
-    if (scene.id === "station-platform") paintPlatformTrain(ctx, asset(platformTrainArt.path), platformTrain);
+    if (scene.id === "station-platform") {
+      paintPlatformTrain(ctx, asset(platformTrainArt.path), platformTrain);
+    }
+    if (scene.id === "station-waiting") paintMaintenanceDoor(ctx, 1466, 645, 54, 91, scene.stationScale);
   } else {
     const paving = asset(paths.paving);
     if (ready(paving)) {
@@ -828,6 +856,8 @@ export function draw(
         (o.type === "npc" &&
           !(o.id === XIAOCHENG && !stationTravelerVisible(scene, adventure)) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
+          !(o.requiresWaitingVisit && !adventure.stationJourney?.visitedWaiting) &&
+          !errandActors.some(a=>a.id===o.id) &&
           !(o.id === "lian" && hungryGuest) &&
           !(o.id === "qiao" && guest)) ||
         (o.type === "stuffy" && !o.hidden && !o.concealed && !hasCollectible(found, o.collectible || "momo")) ||
@@ -851,6 +881,7 @@ export function draw(
       : []),
     ...(guest ? [guest] : []),
     ...(hungryGuest ? [hungryGuest] : []),
+    ...errandActors.filter(a=>!a.hidden),
     ...(stationTraveler ? [stationTraveler] : []),
     ...(scene.roomForeground || []).map((polygon) => ({
       polygon,
@@ -864,6 +895,10 @@ export function draw(
   const directionalProps = scene.scenery.filter(o => o.type === "station-prop" && o.prop.frontEdge);
   const actorTypes = ["player", "panda", "npc", "passerby", "guest", "stuffy", "friend"];
   for (const o of entities) {
+    if (actorTypes.includes(o.type)) {
+      const x = o.artX ?? o.x, y = o.artY ?? o.y;
+      if (x + 180 < view.x || x - 180 > view.x + view.w || y + 50 < view.y || y - (o.artHeight || 240) > view.y + view.h) continue;
+    }
     const actorLayer = directionalProps.length && actorTypes.includes(o.type)
       ? beginStationActorLayer(ctx, asset(scene.backgroundPath), directionalProps.filter(p => !o.occlusionIgnore?.includes(p.id)), npcFeet(o), scene.stationScale || STATION_SCALE)
       : null;
@@ -881,6 +916,7 @@ export function draw(
         ctx.clip("evenodd");
       }
     }
+    try {
     if (!overview && !o.artClip && ["npc", "passerby", "guest"].includes(o.type) &&
         (near?.id === o.id || hover?.id === o.id)) {
       const feet = o.groundShadow === false ? { x: o.x, y: o.y } : npcFeet(o);
@@ -980,7 +1016,7 @@ export function draw(
       ctx.strokeStyle = "#43342b";
       ctx.fillStyle = "#fff9e9";
       const label =
-        o.label || (adventure.xp >= AREA_XP ? "去苏州站" : `船 · ${AREA_XP} XP`);
+        o.label || (settings.devMode || adventure.xp >= AREA_XP ? "去苏州站" : `船 · ${AREA_XP} XP`);
       ctx.strokeText(label, o.x, o.y - o.h - 18);
       ctx.fillText(label, o.x, o.y - o.h - 18);
       ctx.restore();
@@ -1311,6 +1347,7 @@ export function draw(
           feet.y,
           height,
           {
+            silhouette: stationPerson?.silhouette,
             crop: (stationPerson?.frames
               ? stationPerson.frames[stationEmployeeFrame(o, time, animate && settings.motion !== false)]
               : stationPerson) || (walkingTraveler
@@ -1384,13 +1421,14 @@ export function draw(
     } else if (o.type === "station-baggage") {
       paintGroundBaggage(ctx, adventure.stationJourney, asset(paths.stationBag),
         adventure.travelLuggage?.packed ? asset(paths.travelSuitcase) : null);
+
     } else if (o.type === "station-prop" && scene.backgroundPath) {
       const img = asset(scene.backgroundPath);
       if (ready(img) && !o.prop.frontEdge) paintStationProp(ctx, img, o.prop, scene.stationScale || STATION_SCALE);
       if (scene.id === "station-ticketing" && !o.prop.frontEdge) paintGroundPropSign(ctx, o.id);
       if (o.id === "north-banner" && ready(img) && settings.motion !== false)
         paintStationBanner(ctx, img, time, STATION_SCALE);
-      if (o.id === "travel-poster") {
+      if (o.id === "travel-poster" && !o.prop.frontEdge) {
         ctx.save();
         ctx.beginPath();
         ctx.rect(843 * STATION_SCALE, 325 * STATION_SCALE, 110 * STATION_SCALE, 137 * STATION_SCALE);
@@ -1445,13 +1483,17 @@ export function draw(
       );
       ctx.restore();
     }
+    } finally {
     if (marketActor) ctx.restore();
     if (actorLayer) {
       actorLayer.finish();
       ctx = actorLayer.parent;
     }
+    }
   }
   for (const o of scene.interactables) {
+    if(o.carryingTrash && adventure.stationErrands?.trash !== "done") {ctx.fillStyle="#f8edce";ctx.fillRect(o.x+25,o.y-70,12,18);}
+
     const building = scene.scenery.find((b) => b.doorId === o.id);
     if (building && o.type === "door") {
       ctx.save();
@@ -1475,6 +1517,10 @@ export function draw(
 
     }
     if (o.id === "lost-flowers" && adventure.flowers === "accepted") {
+      ctx.save();
+      ctx.translate(o.x, o.y);
+      ctx.scale(1.8, 1.8);
+      ctx.translate(-o.x, -o.y);
       ctx.fillStyle = "#d68ba3";
       for (let i = 0; i < 5; i++) {
         ctx.beginPath();
@@ -1495,6 +1541,11 @@ export function draw(
       ctx.moveTo(o.x - 12, o.y - 8);
       ctx.lineTo(o.x + 10, o.y + 12);
       ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = "#264e39";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("花", o.x, o.y - 48);
     }
   }
   const leaves = paintLeaves(ctx, scene, view, time, settings.motion !== false);

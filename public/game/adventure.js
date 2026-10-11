@@ -105,7 +105,7 @@ export function createAdventure({
               if (a.flowers === "new") a.flowers = "accepted";
             });
             $("panel").close();
-            panda("过桥，去石头旁边找一找吧。");
+            line("Panda", "过西边的桥，去大石头旁边找花吧。", "guò xī biān de qiáo ， qù dà shí tou páng biān zhǎo huā ba 。", "Cross the western bridge and look beside the large rock.", [["flowers-guide", "再帮帮我", () => { $("panel").close(); const target = world().destinations().find(o => o.id === "lost-flowers"); if (target) setTimeout(() => world().walkTo(target, true), 0); panda("跟我来，我们一起去找花。"); }]]);
           },
         ],
       ],
@@ -192,13 +192,13 @@ export function createAdventure({
     line(
       "小莲·一起吃火锅",
       a.hungry === "done"
-        ? "谢谢你请我吃火锅！羊在你家里。"
+        ? "谢谢你请我吃火锅！你想聊什么？"
         : "我有点饿了。我们一起去吃火锅，好吗？",
       a.hungry === "done"
-        ? "xiè xiè nǐ qǐng wǒ chī huǒ guō ！ yáng zài nǐ jiā lǐ 。"
+        ? "xiè xiè nǐ qǐng wǒ chī huǒ guō ！ nǐ xiǎng liáo shén me ？"
         : "Wǒ yǒudiǎn è le. Wǒmen yìqǐ qù chī huǒguō, hǎo ma?",
       a.hungry === "done"
-        ? "Thank you for treating me to hotpot! The sheep is in your home."
+        ? "Thank you for the hotpot! What would you like to talk about?"
         : "I am a little hungry. Shall we go and have hotpot together?",
       a.hungry === "new"
         ? [
@@ -238,7 +238,7 @@ export function createAdventure({
         [["packing-done", "走吧！", () => $("panel").close()]]);
     };
   }
-  const stationInteract = createStationInteractions({ line, state, change, world });
+  const stationInteract = createStationInteractions({ line, state, change, world, devMode: () => persistence.devMode });
   function interact(o) {
     if (needsStationLuggage(world().scene, o, state())) {
       line("熊猫", luggageReminder, "nǐ hái shi xiān huí jiā ná xíng li ba 。",
@@ -354,15 +354,17 @@ export function createAdventure({
         board();
         return true;
       }
-      const unlocked = state().xp >= AREA_XP;
+      const unlocked = persistence.devMode || state().xp >= AREA_XP;
       line(
         "河边的大船",
-        unlocked
-          ? "已经有七百五十分了！上船吧，我们去下一站。"
+        persistence.devMode
+          ? "上船吧，我们去下一站。"
+          : unlocked ? "已经有七百五十分了！上船吧，我们去下一站。"
           : `还差${chineseNumber(AREA_XP - state().xp)}分。先去聊天、帮帮朋友吧。船在这里等你！`,
-        unlocked ? "yǐ jīng yǒu qī bǎi wǔ shí fēn le ！ shàng chuán ba ， wǒ men qù xià yí zhàn 。" : "",
-        unlocked
-          ? "You have reached 750 XP! Come aboard, and let us go to the next stop."
+        persistence.devMode ? "shàng chuán ba ， wǒ men qù xià yí zhàn 。" : unlocked ? "yǐ jīng yǒu qī bǎi wǔ shí fēn le ！ shàng chuán ba ， wǒ men qù xià yí zhàn 。" : "",
+        persistence.devMode
+          ? "Dev mode: come aboard without the XP requirement."
+          : unlocked ? "You have reached 750 XP! Come aboard, and let us go to the next stop."
           : `You need ${AREA_XP - state().xp} more XP. Chat and help your friends first. The boat will wait for you here!`,
         unlocked
           ? [
@@ -371,7 +373,7 @@ export function createAdventure({
                 "上船走",
                 () => {
                   // Re-check at boarding, including after a save conflict or state refresh.
-                  if (state().xp < AREA_XP) return interact(o);
+                  if (!persistence.devMode && state().xp < AREA_XP) return interact(o);
                   $("panel").close();
                   board();
                 },
@@ -382,7 +384,7 @@ export function createAdventure({
       );
       $("panel-content").insertAdjacentHTML(
         "afterbegin",
-        `<img class="departure-portrait" src="/assets/optimized/suzhou-passenger-boat.webp" alt="Suzhou boat with red lanterns"/><p class="departure-progress">${Math.min(AREA_XP, state().xp)} / ${AREA_XP} XP · ${unlocked ? "可以走了" : `还差 ${AREA_XP - state().xp} XP`}</p><progress class="departure-meter" max="${AREA_XP}" value="${Math.min(AREA_XP, state().xp)}" aria-label="上船需要的XP"></progress>`,
+        `<img class="departure-portrait" src="/assets/optimized/suzhou-passenger-boat.webp" alt="Suzhou boat with red lanterns"/><p class="departure-progress">${Math.min(AREA_XP, state().xp)} / ${AREA_XP} XP · ${persistence.devMode ? "Dev mode · XP requirement bypassed" : unlocked ? "可以走了" : `还差 ${AREA_XP - state().xp} XP`}</p><progress class="departure-meter" max="${AREA_XP}" value="${Math.min(AREA_XP, state().xp)}" aria-label="上船需要的XP"></progress>`,
       );
       return true;
     }
@@ -408,12 +410,13 @@ export function createAdventure({
     const chosen = hotpotItems.filter((i) => meal.selected.includes(i.id));
     openPanel(
       meal.withLian ? "和小莲一起吃火锅" : "河边火锅",
-      `${meal.withLian ? "<div class=\"meal-friend\"><span class=\"seated-lian\" role=\"img\" aria-label=\"Lian 坐在桌子前面\"></span><p class=\"chinese\">我们一起吃吧！</p></div>" : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">Canal restaurant</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<output id="food-name" aria-live="polite"></output><div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="我的碗">${meal.eaten.length ? "吃过" + meal.eaten.length + "口" : "我的碗"}</div></div><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
+      `${meal.withLian ? "<div class=\"meal-friend\"><span class=\"seated-lian\" role=\"img\" aria-label=\"Lian 坐在桌子前面\"></span><p class=\"chinese\">我们一起吃吧！</p></div>" : ""}<div class="hotpot-view" data-stage="${meal.phase}"><div class="restaurant-window">Canal restaurant</div>${hotpotItems.map((i) => `<button class="ingredient-hotspot hotspot-${i.id}" data-learn-food="${i.id}" aria-label="听：${i.zh}"><span>${i.zh}</span></button>`).join("")}<div class="hotpot-steam" aria-hidden="true">∿ ∿ ∿</div><div class="hotpot-pot"><div class="broth ${meal.spicy ? "spicy" : ""}">${meal.cooked.map((id) => `<button class="food-piece food-${id}" data-eat="${id}" aria-label="吃${hotpotItems.find((i) => i.id === id).zh}">${hotpotItems.find((i) => i.id === id).zh}</button>`).join("")}</div></div><div class="hotpot-bowl" aria-label="我的碗">${meal.eaten.length ? "吃过" + meal.eaten.length + "口" : "我的碗"}</div></div><output id="food-name" aria-live="polite" hidden></output><div id="hotpot-work"></div><p id="mic-status" role="status"></p><p id="panel-audio-status" role="status"></p>`,
     );
     document.querySelectorAll("[data-learn-food]").forEach(
       (b) =>
         (b.onclick = () => {
           const item = hotpotItems.find((i) => i.id === b.dataset.learnFood);
+          $("food-name").hidden = false;
           $("food-name").textContent =
             item.zh + " · " + item.pinyin + " · " + item.en;
           speech.speak(item.zh, false, "panda");
@@ -427,7 +430,7 @@ export function createAdventure({
           "nǐ hǎo ！ nǐ xiǎng chī shén me ？",
           "Hello! What would you like to eat?",
         ) +
-        `<p class="notice"><strong>Instructions:</strong> Start your order with 我要… (I would like…). Choose ingredients or type your order below.</p><div class="ingredients">${hotpotItems.map((i) => `<button data-ingredient="${i.id}" aria-pressed="${meal.selected.includes(i.id)}">${i.zh}${settings().pinyin ? `<small>${i.pinyin}</small>` : ""}${settings().translation ? `<small>${i.en}</small>` : ""}</button>`).join("")}</div><label for="hotpot-order">我要吃什么</label><textarea id="hotpot-order" rows="2" maxlength="300" placeholder="我要豆腐和菜。">${escape(meal.order || "")}</textarea><div class="small-actions"><button id="hotpot-mic">🎙 说说要吃什么</button><button id="hotpot-read">听一听</button><button id="hotpot-review" class="primary">看看我要吃什么</button></div><p class="notice">Microphone recording lasts up to 15 seconds. Audio is transcribed on your game computer and discarded.${settings().translation ? "Microphone audio is transcribed on your game PC and discarded. Review it before ordering." : ""}</p>`;
+        `<p class="notice"><strong>Instructions:</strong> Choose ingredients or type your order below.</p><div class="ingredients">${hotpotItems.map((i) => `<button data-ingredient="${i.id}" aria-pressed="${meal.selected.includes(i.id)}">${i.zh}${settings().pinyin ? `<small>${i.pinyin}</small>` : ""}${settings().translation ? `<small>${i.en}</small>` : ""}</button>`).join("")}</div><label for="hotpot-order">我要吃什么</label><textarea id="hotpot-order" rows="2" maxlength="300" placeholder="我要豆腐和菜。">${escape(meal.order || "")}</textarea><div class="small-actions"><button id="hotpot-mic">🎙 说说要吃什么</button><button id="hotpot-read">听一听</button><button id="hotpot-review" class="primary">看看我要吃什么</button></div><p class="notice">Microphone recording lasts up to 15 seconds. Audio is transcribed on your game computer and discarded.${settings().translation ? "Microphone audio is transcribed on your game PC and discarded. Review it before ordering." : ""}</p>`;
       document.querySelectorAll("[data-ingredient]").forEach(
         (b) =>
           (b.onclick = () => {
@@ -470,7 +473,7 @@ export function createAdventure({
           "nín yào zhè xiē ， duì ma ？",
           "Is this your order?",
         ) +
-        `<p class="chinese">${chosen.map((i) => i.zh).join("、")} · ${meal.spicy ? "spicy broth" : "mild broth"}</p><div class="small-actions"><button id="hotpot-edit">换一下</button><button class="primary" id="hotpot-confirm">对，谢谢！</button></div>`;
+        `<p class="chinese">${chosen.map((i) => i.zh).join("、")} · ${meal.spicy ? "辣汤底" : "不辣汤底"}</p><div class="small-actions"><button id="hotpot-edit">换一下</button><button class="primary" id="hotpot-confirm">对，谢谢！</button></div>`;
       $("hotpot-edit").onclick = () => {
         meal.phase = "order";
         hotpot();
@@ -502,7 +505,8 @@ export function createAdventure({
             meal.cooked.push(item.id);
             hotpot();
             const sentence = `我把${item.zh}放进锅里了。`;
-            $("food-name").textContent = sentence;
+            $("food-name").hidden = false;
+          $("food-name").textContent = sentence;
             speech.speak(sentence, false, "panda");
           }),
       );
@@ -525,15 +529,12 @@ export function createAdventure({
                   award(a, 60);
                 }
               });
-              panda(
-                state().hungry === "done"
-                  ? "羊真可爱！我们把它放在家里吧。"
-                  : "你用中文点了吃的东西！",
-              );
+              if (!meal.gift) panda("你用中文点了吃的东西！");
             }
             hotpot();
             if (meal.phase !== "done") {
-              $("food-name").textContent = eatenLine;
+              $("food-name").hidden = false;
+          $("food-name").textContent = eatenLine;
               speech.speak(eatenLine, false, "panda");
             }
           }),

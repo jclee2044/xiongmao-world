@@ -13,6 +13,8 @@ export const beginnerForms = [
 // game. HSK is a difficulty guide; a missing list entry does not make a common
 // label such as 书店 unsuitable for a beginner.
 export const everydayGameWords = [
+  // Concrete vocabulary introduced by the station helping activities.
+  "垃圾", "垃圾桶", "小洁", "汤底",
   // Concrete packing vocabulary taught beside the suitcase at home.
   "收拾", "日用品", "火车站",
   // Concrete family-home, weather and Spring Festival vocabulary.
@@ -27,7 +29,7 @@ export const everydayGameWords = [
   // Concrete ground-floor signs and checkpoint vocabulary, explained in place.
   "售票员", "取行李", "候车室", "站台", "检票", "楼梯", "传送带", "车站导览", "林阿姨",
   // The platform's painted boundary, return route, and fellow travelers.
-  "黄线", "左上方", "心怡", "思雨", "敏阿姨", "浩然", "洪叔叔",
+  "维修门", "黄线", "左上方", "心怡", "思雨", "敏阿姨", "浩然", "洪叔叔",
   // Travel practice upstairs: hotel check-in, timetables and changing plans.
   "日期", "时刻表", "酒店", "订房", "订", "改成", "见面", "见", "怎么办", "变", "午饭", "数", "比如", "到达", "下一班",
   // Upper-floor amenities, wayfinding labels and the seated travelers' names.

@@ -1,8 +1,8 @@
 {
   "revision": "b85202c",
   "unit": {
-    "tests": 328,
-    "passed": 324,
+    "tests": 331,
+    "passed": 327,
     "failed": 4,
     "failures": [
       {
@@ -28,5 +28,6 @@
         "expected": "chu4"
       }
     ]
-  }
+  },
+  "featureBaseline": "Concurrent dev-mode snapshot: three additional passing tests; original failure details unchanged."
 }

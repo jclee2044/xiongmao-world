@@ -30,12 +30,15 @@ const types = {
 export function createApp({
   store = new Store(process.env.DATA_DIR || resolve("data")),
   providerConfig = {},
+  devModePassword = process.env.DEV_MODE_PASSWORD,
 } = {}) {
   let modelBusy = false,
     speechQueue = Promise.resolve(),
     speechPending = 0,
     transcriptionBusy = false;
   const rates = new Map();
+  // Per browser session; never include the password or permission in saves.
+  const devSessions = new Set();
   const musicOwnership = createMusicOwnership();
   const server = createServer(async (req, res) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -101,7 +104,7 @@ export function createApp({
             identity = created.id;
             cookie(created.token);
           }
-          return json(200, { ...store.read(identity), identity });
+          return json(200, { ...store.read(identity), identity, devMode: devSessions.has(token) });
         }
         if (!identity)
           return json(401, { error: "Open your world to start a session." });
@@ -125,7 +128,7 @@ export function createApp({
             if (now - v.since > 60000) rates.delete(k);
         if (
           old.count >
-          (pathname === "/api/pair"
+          (["/api/pair", "/api/dev-mode"].includes(pathname)
             ? 8
             : pathname === "/api/music-owner"
               ? 160
@@ -147,6 +150,18 @@ export function createApp({
           chunks.push(chunk);
         }
         const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        if (pathname === "/api/dev-mode") {
+          if (typeof body.enabled !== "boolean")
+            return json(400, { error: "Choose whether to enable dev mode." });
+          if (body.enabled) {
+            if (!devModePassword)
+              return json(503, { error: "Dev mode is not configured on this server." });
+            if (typeof body.password !== "string" || body.password !== devModePassword)
+              return json(403, { error: "Incorrect dev mode password." });
+            devSessions.add(token);
+          } else devSessions.delete(token);
+          return json(200, { enabled: devSessions.has(token) });
+        }
         if (pathname === "/api/music-owner") {
           // One soundtrack per local computer, even across preview ports or
           // isolated embedded browsers. Hosted devices stay independent.

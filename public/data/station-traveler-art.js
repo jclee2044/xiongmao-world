@@ -231,3 +231,7 @@ export const travelerArt = {
     ]
   }
 };
+
+travelerArt["station-confused"] = travelerArt["traveler-rui"];
+
+travelerArt["platform-trash-traveler"] = travelerArt["traveler-jiani"];

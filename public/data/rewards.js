@@ -3,6 +3,12 @@ export const SUZHOU_XP = 750;
 export const PLATFORM_ENTRY_XP = 1400;
 export const TRAIN_XP = 1500;
 export const PLATFORM_LOCAL_XP = 100;
+// Derive arrival credit from the persisted conversation ledger, including old saves.
+// Other platform rewards still count toward total XP, but cannot summon the train.
+export function platformConversationXP(adventure) {
+  return Object.entries(adventure.rewards?.claims || {}).reduce((total, [id, amount]) =>
+    total + (/^talk:station-platform:[^:]+:\d+:(start|answer)$/.test(id) ? amount : 0), 0);
+}
 export function progression(adventure, scene) {
   const required = scene === "station-platform" ? TRAIN_XP
     : adventure.boatTaken || scene === "shantang" || scene?.startsWith("station-") ? PLATFORM_ENTRY_XP : SUZHOU_XP;

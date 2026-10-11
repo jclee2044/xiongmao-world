@@ -1,6 +1,8 @@
 const line = (chinese, pinyin, meaning) => ({ chinese, pinyin, meaning, topic: "food" });
 export const stationShops = {
   "station-cafe": {
+    image: "/assets/world/shop-station-cafe.png",
+    detailAlt: "First-person café counter: Xiao He serving tea, coffee, and noodles",
     name: "车站咖啡店", seller: "station-barista",
     openings: [
       line("你好！想喝茶、咖啡，还是吃碗面？", "nǐ hǎo ！ xiǎng hē chá 、 kā fēi ， hái shì chī wǎn miàn ？", "Hello! Would you like tea, coffee, or a bowl of noodles?"),
@@ -14,6 +16,8 @@ export const stationShops = {
     ],
   },
   "station-snacks": {
+    image: "/assets/world/shop-station-snacks.png",
+    detailAlt: "First-person shop counter: Uncle Chen with bottled water, bread, and cookies",
     name: "车站便利店", seller: "station-shopkeeper",
     openings: [
       line("你好！这里有水、面包和饼干。", "nǐ hǎo ！ zhè lǐ yǒu shuǐ 、 miàn bāo hé bǐng gān 。", "Hello! We have water, bread, and cookies here."),
@@ -33,6 +37,7 @@ for (const shop of Object.values(stationShops)) {
 }
 export const stationShopNpcs = Object.fromEntries(Object.entries(stationShops).map(([id, shop]) => [shop.seller, {
   name: id === "station-cafe" ? "小禾" : "陈叔叔",
+  appearance: id === "station-cafe" ? "station-barista" : "station-shopkeeper",
   voice: id === "station-cafe" ? "female" : "male", topic: "food",
   identity: `The ${id === "station-cafe" ? "barista" : "shopkeeper"} at ${shop.name} in Suzhou station's upstairs waiting hall`,
   personality: "A friendly station seller. Chats about food, drinks and train journeys in simple Chinese. Only offers the products in the shop context. Purchases require explicit purchase buttons. Never invent train times or boarding changes.",

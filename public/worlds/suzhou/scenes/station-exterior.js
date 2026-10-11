@@ -26,6 +26,7 @@ export const stationExterior = {
   height: 1024 * STATION_SCALE,
   backgroundPath: "/assets/world/station-exterior-v2.png",
   spawn: point(355, 813),
+  cameraFollowSeconds: 0.12,
   // The northern promenade tapers into its planted tip; the distant facade
   // continues beyond it, but the pedestrian route ends naturally there.
   // One connected outline: quay → bridge → public forecourt → threshold.

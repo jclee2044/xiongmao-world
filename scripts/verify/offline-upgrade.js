@@ -123,9 +123,13 @@ try {
   await page.waitForFunction(() => JSON.parse(localStorage.getItem("panda-world-v1"))?.dirty === false);
   const before = await savedState(page);
   // Feature migration check: require exact preservation of every historical field.
-  const expectedCurrent = args.includes("--additive-rewards")
+  let expectedCurrent = args.includes("--additive-rewards")
     ? { ...before, adventure: { ...before.adventure, rewards: (await load(candidate, "public/state/rewards.js")).newRewards() } }
     : before;
+  if (args.includes("--additive-station-errands")) expectedCurrent = {
+    ...expectedCurrent, adventure: { ...expectedCurrent.adventure,
+      stationErrands: (await load(candidate, "public/data/station-errands.js")).newStationErrands() },
+  };
   await context.setOffline(true); await page.reload(); await begin(page);
   await verifyModules(page, oldModules, "installed previous version");
   assert.deepEqual(await savedState(page), before, "Previous version preserves the save offline");

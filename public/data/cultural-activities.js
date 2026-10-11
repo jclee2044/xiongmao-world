@@ -65,7 +65,7 @@ export const culturalActivities = [
       { ...line("绿茶", "lǜ chá", "green tea"), price: 4, unit: line("杯", "bēi", "cup"), icon: "🍵" },
     ],
     hint: line("看清楚要买什么、买多少。不要的东西选择零。这是练习。", "kàn qīng chǔ yào mǎi shén me 、 mǎi duō shǎo 。 bú yào de dōng xī xuǎn zé líng 。 zhè shì liàn xí 。", "Look carefully at what to buy and how much. Choose zero for things you do not want. This is practice."),
-    response: line("东西买好了！你可以问：一共多少钱？谢谢！", "dōng xī mǎi hǎo le ！ nǐ kě yǐ wèn ： yí gòng duō shǎo qián ？ xiè xiè ！", "The shopping is done! You can ask: How much is it altogether? Thank you!"),
+    response: line("东西买好了！谢谢！", "dōng xī mǎi hǎo le ！ xiè xiè ！", "The shopping is done! Thank you!"),
     variants: [
       { prompt: line("你有十四元。请买两个苹果和两块蛋糕，不要绿茶。", "nǐ yǒu shí sì yuán 。 qǐng mǎi liǎng gè píng guǒ hé liǎng kuài dàn gāo ， bú yào lǜ chá 。", "You have fourteen yuan. Buy two apples and two pieces of cake. No green tea."), budget: 14, quantities: [2, 2, 0] },
       { prompt: line("你有十五元。请买一块蛋糕和两杯绿茶，不要苹果。", "nǐ yǒu shí wǔ yuán 。 qǐng mǎi yí kuài dàn gāo hé liǎng bēi lǜ chá ， bú yào píng guǒ 。", "You have fifteen yuan. Buy one piece of cake and two cups of green tea. No apples."), budget: 15, quantities: [0, 1, 2] },

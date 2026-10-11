@@ -56,14 +56,10 @@ test("platform entry and stale saves cannot bypass boarding", () => {
   assert.equal(upgradeState(state).scene,"station-ticketing");
 });
 
-test("the complete stairs and rail corridor remain in frame on desktop and phones", () => {
-  for(const [w,h] of [[1440,1000],[390,844],[844,390]]) {
-    const camera=fixedRoomCamera(platform,w,h);
-    assert.equal(camera.camX,0);assert.equal(camera.camY,0);
-    assert.ok(platform.width*camera.scale<=w+0.001);
-    assert.ok(platform.height*camera.scale<=h+0.001);
-    assert.equal(camera.settling,false);
-  }
+test("platform fits its full height and pans horizontally on desktop and phones", () => {
+  for(const [w,h] of [[1440,1000],[390,844],[844,390]]) assert.equal(fixedRoomCamera(platform,w,h),null);
+  assert.equal(platform.cameraFitHeight,true);
+  assert.equal(platform.cameraMinWidth,undefined);
 });
 
 test("Xiaocheng's platform dialogue preserves the encounter and gives the correct return route",async()=>{
@@ -73,4 +69,18 @@ test("Xiaocheng's platform dialogue preserves the encounter and gives the correc
   assert.match(answer.chinese,/站台/);
   assert.doesNotMatch(answer.chinese,/过桥|没开放/);
   assert.equal(answer.action,undefined);
+});
+
+ test("maintenance replaces the platform lift and the relocated bin remains reachable", () => {
+  const upstairs=stationWaitingForJourney(journey);
+  for (const scene of [upstairs, platform]) {
+    const door=scene.interactables.find(o=>o.id==="station-platform-maintenance");
+    assert.equal(door.type,"inspect");
+    assert.equal(door.target,undefined);
+    assert.equal(door.integrationTarget,undefined);
+    assert.ok(canStand(scene,door.x,door.y));
+  }
+  const bin=platform.interactables.find(o=>o.id==="platform-trash-bin");
+  assert.deepEqual({x:bin.x,y:bin.y},p(278,207));
+  assert.ok(pathTo(platform,platformArrival,bin).length);
 });

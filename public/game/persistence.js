@@ -34,6 +34,7 @@ export class Persistence {
     this.saving = false;
     this.conflict = null;
     this.identity = null;
+    this.devMode = false;
   }
   cache() {
     try {
@@ -65,6 +66,7 @@ export class Persistence {
     }
     try {
       const remote = await api("/api/state");
+      this.devMode = remote.devMode === true;
       if (cached?.dirty) {
         if (
           cached.identity === remote.identity &&
@@ -112,6 +114,16 @@ export class Persistence {
       this.conflict ? "Choose which save to use in Settings → Save and devices." : "Saving…",
     );
   }
+  async setDevMode(enabled, password) {
+    try {
+      const result = await api("/api/dev-mode", { enabled, password });
+      this.devMode = result.enabled === true;
+    } catch (error) {
+      if (error.status === 404)
+        error.message = "The game server needs to be restarted to load dev mode. Try again after restarting it.";
+      throw error;
+    }
+  }
   async flush() {
     if (this.saving || this.conflict || this.generation === this.persisted)
       return;
@@ -146,6 +158,7 @@ export class Persistence {
   }
   async choose(source) {
     const remote = await api("/api/state");
+    this.devMode = remote.devMode === true;
     if (source === "server") {
       this.state = upgradeState(remote.state);
       this.revision = remote.revision;

@@ -490,6 +490,8 @@ conversationSubjects.newyear = {
 };
 Object.assign(conversationSubjects, stationSubjects);
 export const npcSubjects = {
+  "station-confused": ["stationBags", "stationDestinations", "stationTimes", "travel"],
+  "platform-trash-traveler": ["food", "travel", "friends", "weather"],
   "waiting-granddaughter": ["family", "friends", "travel", "feelings"],
   "waiting-grandson": ["family", "reading", "travel", "friends"],
   "waiting-friend": ["friends", "travel", "study", "plans"],

@@ -21,7 +21,7 @@ test("2F arrival continues north from 1F and all amenities have clear player/Pan
   assert.equal(scenes[closed.id],closed);
   assert.ok(waitingArrival.y<waitingEscalators[1].top[2]*2);
   assert.deepEqual(waitingEscalators.map(e=>e.direction),[1,-1]);
-  for(const from of [waitingArrival,waitingLiftArrival]) for(const target of closed.interactables.filter(o=>!o.integrationTarget)) route(closed,from,interactionPoint(target));
+  for(const from of [waitingArrival,waitingLiftArrival]) for(const target of closed.interactables.filter(o=>!o.integrationTarget && o.id!=="station-platform-maintenance")) route(closed,from,interactionPoint(target));
   for(const exit of closed.interactables.filter(o=>o.type==="door")) {
     assert.equal(exit.target,"station-ticketing");
     assert.ok(canStand(stationGroundForJourney(ready),exit.returnPoint.x,exit.returnPoint.y));
@@ -30,7 +30,9 @@ test("2F arrival continues north from 1F and all amenities have clear player/Pan
 test("boarding separates hall from landing without a wall north of the gates or end bypass",()=>{
   assert.deepEqual(pathTo(closed,closed.spawn,p(1350,560)),[]);
   for(const x of [1218,1307,1364,1422,1493])assert.equal(canStand(closed,x*2,456*2),false);
-  for(const target of open.interactables.filter(o=>o.integrationTarget))route(open,open.spawn,target);
+  for(const [index,x] of [1235,1307,1364,1422].entries())
+    assert.equal(canStand(open,x*2,456*2),index===1,`boarding lane ${index+1}`);
+  for(const target of open.interactables.filter(o=>o.integrationTarget || o.id==="station-platform-maintenance"))route(open,open.spawn,target);
   route(open,p(1350,560),waitingLiftArrival);
   route(closed,p(1160,365),p(1400,365));
   for(const [x,y] of [[575,310],[500,451],[593,459],[752,548],[1113,649],[1340,670]])assert.equal(canStand(open,x*2,y*2),false,`${x},${y}`);

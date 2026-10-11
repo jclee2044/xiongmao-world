@@ -1,9 +1,12 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149-refactor-worlds-rewards-language-2";
+const CACHE = "xiongmao-shell-0.9.10-dev-menu-151-refactor-worlds-rewards-language-3-activities-1-platform-4-shops-3-approach-2";
 // The user's personal recording is kept outside source control. A checkout
 // without that file must still install the rest of the offline game.
 const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
 const SHELL = [
+  "/game/escort.js",
+  "/game/station-errands.js",
+  "/data/station-errands.js",
   "/data/language-text.js",
   "/data/rewards.js",
   "/state/rewards.js",
@@ -33,7 +36,7 @@ const SHELL = [
       "/data/station-platform-travelers.js",
       "/game/station-train.js",
       "/game/station-platform-art.js",
-      "/assets/world/station-platform-v3.png",
+      "/assets/world/station-platform-v4.png",
       "/assets/world/station-train-overhead-v1.png",
       "/data/station-shops.js",
       "/assets/world/shop-station-cafe.png",
@@ -51,7 +54,7 @@ const SHELL = [
       "/assets/world/station-sign-readability-v1.png",
       "/assets/fonts/station-hand.woff2",
       "/assets/fonts/station-brush.woff2",
-      "/assets/world/station-waiting-v5.png",
+      "/assets/world/station-waiting-v7.png",
       "/assets/characters/station-waiting-people-v2.png",
       "/assets/characters/station-seated-companions-v3.png",
       "/data/station-interior-characters.js",
@@ -98,6 +101,7 @@ const SHELL = [
       "/data/station-props.js",
       "/game/station-layers.js",
       "/game/station-environment.js",
+      "/game/station-environment-worker.js",
       "/game/water-motion.js",
       "/game/station-signs.js",
       "/game/station-sign-help.js",

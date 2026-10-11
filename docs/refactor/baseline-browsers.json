@@ -1,10 +1,15 @@
 {
   "revision": "b85202c",
-  "total": 83,
-  "passed": 55,
+  "total": 84,
+  "passed": 56,
   "failed": 28,
   "timeouts": 0,
   "checks": [
+    {
+      "script": "scripts/browser-dev-mode.js",
+      "status": "pass",
+      "exitCode": 0
+    },
     {
       "script": "scripts/browser-conversation-feedback.js",
       "status": "pass",
@@ -531,5 +536,6 @@
       "exitCode": 0,
       "seconds": 6.88
     }
-  ]
+  ],
+  "featureBaseline": "Concurrent dev-mode browser check passed before and after refactor on desktop and phone; original 83 outcomes retained."
 }

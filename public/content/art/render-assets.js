@@ -1,4 +1,6 @@
 export const renderAssets = {
+  stationCafePortrait: "/assets/world/shop-station-cafe.png",
+  stationSnackPortrait: "/assets/world/shop-station-snacks.png",
   travelSuitcase: "/assets/props/travel-suitcase.png",
   stationBag: "/assets/props/player-green-satchel.png",
   idleWithoutBag: "/assets/characters/player-idle-without-bag.png",

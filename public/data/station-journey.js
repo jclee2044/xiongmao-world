@@ -1,11 +1,11 @@
 import { PLATFORM_ENTRY_XP, trainProgress } from "./rewards.js";
 // Total XP, earned rather than spent. Keep the departure threshold tunable.
 export const STATION_BOARDING_XP = PLATFORM_ENTRY_XP;
-export const stationBoardingProgress = (xp = 0) => {
+export const stationBoardingProgress = (xp = 0, devMode = false) => {
   const earned = Number.isFinite(xp) ? Math.max(0, Math.floor(xp)) : 0;
   return { earned, required: STATION_BOARDING_XP,
     remaining: Math.max(0, STATION_BOARDING_XP - earned),
-    ready: earned >= STATION_BOARDING_XP };
+    ready: devMode === true || earned >= STATION_BOARDING_XP };
 };
 
 // A booking survives leaving the station; permission to enter does not.
@@ -41,7 +41,7 @@ export function stationJourneyAction(value, action, xp = 0, devMode = false, pla
   if (action === "screen" && journey.entry === "bags") next.entry = "screened";
   if (action === "collect" && journey.entry === "screened") next.entry = "ready";
   if (action === "visit-waiting" && journey.entry === "ready") next.visitedWaiting = true;
-  if (action === "board" && journey.booked && journey.entry === "ready" && stationBoardingProgress(xp).ready) next.boarding = true;
+  if (action === "board" && journey.booked && journey.entry === "ready" && stationBoardingProgress(xp, devMode).ready) next.boarding = true;
   if (action === "train-arrived" && journey.boarding) next.trainArrived = true;
   if (action === "board-train" && journey.trainArrived && journey.boarding && trainProgress({ xp, rewards: { platformXP } }, devMode).ready) next.trainBoarded = true;
   if (action === "leave") { next.entry = "public"; delete next.boarding; delete next.trainArrived; delete next.trainBoarded; }

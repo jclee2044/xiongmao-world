@@ -2,7 +2,7 @@ import {
   waitingPhrasesForJourney,
   waitingDeparturesForJourney,
 } from "../data/station-waiting-signs.js";
-import { WAITING_SCALE, boardingLanes } from "../data/station-waiting.js";
+import { WAITING_SCALE, boardingLanes, boardingOpenLane } from "../data/station-waiting.js";
 import { optimizedArt } from "../data/optimized-art.js";
 
 const sans = '"Station Hand", "Station Brush", "Noto Sans CJK SC", sans-serif';
@@ -339,14 +339,15 @@ export function paintWaitingSigns(ctx, journey) {
 }
 // Cache at the background plate's native resolution: reflections and edges
 // should soften with the painting when the camera zooms in.
-let boardingGlass;
-function boardingGlassPaint() {
-  if (boardingGlass) return boardingGlass;
-  boardingGlass = document.createElement("canvas");
+const boardingGlassCache = new Map();
+function boardingGlassPaint(open) {
+  if (boardingGlassCache.has(open)) return boardingGlassCache.get(open);
+  const boardingGlass = document.createElement("canvas");
   boardingGlass.width = 240;
   boardingGlass.height = 50;
   const paint = boardingGlass.getContext("2d");
-  for (const [left, right] of boardingLanes) {
+  for (const [index, [left, right]] of boardingLanes.entries()) {
+    if (open && index === boardingOpenLane) continue;
     const x = left - 1206, w = right - left;
     paint.save();
     paint.beginPath();
@@ -399,6 +400,7 @@ function boardingGlassPaint() {
       pixels.data[i + 3] *= 0.92 + ((grain >>> 16) & 255) / 3187.5;
     }
   paint.putImageData(pixels, 0, 0);
+  boardingGlassCache.set(open, boardingGlass);
   return boardingGlass;
 }
 export function paintBoardingGates(ctx, journey) {
@@ -407,12 +409,13 @@ export function paintBoardingGates(ctx, journey) {
   const open =
     journey?.booked && journey?.entry === "ready" && journey?.boarding;
   ctx.imageSmoothingEnabled = true;
-  if (!open) ctx.drawImage(boardingGlassPaint(), 1206, 419);
-  for (const x of [1279, 1338, 1393, 1449]) {
+  ctx.drawImage(boardingGlassPaint(Boolean(open)), 1206, 419);
+  for (const [index, x] of [1279, 1338, 1393, 1449].entries()) {
+    const laneOpen = open && index === boardingOpenLane;
     const light = ctx.createRadialGradient(x - 0.4, 441.5, 0, x, 442, 3);
-    light.addColorStop(0, open ? "#d4e4ad" : "#eed4a0");
-    light.addColorStop(0.55, open ? "#9fb982bb" : "#c9a365bb");
-    light.addColorStop(1, open ? "#77987800" : "#ab935c00");
+    light.addColorStop(0, laneOpen ? "#d4e4ad" : "#eed4a0");
+    light.addColorStop(0.55, laneOpen ? "#9fb982bb" : "#c9a365bb");
+    light.addColorStop(1, laneOpen ? "#77987800" : "#ab935c00");
     ctx.fillStyle = light;
     ctx.beginPath();
     ctx.arc(x, 442, 3, 0, Math.PI * 2);

@@ -20,6 +20,58 @@ import { reply } from "../server/dialogue.js";
 const scene = scenes.shantang;
 const p = (x, y) => ({ x: x * scale, y: y * scale });
 
+test("the poster's right side stays in front of approaching feet until its solid base", async () => {
+  const { stationProps } = await import("../public/data/station-props.js");
+  const { behindStationProp } = await import("../public/game/station-layers.js");
+  const poster = stationProps.find(o => o.id === "travel-poster");
+  for (const x of [890, 920, 950, 970]) {
+    for (const fps of [10, 30, 60, 144]) {
+      let current = p(x, 550);
+      assert.ok(canStand(scene, current.x, current.y));
+      for (let frame = 0; frame < fps * 2; frame++) {
+        current = move(scene, current, 0, -264 / fps);
+        assert.ok(canStand(scene, current.x, current.y));
+        assert.equal(behindStationProp(poster, current.x / scale, current.y / scale), false);
+      }
+      assert.ok(current.y > 486 * scale, "cannot cross the base from below");
+      assert.ok(current.y < 525 * scale, "can approach the sign");
+    }
+  }
+  assert.equal(behindStationProp(poster, 920, 430), true);
+});
+
+test("station approach camera eases starts, turns and stops at every frame rate", async () => {
+  const { followingRoomCamera: camera } = await import("../public/game/room-camera.js");
+  for (const [width, height, zoom] of [[1440, 900, 1.2], [390, 700, 0.68]]) {
+    const start = p(700, 570), target = p(750, 540);
+    const initial = camera(scene, start, width, height, zoom);
+    const destination = camera(scene, target, width, height, zoom);
+    const results = [];
+    for (const fps of [30, 60, 144]) {
+      let current = initial;
+      for (let frame = 0; frame < fps / 2; frame++) {
+        const next = camera(scene, target, width, height, zoom, current, 1 / fps);
+        for (const key of ["camX", "camY"]) {
+          assert.ok(Math.abs(next[key] - destination[key]) <= Math.abs(current[key] - destination[key]));
+          if (!frame) assert.ok(Math.abs(next[key] - initial[key]) < Math.abs(destination[key] - initial[key]));
+        }
+        current = next;
+      }
+      results.push(current);
+      for (let frame = 0; frame < fps * 2; frame++)
+        current = camera(scene, target, width, height, zoom, current, 1 / fps);
+      assert.deepEqual(current, destination, "settles after movement stops");
+    }
+    for (const result of results)
+      assert.ok(Math.hypot(result.camX - results[0].camX, result.camY - results[0].camY) < 0.01);
+    assert.deepEqual(camera(scene, target, width, height, zoom, { ...initial, sceneId: "shanghai" }, 1 / 60), destination);
+    assert.deepEqual(camera(scene, target, width, height, zoom, { ...initial, viewportWidth: 1 }, 1 / 60), destination);
+    const edge = camera(scene, p(1530, 1020), width, height, zoom, initial, 1 / 60);
+    assert.ok(edge.camX >= 0 && edge.camX + width / zoom <= scene.width);
+    assert.ok(edge.camY >= 0 && edge.camY + height / zoom <= scene.height);
+  }
+});
+
 test("the gap behind the north banner allows diagonal escape in both directions", () => {
   for (const [x, y, dx, dy] of [
     [322.75, 274.5, 3, 3],

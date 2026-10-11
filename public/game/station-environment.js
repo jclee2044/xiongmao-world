@@ -3,6 +3,51 @@
 import { paintWaterSurface } from "./water-motion.js";
 
 const prepared = new WeakMap();
+const animations = new WeakMap();
+// Rasterize animated scenery away from the input/camera thread. Keep at most
+// one pending frame: slow devices reuse the last bitmap rather than queue work.
+export async function prepareStationAnimation(image) {
+  if (animations.has(image)) return animations.get(image).ready;
+  if (typeof Worker === "undefined" || typeof OffscreenCanvas === "undefined" ||
+      typeof createImageBitmap === "undefined") return;
+  const animation = { busy: true, frame: 0 };
+  animations.set(image, animation);
+  animation.ready = new Promise(resolve => {
+    animation.resolve = resolve;
+  });
+  try {
+    const worker = new Worker(new URL("./station-environment-worker.js", import.meta.url), { type: "module" });
+    animation.worker = worker;
+    const fail = () => {
+      clearTimeout(animation.timeout);
+      animation.failed = true;
+      worker.terminate();
+      animation.bitmap?.close();
+      animation.bitmap = null;
+      animation.resolve();
+    };
+    animation.timeout = setTimeout(fail, 10000);
+    worker.onerror = fail;
+    worker.onmessageerror = fail;
+    worker.onmessage = ({ data }) => {
+      if (data.error) { fail(); return; }
+      clearTimeout(animation.timeout);
+      animation.bitmap?.close();
+      animation.bitmap = data.bitmap;
+      animation.busy = false;
+      animation.resolve();
+    };
+    const bitmap = await createImageBitmap(image);
+    worker.postMessage({ image: bitmap, time: 0 }, [bitmap]);
+  } catch {
+    clearTimeout(animation.timeout);
+    animation.failed = true;
+    animation.worker?.terminate();
+    animation.resolve();
+  }
+  return animation.ready;
+}
+
 const TAU = Math.PI * 2;
 const koi = [
   { x: 421, y: 659, w: 39, h: 35, phase: 0.4 },
@@ -114,12 +159,14 @@ function paintStationWater(ctx, art, time) {
   ctx.drawImage(c, 0, 0);
 }
 function canvas(w, h) {
-  const c = document.createElement("canvas");
+  const c = typeof document === "undefined"
+    ? new OffscreenCanvas(w, h)
+    : document.createElement("canvas");
   c.width = w;
   c.height = h;
   return c;
 }
-function prepare(image) {
+export function prepareStationEnvironment(image) {
   if (prepared.has(image)) return prepared.get(image);
   const base = canvas(1536, 1024),
     ctx = base.getContext("2d", { willReadFrequently: true });
@@ -247,20 +294,16 @@ export const stationVestibule = [
   [1342, 444],
   [1138, 391],
 ];
-export function paintStationEnvironment(
-  ctx,
-  image,
-  time,
-  motion,
-  scale,
-  drawTraveler,
-) {
-  // Reduced motion keeps the untouched painting, plus still indoor travelers.
-  const state = stationAmbientState(time, motion);
-  ctx.save();
-  ctx.scale(scale, scale);
-  if (motion) {
-    const art = prepare(image);
+export function paintStationBackdrop(ctx, image, time) {
+  const art = prepareStationEnvironment(image);
+  const state = stationAmbientState(time);
+  const parent = ctx;
+  art.ambient ||= canvas(1536, 1024);
+  const frame = Math.floor(time * 20);
+  if (art.ambientFrame !== frame) {
+    art.ambientFrame = frame;
+    ctx = art.ambient.getContext("2d");
+    ctx.clearRect(0, 0, 1536, 1024);
     ctx.drawImage(art.base, 0, 0);
     paintStationWater(ctx, art, time);
     for (let i = 0; i < koi.length; i++) {
@@ -314,6 +357,34 @@ export function paintStationEnvironment(
         ctx.fillRect(x - 1.5, y - 2, 3, 4);
       }
     }
+    ctx = parent;
+  }
+  ctx.drawImage(art.ambient, 0, 0);
+}
+
+export function paintStationEnvironment(
+  ctx,
+  image,
+  time,
+  motion,
+  scale,
+  drawTraveler,
+) {
+  // Reduced motion keeps the untouched painting, plus still indoor travelers.
+  const state = stationAmbientState(time, motion);
+  ctx.save();
+  ctx.scale(scale, scale);
+  if (motion) {
+    const animation = animations.get(image);
+    if (animation?.bitmap && !animation.failed) {
+      ctx.drawImage(animation.bitmap, 0, 0);
+      const frame = Math.floor(time * 20);
+      if (!animation.busy && animation.frame !== frame) {
+        animation.busy = true;
+        animation.frame = frame;
+        animation.worker.postMessage({ time });
+      }
+    } else paintStationBackdrop(ctx, image, time);
   }
   ctx.save();
   ctx.beginPath();
@@ -339,7 +410,7 @@ export function paintStationEnvironment(
 // This cloth is also a depth-sorted foreground prop, so redraw its wind pass
 // after that prop, keeping nearby actors behind the moving banner.
 export function paintStationBanner(ctx, image, time, scale) {
-  const art = prepare(image),
+  const art = prepareStationEnvironment(image),
     index = 3,
     r = windRegions[index];
   const wind = stationAmbientState(time).wind[index];

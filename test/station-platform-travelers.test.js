@@ -50,7 +50,7 @@ test("every passenger has Chinese platform dialogue without changing earlier enc
     assert.match(train.chinese,/还没到/);
     assert.equal(train.action,undefined);
     const stairs=await reply(id,"怎么回候车室？",[],state,{provider:"story",random:()=>0});
-    assert.match(stairs.chinese,/左上方.*楼梯.*电梯/);
+    assert.match(stairs.chinese,/左上方.*楼梯/);
   }
   assert.deepEqual(state,before);
   state.adventure.stationJourney.trainArrived=true;

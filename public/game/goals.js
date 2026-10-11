@@ -1,6 +1,8 @@
+import { platformConversationXP } from "../data/rewards.js";
+import { errandActors } from "../data/station-errands.js";
 import { isBeginnerChinese } from "../data/language.js";
 import { AREA_XP, award } from "../data/adventure.js";
-export function goalCards(a) {
+export function goalCards(a, devMode = false, scene = "shanghai") {
   const cards = [];
   if (a.met.length < 5)
     cards.push({
@@ -69,9 +71,9 @@ export function goalCards(a) {
       title: "问问路",
       detail:
         a.directionsFind === "accepted"
-          ? "听小林说怎么走，去市场东边、湖下面的饭店。"
-          : "问小林：饭店怎么走？",
-      target: a.directionsFind === "accepted" ? "dumplings" : "lin",
+          ? "听小林说怎么走，过南边的桥，去左边的衣服店。"
+          : "问小林：衣服店怎么走？",
+      target: a.directionsFind === "accepted" ? "clothing-store" : "lin",
       reward: "+40 XP",
     });
   if (a.directionsGive !== "done")
@@ -95,12 +97,12 @@ export function goalCards(a) {
   cards.sort(
     (left, right) => Number(active(right.key)) - Number(active(left.key)),
   );
-  if (!a.boatTaken && a.xp >= AREA_XP)
+  if (!a.boatTaken && (devMode || a.xp >= AREA_XP))
     cards.unshift({
       title: "可以上船了",
       detail: "去右边下面的河边上船，去下一站。",
       target: "next-area",
-      reward: "750 / 750 XP · Ready to board",
+      reward: devMode ? "Dev mode · Ready to board" : "750 / 750 XP · Ready to board",
       key: "departure",
     });
   if (!cards.length)
@@ -142,10 +144,10 @@ export function goalCards(a) {
       `Visit the bamboo grove, lake, and Taihu rock · ${a.nature.length}/3`,
     ],
     directionsFind: [
-      "Find the hotpot restaurant",
+      "Find the clothing store",
       a.directionsFind === "accepted"
-        ? "Follow Lin’s directions to the restaurant east of the market, below the lake."
-        : "Ask Lin how to find the hotpot restaurant.",
+        ? "Cross the southern bridge and follow the path left to the clothing store."
+        : "Ask Lin how to find the clothing store.",
     ],
     directionsGive: [
       "Help Hao find the bookshop",
@@ -161,17 +163,23 @@ export function goalCards(a) {
     ],
     complete: [
       "Enjoy the town",
-      "Explore, chat with neighbors, or practice another activity.",
+      "Open the Journal for new activities, or try the lantern riddles at the lantern rack.",
     ],
   };
   for (const card of cards) [card.title, card.detail] = copy[card.key];
+  if (scene.startsWith("station-")) {
+    const keys=scene==="station-waiting"?["water","rest","bathroom"]:scene==="station-platform"?["trash"]:a.stationJourney.visitedWaiting?["security"]:[];
+    for(const key of keys) if(a.stationErrands?.[key]!=="done") cards.unshift({key:`station-${key}`,title:{water:"Bring Meifang hot water",rest:"Help Wenbo relax",bathroom:"Help Jia Ni find the bathroom",security:"Help the new traveler with security",trash:"Help Xiaojie find a trash can"}[key],detail:{water:"Ask Meifang, fill a cup on the left, and bring it back.",rest:"Invite Wenbo to follow you to the massage chairs.",bathroom:"Explain the directions in your own words.",security:"Explain the passport and luggage checks in your own words.",trash:"Talk to Xiaojie, then find the bin beside the stairs."}[key],target:errandActors[key],reward:`+${{water:40,rest:50,bathroom:80,security:130,trash:50}[key]} XP`});
+    if(scene==="station-platform")cards.unshift({key:"platform",title:"Pass the time on the platform",detail:"Talk to the people on this platform. Earn 100 XP from these conversations for the train to arrive.",reward:`${platformConversationXP(a)} / 100 conversation XP`});
+  }
+  if(cards.every(c=>["complete","departure"].includes(c.key)))cards.push({key:"journal",title:"Try Journal activities and lantern riddles",detail:"Open Journal → Browse all activities to choose a new activity.",reward:"+20 XP per completed activity"});
   return cards;
 }
 export function createGoals({ persistence, world, panda, speech }) {
   const root = document.getElementById("goals-list");
   let last = "";
   function refresh() {
-    const cards = goalCards(persistence.state.adventure),
+    const cards = goalCards(persistence.state.adventure, persistence.devMode, persistence.state.scene),
       key = JSON.stringify(cards);
     if (last === key) return;
     last = key;

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { newAdventure, validateAdventure, mergeAdventure, AREA_XP, award } from "../public/data/adventure.js";
-import { grantReward, beginInteraction, answerInteraction, progression, trainProgress, completeQuest } from "../public/data/rewards.js";
+import { platformConversationXP, grantReward, beginInteraction, answerInteraction, progression, trainProgress, completeQuest } from "../public/data/rewards.js";
 import { stationJourneyAction, stationBoardingProgress } from "../public/data/station-journey.js";
 import { Persistence } from "../public/game/persistence.js";
 import { upgradeState } from "../public/game/world.js";
@@ -105,4 +105,19 @@ test("an overqualified save at the total XP cap can still earn platform credit",
   grantReward(a,{id:"quest:at-cap",amount:100,scene:"station-platform"});
   assert.equal(a.xp,1000000);assert.equal(a.rewards.platformXP,100);
   assert.equal(trainProgress(a).ready,true);
+});
+
+test("arrival counts only platform NPC conversations and survives reload without duplicates", () => {
+  let a = newAdventure();
+  grantReward(a, { id: "practice:platform:0", amount: 500, scene: "station-platform" });
+  answerInteraction(a, beginInteraction(a, "lin", "station-waiting"));
+  assert.equal(platformConversationXP(a), 0);
+  for (let i = 0; i < 5; i++) {
+    const encounter = beginInteraction(a, `traveler-${i}`, "station-platform");
+    assert.equal(platformConversationXP(a), i * 20 + 5);
+    answerInteraction(a, encounter);
+    answerInteraction(a, encounter);
+    a = validateAdventure(JSON.parse(JSON.stringify(a)));
+  }
+  assert.equal(platformConversationXP(a), 100);
 });

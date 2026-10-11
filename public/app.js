@@ -1,3 +1,5 @@
+import { errandGreeting } from "./data/station-errands.js";
+import { createStationErrands } from "./game/station-errands.js";
 import { progression, beginInteraction, answerInteraction, completionText } from "./data/rewards.js";
 import { waitingTravelerProfile } from "./data/station-waiting-travelers.js";
 import { platformTravelerProfile } from "./data/station-platform-travelers.js";
@@ -209,7 +211,7 @@ function updateXP() {
   $("xp-text").textContent = `${xp} / ${required} XP`;
   $("xp-progress").setAttribute(
     "aria-label",
-    xp >= required ? "可以去下一站了" : `${xp} / ${required} XP`,
+    persistence.devMode || xp >= required ? "可以去下一站了" : `${xp} / ${required} XP`,
   );
 }
 const goals = createGoals({ persistence, world: () => world, panda, speech });
@@ -234,11 +236,13 @@ const directions = createDirections({
   panda,
   refresh: updateXP,
 });
+const stationErrands = createStationErrands({persistence, world:()=>world, openPanel, speech, panda, refresh:updateXP});
 const panels = createPanels({
   persistence,
   openPanel,
   toast,
   applySettings,
+  onDevModeChange: updateXP,
   restoreWorld,
   getWorld: () => world,
   openPractice: (id) => practice.start(id),
@@ -388,6 +392,7 @@ function startWorld() {
     varyBubble: createAmbientDialogue(),
     getSettings: () => ({
       ...persistence.state.settings,
+      devMode: persistence.devMode,
       motion:
         persistence.state.settings.motion &&
         !matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -470,6 +475,8 @@ function startWorld() {
       updatePlace();
     },
     onInteract: interact,
+    onErrandArrive: key => stationErrands.complete(key),
+    onPlatformHint: text => panda(text),
     onSignSelect: phrase => {
       openPanel(
         "Panda explains the sign",
@@ -496,6 +503,7 @@ function startWorld() {
   updateXP();
 }
 function interact(n) {
+  if (["npc","guest","passerby"].includes(n.type) && world.scene.id === "station-platform") { world.platformIdle=0; world.platformPrompted=false; }
   landmarkPanda.cancel();
   hidePandaSpeech();
   goals.nature(n.id);
@@ -510,6 +518,7 @@ function interact(n) {
     speech.speak(n.zh, false, "panda");
     return;
   }
+  if (stationErrands.interact(n)) return;
   if (adventure.interact(n)) return;
   if (practice.visit(n.id)) return;
   if (passiveLandmarks.has(n.id)) return;
@@ -663,14 +672,17 @@ function openConversation(id, shopId = null, appearance = null, replay = false) 
       ? "我想坐火车去上海。"
       : npcs[id].starter?.example || starters[npcs[id].topic].example);
   $("send").disabled = false;
+  const questGreeting = errandGreeting(stationErrands.offer(id), persistence.state.adventure);
   if (!shopId) displayReply({
-    ...(waitingProfile?.greeting || (id === XIAOCHENG && world.scene.id === "station-platform" ? platformTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-waiting" ? waitingTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-ticketing" ? indoorTravelerGreeting : npcs[id].greeting)),
+    ...(id === "lian" && persistence.state.adventure.hungry === "done" ? { chinese: "谢谢你请我吃火锅！你想聊什么？", pinyin: "xiè xiè nǐ qǐng wǒ chī huǒ guō ！ nǐ xiǎng liáo shén me ？", meaning: "Thank you for the hotpot! What would you like to talk about?" } : id === "lian" && persistence.state.adventure.hungry !== "new" ? { chinese: "我们一起吃火锅吧。", pinyin: "wǒ men yì qǐ chī huǒ guō ba 。", meaning: "Let’s have hotpot together." } : waitingProfile?.greeting || (id === XIAOCHENG && world.scene.id === "station-platform" ? platformTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-waiting" ? waitingTravelerGreeting : id === XIAOCHENG && world.scene.id === "station-ticketing" ? indoorTravelerGreeting : npcs[id].greeting)),
+    ...(questGreeting || {}),
     purpose: "opening", npcId: id,
     mode: "authored",
     notice: "",
-  }, id !== "station-help" && !waitingProfile && !(id === XIAOCHENG && ["station-ticketing", "station-waiting"].includes(world.scene.id)));
+  }, !questGreeting && !(id === "lian" && persistence.state.adventure.hungry !== "new") && id !== "station-help" && !waitingProfile && !(id === XIAOCHENG && ["station-ticketing", "station-waiting"].includes(world.scene.id)));
   $("dialog-status").textContent = "";
   $("npc-quest")?.remove();
+  $("station-errand")?.remove();
   $("directions-quest")?.remove();
   for (const button of document.querySelectorAll("[data-npc-activity]")) button.remove();
   for (const activity of activities.filter(a => a.npc === id)) {
@@ -685,13 +697,21 @@ function openConversation(id, shopId = null, appearance = null, replay = false) 
     };
     $("speech-controls").append(button);
   }
+  const errand = stationErrands.offer(id);
+  if (errand) {
+    const button = document.createElement("button");
+    button.id="station-errand";button.className="quest-invitation";
+    button.textContent={water:"Bring hot water · +40 XP",rest:"Help him relax · +50 XP",bathroom:"Give Jia Ni directions · +80 XP",security:"Explain the checks · +130 XP",trash:"Find a trash can · +50 XP"}[errand];
+    button.onclick=()=>{$("conversation").close();stationErrands.show(errand);};
+    $("speech-controls").append(button);
+  }
   if (["lin", "hao", "visitor-1"].includes(id) && !shopId) {
     const button = document.createElement("button");
     button.id = "directions-quest";
     button.className = "quest-invitation";
     button.textContent =
       id === "lin"
-        ? "Ask for directions to the restaurant"
+        ? "Ask for directions to the clothing store"
         : id === "visitor-1"
           ? "Give directions to the flower shop"
           : "Help find the bookshop";
@@ -705,7 +725,7 @@ function openConversation(id, shopId = null, appearance = null, replay = false) 
     };
     $("speech-controls").append(button);
   }
-  if (id === "lan" || id === "qiao" || id === "lian") {
+  if (id === "lan" || id === "qiao" || (id === "lian" && persistence.state.adventure.hungry === "new")) {
     const button = document.createElement("button");
     button.id = "npc-quest";
     button.className = "quest-invitation";
@@ -732,7 +752,7 @@ function openConversation(id, shopId = null, appearance = null, replay = false) 
       view = document.createElement("img");
     view.id = "shop-view";
     view.src = shop.image;
-    view.alt = shop.name;
+    view.alt = shop.detailAlt || shop.name;
     $("conversation").insertBefore(
       view,
       $("conversation").querySelector(".conversation-body"),

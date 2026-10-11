@@ -3,7 +3,7 @@ import { waitingTravelers } from "../../../data/station-waiting-travelers.js";
 import { travelerById } from "../../../data/station-travelers.js";
 import { XIAOCHENG } from "../../../data/station-departure.js";
 import { groundPoint } from "../../../data/station-interior.js";
-import { platformArrival, platformLiftArrival, STATION_STAIR_CLEAR_WIDTH } from "../../../data/station-platform.js";
+import { platformArrival, STATION_STAIR_CLEAR_WIDTH } from "../../../data/station-platform.js";
 
 // Source coordinates on the 1536 × 1024 production plate. The upper landing
 // sits north of the recessed A well, continuing the right-up lane from 1F.
@@ -22,6 +22,7 @@ export const waitingEscalators = [
 export const waitingArrival = waitingPoint(600,225);
 export const waitingLiftArrival = waitingPoint(749,362);
 export const boardingBoundary = { west: 1200*WAITING_SCALE, north: 443*WAITING_SCALE };
+export const boardingOpenLane = 1;
 export const boardingLanes = [[1210,1261],[1295,1320],[1352,1377],[1409,1435]];
 
 const banks = [
@@ -50,7 +51,9 @@ for(const [i,x,y,bx,by] of [[2,1044,401,1065,437],[4,753,491,775,528],[5,1081,48
   addSilhouette(i,[[bx-10,by],[bx+8,by],[bx+12,by+6],[bx+12,by+36],[bx-10,by+36]]);
   waitingProps[i].footprint=rect(banks[i][0],banks[i][1]+31,banks[i][2]+8, y+78-(banks[i][1]+31));
 }
-waitingProps.push({id:"massage-chairs",depth:721,footprint:rect(29,663,294,59),
+waitingProps.push(
+  {id:"platform-landing-railing",depth:610,footprint:rect(1432,548,100,62),foliage:[],frontEdge:[[1432,610],[1532,610]],
+    opaque:[rect(1433,516,99,9),[[1433,517],[1444,517],[1447,607],[1438,609]],rect(1440,586,92,10),rect(1519,516,12,90)]},{id:"massage-chairs",depth:721,footprint:rect(29,663,294,59),
   opaque:[...[[45,51],[118,62],[190,62],[263,60]].map(([x,w])=>[[x+8,620],[x+w-5,619],[x+w,645],[x+w-5,704],[x+w-14,714],[x-8,714],[x-7,678],[x,651]]),
     [[27,684],[48,680],[53,686],[51,717],[28,717]],ellipse(77,634,10,13),
     [[62,646],[87,646],[95,669],[84,687],[81,718],[70,718],[67,691],[52,678]]],foliage:[],frontEdge:[[28,721],[324,721]]});
@@ -98,6 +101,19 @@ waitingProps.push(
     opaque:[rect(18,785,1231,12),rect(18,842,1231,17),...[0,160,358,573,785,1005,1234].map(x=>[[x,776],[x+9,768],[x+23,770],[x+27,866],[x,866]])]},
 );
 
+// Counter tops have depth: their REAR edges occlude staff, not just the
+// front lip. Use the same per-actor masks as other furniture so no employee
+// pixels can cover the work surface, including during idle animation.
+waitingProps.push(
+  {id:"snack-sales-counter",depth:311,footprint:rect(91,282,123,29),foliage:[],frontEdge:[[91,311],[214,311]],
+    opaque:[[[91,276],[116,273],[207,273],[215,277],[214,311],[91,311]]]},
+  {id:"cafe-sales-counter",depth:305,footprint:rect(320,280,111,25),foliage:[],frontEdge:[[320,305],[431,305]],
+    opaque:[[[320,273],[334,270],[430,270],[432,277],[431,305],[320,305]]]},
+  {id:"help-desk-counter",depth:540,footprint:rect(198,500,143,40),foliage:[],frontEdge:[[198,540],[341,540]],
+    opaque:[[[198,492],[218,487],[330,487],[343,493],[341,540],[198,540]],
+      rect(228,467,27,24),rect(297,467,27,24)]},
+);
+
 // The gate housings belong in the same per-actor occlusion system as the
 // benches. Their painted tops extend well north of their ground footprints.
 for (const [i, x] of [1261, 1320, 1377, 1435].entries()) {
@@ -118,10 +134,10 @@ const liveSeats = [
   {id:"waiting-uncle",name:"吴叔叔",bank:7,x:758,y:666},
   {id:"waiting-hiker",name:"小宁",bank:9,x:551,y:760},
   {id:"waiting-reader",name:"阿文",bank:10,x:800,y:760},
-  {id:"waiting-granddaughter",name:"朵朵",bank:1,x:769,y:477,companionOf:"waiting-auntie",age:6,artHeight:115,artLift:12},
-  {id:"waiting-friend",name:"小杰",bank:3,x:551,y:567,companionOf:"waiting-student",artHeight:151},
-  {id:"waiting-grandson",name:"乐乐",bank:7,x:799,y:666,companionOf:"waiting-uncle",age:7,artHeight:115,artLift:12},
-  {id:"waiting-travel-friend",name:"小岚",bank:9,x:501,y:760,companionOf:"waiting-hiker",artHeight:151},
+  {id:"waiting-granddaughter",name:"朵朵",bank:1,x:769,y:477,companionOf:"waiting-auntie",age:6},
+  {id:"waiting-friend",name:"小杰",bank:3,x:551,y:567,companionOf:"waiting-student"},
+  {id:"waiting-grandson",name:"乐乐",bank:7,x:799,y:666,companionOf:"waiting-uncle",age:7},
+  {id:"waiting-travel-friend",name:"小岚",bank:9,x:501,y:760,companionOf:"waiting-hiker"},
 ];
 export const waitingSeatManifest = [
   {id:"arrival-sleeper",occupant:"painted",prop:"waiting-bench-0",seats:[0,1,2,3],pose:"sleeping",luggage:true},
@@ -138,7 +154,7 @@ const scenery = waitingProps.map(p=>{
 export const stationWaiting = {
   id:"station-waiting",title:"苏州站 · 二楼候车室",chinese:"苏州站 · 二楼候车室",interior:true,
   width:1536*WAITING_SCALE,height:1024*WAITING_SCALE,stationScale:WAITING_SCALE,
-  backgroundPath:"/assets/world/station-waiting-v5.png",
+  backgroundPath:"/assets/world/station-waiting-v7.png",
   stairClearWidth:STATION_STAIR_CLEAR_WIDTH,
   cameraRegion:poly(rect(16,8,1505,848)),walkableFloor:poly(rect(20,188,1490,604)),
   spawn:waitingArrival,navigationStep:12,navigationRadius:15,
@@ -157,6 +173,9 @@ export const stationWaiting = {
   ],
   scenery:[...scenery,{id:"suzhou-model-table",type:"city-model",...waitingPoint(1380,287),w:180,h:270},{id:"boarding-leaves",type:"station-boarding",...waitingPoint(1360,491),w:650,h:200}],
   interactables:[
+    // The counter sprites use the exact portrait artwork shown during shopping.
+    stop("station-barista","npc","小禾",328,372,{appearance:"station-barista",shopId:"station-cafe",artX:355*WAITING_SCALE,artY:284*WAITING_SCALE,artHeight:110,hitRect:box(262,172,168,138),groundShadow:false}),
+    stop("station-shopkeeper","npc","陈叔叔",147,342,{appearance:"station-shopkeeper",shopId:"station-snacks",artX:150*WAITING_SCALE,artY:286*WAITING_SCALE,artHeight:110,hitRect:box(42,173,194,140),groundShadow:false}),
     stop("rabbit-plush","stuffy","壁画后面",1180,260,{collectible:"rabbit-plush",hidden:true,
       discoveryBounds:box(1100,194,190,112)}),
     inspect("suzhou-city-model","苏州城市模型",1380,313,
@@ -169,14 +188,35 @@ export const stationWaiting = {
     inspect("station-snacks","便利店",147,342,"这里有水和吃的东西。","zhè lǐ yǒu shuǐ hé chī de dōng xi 。","Snacks and bottled water are available here.",{shopId:"station-snacks",hitRect:box(42,173,194,140),navigation:true}),
     inspect("station-cafe","咖啡 · 面",328,372,"坐一会儿，喝杯茶吧。","zuò yí huì er ， hē bēi chá ba 。","Take a break at the café before boarding.",{shopId:"station-cafe",hitRect:box(262,172,168,138),navigation:true}),
     inspect("station-toilets","洗手间",104,556,"洗手间在这里。","xǐ shǒu jiān zài zhè lǐ 。","The toilets are on this side of the waiting hall, before the boarding gates.",{hitRect:box(22,374,145,138),navigation:true}),
-    stop("station-help","npc","问询员",277,567,{appearance:"station-security-desk",artX:277*WAITING_SCALE,artY:536*WAITING_SCALE,artHeight:225,sortY:540*WAITING_SCALE,artClip:poly(rect(246,421,62,75)),hitRect:box(190,386,177,155),navigation:true}),
+    // Feet sit behind the desk; the worktop and monitors occlude the full body.
+    stop("station-help","npc","问询员",277,567,{appearance:"station-security-desk",artX:277*WAITING_SCALE,artY:534*WAITING_SCALE,artHeight:171,sortY:540*WAITING_SCALE,groundShadow:false,hitRect:box(190,386,177,155),navigation:true}),
     inspect("station-hot-water","热水",411,576,"这里有热水。请小心。","zhè lǐ yǒu rè shuǐ 。 qǐng xiǎo xīn 。","Hot water is available here. Take care when filling your cup.",{hitRect:box(377,467,57,85),navigation:true}),
     inspect("station-massage","按摩椅",227,752,"走累了，坐一会儿吧。","zǒu lèi le ， zuò yí huì er ba 。","Four massage chairs offer a place to rest beside the main seating.",{hitRect:box(113,616,214,103)}),
     inspect("station-departure-board","出发信息",953,366,"去上海的火车在晚上六点二十分出发。检票口在右边。","qù shàng hǎi de huǒ chē zài wǎn shang liù diǎn èr shí fēn chū fā 。 jiǎn piào kǒu zài yòu biān 。","G728 to Shanghai departs at 18:20 (6:20 pm). The board also shows Nanjing at 19:05, Hangzhou at 19:40, and Wuxi at 20:10. Speak to the boarding attendant on the right when you are ready.",{hitRect:box(838,175,232,115),navigation:true}),
     stop("station-boarding-check","npc","检票员",1236,394,{appearance:"station-security",artX:1233*WAITING_SCALE,artY:434*WAITING_SCALE,artHeight:171,hitRect:box(1198,350,65,82),navigation:true}),
     inspect("station-platform-stairs","站台 · 下楼",1350,573,"站台在楼下。","zhàn tái zài lóu xià 。","The platform is on floor one.",{hitRect:box(1280,600,144,160),integrationTarget:"station-platform",floorTransition:true,returnPoint:platformArrival,navigation:true}),
-    inspect("station-platform-lift","站台 · 电梯",1466,558,"电梯到楼下的站台。","diàn tī dào lóu xià de zhàn tái 。","The lift opens onto the checked landing and descends to the platform.",{hitRect:box(1464,614,64,190),integrationTarget:"station-platform",floorTransition:true,returnPoint:platformLiftArrival,navigation:true}),
-    ...liveSeats.map((s,i)=>stop(s.id,"npc",s.name,s.x,s.y+22,{appearance:`waiting-person-${i}`,artX:s.x*WAITING_SCALE-(s.companionOf?0:18),artY:(s.y-(s.artLift||0))*WAITING_SCALE,artHeight:s.artHeight||151,seated:true,companionOf:s.companionOf,age:s.age,sortY:(s.y+1)*WAITING_SCALE,occlusionIgnore:[`waiting-bench-${s.bank}`],hitRect:s.companionOf?box(s.x-17,s.y-(s.artLift||0)-(s.artHeight||151)/2,34,(s.artHeight||151)/2):box(s.x-23,s.y-77,47,78)})),
+    inspect("station-platform-maintenance","维修门",1450,531,"维修门，请走旁边的楼梯去站台。","wéi xiū mén ， qǐng zǒu páng biān de lóu tī qù zhàn tái 。","Maintenance access. Use the nearby stairs to reach the platform.",{hitRect:box(1464,614,64,190),navigation:true}),
+    ...liveSeats.map((s, i) => {
+      const artHeight = s.age ? 100 : 129;
+      // Align the hips in each cropped pose to the painted cushion. Keeping
+      // feet fixed when reducing sprite height makes passengers sink below it.
+      const hipFromTop = [0.76, 0.78, 0.77, 0.76, 0.76, 0.77, 0.75, 0.75, 0.74, 0.75][i];
+      const cushionY = (banks[s.bank][1] + 36) * WAITING_SCALE;
+      const artY = cushionY + artHeight * (1 - hipFromTop);
+      return stop(s.id, "npc", s.name, s.x, s.y + 22, {
+        appearance: `waiting-person-${i}`,
+        artX: s.x * WAITING_SCALE, artY, artHeight,
+        seated: true, companionOf: s.companionOf, age: s.age,
+        sortY: (s.y + 1) * WAITING_SCALE,
+        occlusionIgnore: [`waiting-bench-${s.bank}`],
+        hitRect: {
+          x: (s.x - (s.companionOf ? 17 : 23)) * WAITING_SCALE,
+          y: artY - artHeight,
+          w: (s.companionOf ? 34 : 47) * WAITING_SCALE,
+          h: artHeight,
+        },
+      });
+    }),
     // Close, stationary conversation clusters use the existing idle gestures.
     ...[
       ["traveler-yutong",970,380,"board-party",0,3,1],
@@ -206,5 +246,6 @@ export const stationWaiting = {
   ],
   seatManifest:waitingSeatManifest,
 };
-const openWaiting={...stationWaiting,solids:stationWaiting.solids.slice(0,-boardingLanes.length)};
+const openWaiting={...stationWaiting,solids:stationWaiting.solids.filter((_, index) =>
+  index !== stationWaiting.solids.length - boardingLanes.length + boardingOpenLane)};
 export const stationWaitingForJourney = journey => journey?.booked && journey?.entry==="ready" && journey?.boarding ? openWaiting : stationWaiting;

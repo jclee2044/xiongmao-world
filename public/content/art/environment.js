@@ -150,7 +150,13 @@ export const environment = [
     "source": "/assets/world/shop-station-cafe.png"
   },
   {
+    "source": "/assets/world/shop-station-cafe-v2.png"
+  },
+  {
     "source": "/assets/world/shop-station-snacks.png"
+  },
+  {
+    "source": "/assets/world/shop-station-snacks-v2.png"
   },
   {
     "source": "/assets/world/shop-streetfood.png"
@@ -177,6 +183,10 @@ export const environment = [
     "output": "/assets/optimized/station-platform-v3.webp"
   },
   {
+    "source": "/assets/world/station-platform-v4.png",
+    "output": "/assets/optimized/station-platform-v4.webp"
+  },
+  {
     "source": "/assets/world/station-sign-readability-v1.png",
     "output": "/assets/optimized/station-sign-readability-v1.webp"
   },
@@ -196,6 +206,10 @@ export const environment = [
   {
     "source": "/assets/world/station-waiting-v5.png",
     "output": "/assets/optimized/station-waiting-v5.webp"
+  },
+  {
+    "source": "/assets/world/station-waiting-v7.png",
+    "output": "/assets/optimized/station-waiting-v7.webp"
   },
   {
     "source": "/assets/world/stone-bridges.png",

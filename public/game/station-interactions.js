@@ -1,12 +1,12 @@
-import { trainProgress } from "../data/rewards.js";
+import { trainProgress, platformConversationXP, PLATFORM_LOCAL_XP } from "../data/rewards.js";
 import { stationJourneyAction, stationBoardingProgress, STATION_BOARDING_XP } from "../data/station-journey.js";
 
 // Uses the same speech, pinyin, translation and word-help panel as other quests.
 // Guided counter dialogue makes the booking explicit and never invents a fare.
-export function createStationInteractions({ line, state, change, world }) {
+export function createStationInteractions({ line, state, change, world, devMode = () => false }) {
   const journey = () => state().stationJourney;
   const act = (action) => {
-    change((a) => { a.stationJourney = stationJourneyAction(a.stationJourney, action, a.xp, false, a.rewards?.platformXP || 0); });
+    change((a) => { a.stationJourney = stationJourneyAction(a.stationJourney, action, a.xp, devMode(), a.rewards?.platformXP || 0); });
     world()?.syncStationInterior();
   };
   let upstairsRequest = null;
@@ -21,7 +21,7 @@ export function createStationInteractions({ line, state, change, world }) {
   const booked = () => say("去上海 · Shanghai",
     "买好了！请带好护照，去安检入口。",
     "mǎi hǎo le ！ qǐng dài hǎo hù zhào ， qù ān jiǎn rù kǒu 。",
-    `Your Shanghai journey is booked on G728 at 18:20. Take your passport to the entry check. Platform entry upstairs requires ${STATION_BOARDING_XP} total XP; you can explore and earn more before departure.`,
+    `Your Shanghai journey is booked on G728 at 18:20. Take your passport to the entry check. ${devMode() ? "Dev mode bypasses the boarding XP requirement" : `Platform entry upstairs requires ${STATION_BOARDING_XP} total XP`}; you can explore and earn more before departure.`,
     [["station-ticket-done", "谢谢！", close]]);
   function tickets() {
     if (journey().booked) return booked();
@@ -112,13 +112,13 @@ export function createStationInteractions({ line, state, change, world }) {
     if (!journey().booked || journey().entry !== "ready") return say("检票口 · Boarding",
       "请先买票，再去安检。", "qǐng xiān mǎi piào ， zài qù ān jiǎn 。",
       "Buy your ticket and complete security downstairs first.", [], "male-kokoro-009");
-    const progress = stationBoardingProgress(state().xp, false);
+    const progress = stationBoardingProgress(state().xp, devMode());
     const checked = journey().boarding && progress.ready;
     const pass = `<section class="station-boarding-pass" aria-label="Shanghai boarding pass">
       <p>车票 · Journey ticket</p><h3>苏州 → 上海 · Shanghai</h3>
       <p>G728 · 18:20 · 二楼检票口 / 2F boarding gate</p>
       <p role="status">${checked ? "已检票 · Checked" : progress.ready ? "可以检票 · Ready for check" : "继续探索 · Keep exploring"}</p>
-      <p>${progress.earned} / ${progress.required} XP${progress.remaining ? ` · 还差 / Still need ${progress.remaining} XP` : ""}</p>
+      <p>${devMode() ? "Dev mode · XP requirement bypassed · " : ""}${progress.earned} / ${progress.required} XP${!devMode() && progress.remaining ? ` · 还差 / Still need ${progress.remaining} XP` : ""}</p>
       <progress max="${progress.required}" value="${Math.min(progress.earned, progress.required)}" aria-label="Boarding XP"></progress>
       <p>XP 不会扣除 · XP is not spent.</p></section>`;
     line("检票口 · Boarding",
@@ -128,8 +128,8 @@ export function createStationInteractions({ line, state, change, world }) {
       checked ? "jiǎn piào hǎo le ！ qǐng dài hǎo xíng li ， cóng zhè lǐ zǒu 。"
         : progress.ready ? "qǐng chū shì chē piào hé hù zhào 。 nǐ zhǔn bèi hǎo le ma ？"
         : "hái méi dào chū fā de shí hou 。 xiān zài hòu chē shì liáo liao tiān ， yě kě yǐ huí chéng lǐ bāng bang péng you 。",
-      checked ? "Your booking has been checked. Take your luggage through the open lane to the landing."
-        : progress.ready ? "Your Shanghai ticket is ready. Present it with your passport to open the gates, or keep exploring."
+      checked ? "Your booking has been checked. Take your luggage through the second lane from the left to the landing."
+        : progress.ready ? "Your Shanghai ticket is ready. Present it with your passport to open the second gate from the left, or keep exploring."
         : `Earn ${progress.remaining} more XP before departure. Talk with travelers, practice words, or return to town to help friends. Your booking will wait for you.`,
       [
         ...(!checked && progress.ready ? [["station-boarding-confirm", "出示车票和护照 · Present ticket & passport", () => {
@@ -141,28 +141,32 @@ export function createStationInteractions({ line, state, change, world }) {
       ], "male-kokoro-009", pass);
   }
   function platform(o) {
-    if (!journey().boarding || !stationBoardingProgress(state().xp, false).ready) return boarding();
+    if (!journey().boarding || !stationBoardingProgress(state().xp, devMode()).ready) return boarding();
     if (world().hasScene(o.integrationTarget)) {
       close(); world().enterDoor({ ...o, type: "door", target: o.integrationTarget }); return;
     }
     say("站台 · Platform", "站台在楼下。我们在这里等一下吧。",
       "zhàn tái zài lóu xià 。 wǒ men zài zhè lǐ děng yí xià ba 。",
-      "These stairs and the lift lead down to the ground-level platform. The platform and train journey are not open yet. You can return to the waiting hall.");
+      "These stairs lead down to the ground-level platform. The platform and train journey are not open yet. You can return to the waiting hall.");
   }
   function platformTrain() {
-    const arrived = journey().trainArrived;
-    const progress = trainProgress(state(), false);
+    const local = platformConversationXP(state());
+    const arrived = journey().trainArrived && local >= PLATFORM_LOCAL_XP;
+    const progress = trainProgress(state(), devMode());
+    progress.local = local;
+    progress.localRemaining = Math.max(0, PLATFORM_LOCAL_XP - local);
+    progress.ready &&= local >= PLATFORM_LOCAL_XP;
     const boarded = journey().trainBoarded;
     line("站台 · Platform",
       arrived ? "火车到了！我们不着急。" : "火车快来了。请站在黄线里面等车。",
       arrived ? "huǒ chē dào le ！ wǒ men bù zháo jí 。" : "huǒ chē kuài lái le 。 qǐng zhàn zài huáng xiàn lǐ miàn děng chē 。",
       boarded ? "Boarding complete. Your progress is saved. The train ride is still being built."
-        : `${arrived ? "The train has arrived." : "The train will arrive shortly."} Boarding requires 1500 total XP and 100 XP earned here on the platform. The train will wait for you.`,
+        : `${arrived ? "The train has arrived." : "Talk to the platform NPCs to earn 100 conversation XP and bring the train."} Boarding requires 1500 total XP and 100 XP earned by talking to NPCs here on the platform. The train will wait for you.`,
       [
         ...(arrived && progress.ready && !boarded ? [["station-train-board", "Board train", () => { act("board-train"); platformTrain(); }]] : []),
         ["station-platform-done", "好 · Continue", close],
       ], "panda",
-      `<section class="station-boarding-pass" role="status"><p>${progress.earned} / ${progress.required} XP</p><p>Platform: ${progress.local} / ${progress.localRequired} XP</p><p>${progress.ready ? "XP requirements met" : `Still need ${progress.remaining} total XP and ${progress.localRemaining} platform XP`}</p>${boarded ? "<p>Boarding complete ✓</p>" : ""}</section>`);
+      `<section class="station-boarding-pass" role="status"><p>${progress.earned} / ${progress.required} XP</p><p>Platform conversations: ${progress.local} / ${progress.localRequired} XP</p><p>${progress.ready ? "XP requirements met" : `Still need ${progress.remaining} total XP and ${progress.localRemaining} platform conversation XP`}</p>${boarded ? "<p>Boarding complete ✓</p>" : ""}</section>`);
   }
   return (o) => {
     // Ignore stale belt interactions if clearance was reset while navigating.
@@ -174,7 +178,7 @@ export function createStationInteractions({ line, state, change, world }) {
     else if (["station-security-guide", "station-security-exit"].includes(o.id)) securityGuide(o);
     else if (["station-stairs-up", "station-lift-up"].includes(o.id)) upstairs(o);
     else if (o.id === "station-boarding-check") boarding();
-    else if (["station-platform-stairs", "station-platform-lift"].includes(o.id)) platform(o);
+    else if (o.id === "station-platform-stairs") platform(o);
     else if (o.id === "station-platform-train") platformTrain();
     else return false;
     return true;

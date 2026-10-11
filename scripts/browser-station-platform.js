@@ -95,7 +95,7 @@ try {
   await seed({offline:true,scene:"station-platform",position:platformArrival,arrived:true});
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller,null,{timeout:60000});
   const cached=await page.evaluate(async()=>{const c=await caches.open((await caches.keys()).find(k=>k.startsWith("xiongmao-shell-")));return(await c.keys()).map(r=>new URL(r.url).pathname);});
-  for(const file of ["/data/station-platform.js","/data/station-platform-travelers.js","/game/station-train.js","/game/station-platform-art.js","/assets/optimized/station-platform-v3.webp","/assets/optimized/station-train-overhead-v1.webp","/assets/optimized/roamers-idle.webp"])assert.ok(cached.includes(file),file);
+  for(const file of ["/data/station-platform.js","/data/station-platform-travelers.js","/game/station-train.js","/game/station-platform-art.js","/assets/optimized/station-platform-v4.webp","/assets/optimized/station-train-overhead-v1.webp","/assets/optimized/roamers-idle.webp"])assert.ok(cached.includes(file),file);
   await context.setOffline(true);await page.reload();await page.click("#begin");await ready("station-platform");
   assert.equal((await data()).trainPhase,"ready");await capture("offline-platform");
   assert.deepEqual(errors,[]);

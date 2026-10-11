@@ -1,3 +1,5 @@
+import { platformConversationXP } from "../data/rewards.js";
+import { Escort, escortSpawn } from "./escort.js";
 import { createBubbleHelp } from "./bubble-help.js";
 import { luggageObjectVisible, carriesTravelSuitcase, needsStationLuggage } from "../data/travel-luggage.js";
 import { isCoreInteraction, npcFeet } from "./interactions.js";
@@ -38,6 +40,8 @@ export class World {
       onStationJourneyAction = () => {},
       onArtStatus = () => {},
       onSignSelect = () => {},
+      onErrandArrive = () => {},
+      onPlatformHint = () => {},
     },
   ) {
     Object.assign(this, {
@@ -55,6 +59,7 @@ export class World {
       onStationTravelerProgress,
       onStationJourneyAction,
       onArtStatus,
+      onErrandArrive, onPlatformHint,
     });
     this.ctx = canvas.getContext("2d");
     this.signHelp = createStationSignHelp(canvas, phrase => {
@@ -231,6 +236,8 @@ export class World {
           collectibleAvailable(this.scene, o, this.getFound(), this.player) &&
           !(o.id === XIAOCHENG && !stationTravelerVisible(this.scene, this.getAdventure())) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
+          !(o.requiresWaitingVisit && !this.getAdventure().stationJourney?.visitedWaiting) &&
+          !this.errandActors?.some(a => a.id === o.id) &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
             o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
@@ -244,6 +251,7 @@ export class World {
       ...this.actors().filter((o) => o.type === "passerby"),
       ...(this.guest ? [this.guest] : []),
       ...(this.hungryGuest ? [this.hungryGuest] : []),
+      ...(this.errandActors || []).filter(a=>!a.hidden),
     ].filter(o => includeObjects || isCoreInteraction(o));
   }
   nearby() {
@@ -277,6 +285,8 @@ export class World {
           o.type === "npc" &&
           !(o.id === XIAOCHENG && !stationTravelerVisible(this.scene, this.getAdventure())) &&
           !["kid-one", "kid-two", "lin"].includes(o.id) && !o.playRoute &&
+          !(o.requiresWaitingVisit && !this.getAdventure().stationJourney?.visitedWaiting) &&
+          !this.errandActors?.some(a => a.id === o.id) &&
           !(o.id === "lian" && this.hungryGuest) &&
           !(
             o.id === "sheep-keepsake" && this.getAdventure().hungry !== "done"
@@ -285,6 +295,7 @@ export class World {
       ),
       ...(this.guest ? [this.guest] : []),
       ...(this.hungryGuest ? [this.hungryGuest] : []),
+      ...(this.errandActors || []).filter(a=>!a.hidden),
     ].sort((a, b) => b.y - a.y);
     const person = actors.find((o) => {
       const feet = npcFeet(o);
@@ -399,14 +410,14 @@ export class World {
   }
   updateHungryGuest(dt) {
     // Station forecourt has only its traveler cast; resume the town invitation on return.
-    if (this.scene.id === "shantang") {
+    if (!["shanghai", "restaurant"].includes(this.scene.id)) {
       this.hungryGuest = null;
       this.friendRoute = [];
       return;
     }
     const state = this.getAdventure().hungry;
     if (
-      state === "new" ||
+      !state || state === "new" ||
       (state === "done" && this.scene.id !== "restaurant")
     ) {
       this.hungryGuest = null;
@@ -419,42 +430,39 @@ export class World {
         type: "guest",
         name: "小莲",
         appearance: "lian",
-        x: this.player.x - 50,
-        y: this.player.y,
+        ...escortSpawn(this.scene, this.player, this.facing),
         distance: 0,
         facing: this.facing,
         artHeight: 171,
       };
     const g = this.hungryGuest;
-    if (
-      this.scene.id === "restaurant" &&
-      (state === "dining" || state === "done")
-    ) {
-      Object.assign(g, { x: 1045, y: 375, artHeight: 165, moving: false });
-      return;
+    if (this.seat?.kind === "hotpot" || g.seated) { g.moving = false; return; }
+    if (!this.friendEscort || this.friendEscort.actor !== g)
+      this.friendEscort = new Escort(this.scene, g, this.player);
+    this.friendEscort.update(this.player, dt);
+  }
+
+  updateErrands(dt) {
+    if (this.scene.id !== "station-waiting") return;
+    this.errandActors ||= []; this.errandMotion ||= {};
+    for (const [key,id,targetId,active] of [["rest","traveler-wenbo","station-massage","escort"],["bathroom","traveler-jiani","station-toilets","walking"]]) {
+      const status=this.getAdventure().stationErrands?.[key];
+      if (![active,"done"].includes(status)) continue;
+      const original=this.scene.interactables.find(o=>o.id===id), target=this.scene.interactables.find(o=>o.id===targetId);
+      if (!original || !target) continue;
+      let actor=this.errandActors.find(o=>o.id===id);
+      if(!actor){actor={...original,x:original.x,y:original.y,moving:false};delete actor.approachX;delete actor.approachY;delete actor.hitRect;this.errandActors.push(actor);}
+      if(status==="done") {actor.hidden=key==="bathroom";actor.x=target.x;actor.y=target.y;actor.moving=false;continue;}
+      if(!this.errandMotion[key]) {
+        this.errandMotion[key]=key==="rest"?new Escort(this.scene,actor,this.player):{route:pathTo(this.scene,actor,target)};
+      }
+      if(key==="rest") this.errandMotion[key].update(this.player,dt);
+      else {
+        const route=this.errandMotion[key].route,p=route[0];actor.moving=false;
+        if(p){const d=Math.hypot(p.x-actor.x,p.y-actor.y);if(d<2)route.shift();else{const step=Math.min(d,160*dt),next=move(this.scene,actor,(p.x-actor.x)/d*step,(p.y-actor.y)/d*step);actor.distance=(actor.distance||0)+Math.hypot(next.x-actor.x,next.y-actor.y);actor.moving=true;Object.assign(actor,next);}}
+      }
+      if(Math.hypot(actor.x-target.x,actor.y-target.y)<100 && (key!=="rest" || Math.hypot(this.player.x-target.x,this.player.y-target.y)<110)) this.onErrandArrive(key);
     }
-    g.moving = false;
-    if (Math.hypot(g.x - this.player.x, g.y - this.player.y) < 115) return;
-    if (!this.friendRoute?.length)
-      this.friendRoute = pathTo(this.scene, g, this.player);
-    const p = this.friendRoute?.[0];
-    if (!p) return;
-    const d = Math.hypot(p.x - g.x, p.y - g.y);
-    if (d < 5) {
-      this.friendRoute.shift();
-      return;
-    }
-    const step = Math.min(d, 315 * dt),
-      next = move(
-        this.scene,
-        g,
-        ((p.x - g.x) / d) * step,
-        ((p.y - g.y) / d) * step,
-      );
-    g.distance += Math.hypot(next.x - g.x, next.y - g.y);
-    g.moving = true;
-    if (Math.abs(next.x - g.x) > 0.1) g.facing = Math.sign(next.x - g.x);
-    Object.assign(g, { x: next.x, y: next.y });
   }
   sitAt(table, kind) {
     this.seat =
@@ -567,10 +575,16 @@ export class World {
     this.scene = id === "station-ticketing" ? stationGroundForJourney(this.getAdventure().stationJourney)
       : id === "station-waiting" ? stationWaitingForJourney(this.getAdventure().stationJourney) : scenes[id];
     this.platformTrain = id === "station-platform"
-      ? new StationTrain({ arrived: this.getAdventure().stationJourney?.trainArrived }) : null;
+      ? new StationTrain({ arrived: this.getAdventure().stationJourney?.trainArrived, earnedPlatformXP: platformConversationXP(this.getAdventure()) }) : null;
     this.animalPoses = [];
+    this.errandActors = [];
+    this.errandMotion = {};
+    this.platformIdle = 0;
+    this.platformIntroduced = false;
+    this.platformPrompted = false;
     this.guest = null;
     this.hungryGuest = null;
+    this.friendEscort = null;
     this.friendRoute = [];
     this.guestRoute = [];
     this.hover = null;
@@ -588,10 +602,14 @@ export class World {
     this.pandaTrailPoint = { ...this.player, time: 0 };
     this.pandaWalkDistance = 0;
     this.clear();
+    this.camera = null;
+    // Reset any previous scene clip/compositing state, including interrupted draws.
+    this.canvas.width = this.canvas.width;
+    this.paintKey = null;
     this.loadSceneArt();
     this.onMove?.(this.scene.id, this.player);
   }
-  loadSceneArt() {
+  loadSceneArt(retry = false) {
     const generation = (this.artGeneration = (this.artGeneration || 0) + 1);
     this.artPending = true;
     this.canvas.dataset.artReady = "false";
@@ -604,7 +622,12 @@ export class World {
         this.onArtStatus("ready");
       })
       .catch(() => {
-        if (generation === this.artGeneration) this.onArtStatus("error");
+        if (generation !== this.artGeneration) return;
+        if (!retry) {
+          // A failed/evicted decode must not strand the frame loop. Retry only
+          // this scene generation; a later door transition owns its own load.
+          setTimeout(() => { if (generation === this.artGeneration) this.loadSceneArt(true); }, 150);
+        } else this.onArtStatus("error");
       });
   }
   interact() {
@@ -680,7 +703,8 @@ export class World {
     }
   }
   frame(t) {
-    const dt = Math.min(MAX_FRAME_DT, (t - this.last) / 1000 || 0);
+    const elapsed = Math.max(0, (t - this.last) / 1000 || 0);
+    const dt = Math.min(MAX_FRAME_DT, elapsed);
     this.last = t;
     if (this.artPending) {
       this.signHelp.update(this.scene, this.camera, false);
@@ -693,15 +717,21 @@ export class World {
     this.updateStationTraveler(this.paused ? 0 : dt);
     this.syncStationInterior();
     if (this.platformTrain && !this.paused && !this.bubbleHelp.reading) {
-      const pose = this.platformTrain.update(dt, this.getSettings().motion !== false);
+      const pose = this.platformTrain.update(dt, this.getSettings().motion !== false, platformConversationXP(this.getAdventure()));
       if (pose.phase === "ready" && !this.getAdventure().stationJourney?.trainArrived)
         this.onStationJourneyAction("train-arrived");
+    }
+    if (this.scene.id === "station-platform" && !this.paused && !this.bubbleHelp.reading) {
+      if (!this.platformIntroduced) { this.platformIntroduced=true; this.onPlatformHint("我们到站台了，火车应该快到了。"); }
+      this.platformIdle += elapsed;
+      if (this.platformIdle > 45 && !this.platformPrompted) { this.platformPrompted=true;this.onPlatformHint("等车的时候，和这里的人聊聊天吧。也可以帮小洁找垃圾桶。"); }
     }
     let moving = false;
     const previousPanda = this.panda;
     if (!this.paused) {
       this.updateGuest(dt);
       this.updateHungryGuest(dt);
+      this.updateErrands(dt);
       let dx =
         Number(this.keys.has("d") || this.keys.has("arrowright")) -
         Number(this.keys.has("a") || this.keys.has("arrowleft"));
@@ -838,6 +868,8 @@ export class World {
         this.pendingInteraction,
         this.guest,
         this.hungryGuest,
+        this.errandActors,
+        this.getAdventure().stationErrands,
         this.stationTraveler,
         this.getAdventure().stationTraveler,
         this.getAdventure().stationJourney,
@@ -882,6 +914,7 @@ export class World {
           hover: feedbackTarget,
           guest: this.guest,
           hungryGuest: this.hungryGuest,
+          errandActors: this.errandActors || [],
           stationTraveler: this.stationTraveler,
           platformTrain: this.platformTrain?.pose(),
           seat: this.seat,

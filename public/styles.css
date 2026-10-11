@@ -1640,10 +1640,9 @@ dialog .primary {
   bottom: 5%;
 }
 #food-name:not(:empty) {
-  position: absolute;
-  bottom: 4%;
-  left: 24%;
-  right: 26%;
+  display: block;
+  position: static;
+  margin: 10px 0;
   background: #fff3dfed;
   border-radius: 12px;
   padding: 7px;
@@ -1827,12 +1826,19 @@ dialog .primary {
   width: min(900px, 96vw);
   max-width: min(900px, 96vw);
   max-height: 90dvh;
+  overflow-y: auto;
+}
+#conversation.shop-conversation > * {
+  flex-shrink: 0;
+}
+#conversation.shop-conversation .conversation-body {
+  overflow: visible;
 }
 #shop-view {
   display: block;
   width: auto;
   max-width: 100%;
-  height: min(32vh, 320px);
+  height: min(36dvh, 360px);
   flex: 0 0 auto;
   align-self: center;
   object-fit: contain;

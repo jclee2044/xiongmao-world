@@ -1,0 +1,7 @@
+{
+  "mode": "built-in image_gen",
+  "prompt": "Use case: precise-object-edit. Edit target: attached crop of two adjacent station shops. Create a high-resolution faithful repaint/detail restoration of this exact image at 1600x640. Preserve EXACT composition, perspective, positions, outlines, architecture, counter edges, tables and chairs, golden lighting, color palette, both people's identities and scale. Left older Chinese shopkeeper with gray hair, blue shirt behind wooden counter; right young Chinese barista with short dark bob, cream blouse, sage apron behind café counter. Refine faces and hands naturally, paint detailed bread and biscuit packets, bottled water, jars, pastry glass cabinet, coffee machine and porcelain cups. Warm painterly game illustration matching original, soft brushwork but clear readable details. Absolutely no new objects, no new people, no text, no changes to layout or crop framing. This is the SAME scene at higher resolution, not a different viewpoint or portrait.",
+  "source": "Crop [40,200,400,160] of the initial station-shop-repaint result",
+  "master": "source-art/station-shops-detail-v1.png",
+  "integration": "Master normalized to 1600x640. Resize to 400x160 and composite at [40,200] over station-waiting-v5.png to create station-waiting-v6.png. Café popup crop [876,40,704,584], snack popup crop [16,40,748,504], both from the master. Supersedes the first-pass integration in station-shop-repaint.json."
+}

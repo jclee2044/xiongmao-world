@@ -29,7 +29,7 @@ export const groundProps = [
   prop("ticket-planter", 1046, rectangle(423, 1002, 50, 39),
     [rectangle(431, 998, 41, 45), rectangle(417, 828, 23, 174)],
     [[[423, 829], [450, 829], [458, 891], [483, 948], [476, 1006], [434, 1003], [424, 945]]]),
-  prop("map-board", 790, [[630, 742], [705, 773], [706, 789], [631, 756]], [
+  prop("map-board", 790, [[621, 736], [714, 770], [714, 802], [621, 765]], [
     [[631, 618], [700, 645], [704, 788], [690, 781], [688, 766], [632, 746]],
   ]),
   prop("map-west-plant", 753, rectangle(597, 714, 37, 37), [rectangle(598, 716, 32, 34)],
@@ -139,13 +139,14 @@ export const stationGround = {
     poly([[663, 1164], [700, 1152], [741, 1154], [743, 1372], [695, 1377], [662, 1349]]),
   ],
   interactables: [
+    stop("station-confused", "npc", "小安", 480, 1180, {appearance:"station-confused",dialogueId:"station-confused",artHeight:163,requiresWaitingVisit:true}),
     stop("station-ground-exit", "door", "回码头", 505, 1375, {
       target: "shantang", returnPoint: { x: 1215 * 1.8, y: 485 * 1.8 },
       hitRect: box(357, 1305, 310, 100), navigation: true,
     }),
     stop("station-ticket-counter", "npc", "售票员", 276, 1071, {
-      appearance: "station-clerk", artX: 269 * GROUND_SCALE, artY: 1065 * GROUND_SCALE,
-      artHeight: 225, sortY: 1037 * GROUND_SCALE,
+      appearance: "station-clerk", artX: 269 * GROUND_SCALE, artY: 1029 * GROUND_SCALE,
+      artHeight: 171, sortY: 1037 * GROUND_SCALE,
       // The counter conceals her lower body; only the glazed service opening
       // can reveal the clerk. Keep her head clear of the header and uprights.
       artClip: poly(rectangle(222, 911, 85, 73)),

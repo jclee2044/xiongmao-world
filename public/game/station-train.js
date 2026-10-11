@@ -1,24 +1,26 @@
+import { PLATFORM_LOCAL_XP } from "../data/rewards.js";
 // The train is an independent actor. Arrival has no deadline, and it stays at
 // the platform until a future journey scene explicitly requests depart().
-export const TRAIN_WAIT = 3;
+// Kept as a compatibility export; waiting time never unlocks arrival.
+export const TRAIN_WAIT = Infinity;
 export const TRAIN_ARRIVAL = 9;
 export const TRAIN_DEPARTURE = 7;
 
 export class StationTrain {
-  constructor({ arrived = false } = {}) {
-    this.phase = arrived ? "ready" : "waiting";
+  constructor({ arrived = false, earnedPlatformXP = 0 } = {}) {
+    this.phase = arrived && earnedPlatformXP >= PLATFORM_LOCAL_XP ? "ready" : "waiting";
     this.elapsed = 0;
   }
-  update(dt, motion = true) {
+  update(dt, motion = true, earnedPlatformXP = 0) {
+    if (this.phase === "waiting") {
+      if (earnedPlatformXP < PLATFORM_LOCAL_XP) return this.pose();
+      this.phase = "arriving"; this.elapsed = 0;
+    }
     if (!motion && ["waiting", "arriving"].includes(this.phase)) {
       this.phase = "ready";
       this.elapsed = 0;
     }
     this.elapsed += Math.max(0, dt);
-    if (this.phase === "waiting" && this.elapsed >= TRAIN_WAIT) {
-      this.elapsed -= TRAIN_WAIT;
-      this.phase = "arriving";
-    }
     if (this.phase === "arriving" && this.elapsed >= TRAIN_ARRIVAL) {
       this.elapsed = 0;
       this.phase = "ready";

@@ -1,7 +1,7 @@
 import { travelerById } from "./station-travelers.js";
 
 const line = (chinese, meaning, pinyin = "") => ({chinese, meaning, pinyin, topic:"travel"});
-export const platformTravelContext = "You are a passenger on the small railway platform below the boarding gates. You have already bought a ticket and completed security and boarding checks. Use these platform facts instead of earlier ticket-buying plans. The tracks are on the right; wait on the platform side of the yellow line. The stairs and lift at the upper left return to the upstairs waiting hall, where the shops, toilets, hot water and help desk are. The train arrives and waits here; do not claim it has arrived unless the saved journey says so. Carriage boarding and the train ride are not implemented. Personal destinations are fictional travel plans, not a claim that this train serves every destination. Conversation cannot book tickets, open doors or start a train. Speak short, beginner-friendly Chinese about the journey, luggage, family and scenery.";
+export const platformTravelContext = "You are a passenger on the small railway platform below the boarding gates. You have already bought a ticket and completed security and boarding checks. Use these platform facts instead of earlier ticket-buying plans. The tracks are on the right; wait on the platform side of the yellow line. The stairs at the upper left return to the upstairs waiting hall, where the shops, toilets, hot water and help desk are. The train arrives and waits here; do not claim it has arrived unless the saved journey says so. Carriage boarding and the train ride are not implemented. Personal destinations are fictional travel plans, not a claim that this train serves every destination. Conversation cannot book tickets, open doors or start a train. Speak short, beginner-friendly Chinese about the journey, luggage, family and scenery.";
 
 // Reuse the established passengers without changing their earlier conversations.
 const returning = [
@@ -81,7 +81,7 @@ export function platformTravelerReply(id, text, {scene, currentLine, arrived=fal
   if (/厕所|洗手间|问询|热水|买水|toilet|restroom|help desk|hot water/i.test(text))
     return line("先从左上方上楼，回候车室。那些地方都在候车室左边。", "First go upstairs at the upper left to the waiting hall. Those places are all on the left there.");
   if (/楼梯|电梯|回去|上楼|候车室|stairs|lift|elevator|upstairs|waiting hall/i.test(text))
-    return line("左上方的楼梯和电梯都可以回候车室。", "Both the stairs and lift at the upper left return to the waiting hall.");
+    return line("左上方的楼梯可以回候车室。", "The stairs at the upper left return to the waiting hall.");
   if (/去哪里|去哪儿|去哪|目的地|where.*(?:go|travel|visit)|destination|上海|杭州|南京|无锡|黄山|女儿|哥哥|家人|朋友|family|daughter|brother/i.test(text))
     return profile.destination;
   if (/买.*票|车票|ticket/i.test(text))
