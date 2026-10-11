@@ -1,3 +1,4 @@
+import { replySchema, validateReply, dialogueError } from "./dialogue/contracts.js";
 import { platformTravelerNpc, platformTravelerProfile, platformTravelerReply, platformTravelContext } from "../public/data/station-platform-travelers.js";
 import { waitingTravelerReply, waitingTravelerNpc, waitingTravelerProfile, waitingTravelContext } from "../public/data/station-waiting-travelers.js";
 import { stationHelpReply } from "../public/data/station-help.js";
@@ -15,7 +16,6 @@ import {
   subjectLine,
 } from "../public/data/conversation-subjects.js";
 import {
-  isChineseDialogue,
   dialogueLanguageRule,
   rejectedDialogueWords,
 } from "../public/data/language.js";
@@ -25,7 +25,7 @@ import {
   requestedPlace,
   directionsTo,
 } from "../public/data/navigation.js";
-import { npcs, topics } from "../public/data/content.js";
+import { npcs } from "../public/data/content.js";
 import { challengeFor } from "../public/data/learner.js";
 import { pinyin } from "./pronunciation.js";
 import { geminiGenerate } from "./gemini.js";
@@ -259,55 +259,12 @@ export function storyReply(
     notice: "Limited story mode: replies follow a small set of topics.",
   };
 }
-export const replySchema = {
-  type: "object",
-  properties: {
-    chinese: { type: "string" },
-    meaning: { type: "string" },
-    topic: { type: "string", enum: topics },
-  },
-  required: ["chinese", "meaning", "topic"],
-  additionalProperties: false,
-};
+export { replySchema, validateReply } from "./dialogue/contracts.js";
 const conversationSchema = {
   ...replySchema,
   properties: { ...replySchema.properties, pandaFeedback: feedbackSchema },
   required: [...replySchema.required, "pandaFeedback"],
 };
-function dialogueError(message, code) {
-  return Object.assign(new Error(message), { code });
-}
-export function validateReply(data) {
-  if (
-    !data ||
-    typeof data !== "object" ||
-    Array.isArray(data) ||
-    Object.keys(data).some(
-      (k) => !["chinese", "pinyin", "meaning", "topic"].includes(k),
-    )
-  )
-    throw dialogueError("Malformed model response.", "invalid-response");
-  for (const [key, max] of [
-    ["chinese", 180],
-    ["pinyin", 500],
-    ["meaning", 400],
-  ])
-    if (
-      typeof data[key] !== "string" ||
-      !data[key].trim() ||
-      data[key].length > max ||
-      /[<>\u0000-\u001f]/.test(data[key])
-    )
-      throw dialogueError("Malformed model response.", "invalid-response");
-  if (!/[\p{Script=Han}]/u.test(data.chinese) || !topics.includes(data.topic))
-    throw dialogueError("Malformed model response.", "invalid-response");
-  if (!isChineseDialogue(data.chinese))
-    throw dialogueError(
-      "Model reply exceeds the old HSK 3 vocabulary limit.",
-      "vocabulary",
-    );
-  return data;
-}
 function shownDialogueContext(line) {
   if (!line) return "";
   try {

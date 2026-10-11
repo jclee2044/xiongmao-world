@@ -1,4 +1,5 @@
-import { newAdventure, validateAdventure } from "../public/data/adventure.js";
+import { createInitialState } from "../public/state/defaults.js";
+import { validateAdventure } from "../public/data/adventure.js";
 import { stationGroundForJourney } from "../public/data/station-interior.js";
 import { stationWaitingForJourney } from "../public/data/station-waiting.js";
 import { DatabaseSync } from "node:sqlite";
@@ -6,32 +7,15 @@ import { randomBytes, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { defaultSettings, validatePatch } from "../public/data/settings.js";
-import { newLearner } from "../public/data/learner.js";
 import {
   scenes,
   canStand,
-  MAP_VERSION,
   upgradeState,
 } from "../public/game/world.js";
 import { npcs } from "../public/data/content.js";
-import { newPractice, validatePractice } from "../public/data/activities.js";
+import { validatePractice } from "../public/data/activities.js";
 const hash = (text) => createHash("sha256").update(text).digest("hex");
-export const newState = () => ({
-  schema: 1,
-  mapVersion: MAP_VERSION,
-  scene: "shanghai",
-  position: { ...scenes.shanghai.spawn },
-  found: [],
-  settings: { ...defaultSettings },
-  settingsHistory: [],
-  feedback: [],
-  memories: {},
-  learner: newLearner(),
-  history: [],
-  journal: [],
-  practice: newPractice(),
-  adventure: newAdventure(),
-});
+export const newState = () => createInitialState();
 export function validateState(s) {
   const scene = s?.scene === "station-ticketing"
     ? stationGroundForJourney(s?.adventure?.stationJourney)

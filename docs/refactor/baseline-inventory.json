@@ -1,0 +1,2039 @@
+{
+  "format": 1,
+  "revision": "b85202cc1b6188aaa74c8eb95a33cbcd991e556d",
+  "tools": {
+    "node": "v26.8.2",
+    "chromium": "Chromium 152.0.7977.82 Arch Linux",
+    "dependencies": {
+      "playwright": "1.63.0",
+      "prettier": "3.9.9"
+    }
+  },
+  "mapVersion": 14,
+  "scenes": [
+    "shanghai",
+    "home",
+    "clothing-store",
+    "bakery",
+    "teahouse",
+    "bookshop",
+    "family-home",
+    "restaurant",
+    "museum",
+    "shantang",
+    "lion-grove",
+    "humble-garden",
+    "tiger-court",
+    "silk-room",
+    "station-ticketing",
+    "station-waiting",
+    "station-platform"
+  ],
+  "npcs": [
+    "clothing-seller",
+    "clothing-customer",
+    "mei",
+    "lin",
+    "qiao",
+    "bo",
+    "lan",
+    "wei",
+    "an",
+    "hao",
+    "yun",
+    "station-reader",
+    "visitor-0",
+    "visitor-1",
+    "visitor-2",
+    "visitor-3",
+    "visitor-4",
+    "visitor-5",
+    "guide",
+    "waiter",
+    "suyin",
+    "station-traveler",
+    "traveler-yutong",
+    "traveler-wenbo",
+    "traveler-meifang",
+    "traveler-jiani",
+    "traveler-rui",
+    "traveler-guoliang",
+    "traveler-yating",
+    "traveler-huilan",
+    "traveler-zihan",
+    "station-passenger-xinyi",
+    "station-passenger-siyu",
+    "station-passenger-min",
+    "station-passenger-haoran",
+    "station-passenger-hong",
+    "lian",
+    "diner",
+    "diner-friend",
+    "baker",
+    "reader",
+    "gardener",
+    "silk-host",
+    "kid-one",
+    "kid-two",
+    "snack-host",
+    "bamboo-worker",
+    "rock-gardener",
+    "courtyard-caretaker",
+    "family-grandma",
+    "family-grandpa",
+    "family-dad",
+    "family-son",
+    "family-daughter",
+    "waiting-auntie",
+    "waiting-student",
+    "waiting-tea",
+    "waiting-uncle",
+    "waiting-hiker",
+    "waiting-reader",
+    "waiting-granddaughter",
+    "waiting-friend",
+    "waiting-grandson",
+    "waiting-travel-friend",
+    "station-help",
+    "station-barista",
+    "station-shopkeeper"
+  ],
+  "activities": [
+    "mei-order",
+    "qiao-tea",
+    "wei-basket",
+    "lan-gift",
+    "bo-books",
+    "lin-plans",
+    "an-listen",
+    "hao-letter",
+    "yun-find",
+    "bakery-recipe",
+    "tea-listen-order",
+    "book-memory",
+    "lake-animals",
+    "shop-sentences",
+    "lantern-riddles",
+    "silk-workshop",
+    "market-budget",
+    "family-rug",
+    "family-tidy",
+    "weather-forecast",
+    "four-seasons",
+    "weather-clothes",
+    "family-clean",
+    "family-wash",
+    "family-find-book",
+    "family-room",
+    "family-new-year"
+  ],
+  "assets": {
+    "count": 229,
+    "bytes": 259186797
+  },
+  "files": {
+    "public/app.js": {
+      "bytes": 53252,
+      "sha256": "f70aa058d5e21cd9a2af5399dbdceac25d7fc8c3d7c0a7d19a26908497db1077"
+    },
+    "public/assets/audio/ATTRIBUTION.md": {
+      "bytes": 6696,
+      "sha256": "b08e3f7be3de4fbe422dc027b88258e214e49928f98864ef8355d4cc9ecfb7a0"
+    },
+    "public/assets/audio/CC-BY-4.0.txt": {
+      "bytes": 18656,
+      "sha256": "9e5f1b3c610b9c2da5c313bf81d577a7d1acec686bdb0384edefa6df0f90cd94"
+    },
+    "public/assets/audio/asia-fsm-team.mp3": {
+      "bytes": 4230484,
+      "sha256": "09f8662858edc568ef113b9444f848b3aa8bd32c1b066759a8da9202f63463c3"
+    },
+    "public/assets/audio/sonican-asian-music-magical-dream.mp3": {
+      "bytes": 2523637,
+      "sha256": "7f8404dbafe5de1ff1db11b30080ce774e4e7b5cc8aecf32a9e241739abce320"
+    },
+    "public/assets/audio/station-forecourt.mp3": {
+      "bytes": 840768,
+      "sha256": "05a6138e72d87e1cd952db0793edeafa39ff83e64a077fb007ed5bbdaf3efd0a"
+    },
+    "public/assets/audio/station-hall.mp3": {
+      "bytes": 1200945,
+      "sha256": "60ca38bbdfd142cd9b34fb6e558aee1c53ef5434654327a94fea9d115c9b144f"
+    },
+    "public/assets/audio/station-pa.mp3": {
+      "bytes": 1080573,
+      "sha256": "0bc2f844c04f6c8da7ce0cc928a36d1c90e679de66be48cf640b1d45969b68f5"
+    },
+    "public/assets/audio/station-piano.mp3": {
+      "bytes": 3590545,
+      "sha256": "2c2f7db8007795d7a2f84d9ae4ea05a81f6b6aeb12a18826393c2b4fc21894f6"
+    },
+    "public/assets/characters/animals.webp": {
+      "bytes": 655466,
+      "sha256": "5ef39877ff6a788140b91a80c1ca424022570a14e1fbca335fa3a4b4e5019b8f"
+    },
+    "public/assets/characters/children-walk.png": {
+      "bytes": 1404487,
+      "sha256": "868eeccfd8b09f90eb40de9baf437f39589cc3e3eb9009ee0d0f66a71faa8cd9"
+    },
+    "public/assets/characters/fox-plush.png": {
+      "bytes": 1722889,
+      "sha256": "a86fb5a5dac8747a5e31562edcbc914c3d8c161f4d1480fe4c2025bd903febdf"
+    },
+    "public/assets/characters/garden-workers-work.png": {
+      "bytes": 1779059,
+      "sha256": "027a6b363a80fec74b0ef7292027c5d364e46d326ae224957b5acc1cdbeac264"
+    },
+    "public/assets/characters/garden-workers.png": {
+      "bytes": 1458156,
+      "sha256": "1c67330d325da808f0f0754fd7d77c9ac8672778c21a8115a975f0f36593e94c"
+    },
+    "public/assets/characters/indoor-npcs.png": {
+      "bytes": 1116817,
+      "sha256": "bb31c826a2a90c57f0127d1c7669b55e6bfa5383b7035f444fd5b74e30398e4c"
+    },
+    "public/assets/characters/lian-poses.png": {
+      "bytes": 2037817,
+      "sha256": "faace66f4ba12b03af706e990af19427ce54515c94f33fb87605a63f51929f4b"
+    },
+    "public/assets/characters/lin-walk.png": {
+      "bytes": 968942,
+      "sha256": "c05005397d7f20856e137ebfec0dacec4b23ae229e13cf032890fe079211eb5b"
+    },
+    "public/assets/characters/lin.webp": {
+      "bytes": 387696,
+      "sha256": "1051d37e86fbbd93e7d2a318a3082767441285f0bf431948da110dc17c4445b2"
+    },
+    "public/assets/characters/market-cat-poses.png": {
+      "bytes": 1481544,
+      "sha256": "97098b3d76c2b1d4daaf90f0aa034690f24c5cae07b86b9480b55bd366b9a9f5"
+    },
+    "public/assets/characters/market-npcs.png": {
+      "bytes": 2039609,
+      "sha256": "188961ab10a7171c2fc5f6669a7bcf8234bc528241c56dd1b704a7981b10af59"
+    },
+    "public/assets/characters/mei.webp": {
+      "bytes": 764500,
+      "sha256": "220f2f01344b0b1359f32004a25664b3806da5046cc2f63d15408ad5210e02b6"
+    },
+    "public/assets/characters/momo.webp": {
+      "bytes": 889714,
+      "sha256": "24fa78346a535f51a4ce5af5ad3ac3581e636d3672ddbae60a329dc348d81577"
+    },
+    "public/assets/characters/neighbors-walk-v2.png": {
+      "bytes": 2377858,
+      "sha256": "3cca937ab69f5cc71f7b055cb45aa420b9cacf5c31aef0ee4d655f86329a579d"
+    },
+    "public/assets/characters/neighbors-walk.png": {
+      "bytes": 2100916,
+      "sha256": "ee2026e43d21b75f1186ddc71030f5d35279a10e397d365de030d69c1c4dcf4b"
+    },
+    "public/assets/characters/neighbors.webp": {
+      "bytes": 654312,
+      "sha256": "c99ca89b3608d4ef8b21e9cbbbd09d7485e6475b5d34a4f8feb2bd55ee961aac"
+    },
+    "public/assets/characters/panda-v2.png": {
+      "bytes": 1428342,
+      "sha256": "9fc538340228da15ffec6e95abf05329973273da0f8da8fa47232234f8f08c0b"
+    },
+    "public/assets/characters/player-atlas.webp": {
+      "bytes": 339092,
+      "sha256": "5652531518421e07831e60aa68692fb702b4d06e881e4fe66feef70550d5bd63"
+    },
+    "public/assets/characters/player-idle-without-bag.png": {
+      "bytes": 1047635,
+      "sha256": "5d6672015294f0d92354f404cf46e7e9355ce49c3e03c9665d5d0b5e81fbf070"
+    },
+    "public/assets/characters/player-idle.png": {
+      "bytes": 1101051,
+      "sha256": "9dd63992d691f7d6bfb380f2b8a2358eabfc97cc72283f3c92c300b8fb0ce5be"
+    },
+    "public/assets/characters/player-seated-without-bag.png": {
+      "bytes": 1393637,
+      "sha256": "9946346aebc47e08a09b2db868b3fc3df69329bd383fcd546c066dfaa520496d"
+    },
+    "public/assets/characters/player-walk-v2.png": {
+      "bytes": 886931,
+      "sha256": "8a5be12d73b3512f1d7b25536271e0eca45f2e23d26547e1c0c584856cc2370c"
+    },
+    "public/assets/characters/player-walk-without-bag.png": {
+      "bytes": 875236,
+      "sha256": "ec1000d7846c0844944716f6ecf8e333549419ee726ebb9dca808814d10a79b5"
+    },
+    "public/assets/characters/player-walk.webp": {
+      "bytes": 695794,
+      "sha256": "d56f59923d32b011a5f8b85352d95019b793f36618aafc58bb141efe426f5128"
+    },
+    "public/assets/characters/qiao-seated.png": {
+      "bytes": 1953399,
+      "sha256": "dd750c50f803c4d9a215d8ef8213869836f47e45b676ac2d4359b956f2fa3cd8"
+    },
+    "public/assets/characters/rabbit-plush.png": {
+      "bytes": 1798692,
+      "sha256": "80348abddd2ebcdab3e74acaed52cd2ef114195de62ddd6da6614e55a3439e9f"
+    },
+    "public/assets/characters/roamers-idle.png": {
+      "bytes": 1386680,
+      "sha256": "9c02f3b8d62e7eaefe3f80afd4da956df33ec56660343311c97cccc0506591fe"
+    },
+    "public/assets/characters/seated-friends.png": {
+      "bytes": 1413402,
+      "sha256": "d2345eea1017922e4271cdfdb5c53f4b01ac6a1c12fbc9782561e7ebb4935d76"
+    },
+    "public/assets/characters/station-clerk-v2.png": {
+      "bytes": 1764577,
+      "sha256": "1f4e38f7306d04fe2998eee0b414aa5819473b9a98a76ce67a6d184e1e44267b"
+    },
+    "public/assets/characters/station-employee-desk-v1.png": {
+      "bytes": 1080818,
+      "sha256": "bc1526672afbc2215ff46f2fdd565710d01b0b1977f274bb9d3cf8ce301d8fa6"
+    },
+    "public/assets/characters/station-employee-exit-v1.png": {
+      "bytes": 1145096,
+      "sha256": "e4828de6a2a9be8beb0c774b4ab7bdcbdcde8f01befaa14fc494786a8f217b97"
+    },
+    "public/assets/characters/station-employee-guide-v1.png": {
+      "bytes": 1144658,
+      "sha256": "cb3e26d82878e6fb63d807aca8cf9bb3320fcb47bf1d7c79af0153bf4e4d9321"
+    },
+    "public/assets/characters/station-employee-poses-v2.png": {
+      "bytes": 2181271,
+      "sha256": "57ef68c68b7591a037211e22589ff80160f14f99d9ab2679ab3dd2267dbff015"
+    },
+    "public/assets/characters/station-interior-people-v1.png": {
+      "bytes": 1903184,
+      "sha256": "7f1a9fee0f645f9ba6fba28d25d2e5904771ec83374d13f4768b3b21d7a0ba1e"
+    },
+    "public/assets/characters/station-reader-seated-v2.png": {
+      "bytes": 1457570,
+      "sha256": "46aa2fa7933798b37ebb018e51607ed89cc15fb2393ba9f7038f1ae8e137f205"
+    },
+    "public/assets/characters/station-reader-seated-v3.png": {
+      "bytes": 1790213,
+      "sha256": "f86c2f1b9a556cdf5268086fb3c013d962dcca9d03903fb8d70027ce3b2b8a55"
+    },
+    "public/assets/characters/station-seated-companions-v1.png": {
+      "bytes": 1140651,
+      "sha256": "40a1ae373c39f08aa02df230e11ad7c04301e8566ed060a5f48e3d8a5706df2f"
+    },
+    "public/assets/characters/station-seated-companions-v2.png": {
+      "bytes": 2131314,
+      "sha256": "6c11a2f554b484346f817cbae73d1ff1bd071f59bc3fffc8efb4015cb245a432"
+    },
+    "public/assets/characters/station-seated-companions-v3.png": {
+      "bytes": 2334738,
+      "sha256": "e8b352c4ff7b0883fd346d73e77c6dd635773674b229c186a956bcbaf8b84f5f"
+    },
+    "public/assets/characters/station-travelers-a.png": {
+      "bytes": 1342544,
+      "sha256": "ff698c3435131d122d0a448bfed0c5ece365083182d72c9e53d9615c31dd7547"
+    },
+    "public/assets/characters/station-travelers-b.png": {
+      "bytes": 1460319,
+      "sha256": "5601b564d96614ae1fabad9517a86c04e03df6639da96421e8127bf52e770373"
+    },
+    "public/assets/characters/station-travelers-walk-a-v1.png": {
+      "bytes": 1386278,
+      "sha256": "5c1d1313c0de70b004eeda16ba16c365d41effb8e007feb87e30895e2e72b902"
+    },
+    "public/assets/characters/station-travelers-walk-v1.png": {
+      "bytes": 1353388,
+      "sha256": "35660e331ceab236476c1425583450c8a54c610f5e2dc2461f5b1a46142fa1e4"
+    },
+    "public/assets/characters/station-waiting-people-v1.png": {
+      "bytes": 2188692,
+      "sha256": "b697638695b9954aa762dfc81b8dcbc00e872fffb4d65dfef46717a85d0c1bd0"
+    },
+    "public/assets/characters/station-waiting-people-v2.png": {
+      "bytes": 2423532,
+      "sha256": "0c4f5bb553c9d2170724ca044a8d24a38a6f2c6b9e7d70c487de0311a1dc4962"
+    },
+    "public/assets/characters/visitors-walk.png": {
+      "bytes": 2299691,
+      "sha256": "fd8b2d5e66afaadf011fa8c0ecd97a304a2ea6e828677096308c0328472598ab"
+    },
+    "public/assets/characters/wenbo-conversation-away-v1.png": {
+      "bytes": 1169713,
+      "sha256": "70b88192cd3933b5b06f395ab14b75ea461095b1749a5c2b5a1daaf9fca20b0a"
+    },
+    "public/assets/characters/xiaocheng-walk.png": {
+      "bytes": 1500705,
+      "sha256": "46c6e490aed6721d738fbb64124fa2e6b11ab487567ce9d5ccb958439249cee6"
+    },
+    "public/assets/characters/yun.webp": {
+      "bytes": 817164,
+      "sha256": "d4059fc9ffd60f3f5ffa8984dc71038dd16d678b01984de1fed048c1398f894a"
+    },
+    "public/assets/fonts/MaShanZheng-OFL.txt": {
+      "bytes": 4397,
+      "sha256": "d7bdb1cee215b689e23c2f95672a6084c790542170648267a55114103d756a08"
+    },
+    "public/assets/fonts/PatrickHand-OFL.txt": {
+      "bytes": 4376,
+      "sha256": "377f4f9c19e935228552478eb68cc2ed82910988a60ba60e2ac73b09f32d02d1"
+    },
+    "public/assets/fonts/station-brush.woff2": {
+      "bytes": 30940,
+      "sha256": "99d9a54a988e19fa1f4fa3f9a6926ba15f9087ac6216424ff053d3fb8a4cc0ea"
+    },
+    "public/assets/fonts/station-hand.woff2": {
+      "bytes": 14056,
+      "sha256": "1f77b599d0cb53285d10f184c3cc0836d05c046d146bf46b1b9b581fbb645418"
+    },
+    "public/assets/icon-192.png": {
+      "bytes": 26252,
+      "sha256": "3988eb9353499c8ea2bbf095fe784025d2290372ffe00d97c59428530123a6b0"
+    },
+    "public/assets/icon-512.png": {
+      "bytes": 168838,
+      "sha256": "5c99f972991c6045aad47d959b480bd9f6da091d604d8c339ad958f8d6e6ea8b"
+    },
+    "public/assets/journal-icon.svg": {
+      "bytes": 1788,
+      "sha256": "2dc6dce47c4d4ccb71912f7b80fa238b86e70309b0059558840429471df0f01c"
+    },
+    "public/assets/map-icon.svg": {
+      "bytes": 1309,
+      "sha256": "804feebad30bc94ce3de2735bc81274ad4539ffc71b682ced4705591786dc09f"
+    },
+    "public/assets/optimized/animals.webp": {
+      "bytes": 256298,
+      "sha256": "dbe3431bea2ece4188d19473c57cef3cc23eff492ac335d6b58700dec8c149b0"
+    },
+    "public/assets/optimized/bakery-interior.webp": {
+      "bytes": 331286,
+      "sha256": "684d715145667e72d27cb7783707ab8465b4db48512edd90cd6b30511a44da64"
+    },
+    "public/assets/optimized/bookshop-interior.webp": {
+      "bytes": 262448,
+      "sha256": "a86e126f40889790b597db7fc14c8ce4d4f1c2b767bf7797d0fdf0632ed2bd32"
+    },
+    "public/assets/optimized/canal-lane.webp": {
+      "bytes": 386722,
+      "sha256": "07d38f12b826271afe3b32f0c63eb15954fd19cb20bfde69ffe69e73e72d19f9"
+    },
+    "public/assets/optimized/canal-water-v2.webp": {
+      "bytes": 114050,
+      "sha256": "6175e5c6b60fd52715a2f098985bf407b356315d8e3e2ef4b6fee34813f8395d"
+    },
+    "public/assets/optimized/children-walk.webp": {
+      "bytes": 317868,
+      "sha256": "ea35a1515b46410f833faf777a067247ada864d0303762a123198421dc7730a2"
+    },
+    "public/assets/optimized/clothing-store-exterior.webp": {
+      "bytes": 442968,
+      "sha256": "43a5f66f43858e73ea1c20a7b3bd22dd48f0412463b8bd136c20db544e921b8b"
+    },
+    "public/assets/optimized/clothing-store-interior.webp": {
+      "bytes": 337254,
+      "sha256": "c2498caa62c90d5f0abf0516d0690e6798a301ae76fd8f0be4ade52035b24bda"
+    },
+    "public/assets/optimized/earth.webp": {
+      "bytes": 548058,
+      "sha256": "bb5227aee46dd47604cb1d9fbf7776cc7eac2b186aef601e2d038e029b941964"
+    },
+    "public/assets/optimized/family-clutter.webp": {
+      "bytes": 346580,
+      "sha256": "fc02da4b8456189de07d0c0e7b61e475242db74bf2d8dbda32d35c91a45cd319"
+    },
+    "public/assets/optimized/family-fallen-chair.webp": {
+      "bytes": 205188,
+      "sha256": "eba390ff3a0e1ba8dc71395ec636786ee1588ea99e7df6749fef34b20debb130"
+    },
+    "public/assets/optimized/family-furniture.webp": {
+      "bytes": 270804,
+      "sha256": "e811c98deb62fceb2d2557775b370f2b35dee7fd06629e9babe758864dd1beb4"
+    },
+    "public/assets/optimized/family-home.webp": {
+      "bytes": 276866,
+      "sha256": "7a51bf800339913d8929040514ad6c110ba257236b21dc0b2f17df208b57ae30"
+    },
+    "public/assets/optimized/fox-plush.webp": {
+      "bytes": 275134,
+      "sha256": "c6f7d6e631b1ab74aa965ebee8763f88f85e72c5167149b8c7e43a0e0e74b527"
+    },
+    "public/assets/optimized/fruit-trees-v2.webp": {
+      "bytes": 620656,
+      "sha256": "a61631c7e78de24b610e89dcca74f4a0d1f1b5617469d02560864472e766ac28"
+    },
+    "public/assets/optimized/garden-workers-work.webp": {
+      "bytes": 397860,
+      "sha256": "1e96bd482e35341ee2d888cb74f7db8c75bed6e1710520047dc5302ee30f718a"
+    },
+    "public/assets/optimized/garden-workers.webp": {
+      "bytes": 265170,
+      "sha256": "3291e61c5268dd745823f474faaf608f70a98dc9d855cc0d6829fa62cdebcd5c"
+    },
+    "public/assets/optimized/home.webp": {
+      "bytes": 362292,
+      "sha256": "17fb56416a4d2c1ecb1863def687a0e3ca80106031753c5431c171cff2e66437"
+    },
+    "public/assets/optimized/hotpot-table.webp": {
+      "bytes": 315842,
+      "sha256": "a0a12814560ff964ac102000820aa3adc14291d4c62b87c1d1cf5bc3f365a1bd"
+    },
+    "public/assets/optimized/house.webp": {
+      "bytes": 366374,
+      "sha256": "46136ad7262e0acb807a72913d17719d1f670635dbdebd471e0c87d6b97c7d21"
+    },
+    "public/assets/optimized/indoor-npcs.webp": {
+      "bytes": 184436,
+      "sha256": "a7a87d5c24479eebda2a4efeffcc02c762078cd55cf30da3b3d9773dae3a88a8"
+    },
+    "public/assets/optimized/landmarks.webp": {
+      "bytes": 276894,
+      "sha256": "4e5fdc1e7dee2cf4963fbdb70cdbde443a629994d47802aead55ad439d844722"
+    },
+    "public/assets/optimized/lian-poses.webp": {
+      "bytes": 188510,
+      "sha256": "ea6619d716251b4d6e00d7130033ac3036b7ccda69af72ee0dfca7bfe0dee5ad"
+    },
+    "public/assets/optimized/lin-walk.webp": {
+      "bytes": 199136,
+      "sha256": "0a7657a09f8218343e19b3630e5a477cf834646b5ed01bd1678d21e51dab4841"
+    },
+    "public/assets/optimized/lin.webp": {
+      "bytes": 97932,
+      "sha256": "e5986c882a258a9571e67d88ed47ce7027394d60373a4f9b4735dc799594bbdd"
+    },
+    "public/assets/optimized/lotus-fountain.webp": {
+      "bytes": 350146,
+      "sha256": "3fb1edcdcf3f38cd7e677333d0d835691505999648259423ba7ea5e92b732434"
+    },
+    "public/assets/optimized/market-cat-poses.webp": {
+      "bytes": 395972,
+      "sha256": "39da399a3c30fa77d845854e04f69f03aebff61e3cd1df7eeb8c7cfb26399fd1"
+    },
+    "public/assets/optimized/market-npcs.webp": {
+      "bytes": 180630,
+      "sha256": "4787526b45a4449f1b47c3552e1629467f24c0ddeaa0cb4e89f63daf7cda3e26"
+    },
+    "public/assets/optimized/market-rows.webp": {
+      "bytes": 470650,
+      "sha256": "32fd4081882a796f0ebf4e7e2d612135abad4868255b781479ccb3c16469411f"
+    },
+    "public/assets/optimized/mei.webp": {
+      "bytes": 128126,
+      "sha256": "3dbfa6993a38787dbd8a0142ff3c208ed4b9a0230e197589f4d0d28651968c06"
+    },
+    "public/assets/optimized/momo.webp": {
+      "bytes": 213206,
+      "sha256": "2eab1cc55b92731a30b2e6a1fa7a4cb25e71eb882ba9cb9908a419f69533e6f4"
+    },
+    "public/assets/optimized/museum-interior.webp": {
+      "bytes": 166194,
+      "sha256": "04c3114335a588cba2d48ebad0123fb58cffb423cf292f2d36b5e9aff1d9b716"
+    },
+    "public/assets/optimized/neighbors-walk-v2.webp": {
+      "bytes": 346936,
+      "sha256": "3e051ef76bc422af6aac9e9bba7d5b7a20f28e59d0e7b6737f043fb1d7ec51f2"
+    },
+    "public/assets/optimized/neighbors.webp": {
+      "bytes": 163062,
+      "sha256": "637f2a0af74352ee169be11ca020a5e4e5a09b642c18b0159158d91ff2f7fb1b"
+    },
+    "public/assets/optimized/panda-v2.webp": {
+      "bytes": 210678,
+      "sha256": "a8e5a3166fa74f43ce070a6a31f0abd0c5a0f744332fb029637fc845924d5229"
+    },
+    "public/assets/optimized/paving.webp": {
+      "bytes": 292766,
+      "sha256": "d11ce96dc94456599d0c7bf595b3f11818f92093155888db66477c70b5aa7b85"
+    },
+    "public/assets/optimized/player-atlas.webp": {
+      "bytes": 120854,
+      "sha256": "a2c1d4116566a8a3d1d794bb12739121d9d617310cbb016e1c96cce306cad1b0"
+    },
+    "public/assets/optimized/player-green-satchel.webp": {
+      "bytes": 25708,
+      "sha256": "baeb46e75e7a3de5fbd9d5ca791437bd263a0706794aecfb936c7087b5bd580e"
+    },
+    "public/assets/optimized/player-idle-without-bag.webp": {
+      "bytes": 212630,
+      "sha256": "3040fe80246ad1b5ce8e2c2aba299e8bc52190515ba72657e7fae68944a9952a"
+    },
+    "public/assets/optimized/player-idle.webp": {
+      "bytes": 223430,
+      "sha256": "d8a31f0f569dd5ddfa348d248b77ca99b8abfd6e05555b77a34a93b2012bfa9a"
+    },
+    "public/assets/optimized/player-seated-without-bag.webp": {
+      "bytes": 201082,
+      "sha256": "d0b871050f6f7a0e9846e2222a2d66b7c137174a2e9bb46f6f1b4665cfc73cec"
+    },
+    "public/assets/optimized/player-walk-v2.webp": {
+      "bytes": 187426,
+      "sha256": "6446b76d73bbe6281957757f307382792885f08f0de2ded0b97f5a709f47a39e"
+    },
+    "public/assets/optimized/player-walk-without-bag.webp": {
+      "bytes": 194768,
+      "sha256": "cb3b507354c4c34498c3ca93c1fa204f3a2450ee56c24cfa7931dc6abc8cc010"
+    },
+    "public/assets/optimized/props.webp": {
+      "bytes": 446556,
+      "sha256": "f02b5bd3b9d93c689f05a39f31219a1097526b82add12230dfe4ed56a1c05742"
+    },
+    "public/assets/optimized/qiao-seated.webp": {
+      "bytes": 142562,
+      "sha256": "15adddac111c1b8b977536aa859db6d281f0d6382c9de0bf050ab7097f06c0d0"
+    },
+    "public/assets/optimized/rabbit-plush.webp": {
+      "bytes": 19482,
+      "sha256": "c636b96f984b39d7c9a14ba06a936ac4971efc2966cdaa47373ec10b89863669"
+    },
+    "public/assets/optimized/restaurant-interior-v3.webp": {
+      "bytes": 228840,
+      "sha256": "b6f44ed531be22d0f84622e170947f9abb738b1112cf2662cf6f1c56784f2ac9"
+    },
+    "public/assets/optimized/restaurant-interior.webp": {
+      "bytes": 243364,
+      "sha256": "e51c7f0261ece7443d14b17270d63f39424019060f73c7c3b616370de6dc0284"
+    },
+    "public/assets/optimized/roamers-idle.webp": {
+      "bytes": 281792,
+      "sha256": "330540a45298df59451584d2c3c02e6f475a8af1a22a5eae8489114078ee7701"
+    },
+    "public/assets/optimized/seated-friends.webp": {
+      "bytes": 236016,
+      "sha256": "fbace43e7bc19192dcb88a3fb87eeaed897ced8b44a549f997336906e6bcd810"
+    },
+    "public/assets/optimized/sheep-gift.webp": {
+      "bytes": 287130,
+      "sha256": "9c86980215f544ae78b1bb945993af5165056a086ab929b1f8995c48920f7015"
+    },
+    "public/assets/optimized/station-clerk-v2.webp": {
+      "bytes": 124214,
+      "sha256": "82fd39abb3f55fd03809025c1a5231fe2cc69449f0bff9793d0c28cdb7c48ce6"
+    },
+    "public/assets/optimized/station-employee-desk-v1.webp": {
+      "bytes": 120198,
+      "sha256": "b7b726da755de37c14c70a4f61bd1c99b37fda1b0abae3074da2cccdc52dfca6"
+    },
+    "public/assets/optimized/station-employee-exit-v1.webp": {
+      "bytes": 141804,
+      "sha256": "5a266d2fb8da6175e91953e53a2995422d0a754346b1d64ae1456e162c05e0ad"
+    },
+    "public/assets/optimized/station-employee-guide-v1.webp": {
+      "bytes": 144522,
+      "sha256": "172532b3b27a37af469f4d7451c0afd7ae970ec9a75fbe82b582febbaa4a1403"
+    },
+    "public/assets/optimized/station-employee-poses-v2.webp": {
+      "bytes": 244298,
+      "sha256": "f0c9a8d5c899da036135399e8582fab54ff5a8d38d20a798a65b5a76736b1d93"
+    },
+    "public/assets/optimized/station-exterior-v2.webp": {
+      "bytes": 441378,
+      "sha256": "2704af0657c5cd8ae1f14ba8690aabed2de5fd83eec2155ed360397cd250be5e"
+    },
+    "public/assets/optimized/station-ground-v3.webp": {
+      "bytes": 298642,
+      "sha256": "a1835afe0397cbf1bcb0eb600e05b5a7f35355e06c5247355f9d30b5d1fdfe51"
+    },
+    "public/assets/optimized/station-ground-v4.webp": {
+      "bytes": 298580,
+      "sha256": "cf001280526677e6307fcf77d311f888e81ea079ebae0db40dcad8af4fe72fd8"
+    },
+    "public/assets/optimized/station-interior-people-v1.webp": {
+      "bytes": 160094,
+      "sha256": "ca74b8cfa2f9d2f4ec9195908675e413528aca93b4a09d1867e7a6273464c4a1"
+    },
+    "public/assets/optimized/station-platform-v2.webp": {
+      "bytes": 277816,
+      "sha256": "1f24ee38bc2b4b2731b0e1ce330b89b4645e7d1ca34cb880b87c8ae30700922b"
+    },
+    "public/assets/optimized/station-platform-v3.webp": {
+      "bytes": 287250,
+      "sha256": "0fc90de941581567788708d374f75adf1d80a7218a4b865d00cd1b2901d69140"
+    },
+    "public/assets/optimized/station-reader-seated-v2.webp": {
+      "bytes": 78244,
+      "sha256": "0d3106073ae0262a376f465e689ec877de15158fa99985a14be467af14642d56"
+    },
+    "public/assets/optimized/station-reader-seated-v3.webp": {
+      "bytes": 115576,
+      "sha256": "d34956a34e44096e438c1bf785d5d46e25bfd7463ca9b32bcd168c291f43bed3"
+    },
+    "public/assets/optimized/station-seated-companions-v1.webp": {
+      "bytes": 198248,
+      "sha256": "1acb8d7974517b456a2d54da182eba0f4c7bfbef3198ca18c9d6a9ea84362ba8"
+    },
+    "public/assets/optimized/station-seated-companions-v2.webp": {
+      "bytes": 199868,
+      "sha256": "ec7e1f1bc414e0389c4222452a924a2044e539be5ee9be25928971f5506d7838"
+    },
+    "public/assets/optimized/station-seated-companions-v3.webp": {
+      "bytes": 240884,
+      "sha256": "c48ed29313462614ae1e85c8d5beefd9dd1627560dfbdc547677bf178e0c120a"
+    },
+    "public/assets/optimized/station-sign-readability-v1.webp": {
+      "bytes": 366956,
+      "sha256": "ff6e7fce4ee0d29979957d7a5226005d1558545a047806746bd90f6c950fb42b"
+    },
+    "public/assets/optimized/station-train-overhead-v1.webp": {
+      "bytes": 100526,
+      "sha256": "b2bd1e3b8388f88c8e6454c6b4dc530ef70b1d9c83ec2023460347d32b4a9b38"
+    },
+    "public/assets/optimized/station-travelers-a.webp": {
+      "bytes": 315328,
+      "sha256": "68cf08eeff1819544a9e63dfb6db7e841517833ea148d2ec713c8b34344a7232"
+    },
+    "public/assets/optimized/station-travelers-b.webp": {
+      "bytes": 345994,
+      "sha256": "64a742ff1120577b1fc9cdeda6ddd611d78c272818e9f2cfe62c19103b148e30"
+    },
+    "public/assets/optimized/station-travelers-walk-a-v1.webp": {
+      "bytes": 277938,
+      "sha256": "04bdf273639500454e14c418a1ea8e0ff4180774134385aa2038a108e1aac6db"
+    },
+    "public/assets/optimized/station-travelers-walk-v1.webp": {
+      "bytes": 319602,
+      "sha256": "a9262061ed1c89a61abc978c1ba88b249fbb7244e7cac272476edfb16740a72a"
+    },
+    "public/assets/optimized/station-waiting-people-v1.webp": {
+      "bytes": 230404,
+      "sha256": "9c84a1f8bdf1509a119db5289b59cbd4a94f6d9de3a492ea8b7b284ed9705e89"
+    },
+    "public/assets/optimized/station-waiting-people-v2.webp": {
+      "bytes": 272586,
+      "sha256": "f173a666bbf0cf59dde1307e46fbc190efd10bd919521efba2bd671e1d4b721d"
+    },
+    "public/assets/optimized/station-waiting-v3.webp": {
+      "bytes": 345826,
+      "sha256": "c763f56c74274d3372b90064755fb7d95d19275104dfb035181e41f60fddf974"
+    },
+    "public/assets/optimized/station-waiting-v4.webp": {
+      "bytes": 334190,
+      "sha256": "f13477c27b850f33465bf147e31bb24ea30dd857aa68b96a12a1f1784a4e94ba"
+    },
+    "public/assets/optimized/station-waiting-v5.webp": {
+      "bytes": 299858,
+      "sha256": "f1130f4c3a83c4e68438aec3472abe1e3500afc1a0ae68cde1c7e705c00c3a22"
+    },
+    "public/assets/optimized/stone-bridges.webp": {
+      "bytes": 146732,
+      "sha256": "c95168d26e5eda1a4e71820863193d09198768d2adc993644fe73d3aaf380592"
+    },
+    "public/assets/optimized/storefronts.webp": {
+      "bytes": 382526,
+      "sha256": "644006b8cf414b02393daf5f0b94580c5fec78a4bf0656bd1bbd57b6051fe508"
+    },
+    "public/assets/optimized/suzhou-model-closeup.webp": {
+      "bytes": 197604,
+      "sha256": "7b6861cee183e4e5d8b84e1f6365173de2642ed55aef51d4f0a9616b3ec2e0fb"
+    },
+    "public/assets/optimized/suzhou-model-table-rotated.webp": {
+      "bytes": 57480,
+      "sha256": "928b7f9b31ea6dd88e51c02f8e9e9abc9efe63ba75960c252c6fbeec0bfea09c"
+    },
+    "public/assets/optimized/suzhou-model-table.webp": {
+      "bytes": 65178,
+      "sha256": "bf77ff7005b8478756c2dd828deba5482bb00644f98a2f0f2ef837ea96a6f265"
+    },
+    "public/assets/optimized/suzhou-passenger-boat.webp": {
+      "bytes": 242554,
+      "sha256": "94ee19f7f2e92cbe4277d0ac019cac3d0b35a988282924f5d448287eeac19c4e"
+    },
+    "public/assets/optimized/teahouse-interior.webp": {
+      "bytes": 263712,
+      "sha256": "498a2c4de8b36af46a893a29a9595bcdb345ece89f0dde297f8c02f9c0dbd567"
+    },
+    "public/assets/optimized/travel-suitcase.webp": {
+      "bytes": 221402,
+      "sha256": "f3b55fe455d244f6c091c216b4bc36e5a40d5bce6d30620820f3d5df75a51a4f"
+    },
+    "public/assets/optimized/visitors-walk.webp": {
+      "bytes": 319862,
+      "sha256": "5c78adc82170f83e36e373649618c6c91139e0dc156670b85a0dc280eff5ca4a"
+    },
+    "public/assets/optimized/wenbo-conversation-away-v1.webp": {
+      "bytes": 183910,
+      "sha256": "92c53a04d10a073ae78900e0bc1c173182cb35a85116732359a6baba4460d2da"
+    },
+    "public/assets/optimized/willow.webp": {
+      "bytes": 702728,
+      "sha256": "4b5ca62ea87363f6fd4da5189bf693bb7cb19d1e12dfa747da321dd9f63c924b"
+    },
+    "public/assets/optimized/xiaocheng-walk.webp": {
+      "bytes": 318756,
+      "sha256": "c90176230b875e2c8029ca1ba6cb691b61f67c6f89bb197965465691892e1240"
+    },
+    "public/assets/optimized/yun.webp": {
+      "bytes": 156340,
+      "sha256": "26bb31172ba3144ca16ce628032c5fcc1b9c7f4a5804c95c9a011c4a4017ada9"
+    },
+    "public/assets/panda.png": {
+      "bytes": 1709991,
+      "sha256": "a38881e0cfb5504c8873e4f5f2aae1a07aadc6b4924b7e96a1ca0bd16f94dcc9"
+    },
+    "public/assets/props/player-green-satchel.png": {
+      "bytes": 209934,
+      "sha256": "aabf5c1930aa55f93d449b4663baf8ddb03b084765842393e5feb6deab789f0e"
+    },
+    "public/assets/props/suzhou-model-closeup.png": {
+      "bytes": 3027313,
+      "sha256": "cd44f05d88a9300d1ef2cbe70d4e27f8d1fac8885b9e22f40326966796b754ce"
+    },
+    "public/assets/props/suzhou-model-table-rotated.png": {
+      "bytes": 2245980,
+      "sha256": "076414e40908171de6858f42941c79e02cc90aeef64b5289bbe5f03f3add8302"
+    },
+    "public/assets/props/suzhou-model-table.png": {
+      "bytes": 2264095,
+      "sha256": "e9c470711b4f30a4778ce3b0b4d2a5b8b1e57763ab36be8dc3ef8e7ce3a942e8"
+    },
+    "public/assets/props/travel-suitcase.png": {
+      "bytes": 2334442,
+      "sha256": "ff7c9a6324b89fd8f6b4c68222ba2746402525f548039fbef2b41015dd06497a"
+    },
+    "public/assets/welcome/panda-240.webp": {
+      "bytes": 12544,
+      "sha256": "3bd781e29b63638306f3d9c748a3f690c8771ec149fe72fbb58ffbc5665f17a6"
+    },
+    "public/assets/welcome/tea-480.webp": {
+      "bytes": 36122,
+      "sha256": "68286243570a0634f974ffe3ef661ba119d4c72dc073dc3fe046d0e4a0de2fd6"
+    },
+    "public/assets/welcome/tea-960.webp": {
+      "bytes": 123286,
+      "sha256": "8bc645a2bc55c786668ee2a854461395bdb620534fd6d6ab071bc9aa7b2fdd61"
+    },
+    "public/assets/welcome/town-480.webp": {
+      "bytes": 91888,
+      "sha256": "b2988686ce43cca41f23c8bfb72f65d0ec20f51d3cdde8ea58e2abc451d26eac"
+    },
+    "public/assets/welcome/town-960.webp": {
+      "bytes": 281146,
+      "sha256": "5ea1467f19b58831a137e7b807b7ca1a8bfb1400379c2dd6914113b18afe84fe"
+    },
+    "public/assets/world/bakery-interior.webp": {
+      "bytes": 2038830,
+      "sha256": "0920480c88c349a95263c1190b19920531b0bd3282df335da37d3cd34a378b9a"
+    },
+    "public/assets/world/bookshop-interior.webp": {
+      "bytes": 1870000,
+      "sha256": "c2e9876e441d658d936866814352cdb3f7f1c143e13b35ecc08df2be044e2b77"
+    },
+    "public/assets/world/canal-lane.webp": {
+      "bytes": 2317964,
+      "sha256": "7484020be30bf04143be930d700ea91f8c3f6b7f9028e74d928c7dd619e8d38e"
+    },
+    "public/assets/world/canal-water-v2.png": {
+      "bytes": 1995498,
+      "sha256": "647060b4c0ce0d0078268fc3d61cdd4d77fe7f6cc8d502a4f79ef0aebb647cfb"
+    },
+    "public/assets/world/canal-water.png": {
+      "bytes": 2635727,
+      "sha256": "6632fe2638004c95d460ba5365340618b621adcd61f1242c2e78dafb6180a78f"
+    },
+    "public/assets/world/clothing-catalog.png": {
+      "bytes": 2265231,
+      "sha256": "e7ddc1feb3c3b87ee46700559910a48d0e1dba75cab9a47f99197ee4c2f685cf"
+    },
+    "public/assets/world/clothing-store-exterior.png": {
+      "bytes": 2581483,
+      "sha256": "d10d95484fb6ed2cec5349b97834cc233f5d7eccfe013783a8ad556c5e803c87"
+    },
+    "public/assets/world/clothing-store-interior.png": {
+      "bytes": 2821919,
+      "sha256": "ad8d245f9f97b8ba7e9f70c8d6fef82cbb092285178a60f89f84bb4e343d13e3"
+    },
+    "public/assets/world/clothing-store-interior.svg": {
+      "bytes": 3938,
+      "sha256": "edd3552f955a5d0deb41d9cf64221556e7ee8b781b3305bdf60492e6523db309"
+    },
+    "public/assets/world/earth.png": {
+      "bytes": 3509216,
+      "sha256": "915815cf026c0a6f23218274e200492f57d60825aa5feb5f7931af41ce09025e"
+    },
+    "public/assets/world/family-clutter.png": {
+      "bytes": 2544457,
+      "sha256": "696e97c8ba11da5648884eae25a676c4f2f3a96db46905b32a42503c994a28bf"
+    },
+    "public/assets/world/family-clutter.webp": {
+      "bytes": 355508,
+      "sha256": "36f99d303d3aa9592a5b261d9826caede1ac28ae70e5d2bcc84b677992251a42"
+    },
+    "public/assets/world/family-fallen-chair.png": {
+      "bytes": 1189676,
+      "sha256": "ca857529d984f7aeac75bcbbeaf18328a6bdf87f6d382325f40a985449abdf81"
+    },
+    "public/assets/world/family-fallen-chair.webp": {
+      "bytes": 209938,
+      "sha256": "32c0ff9482ae53df6061b531920dbb138c6ed83b4997a6f3b0c9052545e20b8a"
+    },
+    "public/assets/world/family-furniture.png": {
+      "bytes": 2330578,
+      "sha256": "0d4bf244c5eea5f9e30065fd3ffa6a80378af8773e3e2c4c608179ccd6fde37d"
+    },
+    "public/assets/world/family-furniture.webp": {
+      "bytes": 275342,
+      "sha256": "64906589d9564a8fd0bfb7089137edfc6bd98be852c356d229fbde197c351914"
+    },
+    "public/assets/world/family-home.png": {
+      "bytes": 2563791,
+      "sha256": "8edb0dbd8bd4a03437a7c90dba67672439b514d388c5f4fa631c614022470dba"
+    },
+    "public/assets/world/family-home.webp": {
+      "bytes": 282804,
+      "sha256": "2878245bd0553a1c7d5fc605a5e08526c420a384c824c838ae247105520ffd07"
+    },
+    "public/assets/world/fruit-trees-v2.png": {
+      "bytes": 2464499,
+      "sha256": "6dee4cda145e6bb6117fc1bdf57b40c4e658ec27907ef8c70b80261740c1d3cf"
+    },
+    "public/assets/world/home.webp": {
+      "bytes": 2151092,
+      "sha256": "272afdc99e539cd0c9cb548673fa83f1a106ebbcbd29daeb875252c7817477f7"
+    },
+    "public/assets/world/hotpot-table.png": {
+      "bytes": 1676714,
+      "sha256": "647d37f9d1b65dd8f927e7f64eac6f60c2dda26387129239b7b923c0161e8ef9"
+    },
+    "public/assets/world/hotpot-view.png": {
+      "bytes": 2990630,
+      "sha256": "f5551e5c721aee2b3c8a0dec0a1da113ea2b923bb4ba2529f0945e1731e84d7d"
+    },
+    "public/assets/world/house.webp": {
+      "bytes": 1430710,
+      "sha256": "8c07f8c6e24912d888639f4a7399aec9d72b6885453af8bbf9208e8ac8ab5583"
+    },
+    "public/assets/world/landmarks.webp": {
+      "bytes": 921214,
+      "sha256": "d997b1f96a1e4fd235c71193c10bc7aa0879f9d4c8f0fe264dadcac7ef0f3d2f"
+    },
+    "public/assets/world/lotus-fountain.png": {
+      "bytes": 2149369,
+      "sha256": "99e91704ca3780ab8dba274f6c0db5f334d8f4bd96b4dd0166e00706151e2476"
+    },
+    "public/assets/world/market-lane-v2.png": {
+      "bytes": 3723678,
+      "sha256": "3a1671b220e27f6f181ec996752cfb1cf6c9358a45753b3851076fcecf5245ed"
+    },
+    "public/assets/world/market-lane-v3.png": {
+      "bytes": 3572257,
+      "sha256": "d51815311a335042c90bcc70130871f45b26e8443ddaffe51fc2894e67a3bdf8"
+    },
+    "public/assets/world/market-lane-v4.png": {
+      "bytes": 3632236,
+      "sha256": "43dd7acf3c5763b2d1f013e32aa9e7dbc727eaf3ab580fb78d938145a540a487"
+    },
+    "public/assets/world/market-lane.png": {
+      "bytes": 3537432,
+      "sha256": "b0d9933f5e98508582b9ac69118b3d42ffbaf8a56a6e63e0d872448e556b2680"
+    },
+    "public/assets/world/market-rows.png": {
+      "bytes": 3326242,
+      "sha256": "f9f06428ebcd03ca95314834fceddf82cb3800a672db2e18b021aa6471e55736"
+    },
+    "public/assets/world/market-stalls.png": {
+      "bytes": 2021456,
+      "sha256": "6f781f5df8b5eb259fdc31135c6111bce17fe4233a2b65e481116c87d338db30"
+    },
+    "public/assets/world/museum-interior.png": {
+      "bytes": 2407194,
+      "sha256": "b5f881303037d3bfab4a83cbaf50d6bea483ccfb68513d71c364a2f66944cec4"
+    },
+    "public/assets/world/paving.webp": {
+      "bytes": 2133260,
+      "sha256": "26e74c991f88e1a5f0250b6ea64d4b329b5cf91ef53dab9e582b11fcdd7d8e82"
+    },
+    "public/assets/world/props.webp": {
+      "bytes": 1510874,
+      "sha256": "61ac3e89efeaff8119c8714beae4a5b5465c6d7e2a4180d5f80fe94220939b14"
+    },
+    "public/assets/world/restaurant-interior-v2.png": {
+      "bytes": 2423494,
+      "sha256": "1a84ba9cf4b25a885d82d6d4522005cb13bb8634768a6e1b8ac67ea7336f6f93"
+    },
+    "public/assets/world/restaurant-interior-v3.png": {
+      "bytes": 2333557,
+      "sha256": "3fd98e4908352a0d2818016cdd59674bcb97a96065549bd5e771c1f07635ee7d"
+    },
+    "public/assets/world/restaurant-interior.png": {
+      "bytes": 2672175,
+      "sha256": "48f3128bb477bc7ed1f9191d3243fcb84ec63caa1de4a30693de9ad06ea5db42"
+    },
+    "public/assets/world/sheep-gift.png": {
+      "bytes": 1781990,
+      "sha256": "78aacca36c432fb134a2b90704b477f6a2c0d7ebe75f56834bd3e1df0b5d2265"
+    },
+    "public/assets/world/shop-breakfast.png": {
+      "bytes": 2621997,
+      "sha256": "26b331cd5a3a6ae8476b91ddb821cf46ce5bdb2d2e6ac878164da0def6a7354a"
+    },
+    "public/assets/world/shop-produce.png": {
+      "bytes": 2968996,
+      "sha256": "3d28f398149aca7356c1128fda2142c17b35487e8f3aab30259221d4407d94a1"
+    },
+    "public/assets/world/shop-snacks.png": {
+      "bytes": 2769354,
+      "sha256": "a4195ab8a46cd0cf5b24fc115b71557b3c53349846fd4cfd850e8176e670fd73"
+    },
+    "public/assets/world/shop-souvenirs.png": {
+      "bytes": 2916834,
+      "sha256": "44a61691606e09ba783613db92681cfa8ae708e2b7a75b74ebf9f37f4243cd7c"
+    },
+    "public/assets/world/shop-station-cafe.png": {
+      "bytes": 3024808,
+      "sha256": "fb3a42cb4821c815b7423d9b18f221f5918b15a22580cce7a1b646d14ea6095f"
+    },
+    "public/assets/world/shop-station-snacks.png": {
+      "bytes": 2744426,
+      "sha256": "e611df24256df6c8eb87482c2c577e6af8610e2f6c502af7ec374d9b596e350c"
+    },
+    "public/assets/world/shop-streetfood.png": {
+      "bytes": 2763595,
+      "sha256": "be27f76757f960c20f93d5bb08c3e44f9b222e3283f9979893fd641a92572e0a"
+    },
+    "public/assets/world/station-exterior-v2.png": {
+      "bytes": 3098750,
+      "sha256": "3134b5fcc9d0aeef55032e6733de619b8207b266ea67c4bb1a4ee6450e12048e"
+    },
+    "public/assets/world/station-ground-v3.png": {
+      "bytes": 2493901,
+      "sha256": "d598c429bc863d4ad3c222c49d6370b40e8b0a1ac97da9383ef2a475eff32b44"
+    },
+    "public/assets/world/station-ground-v4.png": {
+      "bytes": 2432951,
+      "sha256": "10e6457f3ad0942ba9f3735330a91b983fa69d7342717ee85e40fccb75d967f0"
+    },
+    "public/assets/world/station-platform-v1.png": {
+      "bytes": 2805344,
+      "sha256": "cba78beecfcb575173d476de29c2fb2c5323831ba287be547a2db6fc893a7556"
+    },
+    "public/assets/world/station-platform-v2.png": {
+      "bytes": 2465713,
+      "sha256": "cfb8058173c672d1a85433da01875a28bfd4327b09c604592a52ac2d3aa2b497"
+    },
+    "public/assets/world/station-platform-v3.png": {
+      "bytes": 2440418,
+      "sha256": "c42bb5144367393e221ee9b356903b52ade8ebb6f09091de28e25b6808e5a666"
+    },
+    "public/assets/world/station-sign-readability-v1.png": {
+      "bytes": 2396317,
+      "sha256": "290f89fb563cf1b1b1cf75c13639917f373e52cdf82ddc69148e46e101561326"
+    },
+    "public/assets/world/station-train-overhead-v1.png": {
+      "bytes": 1460869,
+      "sha256": "b138331b482f3327d7cd6c6e8891b01b888b7945e6410a5429be28e54a0e0b2d"
+    },
+    "public/assets/world/station-waiting-v2.png": {
+      "bytes": 2620546,
+      "sha256": "07948e9ff858ce9bc57a3ae11d01a251a16e21b92f58e18e89bee9da29eff86d"
+    },
+    "public/assets/world/station-waiting-v3.png": {
+      "bytes": 2542536,
+      "sha256": "151f0c3077e2328645b48c5e5c813a2685351432463bfc94ad7330cbb6804177"
+    },
+    "public/assets/world/station-waiting-v4.png": {
+      "bytes": 2498685,
+      "sha256": "a5043aad2e936ad27f1a97de0b311e8574996bcb8e4e68400fb5e47b6e75300b"
+    },
+    "public/assets/world/station-waiting-v5.png": {
+      "bytes": 2438269,
+      "sha256": "5b4dd1dc7e3e8726af079f892599963e319071e569cfb48fbe04f0aa2af2a725"
+    },
+    "public/assets/world/stone-bridges.png": {
+      "bytes": 1886609,
+      "sha256": "32fb9640340b0d79415e8a37612db056c3a2e68cdb9b8cc23b5f7dc5133d9549"
+    },
+    "public/assets/world/storefronts.webp": {
+      "bytes": 1492812,
+      "sha256": "7bd7fab6544c444faebc7015facd22f7c0a5a8089a5d94801f3d95ec4a2588fa"
+    },
+    "public/assets/world/suzhou-passenger-boat.png": {
+      "bytes": 2108240,
+      "sha256": "b5faad1e63a63472d89ab143eaedb1f07d1846fd6f3e473ea7204516140b871b"
+    },
+    "public/assets/world/teahouse-interior.webp": {
+      "bytes": 1907488,
+      "sha256": "9d754de128e0f424bb4e3b7d17c5d87f4166dd86a4f87cd54af1d9c4a6501b18"
+    },
+    "public/assets/world/willow.webp": {
+      "bytes": 1922336,
+      "sha256": "aa19c0605fc030dda1143ac08d83bae6b5f8fce3a18c5e328d6bc8886f3cde37"
+    },
+    "public/data/activities.js": {
+      "bytes": 27997,
+      "sha256": "d333badb9e0515c98fae9fd48c96af461bc95bd7b6ae53407ca65082030c14b2"
+    },
+    "public/data/adventure.js": {
+      "bytes": 8363,
+      "sha256": "62a5df75fbce8868aec14eed5ee8c5180fa873ffd85da537276cd5043381a2e9"
+    },
+    "public/data/art-bounds.js": {
+      "bytes": 8221,
+      "sha256": "6325277850637009c507382f6e2d3f80207c45bab4d5511ee05fe463bb57bfc6"
+    },
+    "public/data/book-dialogue.js": {
+      "bytes": 5570,
+      "sha256": "b850683a245aa60b695a028adbc3de11cfca50377773a85db376d38c8da16ab5"
+    },
+    "public/data/cedict.txt.gz": {
+      "bytes": 3978669,
+      "sha256": "545476af88e2d11b8697ca53b6249f3186f0a8d1540a4572ddda898065eb3ae2"
+    },
+    "public/data/content.js": {
+      "bytes": 24516,
+      "sha256": "79abd5f83d7ff3055a0c3a9a4fa17660908754d596e469a8fd4b6f44cbc29636"
+    },
+    "public/data/conversation-subjects.js": {
+      "bytes": 28105,
+      "sha256": "9cf228855540d35c87a805750b9b092a9a03dd01372de62a09ba671d7f79720d"
+    },
+    "public/data/cultural-activities.js": {
+      "bytes": 11409,
+      "sha256": "047da7663aebc4445548b6897f31e174424d77b2ff1a8e05380c56ac514e4f3b"
+    },
+    "public/data/culture.js": {
+      "bytes": 3452,
+      "sha256": "57fb12fe8204ca3530e3b129c9d39a42fa585b5ffb288568a919753ba08ba964"
+    },
+    "public/data/dialogue-options.js": {
+      "bytes": 27741,
+      "sha256": "e5555c2145e71af8be3ad99ab090d2d401ecbecbbd0ca0dd45c9a91a26a2785e"
+    },
+    "public/data/family-dialogue.js": {
+      "bytes": 17834,
+      "sha256": "014bee2b957fbdf444c95c1ce99dfa1ea56550587fb557c24c3d9a45126c39bd"
+    },
+    "public/data/hsk-vocabulary.js": {
+      "bytes": 49244,
+      "sha256": "4dccfa99f8e99d8b0f4227d12f05dcd590b016c5b994ad7a1b1e6188048a486f"
+    },
+    "public/data/interiors.js": {
+      "bytes": 7838,
+      "sha256": "d536e40179da6c9e63330b2d9a872de7d85a82a20863cf5bc059175e5e8ec4cc"
+    },
+    "public/data/language.js": {
+      "bytes": 8254,
+      "sha256": "818d87e0b99b040e6ded0a1f20e8fb7be508a4ab9e9486be66a5e639a8ebce70"
+    },
+    "public/data/learner.js": {
+      "bytes": 2571,
+      "sha256": "c735ace44e53fda4df42878ebd939748aedf8b5fe68b806235ae460fdb167bb2"
+    },
+    "public/data/market-colliders.js": {
+      "bytes": 5947,
+      "sha256": "51e99daea0de942bd170745ef8977bdd6c89bdf5ed8df1f66c1b7daf78067d53"
+    },
+    "public/data/market-foreground.js": {
+      "bytes": 5834,
+      "sha256": "17f8052b2fe28f925a019cca37e45094b3a7a5a024d0579da7ebec6c0ad64c6a"
+    },
+    "public/data/market-integration.js": {
+      "bytes": 3764,
+      "sha256": "2733eca097b4475c4db09dba4da935dbeb4ae9dbcce13f2dfd9dd27ba32a92eb"
+    },
+    "public/data/market.js": {
+      "bytes": 12936,
+      "sha256": "3d321b959402e6e6745d546a846c061a70e728fbee515cfe0df676b62fb63895"
+    },
+    "public/data/navigation.js": {
+      "bytes": 10653,
+      "sha256": "9aa587383ea9d5f6735b568ded6f4269c7fce7bb06a526bf7e96bcd722a3260f"
+    },
+    "public/data/optimized-art.js": {
+      "bytes": 6797,
+      "sha256": "3841fdcb1e868c61d10c8146a8e8ba8bc4dd5adf2344dd1382baf1354961a311"
+    },
+    "public/data/panda-areas.js": {
+      "bytes": 11723,
+      "sha256": "9c17e44e34a128c4524f50cfc7030e339229e8b909b404363d71fdc2041c419e"
+    },
+    "public/data/ponds.js": {
+      "bytes": 892,
+      "sha256": "eeefee029b1b1722bd1c36cd141ed84ec6ccb9fb7c1b69c08465256e02f34440"
+    },
+    "public/data/pronunciation.js": {
+      "bytes": 1572,
+      "sha256": "172267eac962ce7e4f666cad5d9253f5023478ec5b61f481b453b01d7f97e527"
+    },
+    "public/data/roaming-zones.js": {
+      "bytes": 1736,
+      "sha256": "a930c8d48bad9f990bfde34402a02282f4bea5b469e4d80ec44882af283938e1"
+    },
+    "public/data/settings.js": {
+      "bytes": 2172,
+      "sha256": "7a5b68c47c5d310df40fa4032b2541c7a95f8b9e13d77cada8e74efc2ff1fde3"
+    },
+    "public/data/shops.js": {
+      "bytes": 4603,
+      "sha256": "4dd9d47b822a8d23e04278b752c666897950af46ffbf8704d3f38c4822a31a2a"
+    },
+    "public/data/station-departure.js": {
+      "bytes": 1408,
+      "sha256": "a4f63fc8df2ef64e26d7c1821410d4f21e1cb5a25c5b2add2663143ef15f4adb"
+    },
+    "public/data/station-employee-art.js": {
+      "bytes": 1081,
+      "sha256": "5727daf42c5b766ebbe6b04bd5558d7bfa5c1512f70f35af7d9e5af60d9da7ad"
+    },
+    "public/data/station-exterior.js": {
+      "bytes": 6216,
+      "sha256": "9902b61bd5e7ea30a257d461fce102f0d3d3f9a4fd5d182ad2ecdfcc1c4f1fdc"
+    },
+    "public/data/station-help.js": {
+      "bytes": 5808,
+      "sha256": "be258064c995066332108c9a16874786b2e0bef679756d0bb8a26a602fed48d3"
+    },
+    "public/data/station-interior-characters.js": {
+      "bytes": 1314,
+      "sha256": "1e28b345ae53dc61b6c8dcb7fb612aea77edb01bf16f8574573ffe95b4c9e96a"
+    },
+    "public/data/station-interior.js": {
+      "bytes": 14610,
+      "sha256": "7fa054d275aac24f3a5d3a65ed7991ce58b3e1cd06f9c0fe1fcdf1f5483e18ff"
+    },
+    "public/data/station-journey.js": {
+      "bytes": 5322,
+      "sha256": "16cda58ae7d7f2ab8cd771303a17168406c35de6f800889d97af1f00d36823e9"
+    },
+    "public/data/station-language.js": {
+      "bytes": 904,
+      "sha256": "ef345da51795a294c5d380bd815d2330a53e31e6f5edf4e82b88b15c09a080e0"
+    },
+    "public/data/station-panda.js": {
+      "bytes": 5301,
+      "sha256": "a1ab98130caa52e979c9ed24920fa5790027d894bac32e74152ea5a53513cace"
+    },
+    "public/data/station-platform-travelers.js": {
+      "bytes": 12174,
+      "sha256": "af70c27f71c03447328bb60a6d1e6032bf70eecce08ebe8bda8344ad157af101"
+    },
+    "public/data/station-platform.js": {
+      "bytes": 4609,
+      "sha256": "66b5c6200acbb4f23908916dc77fefafab02d372d15d0514b19409d220f402ed"
+    },
+    "public/data/station-props.js": {
+      "bytes": 10964,
+      "sha256": "bfcc37d506eebaf1ce7ae04603d68a8258c9dbc56fca390d0f404b198bb50f20"
+    },
+    "public/data/station-shops.js": {
+      "bytes": 2743,
+      "sha256": "53bde3fcd8e56db948e9867e7e95d70664d2689c58f7766aae2ee9332a6e726e"
+    },
+    "public/data/station-traveler-art.js": {
+      "bytes": 3516,
+      "sha256": "1b47159351e6d7f67d4679b0a57dad289d23fa80eb0eb88e89208a3aad972cde"
+    },
+    "public/data/station-traveler-walk-a-art.js": {
+      "bytes": 821,
+      "sha256": "c8b258fa387a31e903b5180064082948fef090aa6a160f8d383c6ba8b4a8bb0f"
+    },
+    "public/data/station-traveler-walk-art.js": {
+      "bytes": 1587,
+      "sha256": "c50514ba18eaf5574bba570a990952493974c573a76d4124321fcd01dffeaa9c"
+    },
+    "public/data/station-travelers.js": {
+      "bytes": 23951,
+      "sha256": "114154af19370f0ff4678511b0609eabc4770c2d9b42f63d2d9dbd69cd801c6d"
+    },
+    "public/data/station-waiting-characters.js": {
+      "bytes": 5040,
+      "sha256": "f65e8c573badcf291e8a7f789fdd3054e82f8bb1f8d4f4d07cd90539888333a0"
+    },
+    "public/data/station-waiting-signs.js": {
+      "bytes": 8036,
+      "sha256": "bf92fd34c090fe9136030c6bb98875490ddd95a7a374172af257bbf4ae464f3e"
+    },
+    "public/data/station-waiting-travelers.js": {
+      "bytes": 19201,
+      "sha256": "f5e3d99dc3174772910d511ab723fa249862a3c89b2f0b963c7fd25241fbcf94"
+    },
+    "public/data/station-waiting.js": {
+      "bytes": 17353,
+      "sha256": "33b2b298b31e1e3556fd4bfd83945709272f355acf5c50772d525afe98a1d7e0"
+    },
+    "public/data/suzhou-life.js": {
+      "bytes": 33778,
+      "sha256": "a7952c89b23cd57233ca96181a7893bb9feb8290090caec2dff21b17e6dd9dee"
+    },
+    "public/data/town-layout.js": {
+      "bytes": 18015,
+      "sha256": "2c8c3bd63795d1ed90c2c3a3c99ce5127718031fd3dc150164e6e5fed5488e51"
+    },
+    "public/data/town-rooms.js": {
+      "bytes": 16303,
+      "sha256": "d7af85a4044e35f16cfb6f874232f1b281570124a34ff71a6812fc500789a130"
+    },
+    "public/data/town.js": {
+      "bytes": 10754,
+      "sha256": "0f19ff00c57428f904f5d00323b9f180c77a778e4c90b7cb648232d95039db12"
+    },
+    "public/data/travel-luggage.js": {
+      "bytes": 2515,
+      "sha256": "5020f0f5d3e4d05846b1cefd77ff7ab9a10e4790d2799b676c6ab62c76c79ea6"
+    },
+    "public/data/voices.js": {
+      "bytes": 4907,
+      "sha256": "29253b91fbeef9fb9839137839dc52caf7bf6259c41743470bb7e8d91ba7c38d"
+    },
+    "public/data/wenbo-conversation-art.js": {
+      "bytes": 371,
+      "sha256": "22c6ab550232e7164fbf1c37abf5045fc88e71da2ab7edd8b51d3e51385a4b9d"
+    },
+    "public/data/xiaocheng-walk-art.js": {
+      "bytes": 767,
+      "sha256": "801b452f3f69363bcc9681948d45718bb818c63ab726742c1c4bb209ad18d63f"
+    },
+    "public/game/activity-guide.js": {
+      "bytes": 3054,
+      "sha256": "3e2ae1d1007a3fb7f75acc768873e79ea2c19f05f5ce4d114c37b72749a88809"
+    },
+    "public/game/adventure.js": {
+      "bytes": 28092,
+      "sha256": "b9297e5f8eee4cfcc9d2243970f1b075966715000a0aa6a66ed7730a78f538ff"
+    },
+    "public/game/ambience.js": {
+      "bytes": 8463,
+      "sha256": "1184deb80e31d6637e70df555c2bba64b0ecabcd61c13ad5491e04da8b73df8c"
+    },
+    "public/game/appearance.js": {
+      "bytes": 4292,
+      "sha256": "0479075a05cb1850033115b46f1c4a8bceb2f197645f6d100f3ba3278fd76be8"
+    },
+    "public/game/bridges.js": {
+      "bytes": 4607,
+      "sha256": "8e92ace81eefeee4a185d5da77bc7f2fc5f8276f3d98c77adccac3da768278ef"
+    },
+    "public/game/bubble-help.js": {
+      "bytes": 1732,
+      "sha256": "ca173b07bac1eef396fd12ca894068eb20918eb781f1808abdb7ef0f89380d54"
+    },
+    "public/game/coach-questions.js": {
+      "bytes": 498,
+      "sha256": "202e80e51e5d7b6a2d2616490ebcd126d3d9a0d2967a9a890384bbc4269d51e8"
+    },
+    "public/game/collectibles.js": {
+      "bytes": 1054,
+      "sha256": "8c1f68f4263a0ae9183c08dd644581970cc2c2ac3cae191005c1c7d32cf9861e"
+    },
+    "public/game/dialogue-variation.js": {
+      "bytes": 4678,
+      "sha256": "e647c7c836a0554b64024c5fb79a6532338063f0817d3daaf32e78d9cc9ab03a"
+    },
+    "public/game/directions.js": {
+      "bytes": 6684,
+      "sha256": "e54340d9b72c9f16b7b1feb80b4e8904e736756f856d388c4545fe59a53d962f"
+    },
+    "public/game/engine.js": {
+      "bytes": 35343,
+      "sha256": "89b16b8265eb8caab37f546edc459295aeedb54f56d87e00dc0cd94e86079965"
+    },
+    "public/game/exit-arrow.js": {
+      "bytes": 1510,
+      "sha256": "32a5b5be758326ccd572e230b3782aeb47f3e0a22b3ab5b4a9ebe0f1eee8515d"
+    },
+    "public/game/fountain.js": {
+      "bytes": 5824,
+      "sha256": "d058694e8695f4a2f82ee817e4b058d45f2a7b1bfe9d341fe119e3ff9489d931"
+    },
+    "public/game/goals.js": {
+      "bytes": 9896,
+      "sha256": "782c7b777fa2547294bc78ddd87294d2a30e5701cdfb91a68c34ee9bc16dfe79"
+    },
+    "public/game/interaction-surfaces.js": {
+      "bytes": 4321,
+      "sha256": "01401384c4a5e61e9e78dfeed807c64a1d2282287e29c110e366e1554353884f"
+    },
+    "public/game/interactions.js": {
+      "bytes": 1552,
+      "sha256": "0791143e4b900c07f66749ed3fb8c483f8276f15eea22cfc5bf5c950746c06cc"
+    },
+    "public/game/language-signs.js": {
+      "bytes": 2069,
+      "sha256": "93b9c46cbe64396d5afb20eda48a05ad0b3522ea3503a1efbc44175f065d4964"
+    },
+    "public/game/life.js": {
+      "bytes": 12532,
+      "sha256": "3cb53999f63affda4ec22b5beb679e283402607b5127bd2834629910aa4ac150"
+    },
+    "public/game/map.js": {
+      "bytes": 6817,
+      "sha256": "56f75326ee91cf4b9325afce20cf8e1edc4a516f581add3fedd8fb3f4d022560"
+    },
+    "public/game/music-ownership.js": {
+      "bytes": 2173,
+      "sha256": "3771fb038ec7d941254cd5d062ae72b8e703e4a669241379423af763bdde9e64"
+    },
+    "public/game/music-track.js": {
+      "bytes": 4088,
+      "sha256": "78a147e6bcae237b2fd841181a0a8840216e40cbb3baf286f766f4c15044060c"
+    },
+    "public/game/music.js": {
+      "bytes": 10069,
+      "sha256": "117d140c94d029df4a347501842eb3bff6c205a913a970e291f786f9c11afb17"
+    },
+    "public/game/panda-landmarks.js": {
+      "bytes": 3761,
+      "sha256": "f4d0cdf102f244cbb2f73754374f53b36a606c88e20d79910757cb5ae9b90bd5"
+    },
+    "public/game/panels.js": {
+      "bytes": 19666,
+      "sha256": "82b9d2f828581813ecfa84821c28c656d366a86343de8410bcc77b527b47ee9a"
+    },
+    "public/game/pathfinding.js": {
+      "bytes": 4944,
+      "sha256": "d16e9dda51c79511b4a828f42cd34a0feedea937ae5f7c7d13b0352f240157da"
+    },
+    "public/game/persistence.js": {
+      "bytes": 5947,
+      "sha256": "0ca210d386005b77e90bc8a9247a9f5e1d5aa027dd4282e387e172b8fac61063"
+    },
+    "public/game/practice.js": {
+      "bytes": 30414,
+      "sha256": "d845dc0e7ff6715840c4867b4e57dc1413156e8866421fd852492facaf3efaec"
+    },
+    "public/game/pwa.js": {
+      "bytes": 1161,
+      "sha256": "28e2813e58b92153eaba86f16718954b94fd35dd28311d1ec77cb9069b2cd902"
+    },
+    "public/game/render.js": {
+      "bytes": 60397,
+      "sha256": "f364f1c52ced8895ece5941aa734ee58e0d5401f6394fe4cf099cbd7e3a2f1be"
+    },
+    "public/game/room-camera.js": {
+      "bytes": 3710,
+      "sha256": "9d7cf030c61963235249aabe7aa2f6db74de93e2d46887917cc27e6b9324eb3f"
+    },
+    "public/game/speech.js": {
+      "bytes": 6945,
+      "sha256": "51a0c11bf6e2c5aec07279b51b92942a3b5bbd9ade8c2ce23883ff299ed7cf1e"
+    },
+    "public/game/station-audio.js": {
+      "bytes": 3300,
+      "sha256": "3a4ddce85afb5610dd2b5d080c0b2745f01ef10f1c960d585490bc83bd80c36e"
+    },
+    "public/game/station-departure.js": {
+      "bytes": 3909,
+      "sha256": "eaa6b9190945553356b1fbdf97344050900cf67614040c45a48c6fa04069855c"
+    },
+    "public/game/station-employee-animation.js": {
+      "bytes": 601,
+      "sha256": "ecbfd22802230dad25a5eb938644c20fe479084a81ee33ce4f02c9dcea7b6550"
+    },
+    "public/game/station-environment.js": {
+      "bytes": 11255,
+      "sha256": "ccf42aab7f5a8fbcd72b80c29d03c3f2d2273adf0ebdb8c978bd070debe96da5"
+    },
+    "public/game/station-escalators.js": {
+      "bytes": 2859,
+      "sha256": "2f63c7dc3e6a6bf31a15ebf4707c25ac58b5ed0d3fd1f8451f7f9094d1b8d0cb"
+    },
+    "public/game/station-interactions.js": {
+      "bytes": 13671,
+      "sha256": "2d315993490f0f274b742aa855bfdf5e2e7df38deadabac3e136bec341079bf0"
+    },
+    "public/game/station-interior-art.js": {
+      "bytes": 3289,
+      "sha256": "8dafe76134c4d3dbd39352d25958a5998942a22f42fc7607eec3fdb6cbef2f2c"
+    },
+    "public/game/station-layers.js": {
+      "bytes": 6347,
+      "sha256": "34f01f0c7c99a1689281fdb00cf41852c9bf4e14f7fddf0d4f3693ef3af4090a"
+    },
+    "public/game/station-platform-art.js": {
+      "bytes": 731,
+      "sha256": "4e1217d679435dc07edfa91dc040484b5c57b9dff3f455c1ba0a0a59c92e07be"
+    },
+    "public/game/station-sign-help.js": {
+      "bytes": 3392,
+      "sha256": "54cbe4e47097647382ab22aff3e3d803b258347721e6c4cbf9d600599e7eef2f"
+    },
+    "public/game/station-signs.js": {
+      "bytes": 2043,
+      "sha256": "44b96adf1dcd99310e7525ad3d908473c00cc6adc20c919785dbf299f1891a34"
+    },
+    "public/game/station-train.js": {
+      "bytes": 1677,
+      "sha256": "7dd599d1076d5bd61a1175070e25771a6d88334b380f1e7061315deacbea38dd"
+    },
+    "public/game/station-waiting-art.js": {
+      "bytes": 13291,
+      "sha256": "947a30da85a31b49262de101625676b1708c60a41293d646fce07aab13be2091"
+    },
+    "public/game/terrain.js": {
+      "bytes": 15381,
+      "sha256": "1ed8426f762754baa448fd34cf6a0431c089371f1fa8bd679cd8f2fbd4c18248"
+    },
+    "public/game/water-motion.js": {
+      "bytes": 2582,
+      "sha256": "3c4b0f8ffee9c3e88e846d0c3b734dac02e4f8a7f38f8df9c68a61790fdafb27"
+    },
+    "public/game/words.js": {
+      "bytes": 6617,
+      "sha256": "8649bcb470debfd54185933b26b0444f724779f5403823b90a6c4ffb61333929"
+    },
+    "public/game/world.js": {
+      "bytes": 35869,
+      "sha256": "b7d5343668916cc7597079f5a7618e2befeaa20820a417fb82d2ac13ded45fd3"
+    },
+    "public/index.html": {
+      "bytes": 16634,
+      "sha256": "0485188a83088d674c88e4e8588086e9597bf6dc839fc23e68de911477516c12"
+    },
+    "public/manifest.webmanifest": {
+      "bytes": 549,
+      "sha256": "a33762a3abd6cdae8306867e213993862fa48b7aa04da46e4802f1163ff5aa9e"
+    },
+    "public/styles.css": {
+      "bytes": 44879,
+      "sha256": "431e39e6df345856b746b90d99b9719ab9d6fe326ccf1cc9cd1a82bd5cd95094"
+    },
+    "public/sw.js": {
+      "bytes": 11217,
+      "sha256": "c136c8cabf51c4858c0b686b5e70a0fbf578a79b213b7064cae0688dd27b123a"
+    },
+    "public/welcome.css": {
+      "bytes": 9443,
+      "sha256": "c2dbef3f93d5b8a0d2d57304901fc910f3a13cc92f2bd3ca6f73fa5e0d6cc04b"
+    },
+    "server/coach.js": {
+      "bytes": 8761,
+      "sha256": "1c2a39eba1b69931693f229cbd761fbee1fdb0afddeea492c35bb30f8c561327"
+    },
+    "server/conversation-feedback.js": {
+      "bytes": 3352,
+      "sha256": "08c674ca2e91a6ae4b83b1ee8ab72d98d5a0304146f193a57703dd7eb64b4299"
+    },
+    "server/dialogue-variation.js": {
+      "bytes": 4531,
+      "sha256": "234f6558adaa6555b02544915e8d62bceb080599cfbf4bf0c295ac96968ceccb"
+    },
+    "server/dialogue.js": {
+      "bytes": 27142,
+      "sha256": "ec0d90ef3e32d7820a012188acfcbc058932f055412dd8466a3881b8aaede1a2"
+    },
+    "server/dictionary.js": {
+      "bytes": 4581,
+      "sha256": "3b3033e9816645e323a8f1eff9226e85ed932d4f97de586a39c6dd2de505e52a"
+    },
+    "server/gemini.js": {
+      "bytes": 1388,
+      "sha256": "b3cffe29a86a8251688a4ffd148f3d738f29ebeddd4ee7e5e249d6edf35cc668"
+    },
+    "server/index.js": {
+      "bytes": 12811,
+      "sha256": "c191b051013aff1da87d3b7c1dfdb5df5f0527a65f3d2a72eb777544fa35bc4c"
+    },
+    "server/music-ownership.js": {
+      "bytes": 1532,
+      "sha256": "4ad7d9db51935463ee72d0489c281a6842d80523d5bb867188122ef0fdf03dd6"
+    },
+    "server/panda-landmarks.js": {
+      "bytes": 3226,
+      "sha256": "1d6e01248ea71252be68761c782e767d29d55121eac439dd53138d1ebc188423"
+    },
+    "server/panda-speech.js": {
+      "bytes": 1184,
+      "sha256": "d053882e71e84045b7431579cd5f256be19ce8d857974eb0f43eb792ef3edb26"
+    },
+    "server/pronunciation.js": {
+      "bytes": 3079,
+      "sha256": "ee1081ad1a3d3e499a682f11b8e553d30e1b6d832c575423d857782841af6a40"
+    },
+    "server/speech.js": {
+      "bytes": 4710,
+      "sha256": "97ca929e79e03f7f84163bac6606c6f2549fd8e6099a1d6ccf134e8f54d2ab51"
+    },
+    "server/store.js": {
+      "bytes": 8432,
+      "sha256": "f34a8ea02eb311ae60cbd617f3783b8c7bbfe78be08127b72797842f87fba472"
+    },
+    "server/transcription.js": {
+      "bytes": 2196,
+      "sha256": "377eacc0de53791c9ba870189e5181ad8de4fcef48a4cec81b7c31e3c8b62c5a"
+    }
+  },
+  "imports": {
+    "public/app.js": [
+      "public/data/station-waiting-travelers.js",
+      "public/data/station-platform-travelers.js",
+      "public/data/activities.js",
+      "public/data/station-departure.js",
+      "public/data/station-journey.js",
+      "public/game/coach-questions.js",
+      "public/game/dialogue-variation.js",
+      "public/game/interactions.js",
+      "public/game/panda-landmarks.js",
+      "public/game/activity-guide.js",
+      "public/data/voices.js",
+      "public/game/directions.js",
+      "public/data/shops.js",
+      "public/game/goals.js",
+      "public/game/words.js",
+      "public/game/adventure.js",
+      "public/data/adventure.js",
+      "public/game/engine.js",
+      "public/game/persistence.js",
+      "public/game/speech.js",
+      "public/game/ambience.js",
+      "public/game/music.js",
+      "public/data/content.js",
+      "public/data/culture.js",
+      "public/data/learner.js",
+      "public/game/panels.js",
+      "public/game/practice.js",
+      "public/game/pwa.js",
+      "public/game/render.js",
+      "public/game/world.js"
+    ],
+    "public/data/activities.js": [
+      "public/data/suzhou-life.js",
+      "public/data/cultural-activities.js",
+      "public/data/cultural-activities.js"
+    ],
+    "public/data/adventure.js": [
+      "public/data/travel-luggage.js",
+      "public/data/station-journey.js"
+    ],
+    "public/data/art-bounds.js": [],
+    "public/data/book-dialogue.js": [],
+    "public/data/content.js": [
+      "public/data/station-shops.js",
+      "public/data/station-travelers.js",
+      "public/data/station-waiting-characters.js",
+      "public/data/station-help.js",
+      "public/data/station-platform-travelers.js",
+      "public/data/suzhou-life.js",
+      "public/data/book-dialogue.js",
+      "public/data/voices.js"
+    ],
+    "public/data/conversation-subjects.js": [
+      "public/data/station-waiting-characters.js",
+      "public/data/station-shops.js",
+      "public/data/station-travelers.js",
+      "public/data/suzhou-life.js",
+      "public/data/book-dialogue.js",
+      "public/data/family-dialogue.js"
+    ],
+    "public/data/cultural-activities.js": [],
+    "public/data/culture.js": [],
+    "public/data/dialogue-options.js": [
+      "public/data/conversation-subjects.js"
+    ],
+    "public/data/family-dialogue.js": [],
+    "public/data/hsk-vocabulary.js": [],
+    "public/data/interiors.js": [
+      "public/data/content.js"
+    ],
+    "public/data/language.js": [
+      "public/data/hsk-vocabulary.js"
+    ],
+    "public/data/learner.js": [
+      "public/data/content.js"
+    ],
+    "public/data/market-colliders.js": [],
+    "public/data/market-foreground.js": [],
+    "public/data/market-integration.js": [
+      "public/data/town-layout.js"
+    ],
+    "public/data/market.js": [
+      "public/data/market-colliders.js"
+    ],
+    "public/data/navigation.js": [
+      "public/data/station-exterior.js",
+      "public/game/world.js"
+    ],
+    "public/data/optimized-art.js": [],
+    "public/data/panda-areas.js": [
+      "public/data/station-panda.js"
+    ],
+    "public/data/ponds.js": [],
+    "public/data/pronunciation.js": [],
+    "public/data/roaming-zones.js": [],
+    "public/data/settings.js": [],
+    "public/data/shops.js": [
+      "public/data/station-shops.js"
+    ],
+    "public/data/station-departure.js": [],
+    "public/data/station-employee-art.js": [],
+    "public/data/station-exterior.js": [
+      "public/data/station-travelers.js",
+      "public/data/station-props.js"
+    ],
+    "public/data/station-help.js": [],
+    "public/data/station-interior-characters.js": [
+      "public/data/station-employee-art.js"
+    ],
+    "public/data/station-interior.js": [
+      "public/data/station-travelers.js",
+      "public/data/station-departure.js",
+      "public/data/station-journey.js"
+    ],
+    "public/data/station-journey.js": [],
+    "public/data/station-language.js": [],
+    "public/data/station-panda.js": [],
+    "public/data/station-platform-travelers.js": [
+      "public/data/station-travelers.js"
+    ],
+    "public/data/station-platform.js": [
+      "public/data/station-platform-travelers.js"
+    ],
+    "public/data/station-props.js": [],
+    "public/data/station-shops.js": [],
+    "public/data/station-traveler-art.js": [],
+    "public/data/station-traveler-walk-a-art.js": [],
+    "public/data/station-traveler-walk-art.js": [
+      "public/data/station-traveler-walk-a-art.js"
+    ],
+    "public/data/station-travelers.js": [
+      "public/data/station-departure.js"
+    ],
+    "public/data/station-waiting-characters.js": [],
+    "public/data/station-waiting-signs.js": [],
+    "public/data/station-waiting-travelers.js": [],
+    "public/data/station-waiting.js": [
+      "public/data/wenbo-conversation-art.js",
+      "public/data/station-waiting-travelers.js",
+      "public/data/station-travelers.js",
+      "public/data/station-departure.js",
+      "public/data/station-interior.js",
+      "public/data/station-platform.js"
+    ],
+    "public/data/suzhou-life.js": [],
+    "public/data/town-layout.js": [
+      "public/data/ponds.js",
+      "public/data/art-bounds.js"
+    ],
+    "public/data/town-rooms.js": [
+      "public/data/suzhou-life.js",
+      "public/data/station-exterior.js",
+      "public/data/content.js",
+      "public/data/adventure.js",
+      "public/data/ponds.js"
+    ],
+    "public/data/town.js": [
+      "public/data/art-bounds.js"
+    ],
+    "public/data/travel-luggage.js": [
+      "public/data/shops.js",
+      "public/data/station-journey.js"
+    ],
+    "public/data/voices.js": [],
+    "public/data/wenbo-conversation-art.js": [],
+    "public/data/xiaocheng-walk-art.js": [],
+    "public/game/activity-guide.js": [
+      "public/data/activities.js"
+    ],
+    "public/game/adventure.js": [
+      "public/data/travel-luggage.js",
+      "public/data/voices.js",
+      "public/game/station-interactions.js",
+      "public/data/adventure.js",
+      "public/game/persistence.js"
+    ],
+    "public/game/ambience.js": [
+      "public/game/station-audio.js",
+      "public/data/station-exterior.js"
+    ],
+    "public/game/appearance.js": [],
+    "public/game/bridges.js": [],
+    "public/game/bubble-help.js": [],
+    "public/game/coach-questions.js": [],
+    "public/game/collectibles.js": [],
+    "public/game/dialogue-variation.js": [
+      "public/data/dialogue-options.js",
+      "public/game/persistence.js"
+    ],
+    "public/game/directions.js": [
+      "public/data/adventure.js",
+      "public/data/navigation.js"
+    ],
+    "public/game/engine.js": [
+      "public/game/bubble-help.js",
+      "public/data/travel-luggage.js",
+      "public/game/interactions.js",
+      "public/game/interaction-surfaces.js",
+      "public/game/collectibles.js",
+      "public/game/world.js",
+      "public/game/render.js",
+      "public/game/exit-arrow.js",
+      "public/game/pathfinding.js",
+      "public/game/appearance.js",
+      "public/game/life.js",
+      "public/data/station-departure.js",
+      "public/data/station-journey.js",
+      "public/data/station-interior.js",
+      "public/data/station-waiting.js",
+      "public/game/station-departure.js",
+      "public/game/station-train.js",
+      "public/game/station-sign-help.js",
+      "public/data/art-bounds.js"
+    ],
+    "public/game/exit-arrow.js": [
+      "public/game/world.js"
+    ],
+    "public/game/fountain.js": [],
+    "public/game/goals.js": [
+      "public/data/language.js",
+      "public/data/adventure.js"
+    ],
+    "public/game/interaction-surfaces.js": [],
+    "public/game/interactions.js": [],
+    "public/game/language-signs.js": [],
+    "public/game/life.js": [
+      "public/data/roaming-zones.js",
+      "public/data/content.js",
+      "public/game/world.js"
+    ],
+    "public/game/map.js": [
+      "public/game/render.js"
+    ],
+    "public/game/music-ownership.js": [],
+    "public/game/music-track.js": [],
+    "public/game/music.js": [
+      "public/game/music-ownership.js",
+      "public/game/music-track.js"
+    ],
+    "public/game/panda-landmarks.js": [
+      "public/data/panda-areas.js"
+    ],
+    "public/game/panels.js": [
+      "public/game/interactions.js",
+      "public/data/activities.js",
+      "public/game/activity-guide.js",
+      "public/game/goals.js",
+      "public/game/map.js",
+      "public/data/language.js",
+      "public/game/persistence.js",
+      "public/data/shops.js",
+      "public/data/content.js",
+      "public/data/settings.js",
+      "public/game/music.js"
+    ],
+    "public/game/pathfinding.js": [
+      "public/game/world.js"
+    ],
+    "public/game/persistence.js": [
+      "public/data/adventure.js",
+      "public/data/settings.js",
+      "public/data/learner.js",
+      "public/data/activities.js",
+      "public/game/world.js"
+    ],
+    "public/game/practice.js": [
+      "public/game/activity-guide.js",
+      "public/data/content.js",
+      "public/data/activities.js",
+      "public/data/culture.js"
+    ],
+    "public/game/pwa.js": [],
+    "public/game/render.js": [
+      "public/game/station-escalators.js",
+      "public/game/station-waiting-art.js",
+      "public/data/station-waiting.js",
+      "public/data/station-platform.js",
+      "public/game/station-platform-art.js",
+      "public/data/travel-luggage.js",
+      "public/data/station-traveler-walk-art.js",
+      "public/data/station-traveler-art.js",
+      "public/data/xiaocheng-walk-art.js",
+      "public/data/station-departure.js",
+      "public/data/station-journey.js",
+      "public/game/station-interior-art.js",
+      "public/game/interaction-surfaces.js",
+      "public/data/station-interior-characters.js",
+      "public/game/station-employee-animation.js",
+      "public/game/room-camera.js",
+      "public/game/station-layers.js",
+      "public/data/station-exterior.js",
+      "public/game/station-signs.js",
+      "public/game/station-environment.js",
+      "public/data/market-foreground.js",
+      "public/game/interactions.js",
+      "public/game/collectibles.js",
+      "public/data/optimized-art.js",
+      "public/game/fountain.js",
+      "public/game/exit-arrow.js",
+      "public/data/adventure.js",
+      "public/data/art-bounds.js",
+      "public/game/appearance.js",
+      "public/game/terrain.js",
+      "public/game/life.js"
+    ],
+    "public/game/room-camera.js": [],
+    "public/game/speech.js": [
+      "public/data/voices.js",
+      "public/data/pronunciation.js"
+    ],
+    "public/game/station-audio.js": [
+      "public/game/music-track.js"
+    ],
+    "public/game/station-departure.js": [
+      "public/data/station-departure.js",
+      "public/data/station-exterior.js",
+      "public/game/pathfinding.js",
+      "public/game/world.js"
+    ],
+    "public/game/station-employee-animation.js": [],
+    "public/game/station-environment.js": [
+      "public/game/water-motion.js"
+    ],
+    "public/game/station-escalators.js": [
+      "public/data/station-interior.js"
+    ],
+    "public/game/station-interactions.js": [
+      "public/data/station-journey.js"
+    ],
+    "public/game/station-interior-art.js": [
+      "public/data/station-interior.js",
+      "public/data/station-journey.js"
+    ],
+    "public/game/station-layers.js": [],
+    "public/game/station-platform-art.js": [
+      "public/data/station-platform.js"
+    ],
+    "public/game/station-sign-help.js": [
+      "public/data/station-waiting.js",
+      "public/data/station-waiting-signs.js",
+      "public/data/station-exterior.js",
+      "public/game/station-signs.js"
+    ],
+    "public/game/station-signs.js": [
+      "public/data/station-exterior.js"
+    ],
+    "public/game/station-train.js": [],
+    "public/game/station-waiting-art.js": [
+      "public/data/station-waiting-signs.js",
+      "public/data/station-waiting.js",
+      "public/data/optimized-art.js"
+    ],
+    "public/game/terrain.js": [
+      "public/game/bridges.js",
+      "public/game/water-motion.js",
+      "public/game/language-signs.js",
+      "public/game/world.js"
+    ],
+    "public/game/water-motion.js": [],
+    "public/game/words.js": [
+      "public/game/persistence.js",
+      "public/data/content.js"
+    ],
+    "public/game/world.js": [
+      "public/data/station-exterior.js",
+      "public/data/station-interior.js",
+      "public/data/station-waiting.js",
+      "public/data/station-platform.js",
+      "public/data/town-rooms.js",
+      "public/game/collectibles.js",
+      "public/data/adventure.js",
+      "public/data/market-integration.js",
+      "public/data/town-layout.js",
+      "public/data/market.js",
+      "public/data/town.js",
+      "public/data/art-bounds.js",
+      "public/data/interiors.js"
+    ],
+    "public/sw.js": [
+      "public/data/optimized-art.js"
+    ],
+    "server/coach.js": [
+      "server/panda-landmarks.js",
+      "public/data/language.js",
+      "public/data/navigation.js",
+      "server/pronunciation.js",
+      "server/gemini.js"
+    ],
+    "server/conversation-feedback.js": [
+      "public/data/language.js",
+      "server/pronunciation.js"
+    ],
+    "server/dialogue-variation.js": [
+      "public/data/family-dialogue.js",
+      "server/pronunciation.js",
+      "public/data/dialogue-options.js",
+      "public/data/language.js",
+      "server/dialogue.js",
+      "server/gemini.js"
+    ],
+    "server/dialogue.js": [
+      "public/data/station-platform-travelers.js",
+      "public/data/station-waiting-travelers.js",
+      "public/data/station-help.js",
+      "public/data/station-travelers.js",
+      "public/data/station-language.js",
+      "public/data/station-departure.js",
+      "public/data/suzhou-life.js",
+      "public/data/family-dialogue.js",
+      "public/data/book-dialogue.js",
+      "public/data/conversation-subjects.js",
+      "public/data/language.js",
+      "public/data/shops.js",
+      "public/data/navigation.js",
+      "public/data/content.js",
+      "public/data/learner.js",
+      "server/pronunciation.js",
+      "server/gemini.js",
+      "server/dialogue-variation.js",
+      "server/conversation-feedback.js"
+    ],
+    "server/dictionary.js": [
+      "node:fs",
+      "node:zlib",
+      "server/pronunciation.js",
+      "public/data/pronunciation.js",
+      "public/data/content.js",
+      "public/data/language.js"
+    ],
+    "server/gemini.js": [],
+    "server/index.js": [
+      "public/data/voices.js",
+      "server/dictionary.js",
+      "server/transcription.js",
+      "node:http",
+      "node:fs/promises",
+      "node:url",
+      "node:path",
+      "server/store.js",
+      "server/coach.js",
+      "server/dialogue.js",
+      "server/dialogue-variation.js",
+      "server/speech.js",
+      "server/music-ownership.js"
+    ],
+    "server/music-ownership.js": [],
+    "server/panda-landmarks.js": [
+      "public/data/panda-areas.js",
+      "public/data/station-language.js",
+      "public/data/language.js",
+      "server/gemini.js"
+    ],
+    "server/panda-speech.js": [
+      "node:crypto",
+      "node:fs/promises",
+      "node:path"
+    ],
+    "server/pronunciation.js": [
+      "pinyin-pro",
+      "public/data/pronunciation.js"
+    ],
+    "server/speech.js": [
+      "public/data/voices.js",
+      "node:child_process",
+      "node:fs",
+      "node:path",
+      "server/panda-speech.js",
+      "server/pronunciation.js"
+    ],
+    "server/store.js": [
+      "public/data/adventure.js",
+      "public/data/station-interior.js",
+      "public/data/station-waiting.js",
+      "node:sqlite",
+      "node:crypto",
+      "node:fs",
+      "node:path",
+      "public/data/settings.js",
+      "public/data/learner.js",
+      "public/game/world.js",
+      "public/data/content.js",
+      "public/data/activities.js"
+    ],
+    "server/transcription.js": [
+      "node:child_process",
+      "node:fs",
+      "node:path"
+    ]
+  }
+}

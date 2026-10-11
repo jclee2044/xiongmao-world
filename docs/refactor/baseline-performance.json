@@ -1,0 +1,73 @@
+{
+  "browser": "152.0.7977.82",
+  "node": "v26.8.2",
+  "conditions": "Headless desktop Chromium; saved voice/music/ambience muted; service workers blocked; three cold/warm pairs. Declared response bytes are not wire transfer bytes. No physical-device or audible-quality claim.",
+  "samples": [
+    {
+      "run": 0,
+      "mode": "cold",
+      "artReadyMs": 2567.875094,
+      "requests": 175,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.399999999999636,
+      "maxMs": 50,
+      "heapBytes": 18280062
+    },
+    {
+      "run": 0,
+      "mode": "warm",
+      "artReadyMs": 1880.977785,
+      "requests": 175,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.40000000000009,
+      "maxMs": 50,
+      "heapBytes": 23501162
+    },
+    {
+      "run": 1,
+      "mode": "cold",
+      "artReadyMs": 2124.5793009999998,
+      "requests": 174,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.40000000000009,
+      "maxMs": 50.100000000000364,
+      "heapBytes": 16051626
+    },
+    {
+      "run": 1,
+      "mode": "warm",
+      "artReadyMs": 2079.7274579999994,
+      "requests": 176,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.40000000000009,
+      "maxMs": 50.09999999999991,
+      "heapBytes": 16540125
+    },
+    {
+      "run": 2,
+      "mode": "cold",
+      "artReadyMs": 2310.5691719999995,
+      "requests": 175,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.40000000000009,
+      "maxMs": 50,
+      "heapBytes": 15990671
+    },
+    {
+      "run": 2,
+      "mode": "warm",
+      "artReadyMs": 1898.0750570000018,
+      "requests": 173,
+      "declaredBytes": 17116411,
+      "medianMs": 16.699999999999818,
+      "p95Ms": 33.40000000000009,
+      "maxMs": 33.40000000000009,
+      "heapBytes": 23360438
+    }
+  ]
+}

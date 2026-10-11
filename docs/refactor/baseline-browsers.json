@@ -1,0 +1,535 @@
+{
+  "revision": "b85202c",
+  "total": 83,
+  "passed": 55,
+  "failed": 28,
+  "timeouts": 0,
+  "checks": [
+    {
+      "script": "scripts/browser-conversation-feedback.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 5.98
+    },
+    {
+      "script": "scripts/browser-speech-latency.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 3.77
+    },
+    {
+      "script": "scripts/browser-panda-narration.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 27.09
+    },
+    {
+      "script": "scripts/browser-dialogue-help.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 3.77,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   '吃什么',\n-   '朋友',\n-   '明天做什么'\n- ]\n\n    at file://<checkout>/scripts/browser-dialogue-help.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: [],\n  expected: [ '吃什么', '朋友', '明天做什么' ],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-pronunciation.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 7.43
+    },
+    {
+      "script": "scripts/browser-welcome.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 1.52,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'false' !== 'true'\n\n    at file://<checkout>/scripts/browser-welcome.js:<line>:<column>\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:541:9) {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'false',\n  expected: 'true',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-dialogue-variety.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 4.12,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 3\n\n    at file://<checkout>/scripts/browser-dialogue-variety.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 3,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-dialogue-relevance.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 9.59
+    },
+    {
+      "script": "scripts/browser-book-dialogue.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 32.5,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-conversation-subject=\"reading\"]')\n\n    at <checkout>/scripts/browser-book-dialogue.js:<line>:<column> {\n  log: [\n    `  - waiting for locator('[data-conversation-subject=\"reading\"]')`\n  ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-family-dialogue.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 33.55,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-conversation-subject=\"family\"]')\n\n    at <checkout>/scripts/browser-family-dialogue.js:<line>:<column> {\n  log: [ `  - waiting for locator('[data-conversation-subject=\"family\"]')` ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-language.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 4.12,
+      "failure": "AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /\\p{Script=Han}/u. Input:\n\n'\\n' +\n  '      \\n' +\n  '        Settings\\n' +\n  '        ×\\n' +\n  '      \\n' +\n  '      ClothesLavenderSagePeachTealHairBunShortWalking speedNormalSlowerOld HSK levelHSK 1–2HSK 2–3HSK 3 (max)Panda helpMoreStandardLessPinyinShownHiddenEnglish translationsShownHiddenAnimationOnReducedText sizeNormalLargeChinese voiceOnOffVoice volumeMusicOnOffMusic volumeMusic creditsStation: Friday Morning — Kevin MacLeod (incompetech.com), CC BY 4.0. Filtered for distant station speakers. Station recording sources and credits.Home： 花 / Hana (Flower) — composed by Masaaki Kishibe, guitar by Daria Semikina. Outdoors： Asia — FSM Team · CC BY 4.0. Other indoor rooms： Asian Music - Magical Dream — Sonican · Pixabay Content License. Music by https://www.free-stock-music.com (outdoor music)。Environment soundsMusic quiets during speech. You can use the microphone to order at the restaurant.Customize your worldChange your outfit color, hairstyle, walking speed, Chinese practice level, or Panda help. Practice uses everyday Chinese around old HSK 2–3.Describe a changeApply changeUndoRecent changesEarlier settings changeSaved ideasNo saved ideas yet.New maps, artwork, and game features cannot be changed here yet. Your ideas will be saved.Save and devicesSave and devicesJournal savedRetry saveExport savePlay on another deviceOpen this game’s HTTPS address on your phone. Enter the code to share your progress. Codes expire after five minutes and can be used once.Get a pairing codeOr enter a code from another deviceConnect\\n' +\n  '    '\n\n    at file://<checkout>/scripts/browser-language.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '\\n' +\n    '      \\n' +\n    '        Settings\\n' +\n    '        ×\\n' +\n    '      \\n' +\n    '      ClothesLavenderSagePeachTealHairBunShortWalking speedNormalSlowerOld HSK levelHSK 1–2HSK 2–3HSK 3 (max)Panda helpMoreStandardLessPinyinShownHiddenEnglish translationsShownHiddenAnimationOnReducedText sizeNormalLargeChinese voiceOnOffVoice volumeMusicOnOffMusic volumeMusic creditsStation: Friday Morning — Kevin MacLeod (incompetech.com), CC BY 4.0. Filtered for distant station speakers. Station recording sources and credits.Home： 花 / Hana (Flower) — composed by Masaaki Kishibe, guitar by Daria Semikina. Outdoors： Asia — FSM Team · CC BY 4.0. Other indoor rooms： Asian Music - Magical Dream — Sonican · Pixabay Content License. Music by https://www.free-stock-music.com (outdoor music)。Environment soundsMusic quiets during speech. You can use the microphone to order at the restaurant.Customize your worldChange your outfit color, hairstyle, walking speed, Chinese practice level, or Panda help. Practice uses everyday Chinese around old HSK 2–3.Describe a changeApply changeUndoRecent changesEarlier settings changeSaved ideasNo saved ideas yet.New maps, artwork, and game features cannot be changed here yet. Your ideas will be saved.Save and devicesSave and devicesJournal savedRetry saveExport savePlay on another deviceOpen this game’s HTTPS address on your phone. Enter the code to share your progress. Codes expire after five minutes and can be used once.Get a pairing codeOr enter a code from another deviceConnect\\n' +\n    '    ',\n  expected: /\\p{Script=Han}/u,\n  operator: 'doesNotMatch',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-word-help.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 2.57
+    },
+    {
+      "script": "scripts/browser-bubble-help.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 7.73
+    },
+    {
+      "script": "scripts/browser-exit-arrow.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 27.24
+    },
+    {
+      "script": "scripts/browser-touch-controls.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 34.41
+    },
+    {
+      "script": "scripts/browser-npc-movement.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 19.18
+    },
+    {
+      "script": "scripts/browser-panda-walk.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 3.78
+    },
+    {
+      "script": "scripts/browser-town-gates-square.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 35.16,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#interact')\n\n    at <checkout>/scripts/browser-town-gates-square.js:<line>:<column> {\n  log: [ \"  - waiting for locator('#interact')\" ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-music-ownership.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 6.23
+    },
+    {
+      "script": "scripts/browser-panda-panel.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 3.77,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'14px' !== '22px'\n\n    at file://<checkout>/scripts/browser-panda-panel.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '14px',\n  expected: '22px',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-west-grove-audio.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 33.45,
+      "failure": "page.waitForFunction: Timeout 30000ms exceeded.\n    at <checkout>/scripts/browser-west-grove-audio.js:<line>:<column> {\n  log: [],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-town-expansion.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 5.13,
+      "failure": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /湖/. Input:\n\n''\n\n    at file://<checkout>/scripts/browser-town-expansion.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '',\n  expected: /湖/,\n  operator: 'match',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-boat.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 47.69
+    },
+    {
+      "script": "scripts/browser-market-shops.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 14.76,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n30 !== 26\n\n    at file://<checkout>/scripts/browser-market-shops.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 30,\n  expected: 26,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-clothing-store.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 36.47,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: /衬衫/ })\n\n    at <checkout>/scripts/browser-clothing-store.js:<line>:<column> {\n  log: [ \"  - waiting for getByRole('button', { name: /衬衫/ })\" ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-fountain.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 7.33
+    },
+    {
+      "script": "scripts/browser-character-consistency.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 2.37
+    },
+    {
+      "script": "scripts/browser-indoor-npcs.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 23.86
+    },
+    {
+      "script": "scripts/browser-npc-variety.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 2.77,
+      "failure": "AssertionError [ERR_ASSERTION]: mei\n\n0 !== 1\n\n    at file://<checkout>/scripts/browser-npc-variety.js:<line>:<column>\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:541:9) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-refinements.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 15.39,
+      "failure": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /和Lian吃hot pot/. Input:\n\n'和小莲一起吃火锅'\n\n    at file://<checkout>/scripts/browser-refinements.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '和小莲一起吃火锅',\n  expected: /和Lian吃hot pot/,\n  operator: 'match',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-environment.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 35.27,
+      "failure": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for getByLabel('风声和水声')\n\n    at <checkout>/scripts/browser-environment.js:<line>:<column> {\n  log: [ \"  - waiting for getByLabel('风声和水声')\" ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-xiongmao.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 6.63,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'小莲' !== '莲'\n\n    at file://<checkout>/scripts/browser-xiongmao.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '小莲',\n  expected: '莲',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-town.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 5.89,
+      "failure": "locator.click: Error: strict mode violation: getByRole('button', { name: '地图', exact: true }) resolved to 2 elements:\n    1) <button id=\"map\" aria-label=\"地图\">…</button> aka getByLabel('地图')\n    2) <span tabindex=\"0\" role=\"button\" class=\"help-word\">地图</span> aka getByText('地图')\n\nCall log:\n  - waiting for getByRole('button', { name: '地图', exact: true })\n\n    at walkToStop (<checkout>/scripts/browser-helpers.js:<line>:<column>)\n    at async go (<checkout>/scripts/browser-town.js:<line>:<column>)\n    at async file://<checkout>/scripts/browser-town.js:<line>:<column> {\n  log: [\n    \"  - waiting for getByRole('button', { name: '地图', exact: true })\"\n  ]\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-town-extra.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 38.11,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#interact')\n\n    at <checkout>/scripts/browser-town-extra.js:<line>:<column> {\n  log: [ \"  - waiting for locator('#interact')\" ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-life.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 3.39,
+      "failure": "AssertionError [ERR_ASSERTION]: Chinese practice is visible without opening Panda help\n\nfalse !== true\n\n    at file://<checkout>/scripts/browser-life.js:<line>:<column> {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-culture.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 3.37,
+      "failure": "AssertionError [ERR_ASSERTION]: The three games augment all 14 existing errands\n\n27 !== 17\n\n    at file://<checkout>/scripts/browser-culture.js:<line>:<column> {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 27,\n  expected: 17,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-pinyin.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 33.85,
+      "failure": "locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-map-stop=\"mei\"]').last()\n\n    at walkToStop (<checkout>/scripts/browser-helpers.js:<line>:<column>)\n    at async file://<checkout>/scripts/browser-pinyin.js:<line>:<column> {\n  log: [ `  - waiting for locator('[data-map-stop=\"mei\"]').last()` ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-music.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 21.43
+    },
+    {
+      "script": "scripts/browser-music-pitch.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 5.28
+    },
+    {
+      "script": "scripts/browser-pwa.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 7.63,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 17\n\n    at file://<checkout>/scripts/browser-pwa.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 17,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-journal.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 4.33,
+      "failure": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(await page.locator(\"#activity-tracker\").isVisible())\n\n    at file://<checkout>/scripts/browser-journal.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-fox-plush.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 11.71
+    },
+    {
+      "script": "scripts/browser-fox-reveal.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 4.43
+    },
+    {
+      "script": "scripts/browser-garden-workers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 18.57
+    },
+    {
+      "script": "scripts/browser-home-plushies.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 6.69,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   'fox-plush'\n- ]\n\n    at file://<checkout>/scripts/browser-home-plushies.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: [],\n  expected: [ 'fox-plush' ],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-interaction-surfaces.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 5.38
+    },
+    {
+      "script": "scripts/browser-landmark-cleanup.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 7.79
+    },
+    {
+      "script": "scripts/browser-map.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 5.04,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n13 !== 12\n\n    at file://<checkout>/scripts/browser-map.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 13,\n  expected: 12,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+    },
+    {
+      "script": "scripts/browser-market-collisions.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 29.2
+    },
+    {
+      "script": "scripts/browser-market-occlusion.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 30.03
+    },
+    {
+      "script": "scripts/browser-market-review.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 52.41
+    },
+    {
+      "script": "scripts/browser-panda-landmarks.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 12.44
+    },
+    {
+      "script": "scripts/browser-panda-voice.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 14.72
+    },
+    {
+      "script": "scripts/browser-shop-rear-paths.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 27.34
+    },
+    {
+      "script": "scripts/browser-station-audio.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 6.58
+    },
+    {
+      "script": "scripts/browser-station-baggage.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 3.28
+    },
+    {
+      "script": "scripts/browser-station-departure.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 46.7
+    },
+    {
+      "script": "scripts/browser-station-employees.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 19.23
+    },
+    {
+      "script": "scripts/browser-station-environment.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 5.33
+    },
+    {
+      "script": "scripts/browser-station-escalators.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 2.62
+    },
+    {
+      "script": "scripts/browser-station-exterior.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 42.12,
+      "failure": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#panel') to be visible\n    63 × locator resolved to hidden <dialog id=\"panel\">…</dialog>\n\n    at <checkout>/scripts/browser-station-exterior.js:<line>:<column> {\n  log: [\n    \"  - waiting for locator('#panel') to be visible\",\n    '    63 × locator resolved to hidden <dialog id=\"panel\">…</dialog>'\n  ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-station-floor-links.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 26.74
+    },
+    {
+      "script": "scripts/browser-station-ground-layers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 4.02
+    },
+    {
+      "script": "scripts/browser-station-ground-travelers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 8.69
+    },
+    {
+      "script": "scripts/browser-station-interior.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 81.64
+    },
+    {
+      "script": "scripts/browser-station-layers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 6.08
+    },
+    {
+      "script": "scripts/browser-station-nook.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 11.36
+    },
+    {
+      "script": "scripts/browser-station-panda.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 35.4,
+      "failure": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#panda-speech') to be visible\n    60 × locator resolved to hidden <aside hidden=\"\" id=\"panda-speech\" aria-label=\"Panda says\">…</aside>\n\n    at <checkout>/scripts/browser-station-panda.js:<line>:<column> {\n  log: [\n    \"  - waiting for locator('#panda-speech') to be visible\",\n    '    60 × locator resolved to hidden <aside hidden=\"\" id=\"panda-speech\" aria-label=\"Panda says\">…</aside>'\n  ],\n  name: 'TimeoutError'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-station-platform.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 80.08
+    },
+    {
+      "script": "scripts/browser-station-seated-companions.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 9.26
+    },
+    {
+      "script": "scripts/browser-station-shops.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 7.49
+    },
+    {
+      "script": "scripts/browser-station-sign-help.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 8.64
+    },
+    {
+      "script": "scripts/browser-station-traveler-walk.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 3.13
+    },
+    {
+      "script": "scripts/browser-station-travelers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 19.16
+    },
+    {
+      "script": "scripts/browser-station-waiting-layers.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 10.95
+    },
+    {
+      "script": "scripts/browser-station-waiting-signs.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 52.05
+    },
+    {
+      "script": "scripts/browser-station-waiting-travelers.js",
+      "status": "fail",
+      "exitCode": 1,
+      "seconds": 35.46,
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'小岚' !== '小睿'\n\n    at file://<checkout>/scripts/browser-station-waiting-travelers.js:<line>:<column> {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '小岚',\n  expected: '小睿',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.8.2\n"
+    },
+    {
+      "script": "scripts/browser-station-waiting.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 54.73
+    },
+    {
+      "script": "scripts/browser-suzhou-life.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 46.12
+    },
+    {
+      "script": "scripts/browser-tea-guest.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 12.8
+    },
+    {
+      "script": "scripts/browser-travel-luggage.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 25.29
+    },
+    {
+      "script": "scripts/browser-voices.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 116.54
+    },
+    {
+      "script": "scripts/browser-water-motion.js",
+      "status": "pass",
+      "exitCode": 0,
+      "seconds": 6.88
+    }
+  ]
+}

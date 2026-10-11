@@ -1,5 +1,5 @@
 import { optimizedArt } from "./data/optimized-art.js";
-const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149";
+const CACHE = "xiongmao-shell-0.9.8-platform-travelers-149-refactor-worlds";
 // The user's personal recording is kept outside source control. A checkout
 // without that file must still install the rest of the offline game.
 const OPTIONAL_SHELL = ["/assets/audio/hana-daria-semikina.mp3"];
@@ -7,6 +7,22 @@ const SHELL = [
   ...new Set(
     [
       "/welcome.css",
+      "/content/art/render-assets.js",
+      "/engine/navigation.js",
+      "/state/migrations/world.js",
+      "/worlds/catalog.js",
+      "/worlds/suzhou/manifest.js",
+      "/worlds/suzhou/scenes/interiors.js",
+      "/worlds/suzhou/scenes/town-rooms.js",
+      "/worlds/suzhou/scenes/station-exterior.js",
+      "/worlds/suzhou/scenes/station-interior.js",
+      "/worlds/suzhou/scenes/station-waiting.js",
+      "/worlds/suzhou/scenes/station-platform.js",
+      "/content/language/basics.js",
+      "/content/characters/suzhou.js",
+      "/content/characters/catalog.js",
+      "/state/defaults.js",
+      "/shared/geometry/collision.js",
       "/data/station-exterior.js",
       "/data/station-interior.js",
       "/data/station-waiting.js",

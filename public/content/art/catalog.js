@@ -1,0 +1,101 @@
+import { npcs } from "./npcs.js";
+import { player } from "./player.js";
+import { companions } from "./companions.js";
+import { animals } from "./animals.js";
+import { items } from "./items.js";
+import { icons } from "./icons.js";
+import { environment } from "./environment.js";
+import { welcome } from "./welcome.js";
+
+export const assetGroups = { npcs, player, companions, animals, items, icons, environment, welcome };
+export const assets = Object.values(assetGroups).flat();
+const bySource = new Map(assets.map(asset => [asset.source, asset]));
+// Preserve the original conversion order and generated mapping. New descriptors
+// with an explicit output are appended, avoiding implicit basename discovery.
+const existingOrder = [
+  "/assets/props/travel-suitcase.png",
+  "/assets/props/player-green-satchel.png",
+  "/assets/characters/player-idle-without-bag.png",
+  "/assets/characters/player-walk-without-bag.png",
+  "/assets/characters/player-seated-without-bag.png",
+  "/assets/characters/station-employee-guide-v1.png",
+  "/assets/characters/station-employee-poses-v2.png",
+  "/assets/characters/station-employee-exit-v1.png",
+  "/assets/characters/station-employee-desk-v1.png",
+  "/assets/characters/station-reader-seated-v3.png",
+  "/assets/characters/station-clerk-v2.png",
+  "/assets/characters/station-interior-people-v1.png",
+  "/assets/characters/station-seated-companions-v3.png",
+  "/assets/characters/station-waiting-people-v2.png",
+  "/assets/characters/xiaocheng-walk.png",
+  "/assets/characters/station-travelers-walk-a-v1.png",
+  "/assets/characters/station-travelers-walk-v1.png",
+  "/assets/characters/wenbo-conversation-away-v1.png",
+  "/assets/characters/station-travelers-a.png",
+  "/assets/characters/station-travelers-b.png",
+  "/assets/world/lotus-fountain.png",
+  "/assets/world/stone-bridges.png",
+  "/assets/world/suzhou-passenger-boat.png",
+  "/assets/world/canal-water-v2.png",
+  "/assets/characters/lian-poses.png",
+  "/assets/world/fruit-trees-v2.png",
+  "/assets/characters/lin-walk.png",
+  "/assets/characters/seated-friends.png",
+  "/assets/world/sheep-gift.png",
+  "/assets/world/hotpot-table.png",
+  "/assets/characters/player-idle.png",
+  "/assets/characters/panda-v2.png",
+  "/assets/characters/qiao-seated.png",
+  "/assets/characters/neighbors-walk-v2.png",
+  "/assets/characters/visitors-walk.png",
+  "/assets/characters/roamers-idle.png",
+  "/assets/characters/market-cat-poses.png",
+  "/assets/characters/children-walk.png",
+  "/assets/world/market-rows.png",
+  "/assets/world/restaurant-interior-v3.png",
+  "/assets/characters/player-atlas.webp",
+  "/assets/characters/mei.webp",
+  "/assets/characters/lin.webp",
+  "/assets/characters/yun.webp",
+  "/assets/characters/momo.webp",
+  "/assets/optimized/rabbit-plush.webp",
+  "/assets/optimized/suzhou-model-table-rotated.webp",
+  "/assets/characters/fox-plush.png",
+  "/assets/world/canal-lane.webp",
+  "/assets/world/home.webp",
+  "/assets/world/paving.webp",
+  "/assets/world/earth.png",
+  "/assets/world/house.webp",
+  "/assets/world/family-furniture.webp",
+  "/assets/world/family-fallen-chair.webp",
+  "/assets/world/family-clutter.webp",
+  "/assets/world/willow.webp",
+  "/assets/characters/neighbors.webp",
+  "/assets/characters/indoor-npcs.png",
+  "/assets/characters/garden-workers-work.png",
+  "/assets/characters/market-npcs.png",
+  "/assets/characters/player-walk-v2.png",
+  "/assets/world/props.webp",
+  "/assets/world/storefronts.webp",
+  "/assets/world/clothing-store-exterior.png",
+  "/assets/world/landmarks.webp",
+  "/assets/characters/animals.webp",
+  "/assets/world/station-sign-readability-v1.png",
+  "/assets/world/clothing-store-interior.png",
+  "/assets/world/bakery-interior.webp",
+  "/assets/world/teahouse-interior.webp",
+  "/assets/world/bookshop-interior.webp",
+  "/assets/world/family-home.webp",
+  "/assets/world/restaurant-interior.png",
+  "/assets/world/museum-interior.png",
+  "/assets/world/station-exterior-v2.png",
+  "/assets/world/station-ground-v4.png",
+  "/assets/world/station-waiting-v5.png",
+  "/assets/optimized/suzhou-model-closeup.webp",
+  "/assets/world/station-train-overhead-v1.png",
+  "/assets/world/station-platform-v3.png"
+];
+export const optimizationJobs = [
+  ...existingOrder.map(source => bySource.get(source)),
+  ...assets.filter(asset => asset.output && !existingOrder.includes(asset.source)),
+];

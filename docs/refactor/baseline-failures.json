@@ -1,0 +1,32 @@
+{
+  "revision": "b85202c",
+  "unit": {
+    "tests": 328,
+    "passed": 324,
+    "failed": 4,
+    "failures": [
+      {
+        "test": "authored game text stays in range across scenes, UI, activities and speech",
+        "file": "test/language.test.js",
+        "detail": "public/app.js: 更新游戏 · Update game"
+      },
+      {
+        "test": "ducks retain wide ranges and people maneuver inside their dedicated zones",
+        "file": "test/life.test.js",
+        "detail": "visitor-3: 130.0333333333385"
+      },
+      {
+        "test": "market cat explores its apron smoothly and settles during rests",
+        "file": "test/life.test.js",
+        "detail": "assert.ok(maxX - minX > 500)"
+      },
+      {
+        "test": "authored dialogue and activity pinyin agree with contextual polyphone readings",
+        "file": "test/pronunciation.test.js",
+        "detail": "public/data/station-help.js: 想买票，或者想换一张票，请去一楼售票处。 (处)",
+        "actual": "one0",
+        "expected": "chu4"
+      }
+    ]
+  }
+}

@@ -6,11 +6,13 @@ export async function enterWorld(page) {
     () => document.getElementById("world").dataset.artReady === "true",
   );
 }
-export async function walkToStop(page, id) {
-  const scene = Object.values(scenes).find((s) =>
-    s.interactables.some((o) => o.id === id),
-  );
+export async function walkToStop(page, id, { sceneId } = {}) {
+  const scene = sceneId === undefined
+    ? Object.values(scenes).find((s) => s.interactables.some((o) => o.id === id))
+    : scenes[sceneId];
   if (!scene) throw new Error(`Unknown map stop: ${id}`);
+  if (!scene.interactables.some((o) => o.id === id))
+    throw new Error(`Unknown map stop ${id} in scene ${sceneId}`);
   await page.waitForFunction(
     (sceneId) => document.getElementById("world").dataset.scene === sceneId,
     scene.id,

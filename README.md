@@ -177,6 +177,10 @@ After activation: use the same HTTPS URL on PC and phone, with the phone connect
 
 The offline cache contains the exploration shell, art and licensed background recording, never API identities, saves, dialogue responses or generated Mandarin audio. Offline exploration/settings use the last device copy. Server AI, speech, pairing and sync need connectivity. Updates activate after all game tabs are closed and take effect on the next visit. Bump the cache version in `public/sw.js` for new releases, keeping old/new caches separate until activation.
 
+## Extending the game
+
+See [Adding a world](docs/ADDING_WORLDS.md) for scene and character registration, role-based art descriptors, compatibility paths, and the gameplay-preserving verification gate. The [refactor execution record](docs/refactor/EXECUTION.md) tracks accepted batches and existing test failures.
+
 ## Validation
 
 The maintained browser checks start disposable in-memory servers and isolated Chromium profiles. They never seed the live game database. The actual microphone check requires the installed local speech tools, Whisper model and system `ffmpeg`:

@@ -1,0 +1,48 @@
+{
+  "workerChanged": true,
+  "results": [
+    {
+      "label": "installed previous version",
+      "modules": 103,
+      "caches": [
+        "xiongmao-shell-0.9.8-platform-travelers-149"
+      ],
+      "entries": 224
+    },
+    {
+      "label": "previous controller with update waiting",
+      "modules": 103,
+      "caches": [
+        "xiongmao-shell-0.9.8-platform-travelers-149",
+        "xiongmao-shell-0.9.8-platform-travelers-149-refactor-probe"
+      ],
+      "entries": 448
+    },
+    {
+      "label": "current code under previous controller",
+      "modules": 103,
+      "caches": [
+        "xiongmao-shell-0.9.8-platform-travelers-149",
+        "xiongmao-shell-0.9.8-platform-travelers-149-refactor-probe"
+      ],
+      "entries": 448
+    },
+    {
+      "label": "activated current version",
+      "modules": 103,
+      "caches": [
+        "xiongmao-shell-0.9.8-platform-travelers-149-refactor-probe"
+      ],
+      "entries": 224
+    },
+    {
+      "label": "fresh current phone installation",
+      "modules": 103,
+      "caches": [
+        "xiongmao-shell-0.9.8-platform-travelers-149-refactor-probe"
+      ],
+      "entries": 224
+    }
+  ],
+  "errors": []
+}

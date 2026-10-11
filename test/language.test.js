@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { authoredSourceFiles } from "../scripts/verify/discovery.js";
 import babel from "prettier/plugins/babel";
 import {
   isBeginnerChinese,
@@ -65,22 +66,7 @@ test("both AI providers keep everyday Chinese place names instead of falling bac
 });
 
 test("authored game text stays in range across scenes, UI, activities and speech", () => {
-  const excluded = new Set([
-    "hsk-vocabulary.js",
-    "language.js",
-    "art-bounds.js",
-    "pronunciation.js", // Pronunciation metadata, not learner-facing prose.
-  ]);
-  const files = [
-    "public/app.js",
-    ...["public/data", "public/game"].flatMap((dir) =>
-      readdirSync(dir)
-        .filter((name) => name.endsWith(".js") && !excluded.has(name))
-        .map((name) => `${dir}/${name}`),
-    ),
-    "server/coach.js",
-    "server/dialogue.js",
-  ];
+  const files = authoredSourceFiles();
   for (const file of files) {
     const source = readFileSync(file, "utf8"),
       ast = babel.parsers.babel.parse(source);

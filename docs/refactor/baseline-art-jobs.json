@@ -1,0 +1,326 @@
+[
+  {
+    "source": "/assets/props/travel-suitcase.png",
+    "output": "/assets/optimized/travel-suitcase.webp"
+  },
+  {
+    "source": "/assets/props/player-green-satchel.png",
+    "output": "/assets/optimized/player-green-satchel.webp"
+  },
+  {
+    "source": "/assets/characters/player-idle-without-bag.png",
+    "output": "/assets/optimized/player-idle-without-bag.webp"
+  },
+  {
+    "source": "/assets/characters/player-walk-without-bag.png",
+    "output": "/assets/optimized/player-walk-without-bag.webp"
+  },
+  {
+    "source": "/assets/characters/player-seated-without-bag.png",
+    "output": "/assets/optimized/player-seated-without-bag.webp"
+  },
+  {
+    "source": "/assets/characters/station-employee-guide-v1.png",
+    "output": "/assets/optimized/station-employee-guide-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-employee-poses-v2.png",
+    "output": "/assets/optimized/station-employee-poses-v2.webp"
+  },
+  {
+    "source": "/assets/characters/station-employee-exit-v1.png",
+    "output": "/assets/optimized/station-employee-exit-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-employee-desk-v1.png",
+    "output": "/assets/optimized/station-employee-desk-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-reader-seated-v3.png",
+    "output": "/assets/optimized/station-reader-seated-v3.webp"
+  },
+  {
+    "source": "/assets/characters/station-clerk-v2.png",
+    "output": "/assets/optimized/station-clerk-v2.webp"
+  },
+  {
+    "source": "/assets/characters/station-interior-people-v1.png",
+    "output": "/assets/optimized/station-interior-people-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-seated-companions-v3.png",
+    "output": "/assets/optimized/station-seated-companions-v3.webp"
+  },
+  {
+    "source": "/assets/characters/station-waiting-people-v2.png",
+    "output": "/assets/optimized/station-waiting-people-v2.webp"
+  },
+  {
+    "source": "/assets/characters/xiaocheng-walk.png",
+    "output": "/assets/optimized/xiaocheng-walk.webp"
+  },
+  {
+    "source": "/assets/characters/station-travelers-walk-a-v1.png",
+    "output": "/assets/optimized/station-travelers-walk-a-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-travelers-walk-v1.png",
+    "output": "/assets/optimized/station-travelers-walk-v1.webp"
+  },
+  {
+    "source": "/assets/characters/wenbo-conversation-away-v1.png",
+    "output": "/assets/optimized/wenbo-conversation-away-v1.webp"
+  },
+  {
+    "source": "/assets/characters/station-travelers-a.png",
+    "output": "/assets/optimized/station-travelers-a.webp"
+  },
+  {
+    "source": "/assets/characters/station-travelers-b.png",
+    "output": "/assets/optimized/station-travelers-b.webp"
+  },
+  {
+    "source": "/assets/world/lotus-fountain.png",
+    "output": "/assets/optimized/lotus-fountain.webp"
+  },
+  {
+    "source": "/assets/world/stone-bridges.png",
+    "output": "/assets/optimized/stone-bridges.webp"
+  },
+  {
+    "source": "/assets/world/suzhou-passenger-boat.png",
+    "output": "/assets/optimized/suzhou-passenger-boat.webp"
+  },
+  {
+    "source": "/assets/world/canal-water-v2.png",
+    "output": "/assets/optimized/canal-water-v2.webp"
+  },
+  {
+    "source": "/assets/characters/lian-poses.png",
+    "output": "/assets/optimized/lian-poses.webp"
+  },
+  {
+    "source": "/assets/world/fruit-trees-v2.png",
+    "output": "/assets/optimized/fruit-trees-v2.webp"
+  },
+  {
+    "source": "/assets/characters/lin-walk.png",
+    "output": "/assets/optimized/lin-walk.webp"
+  },
+  {
+    "source": "/assets/characters/seated-friends.png",
+    "output": "/assets/optimized/seated-friends.webp"
+  },
+  {
+    "source": "/assets/world/sheep-gift.png",
+    "output": "/assets/optimized/sheep-gift.webp"
+  },
+  {
+    "source": "/assets/world/hotpot-table.png",
+    "output": "/assets/optimized/hotpot-table.webp"
+  },
+  {
+    "source": "/assets/characters/player-idle.png",
+    "output": "/assets/optimized/player-idle.webp"
+  },
+  {
+    "source": "/assets/characters/panda-v2.png",
+    "output": "/assets/optimized/panda-v2.webp"
+  },
+  {
+    "source": "/assets/characters/qiao-seated.png",
+    "output": "/assets/optimized/qiao-seated.webp"
+  },
+  {
+    "source": "/assets/characters/neighbors-walk-v2.png",
+    "output": "/assets/optimized/neighbors-walk-v2.webp"
+  },
+  {
+    "source": "/assets/characters/visitors-walk.png",
+    "output": "/assets/optimized/visitors-walk.webp"
+  },
+  {
+    "source": "/assets/characters/roamers-idle.png",
+    "output": "/assets/optimized/roamers-idle.webp"
+  },
+  {
+    "source": "/assets/characters/market-cat-poses.png",
+    "output": "/assets/optimized/market-cat-poses.webp"
+  },
+  {
+    "source": "/assets/characters/children-walk.png",
+    "output": "/assets/optimized/children-walk.webp"
+  },
+  {
+    "source": "/assets/world/market-rows.png",
+    "output": "/assets/optimized/market-rows.webp"
+  },
+  {
+    "source": "/assets/world/restaurant-interior-v3.png",
+    "output": "/assets/optimized/restaurant-interior-v3.webp"
+  },
+  {
+    "source": "/assets/characters/player-atlas.webp",
+    "output": "/assets/optimized/player-atlas.webp"
+  },
+  {
+    "source": "/assets/characters/mei.webp",
+    "output": "/assets/optimized/mei.webp"
+  },
+  {
+    "source": "/assets/characters/lin.webp",
+    "output": "/assets/optimized/lin.webp"
+  },
+  {
+    "source": "/assets/characters/yun.webp",
+    "output": "/assets/optimized/yun.webp"
+  },
+  {
+    "source": "/assets/characters/momo.webp",
+    "output": "/assets/optimized/momo.webp"
+  },
+  {
+    "source": "/assets/optimized/rabbit-plush.webp",
+    "output": "/assets/optimized/rabbit-plush.webp"
+  },
+  {
+    "source": "/assets/optimized/suzhou-model-table-rotated.webp",
+    "output": "/assets/optimized/suzhou-model-table-rotated.webp"
+  },
+  {
+    "source": "/assets/characters/fox-plush.png",
+    "output": "/assets/optimized/fox-plush.webp"
+  },
+  {
+    "source": "/assets/world/canal-lane.webp",
+    "output": "/assets/optimized/canal-lane.webp"
+  },
+  {
+    "source": "/assets/world/home.webp",
+    "output": "/assets/optimized/home.webp"
+  },
+  {
+    "source": "/assets/world/paving.webp",
+    "output": "/assets/optimized/paving.webp"
+  },
+  {
+    "source": "/assets/world/earth.png",
+    "output": "/assets/optimized/earth.webp"
+  },
+  {
+    "source": "/assets/world/house.webp",
+    "output": "/assets/optimized/house.webp"
+  },
+  {
+    "source": "/assets/world/family-furniture.webp",
+    "output": "/assets/optimized/family-furniture.webp"
+  },
+  {
+    "source": "/assets/world/family-fallen-chair.webp",
+    "output": "/assets/optimized/family-fallen-chair.webp"
+  },
+  {
+    "source": "/assets/world/family-clutter.webp",
+    "output": "/assets/optimized/family-clutter.webp"
+  },
+  {
+    "source": "/assets/world/willow.webp",
+    "output": "/assets/optimized/willow.webp"
+  },
+  {
+    "source": "/assets/characters/neighbors.webp",
+    "output": "/assets/optimized/neighbors.webp"
+  },
+  {
+    "source": "/assets/characters/indoor-npcs.png",
+    "output": "/assets/optimized/indoor-npcs.webp"
+  },
+  {
+    "source": "/assets/characters/garden-workers-work.png",
+    "output": "/assets/optimized/garden-workers-work.webp"
+  },
+  {
+    "source": "/assets/characters/market-npcs.png",
+    "output": "/assets/optimized/market-npcs.webp"
+  },
+  {
+    "source": "/assets/characters/player-walk-v2.png",
+    "output": "/assets/optimized/player-walk-v2.webp"
+  },
+  {
+    "source": "/assets/world/props.webp",
+    "output": "/assets/optimized/props.webp"
+  },
+  {
+    "source": "/assets/world/storefronts.webp",
+    "output": "/assets/optimized/storefronts.webp"
+  },
+  {
+    "source": "/assets/world/clothing-store-exterior.png",
+    "output": "/assets/optimized/clothing-store-exterior.webp"
+  },
+  {
+    "source": "/assets/world/landmarks.webp",
+    "output": "/assets/optimized/landmarks.webp"
+  },
+  {
+    "source": "/assets/characters/animals.webp",
+    "output": "/assets/optimized/animals.webp"
+  },
+  {
+    "source": "/assets/world/station-sign-readability-v1.png",
+    "output": "/assets/optimized/station-sign-readability-v1.webp"
+  },
+  {
+    "source": "/assets/world/clothing-store-interior.png",
+    "output": "/assets/optimized/clothing-store-interior.webp"
+  },
+  {
+    "source": "/assets/world/bakery-interior.webp",
+    "output": "/assets/optimized/bakery-interior.webp"
+  },
+  {
+    "source": "/assets/world/teahouse-interior.webp",
+    "output": "/assets/optimized/teahouse-interior.webp"
+  },
+  {
+    "source": "/assets/world/bookshop-interior.webp",
+    "output": "/assets/optimized/bookshop-interior.webp"
+  },
+  {
+    "source": "/assets/world/family-home.webp",
+    "output": "/assets/optimized/family-home.webp"
+  },
+  {
+    "source": "/assets/world/restaurant-interior.png",
+    "output": "/assets/optimized/restaurant-interior.webp"
+  },
+  {
+    "source": "/assets/world/museum-interior.png",
+    "output": "/assets/optimized/museum-interior.webp"
+  },
+  {
+    "source": "/assets/world/station-exterior-v2.png",
+    "output": "/assets/optimized/station-exterior-v2.webp"
+  },
+  {
+    "source": "/assets/world/station-ground-v4.png",
+    "output": "/assets/optimized/station-ground-v4.webp"
+  },
+  {
+    "source": "/assets/world/station-waiting-v5.png",
+    "output": "/assets/optimized/station-waiting-v5.webp"
+  },
+  {
+    "source": "/assets/optimized/suzhou-model-closeup.webp",
+    "output": "/assets/optimized/suzhou-model-closeup.webp"
+  },
+  {
+    "source": "/assets/world/station-train-overhead-v1.png",
+    "output": "/assets/optimized/station-train-overhead-v1.webp"
+  },
+  {
+    "source": "/assets/world/station-platform-v3.png",
+    "output": "/assets/optimized/station-platform-v3.webp"
+  }
+]

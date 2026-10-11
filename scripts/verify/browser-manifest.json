@@ -1,0 +1,557 @@
+{
+  "format": 1,
+  "entries": [
+    {
+      "file": "scripts/browser-conversation-feedback.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-speech-latency.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-panda-narration.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-dialogue-help.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-pronunciation.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-welcome.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-dialogue-variety.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-dialogue-relevance.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-book-dialogue.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-family-dialogue.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-language.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-word-help.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-bubble-help.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-exit-arrow.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-touch-controls.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-npc-movement.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-panda-walk.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-town-gates-square.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-music-ownership.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-panda-panel.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-west-grove-audio.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-town-expansion.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-boat.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-market-shops.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-clothing-store.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-fountain.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-character-consistency.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-indoor-npcs.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-npc-variety.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-refinements.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-environment.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-xiongmao.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-town.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-town-extra.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-life.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-culture.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-pinyin.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-music.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-music-pitch.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-pwa.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-journal.js",
+      "classification": "active",
+      "group": "maintained",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-ambient.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-art.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-audio-fixture.js",
+      "classification": "helper",
+      "group": null,
+      "reason": "Imported test helper; not a standalone browser check."
+    },
+    {
+      "file": "scripts/browser-base.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-fox-plush.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-fox-reveal.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-garden-workers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-helpers.js",
+      "classification": "helper",
+      "group": null,
+      "reason": "Imported test helper; not a standalone browser check."
+    },
+    {
+      "file": "scripts/browser-home-plushies.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-interaction-surfaces.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-landmark-cleanup.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-map.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-market-collisions.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-market-occlusion.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-market-review.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-movement.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-panda-landmarks.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-panda-voice.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-preview.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-shop-rear-paths.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-slice.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-station-audio.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-baggage.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-departure.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-employees.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-environment.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-escalators.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-exterior.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-floor-links.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-ground-layers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-ground-travelers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-interior.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-layers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-nook.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-panda.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-platform.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-seated-companions.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-shops.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-sign-help.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-traveler-walk.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-travelers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-waiting-layers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-waiting-signs.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-waiting-travelers.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-station-waiting.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-suzhou-life.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-tea-guest.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-travel-luggage.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-turns.js",
+      "classification": "environment-specific",
+      "group": null,
+      "reason": "Hardcoded live port 3210; excluded until isolated. Earlier geometry may also need characterization."
+    },
+    {
+      "file": "scripts/browser-voices.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    },
+    {
+      "file": "scripts/browser-water-motion.js",
+      "classification": "active",
+      "group": "supplemental",
+      "reason": "Disposable in-memory server; retained as an active check even if the baseline fails."
+    }
+  ]
+}

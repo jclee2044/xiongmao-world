@@ -5,7 +5,7 @@ import {
   dialogueLanguageRule,
   isBeginnerChinese,
 } from "../public/data/language.js";
-import { replySchema, validateReply } from "./dialogue.js";
+import { replySchema, validateReply } from "./dialogue/contracts.js";
 import { geminiGenerate } from "./gemini.js";
 
 const pronunciation = (line) => ({

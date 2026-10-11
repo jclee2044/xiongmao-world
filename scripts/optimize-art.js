@@ -1,27 +1,22 @@
 // Rebuild browser-sized encodings without changing atlas dimensions or originals.
 // Requires ImageMagick (magick); runtime has no image-processing dependency.
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-const sources = await Promise.all(
-  [
-    "public/game/render.js",
-    "public/game/station-waiting-art.js",
-    "public/data/interiors.js",
-    "public/data/suzhou-life.js",
-    "public/data/town-rooms.js",
-    "public/data/station-exterior.js",
-    "public/data/station-interior.js",
-    "public/data/station-waiting.js",
-    "public/data/station-platform.js",
-  ].map((p) => readFile(p, "utf8")),
-);
-const paths = [
-  ...new Set(
-    sources.flatMap((s) =>
-      [...s.matchAll(/"(\/assets\/[^"\n]+\.(?:png|webp))"/g)].map((m) => m[1]),
-    ),
-  ),
-];
+import { dirname } from "node:path";
+import { optimizationJobs } from "../public/content/art/catalog.js";
+// Validate the entire plan before writing, so a new world cannot overwrite
+// another world's output halfway through an art build. Direct aliases are fine.
+const producers = new Set();
+for (const job of optimizationJobs) {
+  if (!job?.source || !job.output) throw new Error("Incomplete art conversion descriptor");
+  if (job.source === job.output) continue;
+  if (producers.has(job.output)) throw new Error(`Art output collision: ${job.output}`);
+  producers.add(job.output);
+}
+if (process.argv.includes("--list")) {
+  console.log(JSON.stringify(optimizationJobs, null, 2));
+  process.exit(0);
+}
 await mkdir("public/assets/optimized", { recursive: true });
 const manifest = {};
 function convert(input, output, extra = []) {
@@ -41,13 +36,8 @@ function convert(input, output, extra = []) {
   );
   if (result.status !== 0) throw new Error(result.stderr);
 }
-for (const path of paths) {
-  const target =
-    "/assets/optimized/" +
-    path
-      .split("/")
-      .at(-1)
-      .replace(/\.(png|webp)$/, ".webp");
+for (const { source: path, output: target } of optimizationJobs) {
+  await mkdir(dirname("public" + target), { recursive: true });
   if (path !== target) convert("public" + path, "public" + target);
   manifest[path] = target;
 }
@@ -71,4 +61,4 @@ for (const [name, path] of [
     );
   }
 }
-console.log(`Optimized ${paths.length} game images and 5 welcome images.`);
+console.log(`Optimized ${optimizationJobs.length} game images and 5 welcome images.`);

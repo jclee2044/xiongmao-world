@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   readFileSync,
-  readdirSync,
   existsSync,
   mkdtempSync,
   writeFileSync,
@@ -11,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { authoredSourceFiles } from "../scripts/verify/discovery.js";
 import babel from "prettier/plugins/babel";
 import { convert } from "pinyin-pro";
 import {
@@ -145,12 +145,7 @@ test("Panda's sign explanations use beginner vocabulary and the corrected 暖和
 
 function authoredLines() {
   const lines = [];
-  const paths = [
-    "public/app.js",
-    ...readdirSync("public/data")
-      .filter((file) => file.endsWith(".js") && file !== "hsk-vocabulary.js")
-      .map((file) => `public/data/${file}`),
-  ];
+  const paths = authoredSourceFiles("pronunciation");
   for (const path of paths) {
     const add = (zh, pinyin) => {
       if (

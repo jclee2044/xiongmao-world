@@ -2,9 +2,28 @@
 
 Preserve the current game while making worlds, characters, art, interfaces, and services easier to extend independently. Keep the existing JavaScript modules, Canvas renderer, Node server, and SQLite storage. Make one small structural change at a time, prove that its observable behavior matches the previous verified commit, and only then continue.
 
-**Status:** proposed plan; no refactor implemented. **Baseline:** commit `b85202c`, inspected on October 11, 2026. The earlier `PLAN.md` and `PROGRESS.md` describe historical work and product context; they do not expand the scope of this refactor.
+**Execution update authorized by the user, October 11:** group about 3–4 related steps into a small batch before the full gameplay gate, to reduce repeated verification overhead. Keep each extraction mechanically separate and reviewable within that batch. This supersedes the one-change-at-a-time verification and commit cadence below; it does not relax any behavior contract or coverage requirement. Verify each completed batch against its previous accepted checkpoint and the original baseline. On a gameplay difference, immediately roll back the entire unaccepted batch, record and freeze the implicated aspect, and skip its dependents. Do not accumulate another batch before the current one is accepted.
+
+**Status:** execution authorized; checkpoints and coverage restrictions are recorded in `docs/refactor/EXECUTION.md`. **Baseline:** commit `b85202c`, inspected on October 11, 2026. The earlier `PLAN.md` and `PROGRESS.md` describe historical work and product context; they do not expand the scope of this refactor.
 
 **Governing rule:** if a step changes gameplay, immediately roll back that step, confirm the previous behavior is restored, mark that aspect frozen, and do not refactor it further. Skip dependent steps. Continue only with independent work. Do not fix forward, revise expectations to accept the difference, or retry the same aspect through a different implementation.
+
+## Current pass: scaling foundations only
+
+**Completed:** all four milestones below are accepted. See `docs/refactor/EXECUTION.md` for exact verification results, concurrent feature integration and limitations. The remaining 59-step roadmap is deferred.
+
+The user's latest scope instruction is: “all the things you would say are necessary at this point to continue scaling the game cleanly. but nothing more.” This replaces execution of all 59 steps below. Those steps remain an optional backlog, not a completion requirement for this pass.
+
+Complete four milestones, keeping related mechanical changes in verified batches:
+
+1. **Shared foundations:** remove the dialogue import cycle; share initial state defaults and geometry primitives (original steps 07–09).
+2. **World ownership:** give Suzhou its own scene manifest and an explicit world catalog; separate existing movement/query helpers and save migration from scene assembly. Preserve compatibility exports, scene identity, construction order and saved IDs.
+3. **Reusable content:** establish a clear owner for character definitions and an explicit role-based sprite catalog. Keep existing asset URLs and original bytes; avoid moving unrelated fonts, audio, or paintings merely for symmetry.
+4. **Repeatable world additions:** validate scene registration, references, character placement and asset descriptors; document the minimal steps for adding a world and the existing behavior gates.
+
+Defer application/controller rewrites, input/audio/rendering internals, CSS splitting, test-folder moves, an inheritance hierarchy, broad dialogue/service decomposition and speculative optimization. Existing `World` and controller objects keep their runtime responsibilities; compose ordinary definitions and helpers where useful. A coherent module need not be split further simply because it is large.
+
+The strict gameplay-preservation and whole-batch rollback rules still apply. Verification findings and limitations belong in `docs/refactor/EXECUTION.md`; completion of this narrowed pass does not mean all 59 backlog steps were executed.
 
 ## Findings from the current codebase
 
@@ -236,7 +255,7 @@ Static canvas comparisons should require exact pixels in a controlled environmen
 
 ## Ordered implementation steps
 
-All items below are pending. Numbered items express dependencies and review order, not permission to implement them during this planning task. Each independently verifiable extraction receives its own commit. A row covering several files must be repeated for one cohesive group at a time, with the full gate between repetitions.
+Numbered items express dependencies and review order. Actual completion and deferrals are recorded in `docs/refactor/EXECUTION.md`. Each independently verifiable extraction receives its own commit. A row covering several files must be repeated for one cohesive group at a time, with the full gate between repetitions.
 
 ### Phase 1 Establish verification before moving code
 
@@ -404,4 +423,4 @@ Next independent eligible step:
 
 The refactor is complete only when accepted changes have clear ownership, enforceable dependency boundaries, repeatable tooling and unchanged verified gameplay. All previously passing checks remain passing; no moved content disappears from validation; all current scenes, NPCs, activities and art remain available; old saves and installed offline copies continue to work. Any frozen aspect remains explicitly excluded and intact.
 
-For this planning task, the deliverable is this ordered plan and its baseline findings. No application, gameplay, asset, save, service or test implementation has been changed.
+The execution record distinguishes completed verification, accepted refactors, reverted attempts and work blocked by missing evidence. Completion of a checkpoint does not imply completion of all phases.
