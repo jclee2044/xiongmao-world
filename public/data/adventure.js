@@ -1,8 +1,11 @@
+import { newRewards, validateRewards, mergeRewards } from "../state/rewards.js";
+import { SUZHOU_XP } from "./rewards.js";
 import { newTravelLuggage, validateTravelLuggage, mergeTravelLuggage } from "./travel-luggage.js";
 import { newStationJourney, validateStationJourney, mergeStationJourney } from "./station-journey.js";
-export const AREA_XP = 500;
+export const AREA_XP = SUZHOU_XP;
 export const newAdventure = () => ({
   xp: 0,
+  rewards: newRewards(),
   boatTaken: false,
   boatVisited: false,
   pandaMoments: [],
@@ -33,6 +36,7 @@ export function validateAdventure(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw Error("Invalid adventure.");
   const a = { ...newAdventure(), ...value };
+  a.rewards = validateRewards(a.rewards);
   a.stationJourney = validateStationJourney(a.stationJourney);
   a.travelLuggage = validateTravelLuggage(a.travelLuggage);
   if (typeof a.boatVisited !== "boolean") throw Error("Invalid boat visit progress.");
@@ -110,6 +114,7 @@ export function validateAdventure(value) {
     nature: [...a.nature],
     coins: a.coins,
     xp: a.xp,
+    rewards: a.rewards,
     conversations: a.conversations,
     meals: a.meals,
     flowers: a.flowers,
@@ -218,6 +223,7 @@ export function mergeAdventure(local, remote) {
     nature: [...new Set([...a.nature, ...b.nature])],
     coins: Math.min(a.coins, b.coins),
     xp: Math.max(a.xp, b.xp),
+    rewards: mergeRewards(a.rewards, b.rewards),
     conversations: Math.max(a.conversations, b.conversations),
     meals: Math.max(a.meals, b.meals),
     flowers: later("flowers", ["new", "accepted", "found", "done"]),

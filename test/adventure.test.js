@@ -29,7 +29,7 @@ test("quest progress and participation XP persist without changing learner evide
     const loaded = store.read(id).state;
     assert.deepEqual(loaded.adventure, s.adventure);
     assert.deepEqual(loaded.learner, learner);
-    assert.equal(AREA_XP, 500);
+    assert.equal(AREA_XP, 750);
     assert.equal(store.save(id, 0, newState()), null);
   } finally {
     store.close();

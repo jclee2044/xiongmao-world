@@ -92,7 +92,18 @@ export class Persistence {
     return this.state;
   }
   change(fn) {
+    const scene = this.state.scene;
+    const beforeXP = this.state.adventure.xp;
+    const beforeClaims = this.state.adventure.rewards.claims;
     fn(this.state);
+    // Legacy guarded awards also contribute locally; explicit reward events already do.
+    if (scene === "station-platform" && this.state.adventure.xp > beforeXP) {
+      const a = this.state.adventure;
+      const explicit = Object.entries(a.rewards.claims).reduce((sum, [id, amount]) =>
+        sum + (Object.hasOwn(beforeClaims, id) ? 0 : amount), 0);
+      const untracked = Math.max(0, a.xp - beforeXP - explicit);
+      a.rewards.platformXP = Math.min(1000000, a.rewards.platformXP + untracked);
+    }
     this.generation++;
     this.cache();
     clearTimeout(this.timer);

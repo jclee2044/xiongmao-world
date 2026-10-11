@@ -95,12 +95,12 @@ export function goalCards(a) {
   cards.sort(
     (left, right) => Number(active(right.key)) - Number(active(left.key)),
   );
-  if (a.xp >= AREA_XP)
+  if (!a.boatTaken && a.xp >= AREA_XP)
     cards.unshift({
       title: "可以上船了",
       detail: "去右边下面的河边上船，去下一站。",
       target: "next-area",
-      reward: "500 / 500 XP · Ready to board",
+      reward: "750 / 750 XP · Ready to board",
       key: "departure",
     });
   if (!cards.length)

@@ -93,7 +93,7 @@ try {
     );
     assert.ok(y < post.y + 40, "The character walked up to the post");
   }
-  for (const xp of [0, 499, 500]) {
+  for (const xp of [0, 749, 750]) {
     await seed("shanghai", { x: dock.x - 145, y: dock.y + 45 }, { xp });
     await page.waitForTimeout(800);
     if (xp === 0)
@@ -106,9 +106,9 @@ try {
     assert.equal((await cached()).scene, "shanghai");
     assert.match(
       await page.locator(".departure-progress").innerText(),
-      new RegExp(`${xp} / 500`),
+      new RegExp(`${xp} / 750`),
     );
-    assert.equal(await page.locator("#enter-next").count(), xp >= 500 ? 1 : 0);
+    assert.equal(await page.locator("#enter-next").count(), xp >= 750 ? 1 : 0);
     assert.ok(
       await page
         .locator(".departure-portrait")
@@ -122,8 +122,8 @@ try {
     await page.locator("#world").focus();
     await page.keyboard.press("Space");
     await page.locator("#panel").waitFor({ state: "visible" });
-    assert.equal(await page.locator("#enter-next").count(), xp >= 500 ? 1 : 0);
-    if (xp === 500) {
+    assert.equal(await page.locator("#enter-next").count(), xp >= 750 ? 1 : 0);
+    if (xp === 750) {
       assert.ok(
         goalCards((await cached()).adventure).some(
           (goal) => goal.target === "next-area",
@@ -168,7 +168,7 @@ try {
         () => document.querySelector("#world").dataset.scene === "shanghai",
       );
       const saved = await cached();
-      assert.equal(saved.adventure.xp, 500);
+      assert.equal(saved.adventure.xp, 750);
       assert.equal(saved.adventure.boatTaken, true);
       assert.equal(saved.history[0].user, "你好", "Conversation history survives both boat trips");
       assert.ok(
@@ -218,7 +218,7 @@ try {
   }
   assert.deepEqual(errors, []);
   console.log(
-    "Pier crossing and post collisions, boat click-to-walk, Space, 0/499 XP locks, 500 XP boarding, goal, dock return, saved repeat travel and hidden loading overlay passed.",
+    "Pier crossing and post collisions, boat click-to-walk, Space, 0/749 XP locks, 750 XP boarding, goal, dock return, saved repeat travel and hidden loading overlay passed.",
   );
 } catch (error) {
   await page?.screenshot({ path: "test-results/boat-failure.png" });

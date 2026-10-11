@@ -1,3 +1,4 @@
+import { progression, beginInteraction, answerInteraction, completionText } from "./data/rewards.js";
 import { waitingTravelerProfile } from "./data/station-waiting-travelers.js";
 import { platformTravelerProfile } from "./data/station-platform-travelers.js";
 import { activities } from "./data/activities.js";
@@ -43,7 +44,6 @@ const escape = (text) =>
       ],
   );
 let world,
-  lastRounds = null,
   currentNpc = null,
   currentReply = null,
   conversationHistory = [],
@@ -197,12 +197,13 @@ const landmarkPanda = createLandmarkPanda({
 function updateXP() {
   goals.refresh();
   if (!$("xp-progress")) return;
-  const xp = persistence.state.adventure.xp;
-  $("xp-progress").value = Math.min(AREA_XP, xp);
-  $("xp-text").textContent = `${xp} / ${AREA_XP} XP`;
+  const { earned: xp, required } = progression(persistence.state.adventure, persistence.state.scene);
+  $("xp-progress").max = required;
+  $("xp-progress").value = Math.min(required, xp);
+  $("xp-text").textContent = `${xp} / ${required} XP`;
   $("xp-progress").setAttribute(
     "aria-label",
-    xp >= AREA_XP ? "可以去下一站了" : `${xp} / ${AREA_XP} XP`,
+    xp >= required ? "可以去下一站了" : `${xp} / ${required} XP`,
   );
 }
 const goals = createGoals({ persistence, world: () => world, panda, speech });
@@ -282,13 +283,6 @@ function guideTo(id) {
   }
 }
 function updatePracticeStatus() {
-  const rounds = Object.values(persistence.state.practice.rounds || {}).reduce(
-    (a, b) => a + b,
-    0,
-  );
-  if (lastRounds !== null && rounds > lastRounds)
-    persistence.change((s) => award(s.adventure, 20 * (rounds - lastRounds)));
-  lastRounds = rounds;
   updateXP();
   const status = practice.status();
   let tracker = $("activity-tracker");
@@ -438,6 +432,7 @@ function startWorld() {
       );
     },
     onMove: (scene, position) => {
+      const changedScene = persistence.state.scene !== scene;
       music.setScene(scenes[scene], position);
       ambience.station?.update(scenes[scene], position,
         ambience.ready && !document.hidden && (persistence.state.settings.ambience ?? 0.25) > 0);
@@ -448,6 +443,7 @@ function startWorld() {
         if (scene === "shantang") s.adventure.boatTaken = true;
         s.position = { ...position };
       });
+      if (changedScene) updateXP();
       landmarkPanda.update(
         scenes[scene],
         position,
@@ -622,7 +618,13 @@ let currentShop = null;
 let clothingItem = null;
 let clothingStage = "choose";
 let currentVoice = "older-male";
-function openConversation(id, shopId = null, appearance = null) {
+let currentEncounter = null;
+function openConversation(id, shopId = null, appearance = null, replay = false) {
+  if ($("conversation").open && currentNpc === id && !replay) return;
+  let initiation;
+  persistence.change((s) => { initiation = beginInteraction(s.adventure, id, s.scene, replay); });
+  currentEncounter = initiation;
+  updateXP();
   dialogueVariations.cancel();
   currentVoice = voiceForNpc(id, appearance);
   currentShop = shopId;
@@ -741,6 +743,13 @@ function openConversation(id, shopId = null, appearance = null) {
     });
     renderShopPurchases();
   }
+  $("conversation-restart")?.remove();
+  const restart = document.createElement("button");
+  restart.id = "conversation-restart";
+  restart.textContent = "New conversation · +5 XP, then +15 XP for answering";
+  restart.onclick = () => openConversation(id, shopId, appearance, true);
+  $("speech-controls").append(restart);
+  $("dialog-status").textContent = completionText(initiation);
   $("conversation").showModal();
   animatePanel($("conversation"));
   world.pause(true);
@@ -1279,7 +1288,8 @@ $("reply-form").onsubmit = async (e) => {
   if (!text || $("send").disabled || !currentNpc) return;
   dialogueVariations.cancel();
   const id = currentNpc,
-    generation = ++requestGeneration;
+    generation = ++requestGeneration,
+    encounter = currentEncounter;
   controller = new AbortController();
   $("send").disabled = true;
   $("dialog-status").textContent = "Waiting for a reply…";
@@ -1326,13 +1336,15 @@ $("reply-form").onsubmit = async (e) => {
           helpLevel > 0,
         );
     });
-    adventure.conversation();
+    let reward;
+    persistence.change((s) => { reward = answerInteraction(s.adventure, encounter); });
+    updateXP();
     $("last-user").textContent = text;
     $("reply").value = "";
     dialogueVariations.retain(result);
     displayReply(result, false);
     speakConversationReply(result);
-    $("dialog-status").textContent = "+25 XP";
+    $("dialog-status").textContent = reward ? completionText(reward) : "";
     if (departing) {
       $("reply-form").hidden = true;
       const goodbye = document.createElement("button");

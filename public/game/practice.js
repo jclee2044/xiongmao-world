@@ -1,3 +1,4 @@
+import { grantReward, completionText } from "../data/rewards.js";
 import { activityGuide } from "./activity-guide.js";
 import { npcs } from "../data/content.js";
 import {
@@ -68,6 +69,11 @@ export function createPractice({
   }
   function update(next, extra) {
     persistence.change((s) => {
+      for (const [id, count] of Object.entries(next.rounds || {})) {
+        const previous = s.practice.rounds?.[id] || 0;
+        for (let round = previous + 1; round <= count; round++)
+          grantReward(s.adventure, { id: `practice:${id}:${round}`, amount: 20, scene: s.scene, label: activityById[id].english });
+      }
       s.practice = next;
       extra?.(s);
     });
@@ -146,7 +152,7 @@ export function createPractice({
       a.listenFirst || a.type === "listening" || a.type === "visit";
     const guide = activityGuide(id, active?.id === id ? active : null);
     let html = done
-      ? `${line(a.response)}${controls()}<p lang="en">${escape(label("练习做好了。也可以再和邻居聊天。", "This practice is recorded. You can keep chatting with your neighbor."))}</p><div class="small-actions"><button id="practice-talk">${escape(label("说说话", "Keep chatting"))}</button><button id="practice-again">${escape(label("再来一次", "Try again"))}</button></div>`
+      ? `<p class="xp-award" role="status">${escape(completionText({ label: a.english, gained: 20 }))}</p>${line(a.response)}${controls()}<p lang="en">${escape(label("练习做好了。也可以再和邻居聊天。", "This practice is recorded. You can keep chatting with your neighbor."))}</p><div class="small-actions"><button id="practice-talk">${escape(label("说说话", "Keep chatting"))}</button><button id="practice-again">${escape(label("再来一次", "Try again"))}</button></div>`
       : `${a.steps ? `<p class="muted">${step + 1} / ${a.steps.length}</p>` : ""}${listenFirst ? `<p lang="en">${escape(label("先听一听，再去回答。也可以看字。", "Listen for the clue. You can reveal the words whenever you like."))}</p><button id="practice-transcript" aria-expanded="${transcript}">${escape(label(transcript ? "Hide 字" : "看字", transcript ? "Hide words" : "Show words"))}</button><div id="practice-transcript-content" ${transcript ? "" : "hidden"}>${line(prompt)}</div>` : a.type === "riddle" ? `<div id="practice-riddle-clue" tabindex="-1">${line(prompt)}</div>` : line(prompt)}${stitchClue ? `<div id="practice-current-clue" class="notice" tabindex="-1">${line(stitchClue.clue)}</div>` : ""}${controls()}${a.question ? line(a.question) : ""}`;
     if (!done && riddle)
       html += `<div class="riddle-cards">${pieceOrder(
@@ -255,6 +261,7 @@ export function createPractice({
       };
     if ($("practice-again")) $("practice-again").onclick = () => start(id);
     const finish = (shared) => {
+      if (state().active?.id !== id || state().active.round !== round) return;
       update(completePractice(state(), id), (s) => {
         if (typeof shared === "string") {
           s.history.push({

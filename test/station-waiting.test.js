@@ -10,7 +10,7 @@ import { constrainedRoomCamera } from "../public/game/room-camera.js";
 import { newState, validateState } from "../server/store.js";
 import { reply } from "../server/dialogue.js";
 const ready={booked:true,entry:"ready",revision:5};
-const checked=act(ready,"board",1000), open=stationWaitingForJourney(checked);
+const checked=act(ready,"board",1400), open=stationWaitingForJourney(checked);
 function route(scene,from,to){
   assert.ok(canStand(scene,to.x,to.y),`invalid destination ${JSON.stringify(to)}`);
   const path=pathTo(scene,from,to);assert.ok(path.length,`no route ${JSON.stringify(to)}`);

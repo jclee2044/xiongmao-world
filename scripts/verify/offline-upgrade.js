@@ -122,6 +122,10 @@ try {
   await page.goto(base); await begin(page); await readyWorker(page);
   await page.waitForFunction(() => JSON.parse(localStorage.getItem("panda-world-v1"))?.dirty === false);
   const before = await savedState(page);
+  // Feature migration check: require exact preservation of every historical field.
+  const expectedCurrent = args.includes("--additive-rewards")
+    ? { ...before, adventure: { ...before.adventure, rewards: (await load(candidate, "public/state/rewards.js")).newRewards() } }
+    : before;
   await context.setOffline(true); await page.reload(); await begin(page);
   await verifyModules(page, oldModules, "installed previous version");
   assert.deepEqual(await savedState(page), before, "Previous version preserves the save offline");
@@ -147,7 +151,7 @@ try {
       "Plain fetch is not an equivalent probe for a new script URL under the previous worker");
   }
   await verifyModules(page, newModules, "current code under previous controller");
-  assert.deepEqual(await savedState(page), before, "Mixed-version reload preserves the save");
+  assert.deepEqual(await savedState(page), expectedCurrent, "Mixed-version reload preserves the save");
   await context.setOffline(false);
   if (workerChanged) {
     await Promise.all([page.waitForEvent("framenavigated"), page.locator("#game-update").click()]);
@@ -156,7 +160,7 @@ try {
   }
   await context.setOffline(true); await page.reload(); await begin(page);
   await verifyModules(page, newModules, "activated current version");
-  assert.deepEqual(await savedState(page), before, "Activated update preserves the save");
+  assert.deepEqual(await savedState(page), expectedCurrent, "Activated update preserves the save");
   await context.close();
 
   const fresh = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });

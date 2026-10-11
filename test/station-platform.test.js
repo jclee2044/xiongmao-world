@@ -42,7 +42,7 @@ test("platform entry and stale saves cannot bypass boarding", () => {
   const world={getAdventure:()=>({stationJourney:{...journey,boarding:false}}),changeScene:(...args)=>entered=args};
   assert.equal(World.prototype.enterDoor.call(world,door),false);
   assert.equal(entered,undefined);
-  world.getAdventure=()=>({stationJourney:journey});
+  world.getAdventure=()=>({xp:1400,stationJourney:journey});
   assert.equal(World.prototype.enterDoor.call(world,door),true);
   assert.deepEqual(entered,[platform.id,platformArrival]);
   const state={...newState(),scene:platform.id,position:platformArrival,mapVersion:MAP_VERSION};

@@ -1,3 +1,4 @@
+import { completeQuest } from "../data/rewards.js";
 import { luggageReminder, needsStationLuggage, packingOptions, packTravelLuggage } from "../data/travel-luggage.js";
 import { voiceForNpc } from "../data/voices.js";
 import { createStationInteractions } from "./station-interactions.js";
@@ -62,6 +63,7 @@ export function createAdventure({
         "Thank you! These flowers are for Grandma. Who would you give flowers to?",
         [],
         "female",
+        '<p class="xp-award" role="status">Flowers complete · +60 XP received</p>',
       );
     if (a.flowers === "found")
       return line(
@@ -76,8 +78,9 @@ export function createAdventure({
             () => {
               change((a) => {
                 if (a.flowers !== "found") return;
-                a.flowers = "done";
-                award(a, 60);
+                completeQuest(a, { id: "quest:flowers", amount: 60, scene: persistence.state.scene, label: "Flowers" }, {
+                  isComplete: a => a.flowers === "done", complete: a => { a.flowers = "done"; },
+                });
               });
               panda("帮朋友找回东西，真高兴！");
               flowerQuest();
@@ -123,6 +126,7 @@ export function createAdventure({
         "The tea is lovely! I am happy to have tea with you.",
         [],
         voiceForNpc("qiao"),
+        '<p class="xp-award" role="status">Tea complete · +60 XP received</p>',
       );
     if (atTable && a.tea === "new")
       return line(
@@ -174,8 +178,9 @@ export function createAdventure({
   function finishTea() {
     change((a) => {
       if (a.tea !== "seated") return;
-      a.tea = "done";
-      award(a, 60);
+      completeQuest(a, { id: "quest:tea", amount: 60, scene: persistence.state.scene, label: "Tea" }, {
+        isComplete: a => a.tea === "done", complete: a => { a.tea = "done"; },
+      });
     });
     panda("一杯茶，让我们更了解朋友。");
     teaQuest(true);
@@ -351,11 +356,11 @@ export function createAdventure({
       line(
         "河边的大船",
         unlocked
-          ? "已经有500点XP了！上船吧，我们去下一站。"
+          ? "已经有750点XP了！上船吧，我们去下一站。"
           : `还差${AREA_XP - state().xp}点XP。先去聊天、帮帮朋友吧。船在这里等你！`,
-        unlocked ? "yǐ jīng yǒu 500 diǎn XP liǎo ！ shàng chuán ba ， wǒ men qù xià yí zhàn 。" : "",
+        unlocked ? "yǐ jīng yǒu 750 diǎn XP liǎo ！ shàng chuán ba ， wǒ men qù xià yí zhàn 。" : "",
         unlocked
-          ? "You have reached 500 XP! Come aboard, and let us go to the next stop."
+          ? "You have reached 750 XP! Come aboard, and let us go to the next stop."
           : `You need ${AREA_XP - state().xp} more XP. Chat and help your friends first. The boat will wait for you here!`,
         unlocked
           ? [
@@ -502,6 +507,7 @@ export function createAdventure({
         (b) =>
           (b.onclick = () => {
             const id = b.dataset.eat;
+            if (meal.phase !== "serve" || !meal.cooked.includes(id) || meal.eaten.includes(id)) return;
             meal.cooked = meal.cooked.filter((x) => x !== id);
             meal.eaten.push(id);
             speech.speak(`我把${hotpotItems.find((i) => i.id === id).zh}放进碗里，尝了一口。`, false, "panda");
@@ -639,11 +645,5 @@ export function createAdventure({
     hungryQuest,
     teaQuest,
     close,
-    conversation() {
-      change((a) => {
-        a.conversations = Math.min(1000000, a.conversations + 1);
-        award(a, 25);
-      });
-    },
   };
 }

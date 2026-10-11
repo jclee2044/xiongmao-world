@@ -18,7 +18,7 @@ async function seed({phone=false,landscape=false,offline=false,motion=false,scen
   const initial=await(await context.request.get(base+"/api/state")).json(),state=newState();
   Object.assign(state,{scene,position,mapVersion:MAP_VERSION});
   Object.assign(state.settings,{voice:false,music:0,ambience:0,motion,translation:true,pinyin:true});
-  Object.assign(state.adventure,{xp:1000,stationTraveler:"entered",travelLuggage:{packed:true,items:[]},stationJourney:{booked:true,entry:"ready",boarding:true,revision:6,...(arrived?{trainArrived:true}:{})}});
+  Object.assign(state.adventure,{xp:1400,stationTraveler:"entered",travelLuggage:{packed:true,items:[]},stationJourney:{booked:true,entry:"ready",boarding:true,revision:6,...(arrived?{trainArrived:true}:{})}});
   const response=await context.request.post(base+"/api/state",{headers:{Origin:base},data:{revision:initial.revision,state}});
   assert.equal(response.status(),200,await response.text());
   page=await context.newPage();page.on("pageerror",e=>errors.push(e.message));

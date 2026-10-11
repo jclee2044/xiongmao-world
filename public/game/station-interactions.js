@@ -1,3 +1,4 @@
+import { trainProgress } from "../data/rewards.js";
 import { stationJourneyAction, stationBoardingProgress, STATION_BOARDING_XP } from "../data/station-journey.js";
 
 // Uses the same speech, pinyin, translation and word-help panel as other quests.
@@ -5,7 +6,7 @@ import { stationJourneyAction, stationBoardingProgress, STATION_BOARDING_XP } fr
 export function createStationInteractions({ line, state, change, world }) {
   const journey = () => state().stationJourney;
   const act = (action) => {
-    change((a) => { a.stationJourney = stationJourneyAction(a.stationJourney, action, a.xp); });
+    change((a) => { a.stationJourney = stationJourneyAction(a.stationJourney, action, a.xp, false, a.rewards?.platformXP || 0); });
     world()?.syncStationInterior();
   };
   let upstairsRequest = null;
@@ -20,7 +21,7 @@ export function createStationInteractions({ line, state, change, world }) {
   const booked = () => say("去上海 · Shanghai",
     "买好了！请带好护照，去安检入口。",
     "mǎi hǎo le ！ qǐng dài hǎo hù zhào ， qù ān jiǎn rù kǒu 。",
-    `Your Shanghai journey is booked on G728 at 18:20. Take your passport to the entry check. Boarding upstairs requires ${STATION_BOARDING_XP} total XP; you can explore and earn more before departure.`,
+    `Your Shanghai journey is booked on G728 at 18:20. Take your passport to the entry check. Platform entry upstairs requires ${STATION_BOARDING_XP} total XP; you can explore and earn more before departure.`,
     [["station-ticket-done", "谢谢！", close]]);
   function tickets() {
     if (journey().booked) return booked();
@@ -111,8 +112,8 @@ export function createStationInteractions({ line, state, change, world }) {
     if (!journey().booked || journey().entry !== "ready") return say("检票口 · Boarding",
       "请先买票，再去安检。", "qǐng xiān mǎi piào ， zài qù ān jiǎn 。",
       "Buy your ticket and complete security downstairs first.", [], "male-kokoro-009");
-    const progress = stationBoardingProgress(state().xp);
-    const checked = journey().boarding;
+    const progress = stationBoardingProgress(state().xp, false);
+    const checked = journey().boarding && progress.ready;
     const pass = `<section class="station-boarding-pass" aria-label="Shanghai boarding pass">
       <p>车票 · Journey ticket</p><h3>苏州 → 上海 · Shanghai</h3>
       <p>G728 · 18:20 · 二楼检票口 / 2F boarding gate</p>
@@ -140,7 +141,7 @@ export function createStationInteractions({ line, state, change, world }) {
       ], "male-kokoro-009", pass);
   }
   function platform(o) {
-    if (!journey().boarding) return boarding();
+    if (!journey().boarding || !stationBoardingProgress(state().xp, false).ready) return boarding();
     if (world().hasScene(o.integrationTarget)) {
       close(); world().enterDoor({ ...o, type: "door", target: o.integrationTarget }); return;
     }
@@ -150,12 +151,18 @@ export function createStationInteractions({ line, state, change, world }) {
   }
   function platformTrain() {
     const arrived = journey().trainArrived;
-    say("站台 · Platform",
+    const progress = trainProgress(state(), false);
+    const boarded = journey().trainBoarded;
+    line("站台 · Platform",
       arrived ? "火车到了！我们不着急。" : "火车快来了。请站在黄线里面等车。",
       arrived ? "huǒ chē dào le ！ wǒ men bù zháo jí 。" : "huǒ chē kuài lái le 。 qǐng zhàn zài huáng xiàn lǐ miàn děng chē 。",
-      arrived ? "The train has arrived and will wait here. The train ride is still being built; you can explore the platform or return upstairs."
-        : "The train will arrive shortly. Wait behind the yellow line. There is no boarding countdown.",
-      [["station-platform-done", "好 · Continue", close]]);
+      boarded ? "Boarding complete. Your progress is saved. The train ride is still being built."
+        : `${arrived ? "The train has arrived." : "The train will arrive shortly."} Boarding requires 1500 total XP and 100 XP earned here on the platform. The train will wait for you.`,
+      [
+        ...(arrived && progress.ready && !boarded ? [["station-train-board", "Board train", () => { act("board-train"); platformTrain(); }]] : []),
+        ["station-platform-done", "好 · Continue", close],
+      ], "panda",
+      `<section class="station-boarding-pass" role="status"><p>${progress.earned} / ${progress.required} XP</p><p>Platform: ${progress.local} / ${progress.localRequired} XP</p><p>${progress.ready ? "XP requirements met" : `Still need ${progress.remaining} total XP and ${progress.localRemaining} platform XP`}</p>${boarded ? "<p>Boarding complete ✓</p>" : ""}</section>`);
   }
   return (o) => {
     // Ignore stale belt interactions if clearance was reset while navigating.

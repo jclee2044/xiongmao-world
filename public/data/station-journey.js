@@ -1,5 +1,6 @@
+import { PLATFORM_ENTRY_XP, trainProgress } from "./rewards.js";
 // Total XP, earned rather than spent. Keep the departure threshold tunable.
-export const STATION_BOARDING_XP = 1000;
+export const STATION_BOARDING_XP = PLATFORM_ENTRY_XP;
 export const stationBoardingProgress = (xp = 0) => {
   const earned = Number.isFinite(xp) ? Math.max(0, Math.floor(xp)) : 0;
   return { earned, required: STATION_BOARDING_XP,
@@ -15,6 +16,8 @@ export function validateStationJourney(value = newStationJourney()) {
   if (!value || typeof value !== "object" || Array.isArray(value) ||
       typeof value.booked !== "boolean" || !entryStages.includes(value.entry) ||
       (!value.booked && value.entry !== "public") ||
+      (value.trainBoarded !== undefined && typeof value.trainBoarded !== "boolean") ||
+      (value.trainBoarded && !value.trainArrived) ||
       (value.boarding !== undefined && typeof value.boarding !== "boolean") ||
       (value.visitedWaiting !== undefined && typeof value.visitedWaiting !== "boolean") ||
       (value.trainArrived !== undefined && typeof value.trainArrived !== "boolean") ||
@@ -23,12 +26,13 @@ export function validateStationJourney(value = newStationJourney()) {
       !Number.isSafeInteger(value.revision) || value.revision < 0 || value.revision > 1000000)
     throw Error("Invalid station journey.");
   return { booked: value.booked, entry: value.entry, revision: value.revision,
+    ...(value.trainBoarded ? { trainBoarded: true } : {}),
     ...(value.visitedWaiting ? { visitedWaiting: true } : {}),
     ...(value.trainArrived ? { trainArrived: true } : {}),
     ...(value.boarding ? { boarding: true } : {}) };
 }
 
-export function stationJourneyAction(value, action, xp = 0) {
+export function stationJourneyAction(value, action, xp = 0, devMode = false, platformXP = 0) {
   const journey = validateStationJourney(value);
   const next = { ...journey };
   if (action === "book") next.booked = true;
@@ -39,8 +43,9 @@ export function stationJourneyAction(value, action, xp = 0) {
   if (action === "visit-waiting" && journey.entry === "ready") next.visitedWaiting = true;
   if (action === "board" && journey.booked && journey.entry === "ready" && stationBoardingProgress(xp).ready) next.boarding = true;
   if (action === "train-arrived" && journey.boarding) next.trainArrived = true;
-  if (action === "leave") { next.entry = "public"; delete next.boarding; delete next.trainArrived; }
-  if (next.entry !== journey.entry || next.booked !== journey.booked || next.boarding !== journey.boarding || next.visitedWaiting !== journey.visitedWaiting || next.trainArrived !== journey.trainArrived)
+  if (action === "board-train" && journey.trainArrived && journey.boarding && trainProgress({ xp, rewards: { platformXP } }, devMode).ready) next.trainBoarded = true;
+  if (action === "leave") { next.entry = "public"; delete next.boarding; delete next.trainArrived; delete next.trainBoarded; }
+  if (next.trainBoarded !== journey.trainBoarded || next.entry !== journey.entry || next.booked !== journey.booked || next.boarding !== journey.boarding || next.visitedWaiting !== journey.visitedWaiting || next.trainArrived !== journey.trainArrived)
     next.revision = Math.min(1000000, journey.revision + 1);
   return next;
 }

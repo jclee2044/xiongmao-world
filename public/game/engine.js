@@ -10,7 +10,7 @@ import { pathTo } from "./pathfinding.js";
 import { actorSizes } from "./appearance.js";
 import { lifeActors } from "./life.js";
 import { XIAOCHENG } from "../data/station-departure.js";
-import { stationTravelerVisible, playerCarriesBag } from "../data/station-journey.js";
+import { stationTravelerVisible, playerCarriesBag, stationBoardingProgress } from "../data/station-journey.js";
 import { stationGroundForJourney, groundProgressAction } from "../data/station-interior.js";
 import { stationWaitingForJourney } from "../data/station-waiting.js";
 import { StationDeparture } from "./station-departure.js";
@@ -616,6 +616,7 @@ export class World {
     if (door?.type !== "door" || !scenes[door.target]) return false;
     if (needsStationLuggage(this.scene, door, this.getAdventure())) return false;
     if (door.target === "station-waiting" && this.getAdventure().stationJourney?.entry !== "ready") return false;
+    if (door.target === "station-platform" && !stationBoardingProgress(this.getAdventure().xp, this.getSettings?.().devMode).ready) return false;
     if (door.target === "station-platform" && !(this.getAdventure().stationJourney?.booked && this.getAdventure().stationJourney?.entry === "ready" && this.getAdventure().stationJourney?.boarding)) return false;
     this.changeScene(door.target, door.returnPoint);
     return true;
