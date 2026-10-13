@@ -1,23 +1,23 @@
 # Xiongmao World 熊猫世界
 
-Wander a painted Suzhou-inspired canal town with Panda, meet the neighbors, and practice Chinese through conversations, quests, and everyday activities.
+A self-hosted Chinese exploration game set in a painted, Suzhou-inspired canal town. Wander with Panda, meet neighbors, share meals, help travelers, and practice Chinese through everyday conversations and activities.
 
-Visit 陈叔叔家 beside the southern clothing shop to meet a father, two children and their grandparents. Ten new activities cover household chores, a saved lost-book search, room/appliance descriptions, sample forecasts and temperatures, all four seasons, suitable clothes and Spring Festival preparations. Start household activities by talking to the family members; furniture and floor clutter are scenery. Panda comments on the mess and on the room after cleanup. The family home has a crowded, playful interior: children run around a worn rug, laundry and toys spill onto the floor, and used dishes pile up. Separate furniture and clutter sprites include a cleanable tea stain; finishing the matching chores clears the relevant mess and persists after reload. Hotpot ingredient actions model 把…放进锅里. Housing references are recorded in [Suzhou research](SUZHOU_RESEARCH.md); future Shanghai hospital and corporate-office requirements are in [the plan](PLAN.md). Run `node scripts/browser-suzhou-life.js` for the focused browser regression.
+The playable world now includes the town and its interiors, the station forecourt, ticketing and security hall, upstairs waiting hall, and railway platform. Train arrival and a saved boarding confirmation are implemented; the train ride and Shanghai destination are still to come.
 
 ![The player and Panda meet neighbors among lantern-lit shops in the riverside market](docs/screenshots/market-town.jpg)
 
 ## A glimpse of the world
 
-These screenshots show the current game. Click an image to take a closer look.
+Screenshots from the game. Click an image to take a closer look.
 
-[![The player stands in the middle of the market lane between fruit and noodle stalls, flowering shophouses, and red lanterns](docs/screenshots/market-center.jpg)](docs/screenshots/market-center.jpg)
+[![The player and Panda stand beside luggage-carrying travelers and the painted journey sign in front of Suzhou Station](docs/screenshots/station-forecourt-sign.jpg)](docs/screenshots/station-forecourt-sign.jpg)
 
-*In the heart of the market: browse the stalls and practice everyday Chinese with the sellers.*
+*Outside Suzhou Station: meet travelers and practice talking about journeys, departure times, and family.*
 
-| Canal walks | Classical gardens |
+| Canal walks | Station security |
 | --- | --- |
-| [![Panda follows the player beside a blue canal, stone bridge, and willow tree](docs/screenshots/canal-walk.jpg)](docs/screenshots/canal-walk.jpg) | [![Neighbors tend a classical garden with limestone rockeries, flowers, and a tea pavilion](docs/screenshots/classical-garden.jpg)](docs/screenshots/classical-garden.jpg) |
-| Follow the water, cross stone bridges, and meet people along the way. | Explore garden paths, rockeries, and quiet places to sit. |
+| [![Panda follows the player beside a blue canal, stone bridge, and willow tree](docs/screenshots/canal-walk.jpg)](docs/screenshots/canal-walk.jpg) | [![The player and Panda visit the security checkpoint, with their bag and suitcase on the conveyor beside the metal detector and passport desk](docs/screenshots/station-security-check.jpg)](docs/screenshots/station-security-check.jpg) |
+| Cross stone bridges and meet people along the water. | Show your passport, screen your luggage, and continue upstairs. |
 
 | Suzhou Museum | Tea and conversation |
 | --- | --- |
@@ -27,201 +27,71 @@ These screenshots show the current game. Click an image to take a closer look.
 | Hotpot together | Clothing shop |
 | --- | --- |
 | [![An interactive hotpot meal with tofu and greens ordered in Chinese](docs/screenshots/hotpot.jpg)](docs/screenshots/hotpot.jpg) | [![The player and Panda browse a painted clothing shop with dresses, shirts, and a shopkeeper](docs/screenshots/clothing-shop.jpg)](docs/screenshots/clothing-shop.jpg) |
-| Order ingredients, review your meal, and add food to the pot. | Browse clothes and practice shopping with the seller. |
+| Order ingredients and add food to the pot. | Browse clothes and practice shopping with the seller. |
 
-## About the game
+## What you can do
 
-[![The overhead station platform with its separate arriving train](docs/screenshots/station-platform-train.png)](docs/screenshots/station-platform-train.png)
+- **Explore Suzhou.** Visit market stalls, canals, gardens, a bamboo courtyard, the museum, shops, teahouse, restaurant, and homes. Moving neighbors, animals, boats, water, ambient sounds, and music bring the town to life. Panda follows your route and comments on places and discoveries.
+- **Talk and learn.** Type or speak replies, ask questions, change topics, and replay dialogue at normal or slower speed. Tap Chinese words for contextual pinyin and definitions. Full pinyin and English translations are optional and off by default. Ask Panda for explanations, translations, or reply suggestions; conversation feedback offers corrections and examples. Authored Chinese and AI replies use a beginner vocabulary range based on the older HSK 1–3 lists, with familiar game terms allowed.
+- **Help neighbors.** Find Lan’s flowers, give and follow directions, share tea with Qiao, take Lian to hotpot, find Momo’s toy, and explore with Panda. At hotpot, review your order, choose ingredients, cook, and eat; a shared meal with Lian leaves a keepsake at home.
+- **Practice daily life.** Neighbor activities and mini-games cover listening, recipes, sentence building, object matching, shopping, gifts, animal clues, lantern riddles, and silk colors. The family home adds chores, a lost-book search, room descriptions, weather, seasons, clothes, and Spring Festival preparations. Activities support hints, retries, replay, and saved progress; practice purchases and prices are fictional.
+- **Travel through the station.** Cross the quay bridge, help Xiaocheng find the entrance, book a Shanghai ticket, show your passport, put your bag and suitcase on the conveyor, pass the detector, and collect your belongings. Go upstairs by escalator or lift to explore shops, seating, hot water, toilets, and boarding gates. Help travelers with water, rest, directions, security instructions, and platform trash. After the upstairs boarding check, descend to the platform and talk with fellow passengers while the train arrives.
+- **Keep your progress.** Journal records activities, words, memories, and conversations. XP and completed rewards persist across reloads. Settings includes appearance, movement pace, language help, text size, reduced motion, voice, music, and environment sound controls, plus save export and device pairing.
 
-After the upstairs boarding check, descend by stairs or lift to a compact platform with fourteen traveler placements and platform-specific conversations. Its fixed overhead camera keeps the stairs and right-hand track in view. A separately rendered train arrives and waits without a deadline. Both routes return upstairs; the train ride itself is still to come.
+Progression uses participation XP, not a proficiency score. XP is not spent when traveling.
 
-![Warm evening light on a Suzhou-inspired railway platform](handoff/references/station/train-ride-scenery-concept.png)
+| Milestone | Requirement |
+| --- | --- |
+| Boat from town to the station | 750 total XP |
+| Upstairs boarding check and platform access | 1,400 total XP, a booked ticket, and completed security |
+| Train arrival and boarding confirmation | Arrival follows 100 XP from platform conversations; boarding also requires 1,500 total XP |
 
-*Preserved concept art for the train journey’s scenery and camera angle. The playable boarding platform uses an overhead view, with its tracks on the right.*
+The train waits without a deadline. Boarding saves completion but does not yet enter a carriage or start a journey. Further cities and automatic proficiency assessment remain planned. Suzhou’s layout and travel schedules are fictional interpretations, not a real street map or live railway information.
 
-[![The station quay, broad bridge and pointed forecourt](docs/screenshots/station-overview.jpg)](docs/screenshots/station-overview.jpg)
+## Playing
 
-The station exterior has six luggage-carrying travelers: two facing pairs, a solo visitor asking for directions, and Zihan waiting alone farther north for his fiancée to return from studying Chinese in Beijing. Ten traveler identities are available in `public/data/station-travelers.js`, with three painted poses each in the two `station-travelers` atlases. The other four are reserved for future placements. Their conversation topics and speech bubbles cover train trips, tickets, departure times, luggage, and meeting family or friends. Sprites mirror horizontally to face their partners; reduced motion keeps the neutral pose. Run `node scripts/browser-station-travelers.js` to check all 30 poses, facing, and individual interactions. Rebuild alpha bounds and WebP assets with `node scripts/prepare-station-travelers.js`.
+On a computer, use **WASD/arrows** or click the ground to walk. Click a person or building to approach and interact, or press **Space/E** nearby. On a phone, tap destinations or hold and drag to steer. **Map** helps you find places; **Panda Hints** and **Journal → What to do** explain available activities.
 
-Give Xiaocheng directions in Chinese or English, then close his thank-you conversation to watch him cross the bridge and walk into Suzhou Station. His eight walking sprites cover rightward and rear views; his progress and arrival persist across reloads and scene changes, and he disappears from the quay's interactions after being helped. Reduced motion keeps a still walking pose while his essential travel continues. The final doorway animation does not unlock the station interior for the player. Rebuild the atlas metadata with `node scripts/prepare-xiaocheng-walk.js`; run `node scripts/browser-station-departure.js` for desktop/phone conversation, walking, reload and visual checks. The built-in imagegen prompt is saved in `art/prompts/xiaocheng-walk.json`.
+Dialogue can use authored story replies, local Ollama, or Gemini. AI failures fall back to labeled story replies. Speech generation and microphone transcription run locally when their optional tools and models are installed. Panda has a separate Kokoro voice; voice configuration is documented in [Panda voice](handoff/references/panda-voice.md) and [voice casting](handoff/references/voice-casting.md).
 
-The station exterior preserves the existing boat unlock, return dock and saved progress. See [implementation and validation notes](handoff/STATION_EXTERIOR_IMPLEMENTATION.md). Run `node scripts/browser-station-exterior.js` for desktop, phone and offline checks.
+## Run locally
 
-Ground-floor security uses a standalone painted green satchel matching the player's shoulder bag. Depositing it switches her to bag-free idle, walking and seated sprites; collecting it restores the bag. Both hairstyles support lavender, sage, peach and teal clothing, including reloads and offline play. Run `node scripts/browser-station-baggage.js` for the sprite/color check and `node scripts/browser-station-interior.js` for desktop, phone and offline security flows. Artwork prompts and references are saved in `art/prompts/station-player-baggage.json`.
-
-Panda offers brief language tips inside conversations: a correction, a natural phrasing suggestion, or a useful grammar point, with an example to listen to or put into the reply box. AI dialogue returns optional coaching in the same request; clear clock-minute errors also have authored coaching in story mode and during provider failures. Tips can be dismissed and never interrupt the NPC’s voice. Check this flow with `node scripts/browser-conversation-feedback.js`.
-
-Journal opens to **What to do**, with a recommended or resumable activity, plain-English instructions and a clear completion condition. **My words** offers tappable pronunciation and definitions; **Memories** records adventures and keeps original older entries accessible. Activity guidance stays visible in town, and exploration activities offer a route to the next stop. Exercises are labeled as practice, separate from real purchases. Save export, conflict resolution and device pairing are under **Settings → Save and devices**. Check desktop and mobile flows with `node scripts/browser-journal.js`.
-
-The responsive welcome screen introduces the world with illustrated town and conversation windows, a tappable vocabulary preview, keyboard/phone instructions, and Jacob Lee’s 2026 credit. The starting scene loads before offline installation begins; indoor backgrounds load on entry, with progress and retry controls. Browser WebP copies preserve atlas dimensions and transparency while keeping the original artwork. Rebuild them with `npm run art:optimize` (requires ImageMagick); check desktop/mobile entry, indoor saves and offline play with `node scripts/browser-welcome.js`.
-
-
-A self-hosted Chinese exploration game in a painted Suzhou-inspired canal town. The market uses connected L-shaped shophouses, Chinese shop signs, a bending central lane, cross alleys and a waterfront loop. Its complete transparent perimeter meets the town's shared water and paving. The town is approximately **3775 × 3341**, with a wider western canal path and mixed fruit orchard in the southwest; the market keeps a compact, undistorted 3:2 footprint with clear shop approaches and a parallel-edged southern promenade.
-
-The gardens, courtyards and northwest bamboo grove have visible walled grounds, roughly 2–3% of the town each, with clear gate approaches. **竹林小院** is a dense bamboo courtyard entered only through its door interaction. Its smaller scene has matching enclosing walls and a centered moon gate, with bamboo entirely inside the boundary. The duck pond and courtyard pond have mossy limestone, bank planting and small waterfalls; motion settings also control their ripples. Ground-click destinations use cream rings; interactive destinations retain blue rings.
-
-Help **Xiaoyu** on the north lane find the flower shop with a two-step directions quest (+40 XP), including hints, retries and saved partial progress. **Uncle Zhou** on the southern canal walk reminds visitors to walk carefully using short beginner sentences. All five market stalls retain their first-person seller views, fixed prices and purchases.
-
-The southeastern **河畔广场**, west of the silk workshop, is an open paved square connected to the canal promenade. It replaces the former storytelling courtyard; saves from that room return safely to the square.
-
-Ask Lin how to find the hotpot restaurant, then enter it; help Hao find the bookshop by giving directions. Both quests appear in Panda’s goals. NPCs and Panda use the [in-game location directory](handoff/references/game-directions.md) and shared map facts.
-
-A lantern-lit Suzhou passenger boat waits in the bottom-right canal, beside the silk workshop. Click the boat to walk to its boarding dock, or press Space nearby. Departures unlock at **500 XP**; below that, the captain shows how much remains. At full XP, Panda adds a boarding goal. The boat reaches the station-side quay, with a return trip to this dock. The legacy destination ID remains `shantang` for save compatibility.
-
-Sit with Lian for hotpot and receive a sheep keepsake that appears at home with its story. Sit with Qiao at the larger tea table. An Ask Panda button beside the English dialogue controls opens contextual quick questions and a text box for grammar or translation help. Local AI answers open questions when available; authored help remains available offline.
-
-Click a person or building to walk over and interact automatically. Walk with WASD/arrows and press **Space** (or E) nearby. The goal cards at the upper left show the next action and can guide you there. Meet five people, help Lan find her flowers, share tea with Qiao, treat Lian to hotpot, and take Panda’s nature walk. Shops sell osmanthus cake, tangerines and an embroidered round fan with fictional in-game coins. Journal keeps words, purchases and quest progress.
-
-Quiet procedural water, duck and bird sounds follow nearby nature, with a separate **Environment sounds** volume in Settings. They fade indoors, while speaking and when the tab is hidden. Museum, garden and home narration uses short beginner-friendly sentences.
-
-Gated grounds with a separate interior are entered only by interacting with their moon gate; their town-view footprints are solid and entrance trees are cleared. Two homes sit at the far south center. The open southern square has a small limestone fountain with flowing water and four circling birds; reduced motion freezes its animation.
-
-Music begins after the saved scene is ready and reuses one player when changing rooms. Reinitializing the game releases the prior audio graph. Online local previews share soundtrack ownership across separate browser contexts and preview ports; a handoff waits for the prior player to stop, and Music Off also silences another active preview. Saved mute, speech ducking and offline playback remain supported. Browser regressions mute hardware output while still testing the audio graph.
-
-Chinese dialogue plays automatically. Full English and pinyin are hidden by default; click a dialogue word (or focus it and press Enter) to see pinyin and its definition above the panel. Only the first explicit click on a word triggers its foreground discovery banner and chime. Settings can reveal full translations or pinyin. The 0.7 map migration resets these two defaults once; later choices persist. Dictionary lookup requires the local server; offline play retains a small authored vocabulary fallback.
-
-[PLAN.md](PLAN.md) and [PROGRESS.md](PROGRESS.md) record prior development; [SUZHOU_RESEARCH.md](SUZHOU_RESEARCH.md) contains the current research and design sources.
-
-## Play on this PC
-
-Open **http://127.0.0.1:3210**. Game and private local AI run as enabled user services. On a phone, hold the screen to keep walking in that direction, drag to steer, and release to stop. Tap the ground to walk there, or tap a person or building to walk over and interact or enter. On a computer, walk with WASD/arrows or click clear ground; routes avoid buildings and canal edges. Panda follows half a second behind, interpolating the player’s trail through uneven frame timing; his grounded hop poses advance with his own traveled distance. `node scripts/browser-panda-walk.js` checks movement, pose alignment, pause, scene changes and reduced motion on desktop/mobile sizes. Open Map and select a destination to walk there. Press Space/E or use the interaction button near a person/object. Tap Panda's face to expand his help panel.
-
-Meet Mei at the noodle shop. Type a short Chinese or English reply, ask questions, change topics, request help or leave. Dialogue speaks on opening and after replies; Replay/slow replay remains available. Speech uses the displayed line immediately without waiting for optional AI wording changes. Late rewrites are kept for later visits rather than replacing a line already being spoken. `node scripts/browser-speech-latency.js` checks speech startup with a blocked rewrite, playback, and both replay speeds. Every dialogue word supports dictionary lookup. Optional pinyin sits above each Hanzi word and wraps with it. Character activity buttons launch only that character’s named games; characters with no related game or quest have no activity button. Ask Panda always offers “How can I respond to this?”, “Can you explain this dialogue to me?” for grammar help, and one quick question built from the current dialogue, plus a text box for your own questions. Explanations in this popup are in English; Chinese examples can be copied into your reply. Check desktop/mobile controls, contextual questions, and reply insertion with `node scripts/browser-dialogue-help.js`. No expected answer is required.
-
-Find Momo near a canal bridge and bring the toy home. Meet the original neighbors, two additional market vendors and six strolling passersby. Explore the lotus lake, gardens, bakery, teahouse, bookshop and market stalls, then enter the museum, restaurant or your own home. Use E or the interaction button at objects and doors. Journal retains discoveries and explicitly shared preferences. Settings supports outfit colors, hair, pace, help, challenge, pinyin/meaning, text size, motion, voice and music volume. Changes can be undone; unsupported development feedback is visibly pending.
-
-Choose **练习中文** beside Panda or **中文练习** in a conversation. The nine neighbor activities cover ordering, quantities, gifts, listening, open expression and visits. Eight mini-games add recipes, listening orders, Chinese/object matching, sentence building, animal clue walks, lantern riddles, silk colors and budget shopping. New games vary their rounds on replay and preserve partial progress across reloads. They offer replay, slower speech, optional transcripts and hints. Retries have no penalty; completing an activity does not claim language mastery. Open expression is saved in the neighbor's conversation history, where local AI can continue the conversation.
-
-Visit Tiger Hill Pagoda, a classical garden, Suzhou Museum and Pingjiang canal lanes for short Chinese descriptions with Mandarin replay and optional meaning. The bakery introduces osmanthus sweets, while lantern riddles and the silk workshop introduce Lantern Festival customs and Suzhou embroidery. Each cultural entry links its primary source. The district condenses these places into an illustrated game interpretation; it is not a geographically accurate street map.
-
-From **Map**, choose **Lantern riddles**, **Silk workshop** or **Market shopping**, walk there and press E. Riddles practice descriptions; the 3 × 3 cloth practices colors and positions with undo and an eraser; shopping practices quantities, measure words, yuan and change. Each game has different replay rounds. The cloth is a simplified language activity, and market prices are fictional practice prices.
-
-Moving neighbors, including Lin and the two children, use four painted walking poses each. The children have dedicated sprites. Player idle and seated poses preserve outfit colors, and facing persists when stopping. The rabbit hops between rests. A newly painted, smaller Panda hops faster and follows the player’s route. Six strolling visitors have their own Chinese speech bubbles and conversations. Seven roaming animals and sparrows, falling leaves, moving boats and water add life. White hover outlines identify people; blue dots and outlines identify building interactions. Reduced motion freezes scenery and animated poses.
-
-The central painted canals and outer waterways have clearly connected bridge crossings; shared geometry defines the visible water and blocked floor. Opaque earth, stone lanes and garden beds replace translucent terrain seams. Buildings block their visible footprint. New and migrated saves move to safe ground when necessary, preserving preferences and learning history. Each room exit returns to its real exterior door, including the single home in the northwest.
-
-New things to try:
-
-- Talk to **Lan** outside the flower shop, accept her lost-flower quest, cross the canal to the rockery, then return the bouquet: **60 XP**.
-- Inspect the courtyard tea set, invite **Qiao**, watch her walk over and sit, then share a Chinese response: **60 XP**.
-- Enter the **museum** and inspect the lotus bowl, Pearl Pillar and canal-layout display: **15 XP** per first discovery. These are sourced historical subjects with illustrative art, not exact collection reproductions.
-- Enter the **restaurant**, approach the hot-pot table, and speak or type an order. Review/correct the transcript, confirm the ingredients, add the served food to the pot and eat: **25 XP** per completed meal. Closing the panel discards an unfinished meal; completed XP is saved.
-- Inspect five objects at home for short personal stories. Talk to every neighbor or passerby: each completed conversation turn earns **10 XP**. Completed practice rounds earn **20 XP**.
-- At **500 XP**, the southeast boat reaches **苏州站 · 河边码头**: walk from the landing over the broad stone bridge, meet six travelers, read the canal poster and inspect the public ticket-office entrance. The riddle activity remains available; Suyin is no longer placed at the station. The ticket/security floor, upper waiting hall and connected platform are playable; the train ride remains future work. XP measures participation, not Chinese proficiency.
-
-NPC speech uses a fixed cast matched to age and gender. The approved Kokoro voices zf_001 and zf_026 serve adult women; zm_009, zm_014, zm_020, zm_055 and zm_068 serve adult men. Children retain their existing younger voices, and older women retain AISHELL3 where assigned. Four older male identities retain WNJ (Bo, waiter, visitors 0 and 4); six use Kokoro zm_015 (Wei, gardener, visitor 2, the courtyard caretaker, traveler Guoliang and the family-home grandfather). Conversations and replay preserve each NPC's identity, including the reader's older portrait in two rooms; practice uses its host's profile. See [voice assignments and rollback](handoff/references/voice-casting.md). Hot-pot recognition uses local faster-whisper/base on this PC. Recordings are bounded to 15 seconds, passed through memory and never saved by the game; recognition needs connectivity to this server. A microphone requires localhost or HTTPS. The transcript is always editable and must be reviewed before ordering. Synthetic-speech checks recognize ingredient names but also make errors; natural learner speech remains untested.
-
-Panda's hint speaker button and Ask Panda examples use audition A: a light, nasal, playful Kokoro zm_009 voice with pitch and EQ effects. New lines are generated locally using the same installed Kokoro model as the NPCs. Replays use a pronunciation-aware disk cache, and slow speech changes tempo without changing Panda's pitch. The former Qwen TTS models and environment have been removed. See [Panda voice setup](handoff/references/panda-voice.md). `/api/health` reports `pandaVoice` separately from the NPC speech engine.
-
-Background music is **“Asia” by FSM Team**, a relaxing Asian-inspired lo-fi/chill-hop instrumental bundled locally under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [The artist's track page](https://www.free-stock-music.com/fsm-team-asia.html) permits use in games with credit; the credit appears in Settings and [the bundled attribution](public/assets/audio/ATTRIBUTION.md). It starts after pressing Wander, quiets during Mandarin speech and pauses when the page is hidden. Use **Settings → Music** to switch it on/off or change the volume. An original procedural score remains the fallback if the recording cannot load. No remote music request occurs during play.
-
-Home plays **“花 / Hana (Flower)” by Masaaki Kishibe, performed on guitar by Daria Semikina**, the user-selected [performance](https://www.youtube.com/watch?v=-KrlR5UM6dI). This personal recording is stored locally as `public/assets/audio/hana-daria-semikina.mp3`, excluded from source control, and cached offline when present. Its redistribution permission has not been verified; see [the attribution record](public/assets/audio/ATTRIBUTION.md). Other indoor rooms keep “Asian Music – Magical Dream” by Sonican. Hana is prepared after the Wander tap and its decoded buffer is retained across room visits, so entering Home starts without another download or decode. Playback uses a very short startup fade; normal volume changes and speech recovery keep their gentle fade. Entering and leaving Home switches the existing player; looping, volume, speech ducking and hidden-page pause apply to all tracks.
-
-Pinyin and full English are **off by default**. Version 0.7 migrates these defaults once; later saved preferences stay unchanged. Use **Hide pinyin / Show pinyin** inside any conversation to change pronunciation support immediately. This also applies to phrase explanations and activities, shares the Settings preference, persists after reload, and can be reversed with **Settings → Undo last change**.
-
-The town reuses painted cutouts with new Panda, walking-neighbor, seated-Qiao, earth, museum and restaurant assets. [art/ASSETS.md](art/ASSETS.md) records saved files, exact built-in generation prompts and provenance. [SUZHOU_RESEARCH.md](SUZHOU_RESEARCH.md) records the primary sources and real photographs used for landscape decisions. Settings are entirely in English. Gameplay uses short Chinese within the old six-level HSK 1–3 vocabulary, with HSK 2–3 as the normal practice range. The list is a difficulty guide, with an explicit set of familiar game words such as 书店, 花店, 茶馆, 河, 湖, and 桥 kept in Chinese. Names, specialist foods, cultural labels, and technical instructions use English when they need harder words. The shared vocabulary check uses the official 2015 list, checks authored content in tests, and allows those everyday game words while rejecting harder AI dialogue or coaching in favor of beginner story replies. Familiar grammatical forms and measure-word abbreviations are listed explicitly. Translation and pinyin remain opt-in. Painted market signs receive beginner labels at render time. Panels use cream paper, a double frame, brown text and reduced-motion-aware transitions.
-
-Five cities, full directional animation, richer daily routines, environmental audio, verified automatic ability assessment and a source-editing agent remain future work. The map condenses real Suzhou features into a fictional arrangement.
-
-## Run, stop and restart
-
-Installed: Node 26.8.2, built-in SQLite, one production dependency (`pinyin-pro`). Playwright and Prettier are pinned development dependencies. Node SQLite is currently a release candidate. See [THIRD_PARTY.md](THIRD_PARTY.md) for runtime sources/licenses.
+Requires **Node 26.8.2–26.x**. SQLite is provided by Node; no separate database service is needed.
 
 ```sh
-cd /home/jlrj/Documents/lotus
+npm ci
+cp .env.example .env
+npm start
+```
+
+Open [http://127.0.0.1:3210](http://127.0.0.1:3210). The default `PROVIDER=story` works without an AI account. For local AI, set `PROVIDER=ollama` and run the configured Ollama model. For Gemini, set `PROVIDER=gemini`, `GEMINI_API_KEY`, and `GEMINI_MODEL` in `.env`; those dialogue and coaching requests go to Google, while the key stays on the server. See [.env.example](.env.example) for configuration. Speech models and downloaded tools are not included in a source checkout.
+
+On the configured development PC, the user services can be managed with:
+
+```sh
 systemctl --user status panda-world.service panda-local-ai.service
 systemctl --user restart panda-world.service
 ```
 
-Services start when this user logs in. Actual reboot/login has not been tested. They do not keep the PC awake; phone live features require the PC awake and reachable. No system-wide packages, router rules or firewall changes were installed.
+Stop `panda-world.service` before running a terminal server on the same port. If the project or Node path changes, use `node scripts/install-services.js --install` to regenerate the service files.
 
-To run in a terminal:
+## Saves, offline play, and phones
 
-```sh
-systemctl --user stop panda-world.service
-npm start
-# Ctrl+C stops the terminal server.
-systemctl --user start panda-world.service
-```
+SQLite saves live in `data/`; browser storage retains offline progress. **Settings → Save and devices** offers export, pairing with a short-lived single-use code, and explicit conflict resolution between devices. Run `npm run backup` for a consistent SQLite backup in `data/backups/`. Preserve `.env`, `data/`, and installed `tools/` separately; Git excludes these files.
 
-To stop or disable startup:
+The installable web app caches exploration code and artwork. Offline play uses the device’s last save and authored content; server AI, generated speech, microphone transcription, pairing, and synchronization require connectivity. Close all game tabs and reopen to activate a downloaded update. Phone access needs a reachable server, and microphone/PWA features need a secure origin such as private HTTPS. Physical-phone installation and performance remain unverified; browser checks include emulated touch screens.
 
-```sh
-systemctl --user stop panda-world.service panda-local-ai.service
-systemctl --user disable panda-world.service panda-local-ai.service
-```
+## Development and credits
 
-On a fresh source checkout, `npm ci` installs npm dependencies; copy `.env.example` to `.env`. Set `PROVIDER=gemini`, `GEMINI_MODEL=gemini-3.5-flash-lite`, and `GEMINI_API_KEY` for Gemini dialogue and Panda coaching. The key stays on the server; dialogue and coaching requests are sent to Google's Gemini API. Use `PROVIDER=ollama` for local Qwen3 4B or `PROVIDER=story` for authored replies. API failures use explicitly labeled limited story replies. Speech and SQLite saves remain local.
-
-Service files use absolute project/Node paths. If those move, run `node scripts/install-services.js --install`, then `systemctl --user daemon-reload` and restart. The installer refuses to replace unrelated service files.
-
-## Saves and backup
-
-SQLite stores each world on the PC. Identity uses an HttpOnly cookie; pairing shares a world through a single-use code lasting five minutes. Browser storage preserves offline changes. Save revisions prevent silent overwrites between devices. Settings → Save and devices offers export and an explicit conflict choice. Keeping this device also preserves server discoveries; using server progress replaces the local copy, so export first if you want both.
+The code separates world scenes, characters and artwork from shared movement, rendering, interactions, and saved state. See [Adding a world](docs/ADDING_WORLDS.md) for extension points and [the refactor record](docs/refactor/EXECUTION.md) for migration and verification details.
 
 ```sh
-npm run backup
-```
-
-A consistent live SQLite backup goes under `data/backups/`; this was actually tested. To restore: stop the game service, keep copies of current `world.sqlite` and its WAL/SHM files together if present, replace the database with the backup, and move the old WAL/SHM files out of the way before restarting. Clients with unsynced progress will need the journal conflict choice after a rollback. Restoration on an actual learner save is untested.
-
-For machine backup, preserve the whole project including ignored `data/`, `.env`, and `tools/`, plus Ollama’s normal `~/.ollama/` identity. Git excludes saves, models, config, downloaded runtimes and test output. Source alone does not include downloaded Ollama/eSpeak binaries or model weights.
-
-## Phone/PWA — Tailscale activation pending
-
-Prepared origin: **https://omarchy.tail18f12c.ts.net**. The user explicitly approved persistent private HTTPS for the existing Tailscale network. The retry was accepted, but Tailscale reports that Serve is disabled for this network and requires its account activation page. **The HTTPS route is not yet enabled or verified.** Localhost works.
-
-The approved route uses Tailscale Serve for devices permitted by existing tailnet policy. Those devices can open the game and create a world; accessing an existing world requires its session or pairing code. It does not use public Funnel hosting. After enabling Serve in the Tailscale account, run `tailscale serve --bg --https=443 http://127.0.0.1:3210` and verify `tailscale serve status`.
-
-After activation: use the same HTTPS URL on PC and phone, with the phone connected to the same Tailscale network. Create a pairing code in Settings → Save and devices on the device whose progress you want and enter it on the other. Install using the browser menu on Android/desktop or Safari Share → Add to Home Screen on iPhone. These actual-device steps are unverified.
-
-The offline cache contains the exploration shell, art and licensed background recording, never API identities, saves, dialogue responses or generated Mandarin audio. Offline exploration/settings use the last device copy. Server AI, speech, pairing and sync need connectivity. Updates activate after all game tabs are closed and take effect on the next visit. Bump the cache version in `public/sw.js` for new releases, keeping old/new caches separate until activation.
-
-## Extending the game
-
-See [Adding a world](docs/ADDING_WORLDS.md) for scene and character registration, role-based art descriptors, compatibility paths, and the gameplay-preserving verification gate. The [refactor execution record](docs/refactor/EXECUTION.md) tracks accepted batches and existing test failures.
-
-## Validation
-
-The maintained browser checks start disposable in-memory servers and isolated Chromium profiles. They never seed the live game database. The actual microphone check requires the installed local speech tools, Whisper model and system `ffmpeg`:
-
-```sh
-npm test
 npm run check
+npm run check:worlds
+npm test
 npm run test:browser
-npm run format
 ```
 
-Unit/API checks cover collision, reachable destinations at normal/low frame rates, old-save migration, revisions, pairing, quest/XP validation, order parsing, settings, learning evidence and provider failures. The maintained browser suite covers the social quests, exact room returns, museum exhibits, first-person hot pot, actual MediaRecorder → local Whisper, hover hit targets, the 500 XP gate, all seventeen activities, pinyin, music and offline/reconnect/conflict recovery. Dialogue in these regression flows is mocked; microphone recognition and music playback are real. Phone-sized Chromium is tested; physical phone installation, performance and microphone behavior remain unverified. Older v0.2–v0.5 art/slice scripts retain historical geometry and are not part of the maintained suite. Screenshots/evidence live in ignored `test-results/`.
+Unit/API checks cover navigation, saves, activities, dialogue, and rewards. Browser scripts use disposable in-memory servers and isolated Chromium profiles, keeping the live save untouched; speech and microphone checks need the local speech tools. Focused station and activity checks, including recorded test limitations, are described in [station and activity implementation notes](docs/REMAINING_ACTIVITIES_HANDOFF.md). Generated test screenshots are kept in ignored `test-results/`.
 
-To reproduce local recognition on another PC, create `tools/asr-venv`, install `scripts/requirements-speech.txt`, then use Hugging Face `snapshot_download` for `Systran/faster-whisper-base` at revision `ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66` into `tools/whisper-base` (config.json, model.bin, tokenizer.json, vocabulary.txt). Only installation needs network access; runtime forces local files/offline mode. Model files and the virtual environment are ignored by Git.
-
-Earlier Qwen3 4B checks returned food/hobby/homework replies in 7.1–13.9 seconds. The shorter beginner prompt returned a real Lian reply in **26.8 seconds** during this pass; latency varies with local load. The smaller model was rejected for echoing input and wrong pinyin; dictionary pinyin now replaces model spelling. Chromium decoded and started generated Mandarin. The selected WNJ male neural voice is checked with local ASR; subjective voice quality still benefits from learner feedback. No prerecorded dialogue or remote inference API is used.
-
-## Reproducing the male neural voice
-
-Install `scripts/requirements-speech.txt` in the existing project speech virtual environment. Download and extract [the documented WNJ model](https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-zh-hf-fanchen-wnj.tar.bz2) under `tools/vits-zh-hf-fanchen-wnj`. Runtime makes no remote speech requests. `scripts/synthesize-neural.py` generates bounded WAV audio on CPU; repeated question/exclamation marks are normalized before synthesis and trailing silence is trimmed. The young-female profile prefers a recognized local device voice, with AISHELL3 neural speech as the server fallback. The new young-male and older-female profiles use AISHELL3 directly on both desktop and phone. Install the [AISHELL3 model](https://k2-fsa.github.io/sherpa/onnx/tts/pretrained_models/vits.html#aishell3-chinese-multi-speaker-174-speakers) under `tools/vits-icefall-zh-aishell3` for that fallback. If the male model is absent, the basic male speech engine remains available and is labeled without claiming neural output.
-
-Additional validation: `node scripts/browser-environment.js` measures ambient output/muting and checks that decorative scenery receives no blue hover shadow. `node scripts/browser-xiongmao.js` checks click-to-talk, both retained facing directions, on-demand definitions, Lian’s full meal quest and all new venues in isolated worlds.
-
-`node scripts/browser-refinements.js` checks compact Panda portraits, click-only definitions and first-discovery banners, coaching questions, seated tea/hotpot, the sheep reward and its persistent home display. `node scripts/browser-market-review.js` captures the market boundaries, southwest tangerines and northeast bamboo for visual review.
-
-Character-voice verification: `node scripts/browser-voices.js` synthesizes all twelve NPC profiles at both speeds, decodes their WAVs in a phone-sized Chromium context, and checks real NPC conversation/replay selection. Samples are saved under `test-results/voices/`.
-
-Scripted dialogue chooses a preset half the time and requests a fresh, similar line from the configured LLM the other half. Provider failures and offline play keep a preset. NPC openings draw from four character-appropriate discussion subjects; the 18 subject pools cover routines, weather, family, friends, exercise, transport, study, work, shopping, cooking, rest, feelings, reading, music, gardens, plans, household life, and Spring Festival. Topic buttons start those conversations directly. Each open conversation sends only its current session turns, with the displayed NPC line immediately before the latest learner message. Saved conversation history and explicit preferences remain in the journal. Providers prioritize the latest input and get one repair attempt for repeated dialogue, malformed answers, or vocabulary rejections. If AI still fails, the UI shows a limited-story notice and a bounded failure category. Scripted fallbacks handle common invitations, tiredness questions and contextual tea choices; unsupported direct questions ask for clarification. Conversational fallbacks are not passed through the static-line variation generator. The vocabulary check supports productive short forms such as 学、睡、晚 and 火车, while retaining the old HSK 1–3 limit. Run `node scripts/browser-dialogue-variety.js` and `node scripts/browser-dialogue-relevance.js` for isolated desktop/mobile checks; the latter uses mocked Gemini replies and never calls an external provider.
-
-Family conversations are anchored to the older artwork: Yun is 72, her husband is 74, and their adult daughter is 46; Zhou is 68, his wife is 67, and their adult son is 39. Their family buttons and opening pools use personal stories about breakfast, newspapers, company work, evening calls, weekend visits, cooking, and music. The LLM receives these fixed family facts; contradictory personal ages or child roles trigger repair or an authored fallback. The younger/student/child cast receives no invented spouse or children. `node scripts/browser-family-dialogue.js` checks both family buttons and age answers in an isolated mobile browser.
-
-Dialogue editing references the old six-level [HSK 2 syllabus and sample paper](https://www.chinesetest.cn/userfiles/file/dagang/HSK2.pdf) (300 words) and [HSK 3 syllabus and sample paper](https://www.chinesetest.cn/userfiles/file/dagang/HSK3.pdf) (600 words), alongside the bundled 2015 vocabulary list. Scenes practice comparisons, choices, quantities, plans, experience with 过, ongoing actions with 正在/着, result complements, 把, 先…再…, 又…又…, 一边…一边…, 除了…还…, and 虽然…但是…. Clothing comparisons use the actual catalog prices; reading, food, and garden examples stay tied to their environments. A few ordinary scene words and grammatical forms remain explicit exceptions so the vocabulary filter does not force unnatural Chinese. English `meaning` fields translate the Chinese itself; cultural context belongs in a separate `note`. When editing a line, update its Chinese, pinyin, and translation together.
-
-Language verification: `node scripts/browser-language.js` checks English settings, customization, undo, legacy vocabulary display, and every activity panel on desktop and mobile. `test/language.test.js` audits authored strings and confirms that both dialogue providers and Panda keep everyday game words in Chinese and reject harder Chinese.
-
-Station luggage: Panda stops an unpacked player at the station entrance with “你还是先回家拿行李吧。” Walk back to the small home and interact with the tan suitcase to pack collected stuffies and purchased clothing. Everyday essentials allow packing even without collectibles or purchases. Confirming carries the suitcase, hides packed stuffies at home, saves the contents, and unlocks station entry. It follows every outfit/hairstyle and transfers to the security belt until collected. `node scripts/browser-travel-luggage.js` checks the entrance reminder, mobile packing and cancellation, save/reload, packed entry, and a visual sheet of idle/walking variants.
-
-The ground-floor escalator treads animate continuously: right up, left down. Their repeating textures come from the station painting, remain clipped inside the original rails, and use elapsed time with full-frame station redraws. Pausing freezes the current phase; reduced-motion mode preserves the still painting. `node scripts/browser-station-escalators.js` verifies rendered loop continuity, clipping and reduced motion.
-
-The second-floor waiting hall is now playable after security and bag collection. The right escalator ascends and the left returns; a lift connects both floors. Explore twelve bench banks, shops and services, with six painted and six live seated travelers carrying luggage, including a sleeper near the arrival. The boarding check opens a lane to the landing, where stairs descend to the playable platform beside a staff-only maintenance door. See [implementation and validation](handoff/STATION_WAITING_IMPLEMENTATION.md) and [the full rendered view](docs/screenshots/station-waiting-overview.png). Run `node scripts/browser-station-waiting.js` and `node scripts/browser-station-waiting-layers.js` for desktop, phone, offline, geometry and compositing checks.
-
-Station audio uses free CC0 recordings from Guilin (waiting-hall chatter), Beijing (periodic PA announcements), and Liuzhou (street traffic). Traffic is confined to the forecourt directly outside the station, never the quay, bridge or interiors. Friday Morning plays throughout the station exterior, starting at the boat landing. The plaza gradually brings in crowd sounds and announcements from the bridge exit toward the doors. The two station floors continue the quiet, speaker-filtered piano (Friday Morning by Kevin MacLeod, CC BY 4.0); Settings contains credits and independent music/environment volumes. All four assets are cached for offline use. Run `node scripts/browser-station-audio.js` for real-audio playback, scene isolation, speech ducking and mute checks. Source/license details are in `public/assets/audio/ATTRIBUTION.md`.
-
-Dev mode: the collapsible menu at the bottom of Settings bypasses the 750 XP boat and 1,400 XP boarding requirements without changing earned XP. Set `DEV_MODE_PASSWORD` in the private `.env` file and start with `npm start`; the password is checked only by the server. Tickets, packing and security remain playable. Authorization belongs to the current browser session, survives page reloads while the server is running, and is cleared on server restart. Save exports and paired devices do not grant dev mode. Enabling or disabling dev mode requires connectivity. Restart the running game service after server changes (`systemctl --user restart panda-world.service` for the installed local service). Areas reached and gameplay completed while it is enabled remain saved after disabling it. Run `node scripts/browser-dev-mode.js` for desktop and phone checks.
+[Artwork records](art/ASSETS.md), [Suzhou research](SUZHOU_RESEARCH.md), and [third-party credits](THIRD_PARTY.md) document art provenance, cultural references, and dependencies. Music credits and the locally supplied home recording’s redistribution status are in [audio attribution](public/assets/audio/ATTRIBUTION.md). [PLAN.md](PLAN.md) and [PROGRESS.md](PROGRESS.md) retain the broader roadmap and development history.
